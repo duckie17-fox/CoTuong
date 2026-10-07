@@ -7,7 +7,7 @@ const DIST = path.join(__dirname, '..', '..', 'dist', 'co-tuong.html');
 const EXPORTS = ['Engine', 'Notation', 'Game', 'Solver', 'XQSearch', 'Coach', 'AIEngine',
   'PUZZLES', 'OPENINGS', 'MASTER_GAMES', 'TACTICS', 'ENDGAMES', 'ENDGAME_THEORY', 'SATCUC',
   'LESSONS', 'AI_LEVELS', 'XQ_WORKER_SRC', 'buildOpeningBook'];
-const OPTIONAL = ['Fen', 'Progress', 'Sound', 'PuzzleCheck', 'aiThinkArgs', 'ruleLosingMoves', 'historyKeysOf'];
+const OPTIONAL = ['Fen', 'Progress', 'Sound', 'PuzzleCheck', 'aiThinkArgs', 'ruleLosingMoves', 'historyKeysOf', 'Learn', 'suggestAiLevel', 'playFromPosition'];
 
 let cached = null;
 function load({ fresh = false, storage } = {}) {

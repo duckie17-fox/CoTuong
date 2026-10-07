@@ -523,6 +523,24 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .xq-board-svg:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:14px;}
 .xq-cursor{fill:none;stroke:var(--gold);stroke-width:3.5;stroke-dasharray:6 4;}
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ---------- Học tập: tiến độ, bài hôm nay, gợi ý ---------- */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.dash-tile{background:var(--paper-2);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.dash-tile b{font-size:20px;}
+.dash-tile span{font-size:12.5px;color:var(--ink-soft);}
+.pbar{display:block;height:6px;border-radius:4px;background:color-mix(in srgb, var(--ink) 10%, transparent);overflow:hidden;flex:1;min-width:60px;}
+.pbar span{display:block;height:100%;background:var(--jade);}
+.dash-more{margin-top:10px;}
+.dash-more summary{cursor:pointer;font-weight:700;font-size:13.5px;}
+.dash-topics{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;}
+.dash-topics li{display:grid;grid-template-columns:minmax(0,150px) 1fr 52px;align-items:center;gap:8px;font-size:13px;}
+.dash-topics small{text-align:right;color:var(--ink-soft);}
+.daily-card .daily-inner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:color-mix(in srgb, var(--gold) 14%, transparent);border-radius:12px;padding:10px 12px;margin:8px 0;}
+.suggest-box{background:color-mix(in srgb, var(--jade) 14%, transparent);border-radius:10px;padding:8px 12px;margin-top:10px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.fen-box summary{cursor:pointer;font-weight:700;font-size:14px;}
+.fen-box input{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;margin-top:6px;}
+.status-banner code{font-size:11.5px;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -574,6 +592,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
+  <div class="card" id="progressCard">
+    <h2>📈 Tiến độ của bạn</h2>
+    <div id="progressDash"></div>
+  </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
     <p class="serif">Cờ tướng chơi trên bàn 9 cột × 10 hàng. Quân cờ <b>đứng trên giao điểm của các đường kẻ</b>, không phải trong ô như cờ vua. Ở giữa bàn cờ có một khoảng trống gọi là <b>sông</b> (chia bàn cờ thành lãnh thổ Đỏ và Đen). Mỗi bên có một cung nhỏ 3×3 ở giữa hàng cuối gọi là <b>cung</b> (vẽ hình chữ X) — nơi Tướng và Sĩ phải luôn ở trong đó.</p>
@@ -634,6 +656,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <button class="btn btn-outline" id="masterFlip" aria-label="Lật bàn">⇅</button>
         </div>
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn">♟ Đấu với máy từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn">📋 FEN</button>
+        </div>
         <div id="masterDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -717,7 +743,13 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
         <label><input type="radio" name="aiColor" value="black"><span>Đen</span></label>
       </div>
     </fieldset>
+    <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn">▶ Bắt đầu ván mới</button>
+    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ (FEN)</summary>
+      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ, màu quân và đối thủ đang chọn ở trên.</p>
+      <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
+      <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn">▶ Bắt đầu từ FEN</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
+    </details>
     <h3 class="group-h mt16">🗂 Lịch sử ván</h3>
     <div id="aiHistory"></div>
   </div>
@@ -739,7 +771,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <div id="aiBoard"></div>
         </div>
         <div id="aiStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button></div>
+        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button><button type="button" class="btn btn-outline" id="aiFenBtn">📋 FEN</button></div>
       </div>
       <div class="play-side">
         <h3 class="side-h">Biên bản</h3>
@@ -768,6 +800,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <span class="tb-extra" id="reviewTools"></span>
         </div>
         <div class="board-shell board-card"><div id="reviewBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem">♟ Thử lại từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn">📋 FEN</button>
+        </div>
         <div id="reviewDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -816,6 +852,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
     <p>Chọn một thế cờ và tìm nước đi đúng. Đến lượt bạn, hãy suy nghĩ kỹ trước khi đi! Bài nào có nhiều cách giải đúng thì cách nào cũng được tính.</p>
+    <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
     <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn">🎲 Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
@@ -837,6 +874,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
       <div id="puzzleBoard"></div>
     </div>
     <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
+    <div class="btn-row btn-row-center mt10">
+      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn">♟ Đấu với máy từ thế này</button>
+      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn">📋 FEN</button>
+    </div>
     <div id="puzzleExplain" class="explain-box mt10" hidden></div>
   </div>
 </section>
@@ -3668,12 +3709,14 @@ function markPuzzleSolved(id){
   if(!done.includes(id)){ done.push(id); safeLS_set('xq_puzzles_solved', JSON.stringify(done)); }
 }
 function puzzleList(){
+  if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
   return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff));
 }
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+  const due=Learn.due().length;
+  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','🔁 Cần ôn',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
     <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
@@ -3695,6 +3738,7 @@ function renderPuzzleGrid(){
 }
 function openPuzzle(id){
   pz.active = PUZZLES.find(p=>p.id===id);
+  pz.recorded=false; pz.usedHint=false;   // kết quả lần mở bài này (để ôn bài sai)
   $('#puzzleListCard').hidden = true;
   $('#puzzleDetailCard').hidden = false;
   $('#puzzleTitle').textContent = pz.active.title;
@@ -3764,17 +3808,25 @@ function puzzleExplainText(){
   const g=pz.targetGain!=null?Math.round(pz.targetGain):null;
   return `Vì sao đúng: nước này ${why.join('; ')||'tạo đòn'}${g!=null?`. Sau khi đối phương đáp tốt nhất, bạn vẫn lãi khoảng ${g} điểm quân`:''}. ${p.type==='fork'?'Bắt đôi hiệu quả vì đối phương chỉ cứu được một quân mỗi lượt.':Coach.QUESTIONS['missed-capture']}`;
 }
+// Ghi kết quả lần đầu của mỗi lần mở bài (đúng ngay / đúng nhờ gợi ý / sai) cho lịch ôn tập
+function puzzleRecord(outcome){
+  if(pz.recorded) return; pz.recorded=true;
+  Learn.record(pz.active.id, outcome);
+}
 function puzzleSuccess(){
   pz.locked=true;
   markPuzzleSolved(pz.active.id);
+  puzzleRecord(pz.peeked?'fail':pz.usedHint?'help':'ok');
+  const daily = !pz.peeked && Learn.markDailyDone(pz.active.id);
   if(pz.random && !pz.peeked){ pz.streak=(pz.streak||0)+1; }
-  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:''));
+  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` 🌅 Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
   pz.ctl.render();
 }
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
+  puzzleRecord('fail');
   statusBanner($('#puzzleStatus'),'fail',msg||'✘ Chưa đúng. Thử lại nhé!');
   pz.ctl.render();
   const token = pz.token = {};
@@ -3871,10 +3923,10 @@ function initPuzzles(){
   $('#puzzleRandomBtn').addEventListener('click',()=>{ pz.random=true; pz.streak=0; const p=puzzlePickRandom(); if(p) openPuzzle(p.id); });
   $('#puzzleBackBtn').addEventListener('click', ()=>{ pz.random=false; $('#puzzleListCard').hidden=false; $('#puzzleDetailCard').hidden=true; renderPuzzleGrid(); });
   $('#puzzleRetryBtn').addEventListener('click', puzzleResetBoard);
-  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
+  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.usedHint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
   $('#puzzleNextBtn').addEventListener('click', puzzleNext);
   $('#puzzleAnswerBtn').addEventListener('click', ()=>{
-    puzzleResetBoard(); pz.peeked=true; revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
+    puzzleResetBoard(); pz.peeked=true; puzzleRecord('fail'); revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
     const p=pz.active, sol=p.solution;
     const d=Notation.describe(p.board,sol);
     pz.locked=true; pz.arrows=[{from:sol.from,to:sol.to}];
@@ -5166,6 +5218,243 @@ function initUxSettings(){
   });
 }
 /* =========================================================================
+   HỌC TẬP — FEN, ôn bài sai (lặp lại ngắt quãng), bài hôm nay, bảng tiến độ,
+   gợi ý cấp máy, "đấu với máy từ thế này"
+   ========================================================================= */
+
+/* ---------------- FEN (chuẩn UCCI / WXF) ----------------
+   Hàng 0 (phía Đen) ghi trước. Đỏ chữ hoa, Đen chữ thường:
+   K Tướng · A Sĩ · B Tượng · N Mã · R Xe · C Pháo · P Tốt  (đọc được cả E=Tượng, H=Mã).
+   Lượt: w/r = Đỏ đi, b = Đen đi. Ví dụ thế xuất phát:
+   rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1 */
+const Fen = (function(){
+  const TO={G:'k',A:'a',E:'b',H:'n',R:'r',C:'c',S:'p'};
+  const FROM={k:'G',a:'A',b:'E',e:'E',n:'H',h:'H',r:'R',c:'C',p:'S'};
+  const START='rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1';
+  function toFen(board,turn){
+    const rows=[];
+    for(let r=0;r<10;r++){
+      let s='', e=0;
+      for(let c=0;c<9;c++){
+        const p=board[r][c];
+        if(!p){ e++; continue; }
+        if(e){ s+=e; e=0; }
+        s += p.color==='red' ? TO[p.type].toUpperCase() : TO[p.type];
+      }
+      if(e) s+=e;
+      rows.push(s);
+    }
+    return rows.join('/')+' '+(turn==='black'?'b':'w')+' - - 0 1';
+  }
+  // Trả về {board, turn}; ném lỗi tiếng Việt nếu sai cú pháp hoặc thế cờ không hợp lệ
+  function parse(text){
+    const parts=String(text||'').trim().split(/\s+/);
+    const rows=(parts[0]||'').split('/');
+    if(rows.length!==10) throw new Error('FEN phải có đủ 10 hàng, ngăn cách bằng dấu “/”.');
+    const board=Array.from({length:10},()=>Array(9).fill(null));
+    rows.forEach((row,r)=>{
+      let c=0;
+      for(const ch of row){
+        if(/[1-9]/.test(ch)){ c+=+ch; continue; }
+        const t=FROM[ch.toLowerCase()];
+        if(!t) throw new Error(`Ký tự lạ “${ch}” ở hàng ${r+1}.`);
+        if(c>8) throw new Error(`Hàng ${r+1} có quá 9 cột.`);
+        board[r][c++]={type:t, color: ch===ch.toUpperCase() ? 'red' : 'black'};
+      }
+      if(c!==9) throw new Error(`Hàng ${r+1} có ${c} cột (cần đúng 9).`);
+    });
+    const tc=(parts[1]||'w').toLowerCase();
+    const turn = tc==='b' ? 'black' : 'red';
+    const err=positionError(board,turn);
+    if(err) throw new Error(err);
+    return {board, turn};
+  }
+  // Kiểm tra thế cờ có thể xảy ra (đủ Tướng, quân đúng chỗ, bên không đi không bị chiếu…)
+  function positionError(b,turn){
+    const count={red:{},black:{}};
+    const MAX={G:1,A:2,E:2,H:2,R:2,C:2,S:5};
+    for(let r=0;r<10;r++) for(let c=0;c<9;c++){
+      const p=b[r][c]; if(!p) continue;
+      count[p.color][p.type]=(count[p.color][p.type]||0)+1;
+      const who = p.color==='red'?'Đỏ':'Đen';
+      if((p.type==='G'||p.type==='A') && !Engine.inPalace(r,c,p.color)) return `${VN_NAME[p.type]} ${who} nằm ngoài cung.`;
+      if(p.type==='E' && !Engine.ownSide(r,p.color)) return `Tượng ${who} không thể qua sông.`;
+      if(p.type==='S' && (p.color==='red' ? r>6 : r<3)) return `Tốt ${who} không thể ở sau hàng xuất phát.`;
+    }
+    for(const col of ['red','black']) for(const [t,n] of Object.entries(count[col]))
+      if(n>MAX[t]) return `${col==='red'?'Đỏ':'Đen'} có ${n} quân ${VN_NAME[t]} (tối đa ${MAX[t]}).`;
+    if(!count.red.G || !count.black.G) return 'Mỗi bên phải có đúng một Tướng.';
+    if(Engine.generalsFacing(b)) return 'Hai Tướng đang đối mặt trực tiếp — thế cờ không hợp lệ.';
+    if(Engine.isInCheck(b,Engine.otherColor(turn))) return 'Bên không tới lượt đang bị chiếu — thế cờ không hợp lệ.';
+    return null;
+  }
+  return {toFen, parse, positionError, START};
+})();
+
+async function copyText(text, el){
+  try{ await navigator.clipboard.writeText(text); if(el) statusBanner(el,'over','📋 Đã sao chép FEN: <code>'+esc(text)+'</code>'); }
+  catch(e){ if(el) statusBanner(el,'think','FEN của thế này (hãy tự sao chép): <code>'+esc(text)+'</code>'); }
+}
+
+/* ---------------- Ôn bài sai: hộp Leitner ----------------
+   Mỗi bài từng làm sai có một "hộp" 0..5; đúng ngay lần đầu thì lên hộp, sai thì về hộp 0.
+   Hộp càng cao càng lâu mới phải ôn lại. */
+const Learn = (function(){
+  const KEY='xq_srs', DAILY='xq_daily';
+  const GAP_DAYS=[0,1,3,7,16,35];
+  const DAY=86400000;
+  const load=()=>safeJSON(KEY,{});
+  const save=s=>safeLS_set(KEY,JSON.stringify(s));
+  const today=(t)=>{ const d=new Date(t||Date.now()); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  // outcome: 'ok' (đúng ngay), 'help' (đúng nhưng đã dùng gợi ý), 'fail' (sai / xem đáp án)
+  function record(id, outcome, now){
+    now=now||Date.now();
+    const s=load(), e=s[id]||{box:0,due:0,ok:0,fail:0};
+    if(outcome==='fail'){ e.fail++; e.box=0; e.due=now; }
+    else {
+      e.ok++;
+      if(!s[id] && outcome==='ok'){ e.last=now; e.mastered=true; s[id]=e; save(s); return e; } // chưa từng sai: không cần ôn
+      if(outcome==='ok') e.box=Math.min(GAP_DAYS.length-1, e.box+1);
+      e.due = now + Math.max(1,GAP_DAYS[e.box])*DAY;
+    }
+    e.last=now; s[id]=e; save(s);
+    return e;
+  }
+  // Các bài cần ôn (đã từng sai, tới hạn), bài sai gần nhất lên trước
+  function due(now){
+    now=now||Date.now(); const s=load();
+    return Object.entries(s).filter(([,e])=>!e.mastered && e.fail>0 && e.due<=now && e.box<GAP_DAYS.length-1)
+      .sort((a,b)=>a[1].box-b[1].box || b[1].last-a[1].last).map(([id])=>id);
+  }
+  function stats(){ const s=load(); return {tracked:Object.keys(s).length, wrong:Object.values(s).filter(e=>e.fail>0).length}; }
+
+  // Bài hôm nay: chọn cố định theo ngày, ưu tiên bài chưa giải (không lấy bài sát cục — đã có mục riêng)
+  function hash(str){ let h=2166136261; for(const ch of str){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+  function dailyPuzzle(now){
+    const d=today(now), solved=getSolvedPuzzles();
+    const pool=PUZZLES.filter(p=>p.topic!=='satcuc');
+    const fresh=pool.filter(p=>!solved.includes(p.id));
+    const st=safeJSON(DAILY,{});
+    if(st.date===d && st.id && PUZZLES.some(p=>p.id===st.id)) return PUZZLES.find(p=>p.id===st.id);
+    const from=fresh.length?fresh:pool, p=from[hash(d)%from.length];
+    safeLS_set(DAILY,JSON.stringify(Object.assign({},st,{date:d,id:p.id,done:false})));
+    return p;
+  }
+  function dailyState(){ return safeJSON(DAILY,{}); }
+  function markDailyDone(id, now){
+    const st=dailyState(), d=today(now);
+    if(st.date!==d || st.id!==id || st.done) return st;
+    const yesterday=today((now||Date.now())-DAY);
+    st.streak = st.lastDone===yesterday ? (st.streak||0)+1 : 1;
+    st.lastDone=d; st.done=true; st.best=Math.max(st.best||0, st.streak);
+    safeLS_set(DAILY,JSON.stringify(st));
+    return st;
+  }
+  // Chuỗi ngày còn hiệu lực (bị đứt nếu hôm qua không làm)
+  function streak(now){ const st=dailyState(); const d=today(now), y=today((now||Date.now())-DAY); return (st.lastDone===d||st.lastDone===y) ? (st.streak||0) : 0; }
+  return {record, due, stats, dailyPuzzle, dailyState, markDailyDone, streak, today};
+})();
+
+/* ---------------- Gợi ý cấp máy dựa trên các ván gần đây ---------------- */
+function suggestAiLevel(history){
+  const games=(history||[]).filter(r=>!r.twoPlayer && !r.start && r.result && r.level>0);
+  if(games.length<2) return null;
+  const L=games[0].level, same=games.filter(r=>r.level===L);
+  const res=r=>!r.result.winner?'draw':r.result.winner===r.human?'win':'loss';
+  if(L<AI_LEVELS.length && same.length>=2 && res(same[0])==='win' && res(same[1])==='win')
+    return {level:L+1, why:`Bạn đã thắng 2 ván gần nhất ở cấp ${L}. Thử sức với cấp cao hơn?`};
+  if(L>1 && same.length>=3 && [0,1,2].every(i=>res(same[i])==='loss'))
+    return {level:L-1, why:`3 ván gần nhất ở cấp ${L} đều thua. Hạ một cấp để luyện chắc tay hơn rồi quay lại.`};
+  return null;
+}
+
+/* ---------------- Đấu với máy từ một thế cờ bất kỳ ---------------- */
+function playFromPosition(board, turn, source){
+  const err=Fen.positionError(board,turn);
+  if(err) return alertSoft(err);
+  if(Engine.generateLegalMoves(board,turn).length===0) return alertSoft('Thế này đã hết nước đi — không thể chơi tiếp.');
+  showTab('may');
+  aiBeginGame({board:Engine.cloneBoard(board), turn, humanColor:turn, level:parseInt(safeLS_get('xq_ai_level')||'3',10), source});
+}
+function alertSoft(msg){ const el=document.querySelector('section:not([hidden]) [aria-live]'); if(el) statusBanner(el,'fail',esc(msg)); }
+
+/* ---------------- Bảng tiến độ ---------------- */
+function renderProgressDashboard(){
+  const el=$('#progressDash'); if(!el) return;
+  const done=lessonsDone().filter(k=>LESSONS.some(l=>l.key===k)).length;
+  const solved=getSolvedPuzzles();
+  const topics=Object.entries(PUZZLE_TOPICS).map(([k,v])=>{ const all=PUZZLES.filter(p=>p.topic===k); return {k,v,n:all.length,s:all.filter(p=>solved.includes(p.id)).length}; }).filter(t=>t.n);
+  const hist=loadHistory().filter(r=>r.result && !r.twoPlayer);
+  const w=hist.filter(r=>r.result.winner===r.human).length, d=hist.filter(r=>!r.result.winner).length, l=hist.length-w-d;
+  const accs=hist.filter(r=>r.analysis).map(r=>r.analysis.accuracy);
+  const acc=accs.length?Math.round(accs.reduce((a,b)=>a+b,0)/accs.length):null;
+  const due=Learn.due().length, st=Learn.streak();
+  const bar=(s,n)=>`<span class="pbar"><span style="width:${n?Math.round(100*s/n):0}%"></span></span>`;
+  el.innerHTML=`
+    <div class="dash-grid">
+      <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
+      <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
+      <div class="dash-tile"><b>${st?'🔥 '+st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
+      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy${acc!=null?` · chính xác TB ${acc}%`:''}</span></div>
+    </div>
+    <details class="dash-more"><summary>Chi tiết theo chủ đề bài tập</summary>
+      <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
+    </details>
+    ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview">🔁 Ôn ${due} bài từng làm sai</button></p>`:''}`;
+  const rb=$('#dashReview',el); if(rb) rb.addEventListener('click',()=>{ showTab('baitap'); pz.filter.topic='review'; renderPuzzleGrid(); });
+}
+
+/* ---------------- Gắn vào giao diện ---------------- */
+function renderDailyCard(){
+  const el=$('#dailyCard'); if(!el) return;
+  const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
+  const streak=Learn.streak();
+  el.innerHTML=`<div class="daily-inner"><div><b>🌅 Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
+      <div class="hint-text small">${done?'✓ Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · 🔥 Chuỗi ${streak} ngày`:''}</div></div>
+    <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
+  $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
+}
+function renderAiSuggestion(){
+  const el=$('#aiSuggest'); if(!el) return;
+  const s=suggestAiLevel(loadHistory());
+  if(!s){ el.innerHTML=''; return; }
+  const name=levelInfo(s.level).name;
+  el.innerHTML=`<div class="suggest-box">💡 ${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
+  $('#aiSuggestBtn',el).addEventListener('click',()=>{ const r=$(`input[name="aiLevel"][value="${s.level}"]`); if(r){ r.checked=true; } el.innerHTML=''; });
+}
+function initLearn(){
+  // Bài tập: chơi tiếp & FEN
+  $('#puzzlePlayBtn').addEventListener('click',()=>{ const p=pz.active; playFromPosition(p.board,p.turn,'Bài tập: '+p.title); });
+  $('#puzzleFenBtn').addEventListener('click',()=>copyText(Fen.toFen(pz.active.board,pz.active.turn), $('#puzzleStatus')));
+  // Ván danh thủ
+  const msTurn=()=>ms.pos%2===0?RED:BLACK;
+  $('#masterPlayBtn').addEventListener('click',()=>playFromPosition(masterBoard(),msTurn(),`Ván ${ms.g.red} – ${ms.g.black}, sau ${ms.pos} nửa nước`));
+  $('#masterFenBtn').addEventListener('click',()=>copyText(Fen.toFen(masterBoard(),msTurn()), $('#masterDetail')));
+  // Phân tích ván: thử lại từ thế TRƯỚC nước đang xem
+  const rvPos=()=>{ const g=review.game, i=review.idx; return i<0 ? {b:g.board(), t:g.turn()} : {b: i===0?g.start:g.boards[i-1], t:g.moves[i].color}; };
+  $('#reviewPlayBtn').addEventListener('click',()=>{ const {b,t}=rvPos(); playFromPosition(b,t,'Thử lại từ ván đã đấu'); });
+  $('#reviewFenBtn').addEventListener('click',()=>{ const {b,t}=rvPos(); copyText(Fen.toFen(b,t), $('#reviewDetail')); });
+  // Ván đang đấu
+  $('#aiFenBtn').addEventListener('click',()=>{ const g=aiGame.game; copyText(Fen.toFen(g.board(),g.turn()), $('#aiStatus')); });
+  // Bắt đầu từ FEN
+  $('#fenStartBtn').addEventListener('click',()=>{
+    const out=$('#fenMsg');
+    try{
+      const {board,turn}=Fen.parse($('#fenInput').value);
+      if(Engine.generateLegalMoves(board,turn).length===0) throw new Error('Thế này đã hết nước đi.');
+      out.textContent='';
+      const human=$('input[name="aiColor"]:checked').value, two=($('input[name="aiOpp"]:checked')||{}).value==='human';
+      aiBeginGame({board, turn, humanColor:human, twoPlayer:two, level:parseInt($('input[name="aiLevel"]:checked').value,10), source:'FEN'});
+    }catch(e){ out.textContent='✘ '+e.message; }
+  });
+  renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
+  document.addEventListener('tabshown',e=>{
+    if(e.detail==='hoc') renderProgressDashboard();
+    if(e.detail==='baitap') renderDailyCard();
+    if(e.detail==='may') renderAiSuggestion();
+  });
+}
+/* =========================================================================
    BOOT
    ========================================================================= */
 function initSettings(){
@@ -5186,6 +5475,7 @@ initAIGame();
 AIEngine.init();
 initTactics();
 initPuzzles();
+initLearn();
 showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
 
 </script>
