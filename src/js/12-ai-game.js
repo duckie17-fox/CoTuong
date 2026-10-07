@@ -47,6 +47,28 @@ function historyKeysOf(g){
   for(let i=0;i<g.boards.length-1;i++) keys.push(XQSearch.keyOf(g.boards[i], i%2===0?Engine.otherColor(g.startTurn):g.startTurn));
   return keys;
 }
+// Cờ "đang bị chiếu" của từng thế trong historyKeysOf (cùng thứ tự) — để máy biết luật chiếu mãi
+function historyChecksOf(g){
+  const chk=[Engine.isInCheck(g.start,g.startTurn)];
+  for(let i=0;i<g.moves.length-1;i++) chk.push(!!g.moves[i].check);
+  return chk;
+}
+// Các nước mà luật ván (Game) xử bên đi THUA ngay (chiếu mãi / đuổi mãi ở lần lặp thứ 3).
+// Chỉ cần thử những nước dẫn tới thế đã xuất hiện ≥ 2 lần nên rất rẻ.
+function ruleLosingMoves(g){
+  const seen=new Map(); for(const k of [g.startKey].concat(g.keys)) seen.set(k,(seen.get(k)||0)+1);
+  const me=g.turn(), b=g.board(), out=[];
+  for(const mv of g.legalMoves()){
+    if((seen.get(Game.key(Engine.applyMove(b,mv),Engine.otherColor(me)))||0)<2) continue;
+    g.play(mv); const res=g.result; g.undo(1);
+    if(res && res.winner && res.winner!==me) out.push(mv);
+  }
+  return out;
+}
+// Tham số gọi máy cho thế hiện tại của ván g
+function aiThinkArgs(g, extra){
+  return Object.assign({board:g.board(), turn:g.turn(), historyKeys:historyKeysOf(g), historyChecks:historyChecksOf(g), excludeMoves:ruleLosingMoves(g)}, extra||{});
+}
 function aiMeta(){
   const g=aiGame.game, b=g.board(), turn=g.turn();
   const m={lastMove:g.lastMove(), checkSq: !g.result && Engine.isInCheck(b,turn) ? Engine.findGeneral(b,turn) : null};
@@ -93,7 +115,7 @@ async function triggerAIMove(){
   if(!mv){
     aiGame.bookNote='';
     try{
-      const r=await AIEngine.think({board:g.board(), turn:g.turn(), timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder, historyKeys:historyKeysOf(g)});
+      const r=await AIEngine.think(aiThinkArgs(g,{timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder}));
       mv=r&&r.move;
     }catch(e){ mv=null; }
   }
@@ -155,7 +177,7 @@ function initAIGame(){
   $('#aiHint').addEventListener('click', async ()=>{
     const g=aiGame.game; $('#aiHint').disabled=true;
     statusBanner($('#aiStatus'),'think','💡 Đang tìm gợi ý…');
-    const r=await AIEngine.think({board:g.board(), turn:g.turn(), timeMs:1200, maxDepth:40, historyKeys:historyKeysOf(g)});
+    const r=await AIEngine.think(aiThinkArgs(g,{timeMs:1200, maxDepth:40}));
     if(r&&r.move){
       aiGame.hint=r.move; aiRender();
       const why=Coach.whyGood(g.board(),r.move), danger=Coach.endangered(g.board(),g.turn());

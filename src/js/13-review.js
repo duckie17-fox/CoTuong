@@ -17,12 +17,12 @@ const PIECE_PTS = {G:0,A:2,E:2,H:4,R:9,C:4.5,S:1};
 async function analyzeRecord(rec, onProgress){
   const g=replayRecord(rec);
   const positions=[];
-  const keysAll=[XQSearch.keyOf(g.start,g.startTurn)];
+  const keysAll=[XQSearch.keyOf(g.start,g.startTurn)], chkAll=[Engine.isInCheck(g.start,g.startTurn)];
   for(let k=0;k<=g.moves.length;k++){
     const board = k===0 ? g.start : g.boards[k-1];
     const turn = k%2===0 ? g.startTurn : Engine.otherColor(g.startTurn);
-    positions.push({board, turn, historyKeys: keysAll.slice(0,k)});
-    if(k<g.moves.length) keysAll.push(XQSearch.keyOf(g.boards[k], k%2===0?Engine.otherColor(g.startTurn):g.startTurn));
+    positions.push({board, turn, historyKeys: keysAll.slice(0,k), historyChecks: chkAll.slice(0,k)});
+    if(k<g.moves.length){ keysAll.push(XQSearch.keyOf(g.boards[k], k%2===0?Engine.otherColor(g.startTurn):g.startTurn)); chkAll.push(!!g.moves[k].check); }
   }
   const res = await AIEngine.analyze({positions, timeMs:260, maxDepth:12}, onProgress);
   return {g, res};

@@ -46,7 +46,7 @@ function initLessonDemo(container, demo){
       const b=game.board();
       if(demo.defender==='engine'){
         // thế lớn: dùng máy tìm kiếm (chạy trong Worker), ưu tiên kéo dài / giữ hoà
-        AIEngine.think({board:b, turn:opp, timeMs:demo.thinkMs||800, historyKeys:historyKeysOf(game)})
+        AIEngine.think(aiThinkArgs(game,{timeMs:demo.thinkMs||800}))
           .then(r=>apply(r.move || Engine.generateLegalMoves(b,opp)[0]))
           .catch(()=>apply(Solver.bestDefense(b,opp,1) || Engine.generateLegalMoves(b,opp)[0]));
         return;
