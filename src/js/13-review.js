@@ -124,7 +124,7 @@ function openReview(rec){
   if(!review.widget) review.widget=createBoardWidget($('#reviewBoard'),{label:'Bàn cờ xem lại ván'});
   review.widget.setFlipped(rec.human===BLACK);
   const rs=resultForHuman(rec);
-  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(rec.level).name)}</b> · ${esc(sideText(rec))} · ${Math.ceil(rec.moves.length/2)} nước`;
+  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(rec.level).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
   $('#reviewSummary').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
   reviewRender();
   $('#aiReviewCard').scrollIntoView({block:'start'});

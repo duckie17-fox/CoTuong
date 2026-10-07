@@ -197,12 +197,6 @@
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
     <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>📊 Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
-    <fieldset class="setup-field"><legend>Đối thủ</legend>
-      <div class="seg-radio">
-        <label><input type="radio" name="aiOpp" value="ai" checked><span>🤖 Máy</span></label>
-        <label><input type="radio" name="aiOpp" value="human"><span>👥 Hai người cùng máy</span></label>
-      </div>
-    </fieldset>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -213,7 +207,7 @@
     <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn">▶ Bắt đầu ván mới</button>
     <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ (FEN)</summary>
-      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ, màu quân và đối thủ đang chọn ở trên.</p>
+      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
       <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
       <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn">▶ Bắt đầu từ FEN</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
     </details>

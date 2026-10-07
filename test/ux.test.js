@@ -19,34 +19,23 @@ test('xuất rồi nhập tiến độ khôi phục đúng dữ liệu', () => {
   assert.throws(() => b.T.Progress.importText('rác'), /không đọc được/);
 });
 
-test('hai người cùng máy: đi quân bằng bàn phím, máy không tự đi', async () => {
-  const { window, document } = load({ fresh: true });
+test('đấu với máy: đi quân bằng bàn phím, máy đáp, đi lại', async () => {
+  const { window, document } = load({ fresh: true, storage: { xq_ai_level: '1' } });
   document.querySelector('.tab-btn[data-tab="may"]').click();
-  document.querySelector('input[name="aiOpp"][value="human"]').click();
-  document.querySelector('input[name="aiOpp"][value="human"]').dispatchEvent(new window.Event('change'));
-  assert.equal(document.querySelector('#aiLevelPicker').closest('fieldset').hidden, true);
   document.querySelector('#aiStartBtn').click();
   const svg = document.querySelector('#aiBoard svg');
   assert.equal(svg.getAttribute('tabindex'), '0');
   svg.focus();
   // Pháo Đỏ (7,1) → (7,4): con trỏ bắt đầu ở (7,4)
   keys(svg, ['ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'Enter', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'Enter'], window);
-  await new Promise(r => setTimeout(r, 50));
-  assert.equal(document.querySelectorAll('#aiLog .log-cell[data-ply]').length, 1);
-  assert.match(document.querySelector('#aiStatus').textContent, /Đến lượt Đen/);
-  // Đen đi Mã (0,1) → (2,2): bàn không lật, con trỏ đang ở (7,4)
-  keys(svg, ['ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'Enter',
-    'ArrowDown', 'ArrowDown', 'ArrowRight', 'Enter'], window);
-  await new Promise(r => setTimeout(r, 400));
-  assert.equal(document.querySelectorAll('#aiLog .log-cell[data-ply]').length, 2);
-  assert.match(document.querySelector('#aiStatus').textContent, /Đến lượt Đỏ/);
-  // hoàn tác 1 nửa nước
+  const plies = () => document.querySelectorAll('#aiLog .log-cell[data-ply]').length;
+  for (let i = 0; i < 100 && plies() < 2; i++) await new Promise(r => setTimeout(r, 50));
+  assert.equal(plies(), 2, 'máy chưa đáp');
+  assert.match(document.querySelector('#aiStatus').textContent, /Đến lượt bạn/);
   document.querySelector('#aiUndo').click();
-  assert.equal(document.querySelectorAll('#aiLog .log-cell[data-ply]').length, 1);
-  // lịch sử ghi là ván hai người
+  assert.equal(plies(), 0);
   const hist = JSON.parse(window.localStorage.getItem('xq_ai_history'));
-  assert.equal(hist[0].twoPlayer, true);
-  assert.equal(hist[0].level, 0);
+  assert.equal(hist[0].level, 1);
 });
 
 test('bảng cài đặt: bật/tắt âm thanh được lưu', () => {

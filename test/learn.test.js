@@ -69,7 +69,7 @@ test('gợi ý cấp máy theo các ván gần đây', () => {
   assert.equal(suggestAiLevel([g(3, 'black'), g(3, 'black'), g(3, 'black')]).level, 2);
   assert.equal(suggestAiLevel([g(3, 'red'), g(3, 'black')]), null);
   assert.equal(suggestAiLevel([g(6, 'red'), g(6, 'red')]), null, 'cấp cao nhất thì không gợi ý lên');
-  assert.equal(suggestAiLevel([Object.assign(g(3, 'red'), { twoPlayer: true }), g(3, 'red')]), null);
+  assert.equal(suggestAiLevel([Object.assign(g(3, 'red'), { start: {} }), g(3, 'red')]), null, 'ván từ thế cho trước không tính');
 });
 
 test('giao diện: xem đáp án → bài vào mục "Cần ôn"; chơi tiếp với máy từ bài tập', async () => {

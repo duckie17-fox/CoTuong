@@ -138,7 +138,7 @@ const Learn = (function(){
 
 /* ---------------- Gợi ý cấp máy dựa trên các ván gần đây ---------------- */
 function suggestAiLevel(history){
-  const games=(history||[]).filter(r=>!r.twoPlayer && !r.start && r.result && r.level>0);
+  const games=(history||[]).filter(r=>!r.start && r.result && r.level>0);
   if(games.length<2) return null;
   const L=games[0].level, same=games.filter(r=>r.level===L);
   const res=r=>!r.result.winner?'draw':r.result.winner===r.human?'win':'loss';
@@ -165,7 +165,7 @@ function renderProgressDashboard(){
   const done=lessonsDone().filter(k=>LESSONS.some(l=>l.key===k)).length;
   const solved=getSolvedPuzzles();
   const topics=Object.entries(PUZZLE_TOPICS).map(([k,v])=>{ const all=PUZZLES.filter(p=>p.topic===k); return {k,v,n:all.length,s:all.filter(p=>solved.includes(p.id)).length}; }).filter(t=>t.n);
-  const hist=loadHistory().filter(r=>r.result && !r.twoPlayer);
+  const hist=loadHistory().filter(r=>r.result);
   const w=hist.filter(r=>r.result.winner===r.human).length, d=hist.filter(r=>!r.result.winner).length, l=hist.length-w-d;
   const accs=hist.filter(r=>r.analysis).map(r=>r.analysis.accuracy);
   const acc=accs.length?Math.round(accs.reduce((a,b)=>a+b,0)/accs.length):null;
@@ -224,8 +224,8 @@ function initLearn(){
       const {board,turn}=Fen.parse($('#fenInput').value);
       if(Engine.generateLegalMoves(board,turn).length===0) throw new Error('Thế này đã hết nước đi.');
       out.textContent='';
-      const human=$('input[name="aiColor"]:checked').value, two=($('input[name="aiOpp"]:checked')||{}).value==='human';
-      aiBeginGame({board, turn, humanColor:human, twoPlayer:two, level:parseInt($('input[name="aiLevel"]:checked').value,10), source:'FEN'});
+      const human=$('input[name="aiColor"]:checked').value;
+      aiBeginGame({board, turn, humanColor:human, level:parseInt($('input[name="aiLevel"]:checked').value,10), source:'FEN'});
     }catch(e){ out.textContent='✘ '+e.message; }
   });
   renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
