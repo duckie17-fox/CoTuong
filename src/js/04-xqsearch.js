@@ -163,7 +163,55 @@ const XQSearch = (function(){
     for(let i=0;i<n;i++){ const cap=this.make(buf[i]); if(this.legalAfterMake()) res.push(buf[i]); this.unmake(buf[i],cap); }
     return res;
   };
-  Pos.prototype.evaluate=function(){ return this.side>0 ? this.score : -this.score; };
+  // Đánh giá = vật chất + bảng vị trí (cộng dồn khi make/unmake) + các yếu tố tính tại chỗ:
+  //  · an toàn Tướng: thiếu Sĩ/Tượng bị phạt, tỉ lệ với lực tấn công của đối phương đã áp sát
+  //  · Pháo mạnh khi còn nhiều quân (nhiều ngòi), Mã mạnh hơn khi bàn thưa
+  //  · độ cơ động của Xe (số ô đi được) và Mã (số hướng không bị cản chân)
+  //  · "Pháo đầu trống": Pháo đối phương nhắm thẳng Tướng trên cột không có quân chắn
+  Pos.prototype.evaluate=function(){ const s=this.score+evalExtra(this); return this.side>0 ? s : -s; };
+  function evalExtra(pos){
+    const b=pos.b;
+    let rA=0,rE=0,bA=0,bE=0, threatR=0, threatB=0, heavy=0, s=0;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, r=(sq/9)|0;
+      if(t===R||t===H||t===C) heavy++;
+      if(p>0){
+        if(t===A) rA++; else if(t===E) rE++;
+        else if(t===R) threatB+=3; else if(t===C) threatB+=2;
+        else if(t===H) threatB+= r<=4?3:1; else if(t===P && r<=4) threatB+=1;
+      } else {
+        if(t===A) bA++; else if(t===E) bE++;
+        else if(t===R) threatR+=3; else if(t===C) threatR+=2;
+        else if(t===H) threatR+= r>=5?3:1; else if(t===P && r>=5) threatR+=1;
+      }
+    }
+    // An toàn Tướng (góc nhìn Đỏ: trừ khi Đỏ yếu)
+    s -= ((2-rA)*16 + (2-rE)*10) * Math.min(threatR,14) / 10;
+    s += ((2-bA)*16 + (2-bE)*10) * Math.min(threatB,14) / 10;
+    // Pháo / Mã theo giai đoạn ván (heavy: số Xe+Mã+Pháo còn lại, tối đa 12)
+    const phase=heavy-6;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, sg=p>0?1:-1, r=(sq/9)|0, c=sq%9;
+      if(t===C) s += sg*phase*3;
+      else if(t===H){
+        s -= sg*phase*3;
+        let mob=0; for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; const q=b[rr*9+cc]; if(!q || (q>0)!==(p>0)) mob++; }
+        s += sg*(mob-4)*4;
+      } else if(t===R){
+        let mob=0;
+        for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(p>0)) mob++; break; } mob++; rr+=dr; cc+=dc; } }
+        s += sg*(mob-8)*2;
+      }
+    }
+    // Pháo đầu trống: Pháo đối phương cùng cột với Tướng, giữa không có quân nào
+    for(const side of [1,-1]){
+      const k=pos.kpos[side>0?0:1], kr=(k/9)|0, kc=k%9, dir= side>0?-1:1;
+      for(let rr=kr+dir; rr>=0 && rr<=9; rr+=dir){ const q=b[rr*9+kc]; if(!q) continue; if(q===-side*C) s -= side*45; break; }
+    }
+    return s|0;
+  }
 
   // ---------- Bảng băm ----------
   const TT_BITS=18, TT_SIZE=1<<TT_BITS, TT_MASK=TT_SIZE-1;

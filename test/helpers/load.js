@@ -10,9 +10,9 @@ const EXPORTS = ['Engine', 'Notation', 'Game', 'Solver', 'XQSearch', 'Coach', 'A
 const OPTIONAL = ['Fen', 'Progress', 'Sound', 'PuzzleCheck', 'aiThinkArgs', 'ruleLosingMoves', 'historyKeysOf', 'Learn', 'suggestAiLevel', 'playFromPosition'];
 
 let cached = null;
-function load({ fresh = false, storage } = {}) {
-  if (cached && !fresh) return cached;
-  let html = fs.readFileSync(DIST, 'utf8');
+function load({ fresh = false, storage, dist } = {}) {
+  if (cached && !fresh && !dist) return cached;
+  let html = fs.readFileSync(dist || DIST, 'utf8');
   const exp = EXPORTS.map(n => `${n}`).join(',') + ',' +
     OPTIONAL.map(n => `${n}:typeof ${n}!=='undefined'?${n}:undefined`).join(',');
   const i = html.lastIndexOf('</script>');
@@ -32,7 +32,7 @@ function load({ fresh = false, storage } = {}) {
     },
   });
   const res = { window: dom.window, document: dom.window.document, T: dom.window.__T, errors };
-  if (!fresh) cached = res;
+  if (!fresh && !dist) cached = res;
   return res;
 }
 module.exports = { load };
