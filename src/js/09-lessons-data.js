@@ -296,12 +296,16 @@ const LESSONS = [
     table:{
       head:['Cấp độ máy','Hình dung (ước lượng, chưa đo với người thật)','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–11)','—'],
-        ['2 · Kỳ sĩ cấp 10–7','Chơi cờ phong trào','thắng cấp 1: 10/10 ván'],
-        ['3 · Kỳ sĩ cấp 6–4','Giải cấp phường/xã','thắng cấp 2: 10/10 ván'],
-        ['4 · Kỳ sĩ cấp 3–2','Người chơi khá ở câu lạc bộ','thắng cấp 3: 10/10 ván'],
-        ['5 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 4: 9,5/10 ván'],
-        ['6 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 5: 5/6 ván'],
+        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–15)','—'],
+        ['2 · Kỳ sĩ cấp 14–12','Mới chơi vài tháng','thắng cấp 1: ~83%'],
+        ['3 · Kỳ sĩ cấp 11–9','Chơi cờ phong trào','thắng cấp 2: ~84%'],
+        ['4 · Kỳ sĩ cấp 8–7','Phong trào khá','thắng cấp 3: ~75%'],
+        ['5 · Kỳ sĩ cấp 6–5','Giải cấp phường/xã','thắng cấp 4: ~84%'],
+        ['6 · Kỳ sĩ cấp 4–3','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
+        ['7 · Kỳ sĩ cấp 2','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
+        ['8 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
+        ['9 · Ứng viên đại sư','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
+        ['10 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
       ]
     },
     sources:[

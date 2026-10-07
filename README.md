@@ -13,7 +13,7 @@ hoặc dán làm Artifact.
 - **Chiến thuật, sát cục (24 mẫu), tàn cuộc** (thực hành và lý thuyết).
 - **Bài tập** (164 bài): chiếu bí 1–3 nước, bắt quân, bắt đôi, tìm nước cứu, sát cục.
   Có **bài hôm nay** (đếm chuỗi ngày) và **ôn bài sai** theo lịch lặp lại ngắt quãng.
-- **Đấu với máy** nhiều cấp (mỗi cấp thắng cấp ngay dưới khoảng 70% số ván). Có gợi ý, đi lại, phân tích ván,
+- **Đấu với máy** 10 cấp (mỗi cấp thắng cấp ngay dưới khoảng 75–85% số ván, đo bằng `tools/ladder.js`). Có gợi ý, đi lại, phân tích ván,
   gợi ý lên/xuống cấp theo kết quả, bắt đầu từ **FEN** hoặc từ bất kỳ thế nào trong bài tập / ván danh thủ / ván đã đấu.
 - Luật ván theo kiểu châu Á rút gọn: cấm chiếu mãi / đuổi mãi, hoà do lặp 3 lần, 60 nước không ăn quân, hết quân tấn công.
 - Hiệu ứng đi quân, âm thanh (bật/tắt), điều khiển bàn cờ bằng bàn phím, xuất/nhập tiến độ sang máy khác.
@@ -33,6 +33,7 @@ tools/
   build.js          ghép src/ → dist/co-tuong.html
   selfplay.js       cho các cấp máy tự đấu theo đúng luật của ứng dụng
   match.js          đấu hai bản build với nhau để đo thay đổi sức mạnh (điểm + Elo)
+  ladder.js         đấu hai cấu hình cấp máy để hiệu chỉnh thang cấp
 test/               test (node:test + jsdom) chạy trên chính bản build
 test/e2e/           test trên Chromium thật (playwright-core)
 ```
