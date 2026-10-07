@@ -294,14 +294,14 @@ const LESSONS = [
       '<b>Cấp độ của máy</b> trong tab Đấu với máy được đặt tên theo thang của Trung Quốc để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>: sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, không phải đo bằng thi đấu thật.'
     ],
     table:{
-      head:['Cấp độ máy','Tương ứng (ước lượng)'],
+      head:['Cấp độ máy','Hình dung (ước lượng, chưa đo với người thật)','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–11)'],
-        ['2 · Kỳ sĩ cấp 10–7','Chơi cờ phong trào'],
-        ['3 · Kỳ sĩ cấp 6–4','Giải cấp phường/xã'],
-        ['4 · Kỳ sĩ cấp 3–2','≈ vô địch quận/huyện'],
-        ['5 · Kỳ sĩ cấp 1','≈ vô địch thành phố'],
-        ['6 · Đại sư địa phương','≈ tuyển thủ tỉnh'],
+        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–11)','—'],
+        ['2 · Kỳ sĩ cấp 10–7','Chơi cờ phong trào','thắng cấp 1: 10/10 ván'],
+        ['3 · Kỳ sĩ cấp 6–4','Giải cấp phường/xã','thắng cấp 2: 10/10 ván'],
+        ['4 · Kỳ sĩ cấp 3–2','Người chơi khá ở câu lạc bộ','thắng cấp 3: 10/10 ván'],
+        ['5 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 4: 9,5/10 ván'],
+        ['6 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 5: 5/6 ván'],
       ]
     },
     sources:[
