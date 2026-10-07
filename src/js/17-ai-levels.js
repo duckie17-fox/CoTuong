@@ -4,13 +4,38 @@
    ghi kết quả đo bằng tools/selfplay.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
 const AI_LEVELS = [
-  {id:1, name:'Tân thủ',           desc:'Vừa biết luật: hay đi nước ngẫu nhiên, bỏ sót quân', maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false},
-  {id:2, name:'Kỳ sĩ cấp 10–7',    desc:'Nhìn trước 2 nửa nước, đôi khi sơ suất · thắng cấp 1: 10/10 ván',              maxDepth:2, timeMs:500,  noise:40,  blunder:0.05, book:false},
-  {id:3, name:'Kỳ sĩ cấp 6–4',     desc:'Nhìn trước 3 nửa nước, ít sơ suất · thắng cấp 2: 10/10 ván',              maxDepth:3, timeMs:800,  noise:15,  blunder:0,    book:false},
-  {id:4, name:'Kỳ sĩ cấp 3–2',     desc:'Tính sâu 4 nửa nước, không sơ suất ngẫu nhiên · thắng cấp 3: 10/10 ván',            maxDepth:4, timeMs:1000, noise:0,   blunder:0,    book:false},
-  {id:5, name:'Kỳ sĩ cấp 1',       desc:'Có sách khai cuộc, tính 2 giây/nước · thắng cấp 4: 9,5/10 ván',             maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true},
-  {id:6, name:'Đại sư địa phương', desc:'Có sách khai cuộc, tính tới 4 giây/nước · thắng cấp 5: 5/6 ván',                maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true},
+  {id:1,  name:'Tân thủ',           maxDepth:1, timeMs:300,  noise:120, blunder:0.25,  book:false},
+  {id:2,  name:'Kỳ sĩ cấp 14–12',   maxDepth:1, timeMs:300,  noise:80,  blunder:0.15,  book:false},
+  {id:3,  name:'Kỳ sĩ cấp 11–9',    maxDepth:2, timeMs:400,  noise:60,  blunder:0.10,  book:false},
+  {id:4,  name:'Kỳ sĩ cấp 8–7',     maxDepth:2, timeMs:500,  noise:30,  blunder:0.05,  book:false},
+  {id:5,  name:'Kỳ sĩ cấp 6–5',     maxDepth:3, timeMs:600,  noise:22,  blunder:0.015, book:false},
+  {id:6,  name:'Kỳ sĩ cấp 4–3',     maxDepth:3, timeMs:800,  noise:12,  blunder:0,     book:false},
+  {id:7,  name:'Kỳ sĩ cấp 2',       maxDepth:4, timeMs:800,  noise:15,  blunder:0,     book:false},
+  {id:8,  name:'Kỳ sĩ cấp 1',       maxDepth:4, timeMs:1000, noise:0,   blunder:0,     book:false},
+  {id:9,  name:'Ứng viên đại sư',   maxDepth:5, timeMs:2000, noise:0,   blunder:0,     book:true},
+  {id:10, name:'Đại sư địa phương', maxDepth:40,timeMs:4000, noise:0,   blunder:0,     book:true},
 ];
+// Mô tả cho người chơi: cách máy chơi ở mỗi cấp + kết quả đo với cấp ngay dưới (LEVEL_MEASURED)
+const LEVEL_MEASURED = {};
+AI_LEVELS.forEach(l=>{
+  const how = l.blunder>=0.1 ? 'hay đi nước ngẫu nhiên, bỏ sót quân'
+    : l.blunder>0 ? 'thỉnh thoảng sơ suất'
+    : l.noise>0 ? 'không sơ suất ngẫu nhiên, đôi khi chọn nước chưa tối ưu'
+    : 'luôn chọn nước tốt nhất tìm được';
+  const depth = l.maxDepth>=40 ? `tính tới ${l.timeMs/1000} giây/nước` : `nhìn trước ${l.maxDepth} nửa nước`;
+  l.desc = `${depth[0].toUpperCase()+depth.slice(1)}${l.book?', có sách khai cuộc':''}, ${how}` + (LEVEL_MEASURED[l.id] ? ` · ${LEVEL_MEASURED[l.id]}` : '');
+});
+// Thang cấp cũ (6 cấp) → thang mới (10 cấp): cấp đã lưu và lịch sử ván trước đây vẫn hiển thị đúng
+const LADDER_VERSION=2, OLD_LEVEL_MAP={1:1,2:4,3:6,4:8,5:9,6:10};
+function recLevel(rec){ return rec.ladder===LADDER_VERSION ? rec.level : (OLD_LEVEL_MAP[rec.level]||rec.level); }
+function savedAiLevel(){
+  let lv=parseInt(safeLS_get('xq_ai_level')||'5',10);
+  if(safeLS_get('xq_ai_ladder')!==String(LADDER_VERSION)){
+    if(safeLS_get('xq_ai_level')) lv=OLD_LEVEL_MAP[lv]||5;
+    safeLS_set('xq_ai_ladder',String(LADDER_VERSION)); safeLS_set('xq_ai_level',String(lv));
+  }
+  return AI_LEVELS.some(l=>l.id===lv) ? lv : 5;
+}
 // Sách khai cuộc: lấy từ chính các thế ở tab Khai cuộc
 function buildOpeningBook(openings){
   const book=new Map();

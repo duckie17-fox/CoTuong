@@ -140,7 +140,7 @@ const Learn = (function(){
 function suggestAiLevel(history){
   const games=(history||[]).filter(r=>!r.start && r.result && r.level>0);
   if(games.length<2) return null;
-  const L=games[0].level, same=games.filter(r=>r.level===L);
+  const L=recLevel(games[0]), same=games.filter(r=>recLevel(r)===L);
   const res=r=>!r.result.winner?'draw':r.result.winner===r.human?'win':'loss';
   if(L<AI_LEVELS.length && same.length>=2 && res(same[0])==='win' && res(same[1])==='win')
     return {level:L+1, why:`Bạn đã thắng 2 ván gần nhất ở cấp ${L}. Thử sức với cấp cao hơn?`};
@@ -155,7 +155,7 @@ function playFromPosition(board, turn, source){
   if(err) return alertSoft(err);
   if(Engine.generateLegalMoves(board,turn).length===0) return alertSoft('Thế này đã hết nước đi — không thể chơi tiếp.');
   showTab('may');
-  aiBeginGame({board:Engine.cloneBoard(board), turn, humanColor:turn, level:parseInt(safeLS_get('xq_ai_level')||'3',10), source});
+  aiBeginGame({board:Engine.cloneBoard(board), turn, humanColor:turn, level:savedAiLevel(), source});
 }
 function alertSoft(msg){ const el=document.querySelector('section:not([hidden]) [aria-live]'); if(el) statusBanner(el,'fail',esc(msg)); }
 

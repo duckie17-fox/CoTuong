@@ -11,7 +11,7 @@ function saveHistory(list){ safeLS_set(HISTORY_KEY, JSON.stringify(list.slice(0,
 function upsertHistory(rec){ const list=loadHistory().filter(x=>x.id!==rec.id); list.unshift(rec); saveHistory(list); }
 function gameToRecord(){
   const g=aiGame.game;
-  const rec = { id: aiGame.recId, date: aiGame.recDate, level: aiGame.level, human: aiGame.humanColor,
+  const rec = { id: aiGame.recId, date: aiGame.recDate, level: aiGame.level, ladder: LADDER_VERSION, human: aiGame.humanColor,
     moves: g.moves.map(m=>[m.from[0],m.from[1],m.to[0],m.to[1]]),
     result: g.result ? {winner:g.result.winner, reason:g.result.reason} : null };
   if(aiGame.start) rec.start=aiGame.start;   // ván bắt đầu từ một thế cờ cho trước
@@ -23,7 +23,7 @@ function replayRecord(rec){
   if(rec.result && !g.result) g.result=Object.assign({state:'over'},rec.result);
   return g;
 }
-function levelInfo(id){ return AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[2]; }
+function levelInfo(id){ return AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[4]; }
 function resultForHuman(rec){
   if(!rec.result) return {txt:'Chưa kết thúc', cls:'badge-mid'};
   if(!rec.result.winner) return {txt:'Hoà', cls:'badge-mid'};
@@ -35,7 +35,7 @@ function renderHistoryList(){
   el.innerHTML = list.map(r=>{
     const rs=resultForHuman(r), d=new Date(r.date);
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
-    return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(r.level).name)}</b>
+    return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(r)).name)}</b>
       <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]}${r.start?' · từ thế cho trước':''} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
       <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván">🗑</button></div></div>`;
   }).join('');
@@ -141,7 +141,7 @@ function aiStartGame(){
 //  - board/turn: bắt đầu từ một thế cờ cho trước (vd. "chơi tiếp với máy" từ bài tập, ván danh thủ)
 function aiBeginGame(cfg){
   aiGame.humanColor = cfg.humanColor || RED;
-  aiGame.level = cfg.level || aiGame.level || 3;
+  aiGame.level = cfg.level || aiGame.level || savedAiLevel();
   safeLS_set('xq_ai_level', String(aiGame.level));
   aiGame.start = cfg.board ? {pieces:boardToPieces(cfg.board), turn:cfg.turn||RED, source:cfg.source||''} : null;
   aiGame.game = cfg.board ? Game.create(cfg.board, cfg.turn||RED) : Game.create();
@@ -161,7 +161,7 @@ function showAICard(which){
   if(which==='setup') renderHistoryList();
 }
 function renderLevelPicker(){
-  const saved=parseInt(safeLS_get('xq_ai_level')||'3',10);
+  const saved=savedAiLevel();
   $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
     <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small></span></label>`).join('');
 }
