@@ -140,4 +140,3 @@ const Coach = (function(){
   return {attackers, defenders, endangered, whyGood, whyBad, threatText, plainMove, QUESTIONS, THINKING_STEPS, NAME};
 })();
 
-/*@@WORKER@@*/

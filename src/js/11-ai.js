@@ -2,6 +2,8 @@
    AI — chạy XQSearch trong Web Worker (tạo từ Blob) để giao diện không bị đơ.
    Nếu trình duyệt/trang chặn Worker, tự chuyển sang chạy trên luồng chính.
    ========================================================================= */
+// Mã nguồn Web Worker: build (tools/build.js) tự sinh từ 04-xqsearch.js + worker-shim.js
+/*@@WORKER@@*/
 const AIEngine = (function(){
   let worker=null, mode='main', seq=0;
   const pending=new Map();

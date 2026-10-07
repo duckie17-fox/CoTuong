@@ -1,0 +1,16 @@
+{
+  "name": "co-tuong-nhap-mon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ứng dụng học cờ tướng (một file HTML tự chứa): học luật, khai cuộc, chiến thuật, bài tập, đấu với máy.",
+  "scripts": {
+    "build": "node tools/build.js",
+    "test": "node tools/build.js && node --test test/*.test.js",
+    "test:full": "node tools/build.js && FULL=1 node --test test/*.test.js",
+    "selfplay": "node tools/selfplay.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  },
+  "engines": { "node": ">=18" }
+}
