@@ -7,10 +7,14 @@
     "build": "node tools/build.js",
     "test": "node tools/build.js && node --test test/*.test.js",
     "test:full": "node tools/build.js && FULL=1 node --test test/*.test.js",
-    "selfplay": "node tools/selfplay.js"
+    "selfplay": "node tools/selfplay.js",
+    "test:e2e": "node tools/build.js && node --test test/e2e/*.e2e.js"
   },
   "devDependencies": {
-    "jsdom": "^24.1.0"
+    "jsdom": "^24.1.0",
+    "playwright-core": "^1.63.0"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

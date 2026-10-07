@@ -1,7 +1,10 @@
 /* =========================================================================
    ĐẤU VỚI MÁY + REVIEW VÁN + LỊCH SỬ
    ========================================================================= */
-const aiGame = { game:null, humanColor:RED, level:3, widget:null, ctl:null, thinking:false, hint:null, bookNote:'', saved:false, book:null, token:0 };
+const aiGame = { game:null, humanColor:RED, level:3, twoPlayer:false, start:null, widget:null, ctl:null, thinking:false, hint:null, bookNote:'', saved:false, book:null, token:0 };
+// Lượt này có phải người bấm không (chế độ hai người: cả hai bên đều là người)
+const isHumanTurn = turn => aiGame.twoPlayer || turn===aiGame.humanColor;
+const boardToPieces = b => { const out=[]; for(let r=0;r<10;r++) for(let c=0;c<9;c++){ const p=b[r][c]; if(p) out.push([r,c,p.type,p.color]); } return out; };
 
 /* ---------------- Lịch sử ván (localStorage) ---------------- */
 const HISTORY_KEY='xq_ai_history';
@@ -10,20 +13,26 @@ function saveHistory(list){ safeLS_set(HISTORY_KEY, JSON.stringify(list.slice(0,
 function upsertHistory(rec){ const list=loadHistory().filter(x=>x.id!==rec.id); list.unshift(rec); saveHistory(list); }
 function gameToRecord(){
   const g=aiGame.game;
-  return { id: aiGame.recId, date: aiGame.recDate, level: aiGame.level, human: aiGame.humanColor,
+  const rec = { id: aiGame.recId, date: aiGame.recDate, level: aiGame.twoPlayer?0:aiGame.level, human: aiGame.humanColor,
     moves: g.moves.map(m=>[m.from[0],m.from[1],m.to[0],m.to[1]]),
     result: g.result ? {winner:g.result.winner, reason:g.result.reason} : null };
+  if(aiGame.twoPlayer) rec.twoPlayer=true;
+  if(aiGame.start) rec.start=aiGame.start;   // ván bắt đầu từ một thế cờ cho trước
+  return rec;
 }
 function replayRecord(rec){
-  const g=Game.create();
+  const g = rec.start ? Game.create(mkBoard(rec.start.pieces), rec.start.turn) : Game.create();
   for(const [a,b,c,d] of rec.moves) g.play({from:[a,b],to:[c,d]});
   if(rec.result && !g.result) g.result=Object.assign({state:'over'},rec.result);
   return g;
 }
-function levelInfo(id){ return AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[2]; }
+const TWO_PLAYER_LEVEL = {id:0, name:'Hai người cùng máy', desc:'Không có máy, hai người lần lượt đi'};
+function levelInfo(id){ return id===0 ? TWO_PLAYER_LEVEL : (AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[2]); }
+function sideText(rec){ return rec.twoPlayer ? 'Hai người' : 'Bạn cầm '+COLOR_VN[rec.human]; }
 function resultForHuman(rec){
   if(!rec.result) return {txt:'Chưa kết thúc', cls:'badge-mid'};
   if(!rec.result.winner) return {txt:'Hoà', cls:'badge-mid'};
+  if(rec.twoPlayer) return {txt:COLOR_VN[rec.result.winner]+' thắng', cls:'badge-mid'};
   return rec.result.winner===rec.human ? {txt:'Thắng', cls:'badge-easy'} : {txt:'Thua', cls:'badge-hard'};
 }
 function renderHistoryList(){
@@ -33,7 +42,7 @@ function renderHistoryList(){
     const rs=resultForHuman(r), d=new Date(r.date);
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
     return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(r.level).name)}</b>
-      <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
+      <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · ${esc(sideText(r))}${r.start?' · từ thế cho trước':''} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
       <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván">🗑</button></div></div>`;
   }).join('');
   $$('[data-review]',el).forEach(b=>b.addEventListener('click',()=>openReview(loadHistory().find(x=>x.id===b.dataset.review))));
@@ -80,18 +89,18 @@ function aiRender(){
   aiGame.ctl.render();
   const el=$('#aiStatus');
   if(g.result){
-    const human = g.result.winner===aiGame.humanColor, draw=!g.result.winner;
+    const human = aiGame.twoPlayer || g.result.winner===aiGame.humanColor, draw=!g.result.winner;
     statusBanner(el, draw?'draw':(human?'over':'fail'), (draw?'🤝 ':human?'🎉 ':'♟ ')+Game.resultText(g.result)+' Bấm <b>📊 Phân tích ván</b> để xem mình đi hay/dở ở đâu.');
   } else if(aiGame.thinking) statusBanner(el,'think','🤔 Máy đang suy nghĩ…');
-  else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===aiGame.humanColor ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
-  else el.innerHTML = (turn===aiGame.humanColor ? `<span class="turn-dot turn-${turn}"></span> Đến lượt bạn (${COLOR_VN[turn]})` : `<span class="turn-dot turn-${turn}"></span> Lượt của máy`) + (aiGame.bookNote?`<div class="hint-text small">${esc(aiGame.bookNote)}</div>`:'');
+  else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', aiGame.twoPlayer ? `${COLOR_VN[turn]} đang bị chiếu tướng — phải giải chiếu!` : turn===aiGame.humanColor ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
+  else el.innerHTML = (aiGame.twoPlayer ? `<span class="turn-dot turn-${turn}"></span> Đến lượt ${COLOR_VN[turn]}` : turn===aiGame.humanColor ? `<span class="turn-dot turn-${turn}"></span> Đến lượt bạn (${COLOR_VN[turn]})` : `<span class="turn-dot turn-${turn}"></span> Lượt của máy`) + (aiGame.bookNote?`<div class="hint-text small">${esc(aiGame.bookNote)}</div>`:'');
   renderMoveLog($('#aiLog'), g.moves);
-  const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
-  $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
+  const humanTurn = !g.result && !aiGame.thinking && isHumanTurn(turn);
+  $('#aiUndo').disabled = aiGame.thinking || (aiGame.twoPlayer ? g.moves.length===0 : g.moves.filter(m=>m.color===aiGame.humanColor).length===0);
   $('#aiHint').disabled = !humanTurn;
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
-  $('#aiLevelTag').textContent = `${levelInfo(aiGame.level).name} · Bạn cầm ${COLOR_VN[aiGame.humanColor]}`;
+  $('#aiLevelTag').textContent = aiGame.twoPlayer ? TWO_PLAYER_LEVEL.name : `${levelInfo(aiGame.level).name} · Bạn cầm ${COLOR_VN[aiGame.humanColor]}`;
 }
 function aiPersist(){
   if(!aiGame.game.moves.length) return;
@@ -101,7 +110,7 @@ function aiAfterMove(){
   aiGame.hint=null;
   aiPersist();
   aiRender();
-  if(!aiGame.game.result && aiGame.game.turn()!==aiGame.humanColor) triggerAIMove();
+  if(!aiGame.game.result && !isHumanTurn(aiGame.game.turn())) triggerAIMove();
 }
 async function triggerAIMove(){
   const g=aiGame.game, L=levelInfo(aiGame.level), token=++aiGame.token;
@@ -129,16 +138,27 @@ async function triggerAIMove(){
   }, wait);
 }
 function aiStartGame(){
-  aiGame.humanColor = $('input[name="aiColor"]:checked').value;
-  aiGame.level = parseInt($('input[name="aiLevel"]:checked').value,10);
-  safeLS_set('xq_ai_level', String(aiGame.level));
-  aiGame.game = Game.create();
+  aiBeginGame({
+    humanColor: $('input[name="aiColor"]:checked').value,
+    level: parseInt($('input[name="aiLevel"]:checked').value,10),
+    twoPlayer: ($('input[name="aiOpp"]:checked')||{}).value==='human',
+  });
+}
+// Bắt đầu ván. cfg: {humanColor, level, twoPlayer, board?, turn?, source?}
+//  - board/turn: bắt đầu từ một thế cờ cho trước (vd. "chơi tiếp với máy" từ bài tập, ván danh thủ)
+function aiBeginGame(cfg){
+  aiGame.humanColor = cfg.humanColor || RED;
+  aiGame.level = cfg.level || aiGame.level || 3;
+  aiGame.twoPlayer = !!cfg.twoPlayer;
+  if(!aiGame.twoPlayer) safeLS_set('xq_ai_level', String(aiGame.level));
+  aiGame.start = cfg.board ? {pieces:boardToPieces(cfg.board), turn:cfg.turn||RED, source:cfg.source||''} : null;
+  aiGame.game = cfg.board ? Game.create(cfg.board, cfg.turn||RED) : Game.create();
   aiGame.thinking=false; aiGame.hint=null; aiGame.bookNote=''; aiGame.token++;
   aiGame.recId = 'g'+Date.now().toString(36); aiGame.recDate = Date.now();
   if(!aiGame.book) aiGame.book=buildOpeningBook(OPENINGS);
   showAICard('game');
   aiGame.ctl.clear();
-  aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
+  aiGame.widget.setFlipped(!aiGame.twoPlayer && aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
 }
@@ -155,6 +175,10 @@ function renderLevelPicker(){
 }
 function initAIGame(){
   renderLevelPicker();
+  // Chế độ hai người: không cần chọn cấp độ / màu quân
+  const syncOpp=()=>{ const two=($('input[name="aiOpp"]:checked')||{}).value==='human';
+    $('#aiLevelPicker').closest('fieldset').hidden=two; $('input[name="aiColor"]').closest('fieldset').hidden=two; };
+  $$('input[name="aiOpp"]').forEach(i=>i.addEventListener('change',syncOpp)); syncOpp();
   $('#thinkSteps').innerHTML=Coach.THINKING_STEPS.map(([h,t])=>`<li><b>${esc(h)}</b><span>${esc(t)}</span></li>`).join('');
   if(window.matchMedia && matchMedia('(max-width:860px)').matches) $('#thinkBox').open=false;
   aiGame.widget = createBoardWidget($('#aiBoard'), {onSquareClick:(r,c)=>aiGame.ctl.click(r,c), label:'Bàn cờ đấu với máy'});
@@ -162,7 +186,7 @@ function initAIGame(){
     widget:aiGame.widget,
     getBoard:()=>aiGame.game.board(),
     turn:()=>aiGame.game.turn(),
-    canMove:(turn)=>!aiGame.game.result && !aiGame.thinking && turn===aiGame.humanColor,
+    canMove:(turn)=>!aiGame.game.result && !aiGame.thinking && isHumanTurn(turn),
     onMove:(mv)=>{ aiGame.game.play(mv); aiAfterMove(); },
     extraMeta:aiMeta,
   });
@@ -171,7 +195,8 @@ function initAIGame(){
   $('#aiUndo').addEventListener('click', ()=>{
     const g=aiGame.game; aiGame.token++; aiGame.thinking=false;
     // lùi tới trước nước gần nhất của người chơi
-    let n=0; while(g.moves.length && (n===0 || g.turn()!==aiGame.humanColor)){ g.undo(1); n++; if(g.turn()===aiGame.humanColor) break; }
+    if(aiGame.twoPlayer) g.undo(1);
+    else { let n=0; while(g.moves.length && (n===0 || g.turn()!==aiGame.humanColor)){ g.undo(1); n++; if(g.turn()===aiGame.humanColor) break; } }
     aiGame.hint=null; aiGame.ctl.clear(); aiPersist(); aiRender();
   });
   $('#aiHint').addEventListener('click', async ()=>{
@@ -192,7 +217,7 @@ function initAIGame(){
     if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng'; },3000); return; }
     delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng';
     aiGame.token++; aiGame.thinking=false;
-    g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
+    g.result={state:'over', winner:Engine.otherColor(aiGame.twoPlayer ? g.turn() : aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();
   });
   $('#aiFlip').addEventListener('click', ()=> aiGame.widget.setFlipped(!aiGame.widget.isFlipped()));

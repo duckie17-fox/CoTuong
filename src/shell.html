@@ -23,6 +23,30 @@
       <button type="button" data-style="han" title="Quân chữ Hán truyền thống">帥 Hán</button>
       <button type="button" data-style="vn" title="Quân ghi tên tiếng Việt">Việt</button>
     </div>
+    <details class="settings-menu" id="settingsPanel">
+      <summary aria-label="Cài đặt và tiến độ" title="Cài đặt và tiến độ">⚙️</summary>
+      <div class="settings-pop">
+        <div class="settings-row"><span>Âm thanh nước đi</span>
+          <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
+            <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
+          </div>
+        </div>
+        <p class="hint-text small">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+        <h4>Tiến độ học</h4>
+        <p class="hint-text small" id="progressSummary"></p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline btn-sm" id="progressCopy">📋 Sao chép mã</button>
+          <button type="button" class="btn btn-outline btn-sm" id="progressDownload">⬇ Tải tệp</button>
+        </div>
+        <label class="hint-text small" for="progressText">Chuyển sang máy khác: dán mã (hoặc chọn tệp) rồi bấm Nhập.</label>
+        <textarea id="progressText" rows="3" spellcheck="false" placeholder='{"app":"co-tuong-nhap-mon",…}'></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary btn-sm" id="progressImport">⬆ Nhập</button>
+          <label class="btn btn-outline btn-sm file-btn">📂 Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
+        </div>
+        <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+      </div>
+    </details>
   </div>
   <nav class="tabs" role="tablist" aria-label="Chọn phần học">
     <button class="tab-btn" data-tab="hoc" role="tab">📖 Học luật</button>
@@ -165,6 +189,12 @@
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
     <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>📊 Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
+    <fieldset class="setup-field"><legend>Đối thủ</legend>
+      <div class="seg-radio">
+        <label><input type="radio" name="aiOpp" value="ai" checked><span>🤖 Máy</span></label>
+        <label><input type="radio" name="aiOpp" value="human"><span>👥 Hai người cùng máy</span></label>
+      </div>
+    </fieldset>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">

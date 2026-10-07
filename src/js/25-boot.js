@@ -10,6 +10,7 @@ function initSettings(){
 initTabs();
 updateStickyTop(); window.addEventListener('resize', updateStickyTop);
 initSettings();
+initUxSettings();
 buildLegend();
 initOpenings();
 initMasters();

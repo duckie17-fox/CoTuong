@@ -493,3 +493,24 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 #puzzleExplain{font-family:inherit;}
 #puzzleExplain .think-steps li{background:var(--card);}
 
+
+/* ---------- Cài đặt & tiến độ ---------- */
+.settings-menu{position:relative;flex:none;}
+.settings-menu summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:18px;}
+.settings-menu summary::-webkit-details-marker{display:none;}
+.settings-menu summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.settings-menu[open] summary{background:var(--paper-2);}
+.settings-pop{position:absolute;right:0;top:48px;z-index:50;width:min(340px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px var(--shadow);display:flex;flex-direction:column;gap:8px;}
+.settings-pop h4{margin:6px 0 0;font-size:14px;}
+.settings-pop p{margin:0;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;}
+.settings-pop textarea{width:100%;font:12px ui-monospace,Menlo,monospace;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;resize:vertical;}
+.file-btn{position:relative;overflow:hidden;}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.msg-good{color:var(--jade);} .msg-bad{color:var(--accent);}
+
+/* ---------- Bàn cờ: bàn phím ---------- */
+.xq-board-svg:focus{outline:none;}
+.xq-board-svg:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:14px;}
+.xq-cursor{fill:none;stroke:var(--gold);stroke-width:3.5;stroke-dasharray:6 4;}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}

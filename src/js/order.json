@@ -24,5 +24,6 @@
  "22-satcuc-ui.js",
  "23-tactics-ui.js",
  "24-tabs.js",
+ "26-ux.js",
  "25-boot.js"
 ]
