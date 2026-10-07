@@ -64,11 +64,13 @@ test('bài hôm nay: cố định trong ngày; chuỗi ngày tăng khi làm liê
 
 test('gợi ý cấp máy theo các ván gần đây', () => {
   const { T: { suggestAiLevel } } = load();
-  const g = (level, w) => ({ level, human: 'red', result: { winner: w } });
+  const g = (level, w) => ({ level, ladder: 2, human: 'red', result: { winner: w } });
   assert.equal(suggestAiLevel([g(3, 'red'), g(3, 'red')]).level, 4);
   assert.equal(suggestAiLevel([g(3, 'black'), g(3, 'black'), g(3, 'black')]).level, 2);
   assert.equal(suggestAiLevel([g(3, 'red'), g(3, 'black')]), null);
-  assert.equal(suggestAiLevel([g(6, 'red'), g(6, 'red')]), null, 'cấp cao nhất thì không gợi ý lên');
+  assert.equal(suggestAiLevel([g(10, 'red'), g(10, 'red')]), null, 'cấp cao nhất thì không gợi ý lên');
+  // ván cũ (thang 6 cấp, không có ladder): cấp 3 cũ tương ứng cấp 6 mới
+  assert.equal(suggestAiLevel([{ level: 3, human: 'red', result: { winner: 'red' } }, { level: 3, human: 'red', result: { winner: 'red' } }]).level, 7);
   assert.equal(suggestAiLevel([Object.assign(g(3, 'red'), { start: {} }), g(3, 'red')]), null, 'ván từ thế cho trước không tính');
 });
 
@@ -115,4 +117,13 @@ test('bảng tiến độ hiển thị ở tab Học luật', () => {
   const txt = document.querySelector('#progressDash').textContent;
   assert.match(txt, /bài tập đã giải/);
   assert.match(txt, /1\/\d+/);
+});
+
+test('cấp đã lưu theo thang 6 cấp cũ được chuyển sang thang 10 cấp', () => {
+  const { T, window } = load({ fresh: true, storage: { xq_ai_level: '3' } });
+  assert.equal(T.AI_LEVELS.length, 10);
+  assert.equal(T.savedAiLevel(), 6);
+  assert.equal(window.localStorage.getItem('xq_ai_ladder'), '2');
+  assert.equal(T.savedAiLevel(), 6, 'không chuyển đổi lần thứ hai');
+  assert.ok(T.AI_LEVELS.every(l => typeof l.desc === 'string' && l.desc.length > 10));
 });
