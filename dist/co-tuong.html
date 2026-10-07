@@ -5254,12 +5254,29 @@ function initUxSettings(){
     try{ await navigator.clipboard.writeText(t); say('Đã sao chép mã tiến độ. Dán vào ô này ở máy khác rồi bấm “Nhập”.',true); }
     catch(e){ say('Mã tiến độ đã hiện trong ô bên dưới — hãy tự sao chép (Ctrl/⌘+C).'); }
   });
-  $('#progressDownload').addEventListener('click',()=>{
+  // Trong khung Artifact: tải tệp phải qua capability "downloads" (người xem xác nhận).
+  // Mở file trực tiếp (không có window.claude): dùng link tải thông thường.
+  const inArtifact = !!(window.claude && window.claude.use);
+  let downloads = null;
+  if(inArtifact){
+    $('#progressDownload').hidden = true;   // chỉ hiện khi capability sẵn sàng
+    window.claude.use('downloads').then(ns=>{ downloads=ns; if(ns) $('#progressDownload').hidden=false; }).catch(()=>{});
+  }
+  $('#progressDownload').addEventListener('click', async ()=>{
     const t=Progress.exportText();
+    const filename='co-tuong-tien-do-'+new Date().toISOString().slice(0,10)+'.json';
+    if(downloads){
+      try{ await downloads.save({filename, data:t}); say('Đã lưu tệp tiến độ.',true); }
+      catch(e){
+        if(e && e.code==='declined') say('Đã huỷ lưu tệp.');
+        else { box.value=t; say('Không lưu được tệp ở đây — mã tiến độ đã hiện trong ô bên dưới, hãy dùng “Sao chép mã”.'); }
+      }
+      return;
+    }
     try{
       const a=document.createElement('a');
       a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));
-      a.download='co-tuong-tien-do-'+new Date().toISOString().slice(0,10)+'.json';
+      a.download=filename;
       document.body.appendChild(a); a.click(); a.remove();
       say('Đã tạo tệp tiến độ. Nếu trình duyệt chặn tải xuống, hãy dùng nút “Sao chép mã”.',true);
     }catch(e){ box.value=t; say('Không tải xuống được ở đây — mã tiến độ đã hiện trong ô bên dưới.'); }
