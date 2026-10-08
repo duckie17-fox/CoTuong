@@ -99,7 +99,7 @@ a{color:var(--accent);}
 .wrap{max-width:1100px;margin:0 auto;}
 
 /* ---------- Khung app: thanh trên + hàng thẻ con (dính khi cuộn, mọi kích thước) ---------- */
-.app-header{position:sticky;top:0;z-index:30;transition:transform .22s ease;background:var(--paper);border-bottom:1px solid var(--line);
+.app-header{position:sticky;top:0;z-index:30;transition:top .22s ease;background:var(--paper);border-bottom:1px solid var(--line);
   padding-top:env(safe-area-inset-top,0px);box-shadow:0 2px 10px color-mix(in srgb, var(--shadow) 35%, transparent);}
 .topbar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 24px;}
 .topbar .seal{
@@ -369,10 +369,6 @@ select.field, input.field{
   body{padding-bottom:max(40px, env(safe-area-inset-bottom));}
   .topbar{padding:6px max(10px, env(safe-area-inset-left)) 4px;gap:8px;}
   .topbar .seal{width:34px;height:34px;font-size:19px;}
-  .app-name{display:none;}
-  .zone-switch{flex:1;margin-left:0;}
-  .zone-btn{flex:1 1 0;flex-direction:column;justify-content:center;padding:4px 2px;min-height:48px;font-size:12.5px;gap:2px;}
-  .zone-badge{right:calc(50% - 26px);}
   .tabs{padding-inline:6px;}
   .tab-btn{padding:11px 10px;font-size:14px;}
   .app-main{padding:14px max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));}
@@ -391,7 +387,6 @@ select.field, input.field{
   .puzzle-grid,.opening-grid{grid-template-columns:1fr;}
 }
 @media (max-width:360px){
-  .zone-btn .zone-ic{width:18px;height:18px;}
   .card{padding:12px 10px;}
 }
 
@@ -751,7 +746,7 @@ body.dlg-open{overflow:hidden;}
 }
 
 /* ---------- Sảnh Sa trường gọn + màn đánh cờ trên điện thoại ---------- */
-body.hdr-hide .app-header{transform:translateY(-100%);}
+body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
 #olLobby > * + *{margin-top:14px;}
 #olLobby .ol-grid{gap:14px;align-items:start;}
 #olLobby .ol-grid .card + .card{margin-top:0;}
@@ -833,3 +828,22 @@ body.gated{overflow:hidden;}
 .gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
 .gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
 .gate-note{margin-top:6px;}
+
+/* ---------- Điện thoại / máy tính bảng dọc: 3 mục chính nằm ở thanh dưới (bottom nav) ---------- */
+@media (max-width:767px){
+  .topbar{padding:8px max(14px, env(safe-area-inset-left)) 6px;gap:10px;min-height:48px;}
+  .topbar .seal{width:32px;height:32px;font-size:18px;border-radius:9px;}
+  .app-name{display:block;font-size:18px;flex:1;}
+  .zone-switch{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
+    background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 16px color-mix(in srgb, var(--shadow) 35%, transparent);
+    padding:6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom));}
+  .zone-btn{flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:52px;padding:4px 2px;font-size:12px;border-radius:12px;}
+  .zone-btn .zone-ic{width:22px;height:22px;}
+  .zone-btn[aria-pressed="true"]{background:transparent;}
+  .zone-btn[aria-pressed="true"] .zone-ic,.zone-btn[aria-pressed="true"] #meIcon{background:color-mix(in srgb, var(--accent) 14%, transparent);border-radius:999px;padding:3px 14px;box-sizing:content-box;}
+  .zone-btn[aria-pressed="true"] #meIcon .zone-ic{background:none;padding:0;}
+  .zone-badge{top:2px;right:calc(50% - 30px);}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom));}
+  .notice-stack{bottom:calc(78px + env(safe-area-inset-bottom));}
+  .sync-ic{width:34px;height:34px;}
+}

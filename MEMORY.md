@@ -140,3 +140,4 @@
   Rủi ro đã biết: máy chủ sập thì người chưa đăng nhập không vào được app (kể cả phần học).
 - **2026-10-08: PR #4 merge + deploy xanh**: D1 cũ được tìm thấy, chỉ chạy 0002_ranked.sql; Worker có DB + ROOMS; Pages lên bản mới.
 - Người dùng quyết định **không** thêm dòng "có thể được ghép với đối thủ máy" vào luật xếp hạng (2026-10-08). Đừng đề xuất lại.
+- Điện thoại (≤767px): 3 mục chính chuyển xuống bottom nav cố định (.zone-switch position:fixed), thanh trên còn logo + tên + đồng bộ; ẩn thanh trên khi cuộn dùng top âm (--hdr-h) thay transform (transform làm hỏng position:fixed bên trong). Đã rà 320/360/390/412/768px: không tràn ngang.

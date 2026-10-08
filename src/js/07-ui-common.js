@@ -78,12 +78,14 @@ function revealBoard(el){
   const r={top:ra.top, bottom:rs.bottom, height:rs.bottom-ra.top};
   // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
   const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
-  const vh=window.innerHeight||document.documentElement.clientHeight;
+  // trừ thanh dưới (bottom nav trên điện thoại)
+  const nav=document.querySelector('.zone-switch'), navH = nav && getComputedStyle(nav).position==='fixed' ? nav.offsetHeight : 0;
+  const vh=(window.innerHeight||document.documentElement.clientHeight)-navH;
   if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
   if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
-function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:600px)').matches); }catch(e){ return false; } }
+function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:767px)').matches); }catch(e){ return false; } }
 // Điện thoại: cuộn xuống thì ẩn thanh trên (nhường chỗ cho bàn cờ), cuộn lên thì hiện lại
 function initAutoHideHeader(){
   let lastY=window.scrollY||0;
@@ -98,6 +100,7 @@ function updateStickyTop(){
   const head=document.querySelector('.app-header');
   const sticky = head && getComputedStyle(head).position==='sticky';
   document.documentElement.style.setProperty('--sticky-top', (sticky?head.offsetHeight:0)+'px');
+  if(head) document.documentElement.style.setProperty('--hdr-h', head.offsetHeight+'px');
 }
 
 /* Trình bày phân tích theo quy trình tư duy: mỗi bước một câu hỏi + câu trả lời ngắn */
