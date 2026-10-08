@@ -371,19 +371,17 @@ const Online = (function(){
     const signed = typeof Account!=='undefined' && Account.signedIn(), u = signed ? Account.user() : null;
     card.hidden = !server();
     $('#olRankedMe').innerHTML = u ? `${tierBadge(u.elo)}<b class="ranked-elo">${u.elo}</b>` : '';
-    const body=$('#olRankedBody'), resume=savedBot();
+    const body=$('#olRankedBody'), open=savedBots();
     if(!u){ body.innerHTML=`<div class="btn-row"><button type="button" class="btn btn-primary" data-open-login-r>Đăng nhập để đấu xếp hạng</button></div>`;
       $('[data-open-login-r]',body).addEventListener('click',()=>Account.openLogin()); return; }
-    if(resume && !resume.result){
-      body.innerHTML=`<div class="ranked-resume"><span>Bạn có ván xếp hạng đang dở với <b>${esc(resume.botName)}</b>.</span><button type="button" class="btn btn-primary" id="olResume">Vào tiếp</button></div>`;
-      $('#olResume').addEventListener('click',()=>startBotMatch(resume, true)); return;
-    }
     if(search.active){
       const sec=Math.floor((Date.now()-search.t0)/1000);
       body.innerHTML=`<div class="ranked-search"><span class="spinner" aria-hidden="true"></span><span>Đang tìm đối thủ… <b>0:${String(sec).padStart(2,'0')}</b></span><button type="button" class="btn btn-outline btn-sm" id="olSearchCancel">Huỷ</button></div>`;
       $('#olSearchCancel').addEventListener('click',cancelSearch); return;
     }
-    body.innerHTML=`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}Tìm trận</button><p class="hint-text small ranked-note">Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.</p>`;
+    body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-outline btn-sm" data-resume="${g.id}">Vào tiếp</button></div>`).join('')
+      +`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button><p class="hint-text small ranked-note">${open.length ? 'Ván đang dở vẫn giữ nguyên, vào tiếp lúc nào cũng được.' : 'Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.'}</p>`;
+    $$('[data-resume]',body).forEach(b=>b.addEventListener('click',()=>{ const g=savedBots().find(x=>String(x.id)===b.dataset.resume); if(g) startBotMatch(g, true); }));
     $('#olFindMatch').addEventListener('click',startSearch);
   }
   async function startSearch(){
@@ -412,9 +410,11 @@ const Online = (function(){
 
   /* Ván với máy: một "phòng ảo" cùng dạng dữ liệu với phòng online để dùng chung giao diện */
   const BOT_KEY='xq_ranked_bot';
-  function savedBot(){ const v=safeJSON(BOT_KEY,null); return v && v.id ? v : null; }
-  function saveBot(){ if(st.bot) safeLS_set(BOT_KEY, JSON.stringify(Object.assign({}, st.bot, {timer:undefined}))); }
-  function clearBot(){ try{ localStorage.removeItem(BOT_KEY); }catch(e){} }
+  // Có thể có nhiều ván dở song song (tìm trận mới không bỏ ván cũ): lưu thành danh sách
+  function savedBots(){ const v=safeJSON(BOT_KEY,null); return (Array.isArray(v) ? v : v && v.id ? [v] : []).filter(g=>g && g.id && !g.result); }
+  function writeBots(list){ if(list.length) safeLS_set(BOT_KEY, JSON.stringify(list)); else try{ localStorage.removeItem(BOT_KEY); }catch(e){} }
+  function saveBot(){ const b=st.bot; if(!b) return; writeBots(savedBots().filter(g=>g.id!==b.id).concat(b.result ? [] : [Object.assign({}, b, {timer:undefined})])); }
+  function clearBot(id){ writeBots(savedBots().filter(g=>g.id!==id)); }
   function botRoomView(){
     const b=st.bot, u=Account.user()||{displayName:myName(), elo:1200}, opp=other(b.color);
     const seats={}; seats[b.color]={name:u.displayName, online:true, elo:u.elo, username:u.username};
@@ -455,7 +455,7 @@ const Online = (function(){
       if(st.bot!==b) return;
       b.submitted=true; b.elo=r.elo||null; if(r.user) Account.setUser(r.user);
       if(Math.random()<0.6) b.chat.push({by:b.botName, seat:other(b.color), text:['Ván hay, cảm ơn bạn!','gg','Hay quá','gg wp',':)'][Math.floor(Math.random()*5)], t:Date.now()});
-      botPush(); clearBot();
+      botPush(); clearBot(b.id);
     }catch(e){ flash('Chưa gửi được kết quả — sẽ thử lại.'); setTimeout(()=>{ if(st.bot===b) botSubmit(); }, 5000); }
   }
   function botHandle(o){

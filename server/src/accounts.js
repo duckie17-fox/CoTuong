@@ -453,7 +453,7 @@ const Accounts = (function(){
   });
 
   /* ---------- đấu xếp hạng (spec v4): ghép trận, máy thế chỗ khi vắng người ---------- */
-  const QUEUE_STALE_MS=15000, BOT_DAILY_MAX=30;   // ván không giới hạn thời gian: ván dở giữ mãi để vào tiếp
+  const QUEUE_STALE_MS=15000, BOT_DAILY_MAX=30;   // ván không giới hạn thời gian: ván dở giữ mãi để vào tiếp, được mở thêm ván song song
   const PIECE_VAL={R:9, H:4, C:4.5, E:2, A:2, S:1, G:0};
   // Chênh lệch quân (bên `color` trừ bên kia) — tốt qua sông tính 2
   function materialDiff(board, color){
@@ -517,10 +517,9 @@ const Accounts = (function(){
     const me=await db.prepare('SELECT * FROM match_queue WHERE user_id=?').bind(u.id).first();
     await db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run();
     if(me && me.room_code) return json(200, queueView(me));
-    const open=await db.prepare('SELECT * FROM bot_games WHERE user_id=? AND finished_at IS NULL ORDER BY id DESC LIMIT 1').bind(u.id).first();
-    if(open) return json(200, {status:'bot', game:botView(open)});
     const n=await db.prepare('SELECT COUNT(*) AS n FROM bot_games WHERE user_id=? AND created_at>?').bind(u.id, now-DAY).first('n');
     if((n||0)>=BOT_DAILY_MAX) throw new ApiError(429,'bot_daily');
+    // Tìm trận mới cả khi còn ván dở: ván cũ vẫn giữ, các ván chạy song song
     const fresh=await userBy(db,'id',u.id);
     const level=Ranked.botLevelFor(fresh.elo), L=Ranked.BOT_LEVELS[level-1];
     const seed=rand(4).reduce((a,b)=>a*256+b,0);

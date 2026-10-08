@@ -84,12 +84,12 @@
 }
 
 *{box-sizing:border-box;}
-html,body{background:var(--paper);}
+html{background:var(--paper);}
 body{
   margin:0;
   font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
   color:var(--ink);
-  background:var(--paper);
+  background:transparent;
   padding:0 0 60px;
 }
 h1,h2,h3,h4{font-family:'Be Vietnam Pro',sans-serif;font-weight:800;text-wrap:balance;margin:0 0 8px;}
@@ -815,6 +815,7 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
 .ranked-go{min-height:50px;font-size:16px;}
 .ranked-note{margin:8px 0 0;text-align:center;}
 .ranked-search,.ranked-resume{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;background:var(--paper-2);border-radius:12px;padding:12px 14px;}
+.ranked-resume + .ranked-resume,.ranked-resume + .ranked-go{margin-top:10px;}
 .ranked-search .spinner{color:var(--accent);}
 .rank-elo{display:flex;align-items:center;gap:8px;}
 #meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
@@ -872,3 +873,28 @@ body.gated{overflow:hidden;}
   .play-layout > .play-board > .board-caption{margin-top:0;text-align:left;}
   .play-layout .board-shell{max-width:max(420px, min(780px, calc((100vh - 220px) * 0.9)));}
 }
+
+/* ---------- Nền: điểm nhấn nhẹ kiểu cờ thủ — dấu vị trí quân như trên bàn cờ, mây cát tường ở hai góc ---------- */
+body::before,body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;}
+body::before{background:var(--ink);opacity:.07;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;}
+body::after{background:var(--gold);opacity:.2;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;}
+:root[data-theme="dark"] body::before{opacity:.05;}
+:root[data-theme="dark"] body::after{opacity:.13;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) body::before{opacity:.05;}
+  :root:not([data-theme="light"]) body::after{opacity:.13;}
+}
+@media (max-width:767px){
+  body::after{-webkit-mask-size:200px auto,230px auto;mask-size:200px auto,230px auto;
+    -webkit-mask-position:right -30px top 70px,left -36px bottom 110px;mask-position:right -30px top 70px,left -36px bottom 110px;}
+}
+/* Nút bật/tắt nhạc nền trên đầu trang */
+.music-btn{appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink-soft);width:40px;height:40px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;}
+.music-btn .ic{width:19px;height:19px;}
+.music-btn:hover{background:var(--paper-2);color:var(--ink);}
+.music-btn[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 40%, transparent);background:color-mix(in srgb, var(--accent) 9%, transparent);}
+.music-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}

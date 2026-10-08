@@ -21,6 +21,7 @@
       <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
       <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
+    <button type="button" class="music-btn" id="musicBtn" aria-pressed="false" aria-label="Bật nhạc nền" title="Bật nhạc nền"></button>
   </div>
   <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
@@ -501,6 +502,11 @@
       <div class="settings-row"><span>Âm thanh nước đi</span>
         <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
           <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
+        </div>
+      </div>
+      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời, kiểu đàn tranh)</small></span>
+        <div class="seg" id="musicToggle" role="group" aria-label="Nhạc nền">
+          <button type="button" data-music="on">Bật</button><button type="button" data-music="off">Tắt</button>
         </div>
       </div>
       <div class="settings-row"><span>Giao diện</span>

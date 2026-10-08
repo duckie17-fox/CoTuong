@@ -1,12 +1,12 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-**PR #4 đã merge + deploy** (2026-10-08): Đấu xếp hạng (migration 0002 đã chạy trên D1), bắt buộc đăng nhập, tên cấp võ tướng.
-Nhánh làm việc đã dựng lại từ main.
+Nhánh `claude/improvement-plan-xdtg8b` (chưa PR): bỏ nút đồng bộ, kết bạn nhanh, bàn cờ to trên máy tính, không xử thắng/không giới hạn giờ,
+nền kiểu cờ thủ, nhạc nền bật/tắt (Web Audio), ván xếp hạng với máy song song. Test 79/79 + e2e 5/5 xanh. Artifact đã cập nhật.
 
 ## Next step
-1. Người dùng thử bản thật https://duckie17-fox.github.io/CoTuong/ (container không vào được github.io/workers.dev).
-2. Sau một thời gian có ván thật: hiệu chỉnh Elo các cấp máy xếp hạng (bảng bot_games).
+1. Người dùng nghe thử nhạc / xem nền → chỉnh nếu cần.
+2. Khi người dùng bảo: tạo PR + merge → deploy (không cần migration mới).
 
 ## Blocker
 - Không có.

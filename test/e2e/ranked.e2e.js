@@ -59,13 +59,20 @@ test('đấu xếp hạng: ghép hai người; một mình thì ghép máy, đ�
     // tải lại trang giữa ván → vào tiếp
     await C.reload();
     await C.click('.zone-btn[data-zone="satruong"]');
-    await C.waitForSelector('#olResume');
-    await C.click('#olResume');
+    await C.waitForSelector('[data-resume]');
+    const oldId = await C.evaluate(() => document.querySelector('[data-resume]').dataset.resume);
+    // vẫn tìm trận mới được khi còn ván dở → hai ván song song
+    assert.match(await C.evaluate(() => document.querySelector('#olFindMatch').textContent), /Tìm trận mới/);
+    await C.click('#olFindMatch');
+    await C.waitForFunction(id => Online.state.bot && String(Online.state.bot.id) !== id, oldId, { timeout: 20000 });
+    await C.click('#olLeave');
+    await C.waitForFunction(() => document.querySelectorAll('[data-resume]').length === 2);
+    await C.click(`[data-resume="${oldId}"]`);
     await C.waitForFunction(n => Online.state.room && Online.state.room.moves.length >= n + 2, n0);
     // đầu hàng (2 bước) → thua, bị trừ Elo
     await C.click('#olResign'); await C.click('#olResign');
     await C.waitForFunction(() => /Elo của bạn: \d+ \(-\d+\)/.test(document.querySelector('#olStatus').textContent), null, { timeout: 10000 });
-    assert.equal(await C.evaluate(() => localStorage.getItem('xq_ranked_bot')), null);
+    assert.equal(await C.evaluate(() => JSON.parse(localStorage.getItem('xq_ranked_bot')).length), 1, 'còn lại đúng ván mới');
     await C.click('#olLeave');
     await C.waitForFunction(() => /Vàng/.test(document.querySelector('#olRankedMe').textContent) && +document.querySelector('.ranked-elo').textContent < 1200);
     assert.deepEqual(errors, []);

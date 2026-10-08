@@ -36,6 +36,6 @@ Bậc Đồng chia nấc: III < 900, II 900–949, I 950–999. Các bậc khác
 - Ván với máy: máy chủ phát lại toàn bộ nước đi để kiểm tra hợp lệ; kết quả tự nhiên (chiếu bí, lặp, 60 nước…) phải khớp;
   người chơi đầu hàng = thua; máy "đầu hàng" chỉ nhận khi người chơi hơn rõ về quân; hoà thoả thuận chỉ nhận sau ≥ 60 nửa nước
   và quân hai bên gần bằng nhau.
-- **Không giới hạn thời gian** (người dùng chốt 2026-10-08): ván dở với máy được giữ để vào tiếp bất cứ lúc nào; chưa xong ván dở thì không mở được ván xếp hạng mới (không né thua được). Thua/đầu hàng vẫn bị trừ Elo.
+- **Không giới hạn thời gian** (người dùng chốt 2026-10-08): ván dở với máy được giữ để vào tiếp bất cứ lúc nào; vẫn tìm trận mới được khi còn ván dở — các ván chạy song song (người dùng chốt, chấp nhận việc có thể bỏ lửng ván đang thua). Thua/đầu hàng vẫn bị trừ Elo.
 - Tối đa 30 ván xếp hạng với máy mỗi ngày. Thắng chỉ tính khi ván ≥ 10 nửa nước (đầu hàng sớm vẫn bị trừ).
 - Hai người được ghép: vào cùng phòng Tính Elo (luật như phòng Tính Elo của spec v3).
