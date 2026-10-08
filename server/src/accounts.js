@@ -111,7 +111,7 @@ const Accounts = (function(){
   }
 
   /* ---------- gộp tiến độ (spec 4.2) ---------- */
-  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta']);
+  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta','xq_ranked_bot']);
   const UNION = new Set(['xq_lessons_done','xq_puzzles_solved','xq_sc_solved','xq_tactics_seen','xq_eg_seen']);
   const HISTORY = new Set(['xq_ai_history','xq_online_history']);
   const HISTORY_MAX = 100;

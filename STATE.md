@@ -1,12 +1,12 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-**Đấu xếp hạng** (spec v4: docs/spec-v4-dau-xep-hang.md): ghép trận 8s → máy 20 cấp với nick giống người; bậc Đồng→Thách Đấu.
+**Đấu xếp hạng xong trên nhánh** (chưa merge): ghép người 8s → máy 20 cấp nick giống người, phòng ảo đấu máy, vào tiếp ván dở,
+bỏ ván 2h = thua; bậc Đồng → Thách Đấu (huy hiệu ở Phòng đấu, Tôi, Xếp hạng); tên cấp phòng tập mới. 77 test + e2e 5/5.
 
 ## Next step
-1. Server: migration 0002 (match_queue, bot_games), API /api/match/*, kiểm ván máy, Elo; room.join cho phòng ghép (create.match).
-2. Client: thẻ Đấu xếp hạng (bậc + Elo + Tìm trận), phòng ảo đấu máy giống người, huy hiệu bậc ở Tôi/Xếp hạng/ghế.
-3. Test (đơn vị + giao diện + e2e) → build → Artifact → commit/push → hỏi người dùng tạo PR.
+1. Người dùng xem + chốt tên bậc/tên cấp; muốn thì tạo PR → merge → deploy (migration 0002 tự chạy).
+2. Sau deploy: hiệu chỉnh Elo các cấp máy theo ván thật (bot_games có level, bot_elo, kết quả).
 
 ## Blocker
-- Không có. (Người dùng vẫn cần thử bản thật đã deploy.)
+- Không có.

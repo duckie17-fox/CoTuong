@@ -349,6 +349,13 @@
  <div data-stpanel="phong">
   <div id="olLobby">
     <div id="olNotice"></div>
+    <div class="card ranked-card" id="olRanked">
+      <div class="ranked-head">
+        <div><h2>Đấu xếp hạng</h2><div class="hint-text small" id="olRankedSub">Ghép với người chơi cùng trình độ</div></div>
+        <div class="ranked-me" id="olRankedMe"></div>
+      </div>
+      <div id="olRankedBody"></div>
+    </div>
     <div id="olFriendsOnline" class="card" hidden></div>
     <div class="ol-grid">
       <div class="card ol-box">
@@ -402,6 +409,7 @@
         <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
+          <button type="button" class="btn btn-primary btn-sm" id="olNextMatch" hidden><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Tìm trận mới</button>
           <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
         </div>
       </div>

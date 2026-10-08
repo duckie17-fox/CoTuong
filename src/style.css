@@ -804,3 +804,20 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   .cap{width:18px;height:18px;font-size:11px;}
 }
 .level-opt .lv-tier{color:var(--jade);font-weight:600;}
+
+/* ---------- Đấu xếp hạng: bậc hạng, thẻ tìm trận ---------- */
+.tier{display:inline-flex;align-items:center;gap:4px;font:800 11.5px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
+.tier-dong{--tier:#9a6236;} .tier-bac{--tier:#7d8895;} .tier-vang{--tier:#b8871f;} .tier-bachkim{--tier:#2f948f;}
+.tier-kimcuong{--tier:#3e6fc4;} .tier-tinhanh{--tier:#7b4fc4;} .tier-caothu{--tier:#c23e50;} .tier-daicaothu{--tier:#8f1d2c;}
+.tier-thachdau{--tier:linear-gradient(120deg,#b8871f,#c23e50,#7b4fc4);background:var(--tier);}
+.ranked-card{border-color:color-mix(in srgb, var(--accent) 35%, var(--line));}
+.ranked-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.ranked-head h2{margin:0;font-size:18px;}
+.ranked-me{display:flex;align-items:center;gap:8px;}
+.ranked-elo{font-size:22px;color:var(--accent);}
+.ranked-go{min-height:50px;font-size:16px;}
+.ranked-note{margin:8px 0 0;text-align:center;}
+.ranked-search,.ranked-resume{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;background:var(--paper-2);border-radius:12px;padding:12px 14px;}
+.ranked-search .spinner{color:var(--accent);}
+.rank-elo{display:flex;align-items:center;gap:8px;}
+#meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}

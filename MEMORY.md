@@ -128,3 +128,8 @@
 - Thiết kế: hàng chờ ghép trận trong D1 (`match_queue`, hỏi định kỳ), không dùng Durable Object; ván với máy chạy trên trình duyệt
   (dựng "phòng ảo" cùng dạng state với phòng online để dùng chung giao diện), máy chủ kiểm lại nước đi + kết quả khi nộp (`bot_games`).
 - Tên cấp phòng tập đổi thành: Mới tập, Làm quen, Biết chơi, Khá, Vững vàng, Giỏi, Rất giỏi, Cao thủ, Kiện tướng, Đại kiện tướng (người dùng thấy tên thang Trung Quốc khó hiểu); mỗi cấp có elo ước tính để hiện "Ngang bậc …".
+- Đấu xếp hạng (client): `Online.startSearch` hỏi `/api/match/join` mỗi 1,5s, quá 8s gọi `/api/match/bot`; ván với máy dùng `st.bot` +
+  `send()` chặn lại xử lý cục bộ (`botHandle`), dựng state giống phòng online (`botRoomView`) rồi `apply()` → dùng chung toàn bộ giao diện.
+  Ván dở lưu `xq_ranked_bot` (không đồng bộ, không xuất) để tải lại trang vào tiếp. Phòng xếp hạng: ẩn "Đấu ván nữa", hiện "Tìm trận mới".
+- Thắng tự nhiên (chiếu bí…) được nhận dù < 10 nửa nước; chỉ "máy đầu hàng" mới cần ≥ 10 nửa nước và hơn ≥ 6 điểm quân.
+- Kiểm nhanh 20 cấp máy bằng ladder.js (6 cặp ván, giới hạn 600ms): cấp 3 thắng cấp 1 71%, cấp 7 thắng cấp 5 100%.
