@@ -448,7 +448,6 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .cls-book{color:var(--gold);}
 .cls-inacc{color:#b7791f;}
 .cls-mistake{color:#c05621;}
-.cls-miss{color:#2b6cb0;}
 .cls-great{color:#2c7a7b;background:color-mix(in srgb, #2c7a7b 12%, transparent);}
 .cls-brilliant{color:#0987a0;background:color-mix(in srgb, #0987a0 16%, transparent);}
 .cls-legend{margin-top:8px;font-size:13px;}
@@ -478,7 +477,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 #masterSide{font:inherit;font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:40px;}
 .caption-box.trap-hit{border-left:4px solid var(--accent);}
 .ok-text{color:var(--jade);font-weight:700;}
-.eval-svg .dot-inacc{fill:#d69e2e;} .eval-svg .dot-miss{fill:#3182ce;} .eval-svg .dot-mistake{fill:#dd6b20;} .eval-svg .dot-blunder{fill:var(--accent);}
+.eval-svg .dot-inacc{fill:#d69e2e;} .eval-svg .dot-mistake{fill:#dd6b20;} .eval-svg .dot-blunder{fill:var(--accent);}
 .chart-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-top:4px;}
 .review-detail{background:var(--paper-2);border-radius:10px;padding:10px 12px;margin-top:10px;min-height:70px;font-size:14.5px;line-height:1.55;}
 .review-detail .rv-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
@@ -486,11 +485,9 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .log-cell.mark-inacc{box-shadow:inset 0 -3px 0 #d69e2e;}
 .log-cell.mark-mistake{box-shadow:inset 0 -3px 0 #dd6b20;}
 .log-cell.mark-blunder{box-shadow:inset 0 -3px 0 var(--accent);}
-.log-cell.mark-miss{box-shadow:inset 0 -3px 0 #3182ce;}
 .log-cell.mark-good{box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--jade) 55%, transparent);}
 .log-cell.mark-great,.log-cell.mark-brilliant{box-shadow:inset 0 -3px 0 #2c7a7b;}
 .log-cell.mark-great .mk,.log-cell.mark-brilliant .mk{color:#2c7a7b;}
-.log-cell.mark-miss .mk{color:#3182ce;}
 .log-cell .mk{color:var(--accent);font-weight:800;margin-left:3px;}
 @media (max-width:600px){
   .review-summary{grid-template-columns:1fr;}

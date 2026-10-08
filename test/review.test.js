@@ -82,7 +82,7 @@ test('Coach.intent: ăn quân miễn phí, chiếu bí, cứu quân đều có m
   assert.ok(it.think.length > 20);
 });
 
-test('xếp hạng nước theo cơ hội thắng: !!, !, ★, ✓, ?!, ✗, ?, ??', () => {
+test('xếp hạng nước theo cơ hội thắng: !!, !, (không dấu), ?!, ?, ??', () => {
   const { window } = load();
   const c = o => window.eval(`classifyPly(${JSON.stringify(o)})`);
   const base = { inBook: false, sameAsBest: false, second: null };
@@ -92,8 +92,8 @@ test('xếp hạng nước theo cơ hội thắng: !!, !, ★, ✓, ?!, ✗, ?, 
   assert.equal(c({ ...base, best: 0, played: -80 }), 'inacc');
   assert.equal(c({ ...base, best: 0, played: -160 }), 'mistake');
   assert.equal(c({ ...base, best: 0, played: -300 }), 'blunder', 'thế cân bằng mà mất một Mã là sai lầm nghiêm trọng');
-  // đang thắng đậm, bỏ lỡ chiếu bí nhưng vẫn hơn hẳn → "Bỏ lỡ", không phải "??"
-  assert.equal(c({ ...base, best: 29990, played: 900 }), 'miss');
+  // đang thắng đậm, bỏ lỡ chiếu bí nhưng vẫn hơn hẳn → chỉ "?!", không phải "??"
+  assert.equal(c({ ...base, best: 29990, played: 900 }), 'inacc');
   // đang thắng đậm rồi đánh rơi hết → vẫn là "??"
   assert.equal(c({ ...base, best: 900, played: -100 }), 'blunder');
   // nước duy nhất: nước thứ hai kém hẳn
@@ -107,7 +107,7 @@ test('bảng ký hiệu, nước tốt có gợi ý tối ưu hơn, phân tích 
   const { document, window, det } = open();
   const sum = document.querySelector('#reviewSummary');
   const legend = txt(sum.querySelector('.cls-legend'));
-  for (const s of ['!!', '?!', '??', 'Bỏ lỡ', 'Sai lầm nghiêm trọng', 'cơ hội thắng']) assert.ok(legend.includes(s), s);
+  for (const s of ['!!', '?!', '??', 'Sai lầm nặng', 'không có dấu', 'nước duy nhất', 'thí quân', 'cơ hội thắng']) assert.ok(legend.includes(s), s);
   // nước "tốt" khác nước máy chọn → có mục "Nước tối ưu hơn" với mục đích
   const good = [...window.eval('review.an.plies')].find(p => p.color === window.eval('review.rec.human') && p.cls === 'good' && p.bestMove);
   assert.ok(good, 'ván mẫu cần có nước "tốt"');
@@ -123,6 +123,7 @@ test('bảng ký hiệu, nước tốt có gợi ý tối ưu hơn, phân tích 
   assert.match(st, /Tấn công|Cân bằng|Chắc chắn/);
   assert.match(st, /Đề xuất cho bạn/);
   assert.doesNotMatch(st, /undefined|NaN/);
+  assert.doesNotMatch(txt(sum.querySelector('.cls-chips')) + legend, /[★✓✗📖]/, 'chỉ dùng 5 ký hiệu !! ! ?! ? ??');
   const op = sum.querySelector('[data-op]');
   op.click();
   assert.equal(document.querySelector('#openingDetailCard').hidden, false);

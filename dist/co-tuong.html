@@ -457,7 +457,6 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .cls-book{color:var(--gold);}
 .cls-inacc{color:#b7791f;}
 .cls-mistake{color:#c05621;}
-.cls-miss{color:#2b6cb0;}
 .cls-great{color:#2c7a7b;background:color-mix(in srgb, #2c7a7b 12%, transparent);}
 .cls-brilliant{color:#0987a0;background:color-mix(in srgb, #0987a0 16%, transparent);}
 .cls-legend{margin-top:8px;font-size:13px;}
@@ -487,7 +486,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 #masterSide{font:inherit;font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:40px;}
 .caption-box.trap-hit{border-left:4px solid var(--accent);}
 .ok-text{color:var(--jade);font-weight:700;}
-.eval-svg .dot-inacc{fill:#d69e2e;} .eval-svg .dot-miss{fill:#3182ce;} .eval-svg .dot-mistake{fill:#dd6b20;} .eval-svg .dot-blunder{fill:var(--accent);}
+.eval-svg .dot-inacc{fill:#d69e2e;} .eval-svg .dot-mistake{fill:#dd6b20;} .eval-svg .dot-blunder{fill:var(--accent);}
 .chart-legend{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-top:4px;}
 .review-detail{background:var(--paper-2);border-radius:10px;padding:10px 12px;margin-top:10px;min-height:70px;font-size:14.5px;line-height:1.55;}
 .review-detail .rv-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
@@ -495,11 +494,9 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .log-cell.mark-inacc{box-shadow:inset 0 -3px 0 #d69e2e;}
 .log-cell.mark-mistake{box-shadow:inset 0 -3px 0 #dd6b20;}
 .log-cell.mark-blunder{box-shadow:inset 0 -3px 0 var(--accent);}
-.log-cell.mark-miss{box-shadow:inset 0 -3px 0 #3182ce;}
 .log-cell.mark-good{box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--jade) 55%, transparent);}
 .log-cell.mark-great,.log-cell.mark-brilliant{box-shadow:inset 0 -3px 0 #2c7a7b;}
 .log-cell.mark-great .mk,.log-cell.mark-brilliant .mk{color:#2c7a7b;}
-.log-cell.mark-miss .mk{color:#3182ce;}
 .log-cell .mk{color:var(--accent);font-weight:800;margin-left:3px;}
 @media (max-width:600px){
   .review-summary{grid-template-columns:1fr;}
@@ -3348,19 +3345,21 @@ function initAIGame(){
    REVIEW — chấm từng nước, gợi ý nước tốt hơn, rút ra bài học
    ========================================================================= */
 const review = { rec:null, game:null, an:null, idx:-1, overview:false, onlyBig:safeLS_get('xq_review_big')==='1', lessons:null, widget:null, running:false, token:0, anim:0 };
-// Ký hiệu theo quy ước bình luận cờ quốc tế (!!, !, ?!, ?, ??) + ký hiệu phân tích máy (★ ✓ 📖 ✗).
+// Ký hiệu theo quy ước bình luận cờ: chỉ 5 dấu !! ! ?! ? ??; nước bình thường không ghi ký hiệu.
 // Xếp hạng theo mức tụt "cơ hội thắng" của người đi (xem classifyPly), không theo điểm tuyệt đối.
 const CLASS_INFO = {
-  brilliant:{label:'Nước tuyệt hay',      icon:'!!', cls:'brilliant', desc:'Nước duy nhất giữ được thế cờ, lại còn thí quân — rất khó tìm.'},
-  great:  {label:'Nước hay',              icon:'!',  cls:'great',   desc:'Nước duy nhất tốt: mọi nước khác đều làm thế cờ kém hẳn.'},
-  best:   {label:'Tốt nhất',              icon:'★',  cls:'best',    desc:'Bằng (hoặc gần bằng) nước tốt nhất máy tìm được.'},
-  good:   {label:'Tốt',                   icon:'✓',  cls:'good',    desc:'Chỉ kém nước tốt nhất một chút, không ảnh hưởng thế cờ.'},
-  book:   {label:'Theo sách',             icon:'📖', cls:'book',    desc:'Nước khai cuộc đúng lý thuyết.'},
-  inacc:  {label:'Nước đáng ngờ',         icon:'?!', cls:'inacc',   desc:'Làm cơ hội thắng giảm nhẹ; có nước tốt hơn rõ ràng.'},
-  miss:   {label:'Bỏ lỡ',                 icon:'✗',  cls:'miss',    desc:'Có đòn thắng (chiếu bí hoặc lãi lớn) mà không đi; thế cờ vẫn tốt nhưng mất cơ hội kết thúc.'},
-  mistake:{label:'Sai lầm',               icon:'?',  cls:'mistake', desc:'Làm cơ hội thắng giảm đáng kể, thường là mất quân nhỏ hoặc thế cờ xấu đi rõ.'},
-  blunder:{label:'Sai lầm nghiêm trọng',  icon:'??', cls:'blunder', desc:'Làm thay đổi kết quả ván: mất quân lớn, để bị chiếu bí hoặc đánh mất thế thắng.'},
+  brilliant:{label:'Tuyệt hay',  icon:'!!', cls:'brilliant', desc:'Giống “Hay”, nhưng nước đó còn <b>thí quân</b> (để đối phương ăn quân của mình) để đổi lấy cái lợi lớn hơn. Hiếm nhất, khó tìm nhất.'},
+  great:  {label:'Hay',          icon:'!',  cls:'great',   desc:'Đúng nước máy chọn <b>và là nước duy nhất</b>: mọi nước khác đều làm thế cờ kém hẳn. Khen vì bạn tìm ra lối thoát duy nhất.'},
+  best:   {label:'Tốt nhất',     icon:'',   cls:'best',    desc:'Đúng (hoặc ngang) nước máy chọn, nhưng còn những nước khác cũng ổn — nên không có gì phải khen riêng.'},
+  good:   {label:'Tốt',          icon:'',   cls:'good',    desc:'Kém nước máy chọn một chút, thế cờ không bị ảnh hưởng. Bấm vào để xem nước tối ưu hơn.'},
+  book:   {label:'Theo sách',    icon:'',   cls:'book',    desc:'Nước khai cuộc đúng lý thuyết.'},
+  inacc:  {label:'Đáng ngờ',     icon:'?!', cls:'inacc',   desc:'Thiệt nhẹ (cỡ 2 Tốt trở lên), hoặc bỏ lỡ đòn thắng trong khi vẫn đang hơn.'},
+  mistake:{label:'Sai lầm',      icon:'?',  cls:'mistake', desc:'Thiệt đáng kể (cỡ một Sĩ/Tượng trở lên), thế cờ xấu đi rõ.'},
+  blunder:{label:'Sai lầm nặng', icon:'??', cls:'blunder', desc:'Đổi kết quả ván: mất quân lớn, để bị chiếu bí, hoặc đánh mất thế thắng.'},
 };
+const clsTag = info => (info.icon ? `<b>${info.icon}</b> ` : '') + info.label;
+// Bỏ lỡ đòn thắng nhưng vẫn đang hơn rõ
+const missedWin = p => (p.bestScore>MATE_T || winChance(p.bestScore)>=0.6) && winChance(p.played)>=0.2;
 // "Cơ hội thắng" trong khoảng [-1, 1] theo điểm của máy (thang: Tốt≈30, Mã/Pháo≈280, Xe≈600).
 // Cùng dạng công thức Lichess dùng cho cờ vua, hệ số quy đổi theo giá trị Xe.
 const winChance = cp => 2/(1+Math.exp(-0.003*clampScore(cp))) - 1;
@@ -3375,7 +3374,8 @@ function classifyPly(o){
     return 'best';
   }
   if(drop<0.1) return 'good';
-  if((o.best>MATE_T || wb>=0.6) && wp>=0.2) return 'miss';
+  // bỏ lỡ đòn thắng mà vẫn hơn rõ: chỉ tính là đáng ngờ
+  if((o.best>MATE_T || wb>=0.6) && wp>=0.2) return 'inacc';
   return drop<0.2 ? 'inacc' : drop<0.3 ? 'mistake' : 'blunder';
 }
 // Độ chính xác từng nước theo mức tụt % thắng (công thức kiểu Lichess)
@@ -3544,13 +3544,13 @@ function explainPly(g, p){
 
   const decisive = p.played< -MATE_T || p.bestScore>MATE_T;
   const evBefore=evalAt(p.k), evAfter=evalAt(p.k+1);
-  const trend=`Thế cờ: trước nước này <b>${evalWords(evBefore,'bạn','máy')}</b> → sau nước này <b>${evalWords(evAfter,'bạn','máy')}</b>.<br>So với nước nên đi: <b>${p.cls==='miss'?`bạn vẫn giữ ưu thế, nhưng để lỡ ${p.bestScore>MATE_T?'đòn kết thúc ván':lossWords(p.loss)}`:decisive?'lỗi quyết định cả ván':lossWords(p.loss)}</b>.`;
+  const trend=`Thế cờ: trước nước này <b>${evalWords(evBefore,'bạn','máy')}</b> → sau nước này <b>${evalWords(evAfter,'bạn','máy')}</b>.<br>So với nước nên đi: <b>${missedWin(p)?`bạn vẫn giữ ưu thế, nhưng để lỡ ${p.bestScore>MATE_T?'đòn kết thúc ván':lossWords(p.loss)}`:decisive?'lỗi quyết định cả ván':lossWords(p.loss)}</b>.`;
   const why=`<b>${bad[0][0].toUpperCase()+bad[0].slice(1)}.</b>${bad.length>1?` Ngoài ra: ${bad.slice(1).join('; ')}.`:''}<br>${trend}`;
 
   const best = lineText(before, p.bestPv, 4);
   return thinkStepsHTML([
     step1, step2,
-    {ic:p.cls==='inacc'?'⚠️':p.cls==='miss'?'🎯':'❌', q:p.cls==='miss'?'Bỏ lỡ cơ hội gì?':'Vì sao chưa tốt?', cls:'ts-bad', html:why},
+    {ic:missedWin(p)?'🎯':p.cls==='inacc'?'⚠️':'❌', q:missedWin(p)?'Bỏ lỡ cơ hội gì?':'Vì sao chưa tốt?', cls:'ts-bad', html:why},
     reply.n && {ic:'⚔️', q:'Máy có thể đáp lại', html:`${reply.html}${reply.n>=4?' …':''}${(()=>{ const ri=Coach.intent(after,p.replyPv[0])[0]; return ri?`<br>Ý đồ của máy: ${esc(ri.goal)}.`:''; })()}${reply.caps.length?`<br>Kết quả: ${reply.caps.join(', ')}.`:''} <span class="hint-text small">(bấm “▶ Đòn đối phương” để xem trên bàn)</span>`},
     bestTxt && {ic:'💡', q:'Nên đi', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh).${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
     {ic:'🧠', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Coach.QUESTIONS[qKey])},
@@ -3681,8 +3681,9 @@ function styleHTML(sp, an){
     ${sp.games<3?'<p class="hint-text small">Mới có ít ván nên nhận xét chỉ là tạm thời; chơi thêm vài ván để thấy rõ phong cách.</p>':''}</div>`;
 }
 function legendHTML(){
-  return `<details class="cls-legend"><summary>Ý nghĩa các ký hiệu</summary><dl>${Object.values(CLASS_INFO).map(i=>`<div><dt class="cls-${i.cls}">${i.icon} ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
-    <p class="hint-text small">Mức lỗi tính theo <b>cơ hội thắng</b> bị mất, không theo số quân: cùng thiệt một Mã, khi thế cờ đang cân bằng là sai lầm lớn, còn khi bạn đang thắng đậm thì nhẹ hơn.</p></details>`;
+  const C=CLASS_INFO, rows=[C.brilliant, C.great, C.best, C.good, C.book, C.inacc, C.mistake, C.blunder];
+  return `<details class="cls-legend"><summary>Ý nghĩa ký hiệu</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}"><b>${i.icon||'—'}</b> ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
+    <p class="hint-text small">Dấu <b>!</b> là khen, dấu <b>?</b> là chê, càng nhiều dấu càng mạnh. Nước <b>không có dấu</b> (Tốt nhất, Tốt, Theo sách) là nước bình thường, không có gì sai. <b>Tốt nhất</b> khác <b>Hay</b> ở chỗ: Tốt nhất là nước đúng nhưng dễ tìm (còn nước khác cũng được), Hay là nước đúng mà gần như chỉ có một. Mức lỗi tính theo <b>cơ hội thắng</b> bị mất: cùng thiệt một Mã, khi thế cờ đang cân bằng là lỗi nặng, còn khi bạn đang thắng đậm thì nhẹ hơn.</p></details>`;
 }
 
 function openReview(rec){
@@ -3717,7 +3718,7 @@ async function runAnalysis(){
 }
 function applyStoredAnalysis(rec){
   const a=rec.analysis, g=review.game;
-  const plies=a.plies.map((p,k)=>({k, color:g.moves[k].color, cls:p.c, loss:p.l, second:p.g==null?null:p.g, bestMove:p.b?{from:p.b[0],to:p.b[1]}:null, bestScore:p.s, played:p.pl, reply:p.r?{from:p.r[0],to:p.r[1]}:null, replyPv:(p.rp||[]).map(x=>({from:x[0],to:x[1]})), bestPv:(p.bp||[]).map(x=>({from:x[0],to:x[1]})), evalRed:p.e}));
+  const plies=a.plies.map((p,k)=>({k, color:g.moves[k].color, cls:CLASS_INFO[p.c]?p.c:'inacc', loss:p.l, second:p.g==null?null:p.g, bestMove:p.b?{from:p.b[0],to:p.b[1]}:null, bestScore:p.s, played:p.pl, reply:p.r?{from:p.r[0],to:p.r[1]}:null, replyPv:(p.rp||[]).map(x=>({from:x[0],to:x[1]})), bestPv:(p.bp||[]).map(x=>({from:x[0],to:x[1]})), evalRed:p.e}));
   // Bản lưu cũ (v2) xếp hạng theo thang điểm cũ → xếp hạng lại theo thang mới
   if(a.version===2) plies.forEach(p=>{
     const m=g.moves[p.k], same=!!(p.bestMove && p.bestMove.from+''===m.from+'' && p.bestMove.to+''===m.to+'');
@@ -3728,7 +3729,7 @@ function applyStoredAnalysis(rec){
   reviewShowAnalysis();
 }
 /* ---------- Luồng xem lại: Tổng quan → Lỗi 1 → … → Lỗi cuối → Tổng kết ---------- */
-const ERR_ALL=['inacc','miss','mistake','blunder'], ERR_BIG=['miss','mistake','blunder'];
+const ERR_ALL=['inacc','mistake','blunder'], ERR_BIG=['mistake','blunder'];
 const GOOD_ALL=['book','best','good','great','brilliant'];
 function reviewErrors(){
   const set = review.onlyBig ? ERR_BIG : ERR_ALL;
@@ -3740,7 +3741,8 @@ const moveNum=k=>Math.floor(k/2)+1;   // dùng trong câu văn: "nước 12"
 function reviewShowAnalysis(){
   const rec=review.rec, g=review.game, an=review.an;
   review.lessons=lessonsFrom(rec,g,an);   // cũng tính sẵn lời giải thích ngắn cho từng lỗi
-  const cnt=Object.entries(CLASS_INFO).filter(([c])=>an.counts[c]).map(([c,i])=>`<span class="cls-chip cls-${i.cls}">${i.icon} ${i.label}: <b>${an.counts[c]}</b></span>`).join('');
+  const C=an.counts, chips=[[CLASS_INFO.brilliant,C.brilliant],[CLASS_INFO.great,C.great],[{label:'Tốt',icon:'',cls:'good'},C.best+C.good+C.book],[CLASS_INFO.inacc,C.inacc],[CLASS_INFO.mistake,C.mistake],[CLASS_INFO.blunder,C.blunder]];
+  const cnt=chips.filter(([,n])=>n).map(([i,n])=>`<span class="cls-chip cls-${i.cls}">${clsTag(i)}: <b>${n}</b></span>`).join('');
   $('#reviewSummary').innerHTML=`<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
     <div class="acc-side"><div class="cls-chips">${cnt}</div>${legendHTML()}<h3 class="side-h mt10">📌 Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>
     ${styleHTML(styleProfile(rec,g,an), an)}`;
@@ -3760,7 +3762,7 @@ function overviewHTML(){
   errs.forEach((p,i)=>{ const ph=phaseOf(g,p.k); (groups[ph]=groups[ph]||[]).push({p,i}); });
   const items=Object.entries(groups).map(([ph,list])=>`<div class="tl-phase"><div class="tl-phase-h">${ph}</div>${list.map(({p,i})=>{
       const info=CLASS_INFO[p.cls], m=g.moves[p.k];
-      return `<button type="button" class="tl-item" data-k="${p.k}"><span class="tl-n">${i+1}</span><span class="tl-body"><b>Nước ${moveNum(p.k)}: ${esc(m.text.short)}</b> <span class="cls-chip cls-${info.cls}">${info.icon} ${info.label}</span>${p===tp?' <span class="tl-star">⭐ bước ngoặt</span>':''}<small>${esc(p.short||lossWords(p.loss))}</small></span></button>`; }).join('')}</div>`).join('');
+      return `<button type="button" class="tl-item" data-k="${p.k}"><span class="tl-n">${i+1}</span><span class="tl-body"><b>Nước ${moveNum(p.k)}: ${esc(m.text.short)}</b> <span class="cls-chip cls-${info.cls}">${clsTag(info)}</span>${p===tp?' <span class="tl-star">⭐ bước ngoặt</span>':''}<small>${esc(p.short||lossWords(p.loss))}</small></span></button>`; }).join('')}</div>`).join('');
   const tpLine = tp ? `<p class="hint-text">⭐ <b>Bước ngoặt</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
   return `<p><b>Ván này có ${errs.length} chỗ bạn có thể đi tốt hơn.</b> Hãy xem lần lượt từ đầu đến cuối: mỗi chỗ có tình huống, vì sao chưa tốt, máy đáp thế nào và nên đi gì.</p>
     ${tpLine}${filter}<div class="timeline">${items}</div>${betterHTML}
@@ -3830,7 +3832,7 @@ function reviewRender(){
   if(p && p.bestMove && !(p.bestMove.from+''===m.from+''&&p.bestMove.to+''===m.to+'') && !['book','best'].includes(p.cls)) arrows.push({from:p.bestMove.from,to:p.bestMove.to});
   review.widget.setBoard(ov ? g.start : idx<0 && g.moves.length ? g.board() : board, {arrows, lastMove: !ov && idx<0 ? g.lastMove() : null});
   const marks={}, badges={};
-  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(q.cls!=='best' && q.cls!=='good' && q.cls!=='book') badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
+  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(CLASS_INFO[q.cls].icon) badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
   renderMoveLog($('#reviewLog'), g.moves, {active:ov?null:idx, marks, badges, onPick:(k)=>reviewGo(k)});
   // Thanh tiến trình: đang ở đâu trong luồng xem lại
   const errs=reviewErrors(), ei = idx>=0 ? errs.findIndex(q=>q.k===idx) : -1, tp=turningPoint();
@@ -3848,7 +3850,7 @@ function reviewRender(){
     const who = m.color===rec.human ? 'Bạn' : 'Máy';
     const info = p ? CLASS_INFO[p.cls] : null;
     det.innerHTML = `${ei>=0?`<p class="bridge">${bridgeHTML(ei,p)}</p>`:''}<div class="rv-head"><b>${moveNo(idx)} ${esc(m.text.short)}</b> <span class="hint-text">(${who} · ${esc(m.text.long)})</span>
-      ${info && m.color===rec.human?`<span class="cls-chip cls-${info.cls}">${info.icon} ${info.label}</span>`:''}</div>
+      ${info && m.color===rec.human?`<span class="cls-chip cls-${info.cls}">${clsTag(info)}</span>`:''}</div>
       ${p && m.color===rec.human ? `${explainPly(g,p)}<p class="hint-text small">Mũi tên đỏ: nước đã đi${arrows.length>1?' · mũi tên xanh: nước nên đi':''}.</p>` : (an?`<p class="hint-text small">Nước của máy${p&&p.bestMove?'':''}.</p>`:'')}
       ${ei>=0?`<div class="btn-row mt10">${ei+1<errs.length?`<button type="button" class="btn btn-primary btn-sm" data-rv="next">Lỗi tiếp theo (${ei+2}/${errs.length}) ⏭</button>`:`<button type="button" class="btn btn-primary btn-sm" data-rv="next">🏁 Xem tổng kết</button>`}</div>`:''}`;
     $('#reviewTools').innerHTML = p && m.color===rec.human && !['book','best','great','brilliant'].includes(p.cls)
