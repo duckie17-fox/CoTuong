@@ -812,6 +812,36 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   .ol-player{padding:3px 8px;min-height:36px;}
   .cap{width:18px;height:18px;font-size:11px;}
 }
+.level-opt .lv-tier{color:var(--jade);font-weight:600;}
+
+/* ---------- Đấu xếp hạng: bậc hạng, thẻ tìm trận ---------- */
+.tier{display:inline-flex;align-items:center;gap:4px;font:800 11.5px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
+.tier-dong{--tier:#9a6236;} .tier-bac{--tier:#7d8895;} .tier-vang{--tier:#b8871f;} .tier-bachkim{--tier:#2f948f;}
+.tier-kimcuong{--tier:#3e6fc4;} .tier-tinhanh{--tier:#7b4fc4;} .tier-caothu{--tier:#c23e50;} .tier-daicaothu{--tier:#8f1d2c;}
+.tier-thachdau{--tier:linear-gradient(120deg,#b8871f,#c23e50,#7b4fc4);background:var(--tier);}
+.ranked-card{border-color:color-mix(in srgb, var(--accent) 35%, var(--line));}
+.ranked-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.ranked-head h2{margin:0;font-size:18px;}
+.ranked-me{display:flex;align-items:center;gap:8px;}
+.ranked-elo{font-size:22px;color:var(--accent);}
+.ranked-go{min-height:50px;font-size:16px;}
+.ranked-note{margin:8px 0 0;text-align:center;}
+.ranked-search,.ranked-resume{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;background:var(--paper-2);border-radius:12px;padding:12px 14px;}
+.ranked-search .spinner{color:var(--accent);}
+.rank-elo{display:flex;align-items:center;gap:8px;}
+#meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+
+/* ---------- Bắt buộc đăng nhập ---------- */
+.auth-gate{position:fixed;inset:0;z-index:80;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;}
+body.gated{overflow:hidden;}
+.gate-box{width:100%;max-width:400px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.gate-seal{width:72px !important;height:72px !important;font-size:40px !important;border-radius:18px !important;display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(155deg,var(--b-red),var(--b-red-deep));color:#fff6ec;font-family:var(--han-font);box-shadow:0 4px 14px var(--shadow);}
+.gate-title{font-size:32px;margin:6px 0 0;}
+.gate-sub{color:var(--ink-soft);margin:0 0 10px;}
+.gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
+.gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
+.gate-note{margin-top:6px;}
 </style>
 </head>
 <body>
@@ -989,7 +1019,7 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
+    <p>Chọn cấp và màu quân. Mỗi cấp ghi bậc hạng tương đương ở Đấu xếp hạng. Xong ván, bấm <b>Phân tích ván</b> để xem mình đi hay, dở ở đâu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -1153,6 +1183,13 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
  <div data-stpanel="phong">
   <div id="olLobby">
     <div id="olNotice"></div>
+    <div class="card ranked-card" id="olRanked">
+      <div class="ranked-head">
+        <div><h2>Đấu xếp hạng</h2><div class="hint-text small" id="olRankedSub">Ghép với người chơi cùng trình độ</div></div>
+        <div class="ranked-me" id="olRankedMe"></div>
+      </div>
+      <div id="olRankedBody"></div>
+    </div>
     <div id="olFriendsOnline" class="card" hidden></div>
     <div class="ol-grid">
       <div class="card ol-box">
@@ -1182,11 +1219,6 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
     </div>
     <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
     <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
-    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
-      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
-      <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
-      <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
-    </details>
   </div>
 
   <div class="card" id="olRoom" hidden>
@@ -1211,6 +1243,7 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
         <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
+          <button type="button" class="btn btn-primary btn-sm" id="olNextMatch" hidden><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Tìm trận mới</button>
           <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
         </div>
       </div>
@@ -1347,6 +1380,18 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
 </section>
 
 </main>
+<div class="auth-gate" id="authGate" hidden>
+  <div class="gate-box">
+    <span class="seal gate-seal" aria-hidden="true">象</span>
+    <h1 class="gate-title">Cờ Tướng</h1>
+    <p class="gate-sub">Học cờ, đấu với máy và đấu xếp hạng với bạn bè.</p>
+    <div class="gate-btns">
+      <button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button>
+      <button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button>
+    </div>
+    <p class="hint-text small gate-note">Tiến độ của bạn được lưu theo tài khoản, dùng được trên mọi máy.</p>
+  </div>
+</div>
 <div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
 <div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 
@@ -3358,21 +3403,21 @@ const LESSONS = [
       '<b>Trung Quốc</b> (Hiệp hội Cờ tướng Trung Quốc) có khoảng 20 bậc, từ thấp lên cao: <b>Kỳ sĩ</b> cấp 16 → cấp 1 (棋士, dành cho người chơi nghiệp dư), <b>Đại sư địa phương</b> (地方大师, trình độ tuyển thủ thành phố/tỉnh), <b>Kỳ hiệp đại sư</b> (棋协大师, cỡ vô địch tỉnh), <b>Đại sư quốc gia</b> (国家大师, ranh giới giữa nghiệp dư và chuyên nghiệp) và cao nhất là <b>Đặc cấp đại sư</b> (特级大师).',
       '<b>Quốc tế</b> (Liên đoàn Cờ tướng Thế giới, WXF) phong các danh hiệu: <b>Kiện tướng Liên đoàn</b>, <b>Kiện tướng quốc tế</b> và <b>Đại kiện tướng quốc tế</b>.',
       '<b>Việt Nam:</b> vận động viên được phong đẳng cấp (như Kiện tướng quốc gia) dựa trên thành tích tại các giải quốc gia; ở quốc tế thì nhận danh hiệu của WXF.',
-      '<b>Cấp độ của máy</b> trong tab Đấu với máy được đặt tên theo thang của Trung Quốc để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>: sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, không phải đo bằng thi đấu thật.'
+      '<b>Cấp độ của máy</b> trong mục Đấu với máy có 10 cấp, đặt tên theo cấp bậc võ tướng xưa (Tiểu Tốt → Nguyên Soái) và ghi bậc hạng tương đương ở Đấu xếp hạng. Sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, chưa đo bằng thi đấu với người thật.'
     ],
     table:{
-      head:['Cấp độ máy','Hình dung (ước lượng, chưa đo với người thật)','Đo bằng máy tự đấu'],
+      head:['Cấp độ máy','Hình dung','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–15)','—'],
-        ['2 · Kỳ sĩ cấp 14–12','Mới chơi vài tháng','thắng cấp 1: ~83%'],
-        ['3 · Kỳ sĩ cấp 11–9','Chơi cờ phong trào','thắng cấp 2: ~84%'],
-        ['4 · Kỳ sĩ cấp 8–7','Phong trào khá','thắng cấp 3: ~75%'],
-        ['5 · Kỳ sĩ cấp 6–5','Giải cấp phường/xã','thắng cấp 4: ~84%'],
-        ['6 · Kỳ sĩ cấp 4–3','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
-        ['7 · Kỳ sĩ cấp 2','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
-        ['8 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
-        ['9 · Ứng viên đại sư','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
-        ['10 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
+        ['1 · Tiểu Tốt','Vừa biết luật','—'],
+        ['2 · Ngũ Trưởng','Mới chơi vài tháng','thắng cấp 1: ~83%'],
+        ['3 · Thập Trưởng','Chơi cờ phong trào','thắng cấp 2: ~84%'],
+        ['4 · Bách Hộ','Phong trào khá','thắng cấp 3: ~75%'],
+        ['5 · Thiên Hộ','Giải cấp phường/xã','thắng cấp 4: ~84%'],
+        ['6 · Hiệu Úy','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
+        ['7 · Tướng Quân','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
+        ['8 · Đại Tướng','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
+        ['9 · Thượng Tướng','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
+        ['10 · Nguyên Soái','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
       ]
     },
     sources:[
@@ -3743,7 +3788,7 @@ function aiRender(){
   const el=$('#aiStatus');
   const H=aiGame.humanColor, M=Engine.otherColor(H), over=!!g.result;
   // thanh người chơi: máy ở trên, bạn ở dưới; sáng lên khi tới lượt
-  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(levelInfo(aiGame.level).name), captured:capturedBy(g.moves,M),
+  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(`Cấp ${aiGame.level} · ${levelInfo(aiGame.level).name}`), captured:capturedBy(g.moves,M),
     active:!over && turn===M, note: !over && aiGame.thinking ? 'đang nghĩ…' : ''});
   setPlayerBar($('#aiBottom'), {color:H, name:'Bạn', sub:COLOR_VN[H], me:false, captured:capturedBy(g.moves,H),
     active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
@@ -3831,7 +3876,7 @@ function showAICard(which){
 function renderLevelPicker(){
   const saved=savedAiLevel();
   $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
-    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small></span></label>`).join('');
+    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small><small class="lv-tier">Ngang bậc <b>${esc(Ranked.tierOf(l.elo).label)}</b></small></span></label>`).join('');
 }
 function initAIGame(){
   renderLevelPicker();
@@ -5283,29 +5328,22 @@ if(typeof OPENING_TRAPS!=='undefined') OPENING_TRAPS.forEach(t=>{
    Đây là MÔ PHỎNG TƯƠNG ĐỐI, không phải đo bằng thi đấu với người thật. Phần mô tả
    ghi kết quả đo bằng tools/ladder.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
+// Tên cấp theo cấp bậc võ tướng thời xưa (người dùng chọn): Tiểu Tốt → Nguyên Soái.
+// elo: cùng thông số với cấp máy xếp hạng tương ứng (Ranked.BOT_LEVELS) để quy ra bậc hạng.
 const AI_LEVELS = [
-  {id:1,  name:'Tân thủ',           maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false},
-  {id:2,  name:'Kỳ sĩ cấp 14–12',   maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false},
-  {id:3,  name:'Kỳ sĩ cấp 11–9',    maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false},
-  {id:4,  name:'Kỳ sĩ cấp 8–7',     maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false},
-  {id:5,  name:'Kỳ sĩ cấp 6–5',     maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false},
-  {id:6,  name:'Kỳ sĩ cấp 4–3',     maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false},
-  {id:7,  name:'Kỳ sĩ cấp 2',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false},
-  {id:8,  name:'Kỳ sĩ cấp 1',       maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false},
-  {id:9,  name:'Ứng viên đại sư',   maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true},
-  {id:10, name:'Đại sư địa phương', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true},
+  {id:1,  name:'Tiểu Tốt',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
+  {id:2,  name:'Ngũ Trưởng',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
+  {id:3,  name:'Thập Trưởng',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
+  {id:4,  name:'Bách Hộ',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
+  {id:5,  name:'Thiên Hộ',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
+  {id:6,  name:'Hiệu Úy',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
+  {id:7,  name:'Tướng Quân',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
+  {id:8,  name:'Đại Tướng',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
+  {id:9,  name:'Thượng Tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
+  {id:10, name:'Nguyên Soái', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
 ];
-// Mô tả cho người chơi: cách máy chơi ở mỗi cấp + kết quả đo với cấp ngay dưới (LEVEL_MEASURED)
-// Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp)
+// Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp) — cấp sau thắng cấp trước bao nhiêu %
 const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};
-AI_LEVELS.forEach(l=>{
-  const how = l.blunder>=0.1 ? 'hay đi nước ngẫu nhiên, bỏ sót quân'
-    : l.blunder>0 ? 'thỉnh thoảng sơ suất'
-    : l.noise>0 ? 'không sơ suất ngẫu nhiên, đôi khi chọn nước chưa tối ưu'
-    : 'luôn chọn nước tốt nhất tìm được';
-  const depth = l.maxDepth>=40 ? `tính tới ${l.timeMs/1000} giây/nước` : `nhìn trước ${l.maxDepth} nửa nước`;
-  l.desc = `${depth[0].toUpperCase()+depth.slice(1)}${l.book?', có sách khai cuộc':''}, ${how}` + (LEVEL_MEASURED[l.id] ? ` · thắng cấp ${l.id-1} khoảng ${LEVEL_MEASURED[l.id]}% số ván` : '');
-});
 // Thang cấp cũ (6 cấp) → thang mới (10 cấp): cấp đã lưu và lịch sử ván trước đây vẫn hiển thị đúng
 const LADDER_VERSION=2, OLD_LEVEL_MAP={1:1,2:4,3:6,4:8,5:9,6:10};
 function recLevel(rec){ return rec.ladder===LADDER_VERSION ? rec.level : (OLD_LEVEL_MAP[rec.level]||rec.level); }
@@ -6220,7 +6258,7 @@ const Sound = (function(){
 const Progress = (function(){
   const APP='co-tuong-nhap-mon', VERSION=1, PREFIX='xq_';
   // Các mục không phải "tiến độ học" thì không cần mang theo
-  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server','xq_auth','xq_user','xq_sync_meta']);
+  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server','xq_auth','xq_user','xq_sync_meta','xq_ranked_bot']);
   function keys(){
     const out=[];
     try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(PREFIX) && !SKIP.has(k)) out.push(k); } }catch(e){}
@@ -6548,6 +6586,85 @@ function initLearn(){
   });
 }
 /* =========================================================================
+   XẾP HẠNG — bậc hạng theo Elo, 20 cấp máy xếp hạng, nick máy (spec v4).
+   Dùng chung cho ứng dụng và máy chủ (tools/build-server.js ghép file này vào server).
+   ========================================================================= */
+const Ranked = (function(){
+  // Bậc hạng: [tên, Elo bắt đầu]. Mỗi bậc (trừ Thách Đấu) chia III → II → I.
+  const TIERS = [
+    ['Đồng', -Infinity], ['Bạc', 1000], ['Vàng', 1150], ['Bạch Kim', 1300], ['Kim Cương', 1450],
+    ['Tinh Anh', 1600], ['Cao Thủ', 1800], ['Đại Cao Thủ', 2000], ['Thách Đấu', 2200],
+  ];
+  const TIER_KEYS = ['dong','bac','vang','bachkim','kimcuong','tinhanh','caothu','daicaothu','thachdau'];
+  function tierOf(elo){
+    let i=TIERS.length-1; while(i>0 && elo<TIERS[i][1]) i--;
+    const [name, lo]=TIERS[i], key=TIER_KEYS[i];
+    if(i===TIERS.length-1) return {name, key, div:'', label:name, index:i};
+    let div;
+    if(i===0) div = elo<900 ? 'III' : elo<950 ? 'II' : 'I';
+    else { const span=(TIERS[i+1][1]-lo)/3; div = elo<lo+span ? 'III' : elo<lo+2*span ? 'II' : 'I'; }
+    return {name, key, div, label:`${name} ${div}`, index:i};
+  }
+
+  // 20 cấp máy xếp hạng: nội suy từ 10 cấp luyện tập (độ sâu, nhiễu, sơ suất, thời gian/nước).
+  // Elo cố định là ước tính: cấp n = 700 + (n−1)·85.
+  const BOT_LEVELS = [
+    {maxDepth:1, timeMs:300,  noise:150, blunder:0.32},
+    {maxDepth:1, timeMs:300,  noise:120, blunder:0.25},
+    {maxDepth:1, timeMs:300,  noise:100, blunder:0.20},
+    {maxDepth:1, timeMs:300,  noise:80,  blunder:0.15},
+    {maxDepth:1, timeMs:300,  noise:60,  blunder:0.11},
+    {maxDepth:1, timeMs:300,  noise:45,  blunder:0.08},
+    {maxDepth:2, timeMs:400,  noise:45,  blunder:0.07},
+    {maxDepth:2, timeMs:400,  noise:40,  blunder:0.06},
+    {maxDepth:2, timeMs:500,  noise:30,  blunder:0.045},
+    {maxDepth:2, timeMs:500,  noise:20,  blunder:0.03},
+    {maxDepth:3, timeMs:600,  noise:30,  blunder:0.025},
+    {maxDepth:3, timeMs:600,  noise:25,  blunder:0.02},
+    {maxDepth:3, timeMs:700,  noise:15,  blunder:0.01},
+    {maxDepth:3, timeMs:800,  noise:10,  blunder:0},
+    {maxDepth:4, timeMs:800,  noise:12,  blunder:0},
+    {maxDepth:4, timeMs:1200, noise:6,   blunder:0},
+    {maxDepth:5, timeMs:2000, noise:0,   blunder:0, book:true},
+    {maxDepth:6, timeMs:2500, noise:0,   blunder:0, book:true},
+    {maxDepth:40,timeMs:3000, noise:0,   blunder:0, book:true},
+    {maxDepth:40,timeMs:4000, noise:0,   blunder:0, book:true},
+  ].map((l,i)=>Object.assign(l, {level:i+1, elo:700+i*85}));
+  // Cấp máy cho người chơi có Elo `elo`: cấp đầu tiên có Elo ≥ elo (nhỉnh hơn một chút)
+  function botLevelFor(elo){
+    const l=BOT_LEVELS.find(b=>b.elo>=elo);
+    return l ? l.level : BOT_LEVELS.length;
+  }
+
+  // Nick máy kiểu game thủ Việt — sinh từ một số ngẫu nhiên (seed) để máy chủ và ứng dụng ra cùng tên
+  const NAMES = ['Tuấn','Hùng','Long','Minh','Huy','Nam','Phong','Khánh','Đạt','Quân','Linh','Trang','Vy','Thảo','Bảo',
+    'Duy','Tú','Sơn','Hiếu','Nhật','Khoa','Tâm','Lâm','Thắng','Trung','Đức','Hải','Kiên','Vũ','Hoàng','Phúc','Thịnh'];
+  const ASCII = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
+  const NICK_SUFFIX = ['Đẹp Trai','Cờ Thủ','Pro','Vô Đối','Tàng Hình','Lạnh Lùng','Bất Bại','Mắt Nai','Tốc Độ','Thần Đồng'];
+  const PLACES = ['Hà Nội','Sài Gòn','Đà Nẵng','Hải Phòng','Cần Thơ','Huế','Nghệ An','Thanh Hoá','Quảng Ninh','Bình Dương','Nam Định','Đồng Nai'];
+  const CHESS = ['Pháo Đầu','Hắc Mã','Xe Thần','Mã Hồi','Tốt Qua Sông','Thuận Pháo','Bình Phong Mã','Song Xe','Phi Tượng','Liên Hoàn Mã'];
+  const CUTE = ['Bé Mèo Ú','Gấu Lười','Tèo Em','Cún Con','Thỏ Bông','Mèo Mướp','Cá Mập Con','Sóc Nâu','Heo Hồng','Chuột Nhắt'];
+  const TAGS = ['pro','dz','vip','tv','2k','gaming','cotuong','99','vn','official'];
+  function rng(seed){ let s=(seed>>>0)||1; return ()=>{ s^=s<<13; s>>>=0; s^=s>>>17; s^=s<<5; s>>>=0; return s/4294967296; }; }
+  function botNick(seed){
+    const r=rng(seed), pick=a=>a[Math.floor(r()*a.length)], n=pick(NAMES), num=()=>String(Math.floor(r()*100)).padStart(2,'0');
+    const yr=()=>String(1990+Math.floor(r()*18)), k=Math.floor(r()*10);
+    switch(k){
+      case 0: return `${n}${yr()}`;
+      case 1: return `${ASCII(n).toLowerCase()}_${pick(TAGS)}`;
+      case 2: return `xX${ASCII(n)}Xx`;
+      case 3: return `${n} ${pick(NICK_SUFFIX)}`;
+      case 4: return `Cờ Thủ ${pick(PLACES)}`;
+      case 5: return `${pick(CHESS)} ${pick(PLACES)}`;
+      case 6: return `${pick(CUTE)} ${num()}`;
+      case 7: return `${ASCII(n).toLowerCase()}${pick(['dz','pro','cute','123','kute'])}${num()}`;
+      case 8: return `${pick(CHESS)} ${num()}`;
+      default: return `${n}.${ASCII(pick(NAMES)).toLowerCase()}${Math.floor(r()*10)}`;
+    }
+  }
+  return {TIERS, tierOf, BOT_LEVELS, botLevelFor, botNick, MATCH_WAIT_MS:8000, ELO_RANGE:200};
+})();
+/* =========================================================================
    SA TRƯỜNG — đấu với bạn bè qua server (Cloudflare Worker, xem server/)
    - Server là trọng tài: client chỉ gửi ý định (đi quân, xin hoà…), hiển thị
      theo trạng thái server gửi về. Nước đi được vẽ trước cho mượt, server sai
@@ -6623,7 +6740,7 @@ const Online = (function(){
 
   /* ---------- kết nối ---------- */
   function setConn(c){ st.conn=c; renderConn(); }
-  function send(o){ if(st.ws && st.ws.readyState===1){ st.ws.send(JSON.stringify(o)); return true; } flash('Mất kết nối — đang kết nối lại…'); return false; }
+  function send(o){ if(st.bot){ botHandle(o); return true; } if(st.ws && st.ws.readyState===1){ st.ws.send(JSON.stringify(o)); return true; } flash('Mất kết nối — đang kết nối lại…'); return false; }
   function connect(){
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const srv=server();
@@ -6635,7 +6752,7 @@ const Online = (function(){
       if(st.ws!==ws) return;
       st.retry=0; st.everOpen=true; setConn('open');
       const msg={type:'join', name:myName()||'Kỳ thủ', token:token()};
-      if(st.create) msg.create={color:st.create.color, rated:!!st.create.rated};
+      if(st.create) msg.create={color:st.create.color, rated:!!st.create.rated, match:!!st.create.match};
       if(Account.signedIn()) msg.auth=Account.token();
       ws.send(JSON.stringify(msg));
       st.ping=setInterval(()=>{ try{ ws.readyState===1 && ws.send('ping'); }catch(e){} }, 25000);
@@ -6667,6 +6784,7 @@ const Online = (function(){
   }
   function disconnect(){
     keepAwake(false);
+    if(st.bot){ clearTimeout(st.bot.timer); st.bot=null; }
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const ws=st.ws; st.ws=null; st.code=null; st.room=null;
     if(ws) try{ ws.close(1000); }catch(e){}
@@ -6710,7 +6828,7 @@ const Online = (function(){
       if(last.t!==seen && !last.sys && !(last.seat ? last.seat===room.you : last.by===myName())) toast(`${last.by}: ${last.text}`);
     }
     const opp=room.seats[other(room.you)];
-    saveRecent({code:room.code, you:room.you, opp: room.you==='spectator' ? `${(room.seats.red||{}).name||'?'} – ${(room.seats.black||{}).name||'?'}` : (opp?opp.name:''), result:room.result, n:room.moves.length});
+    if(!st.bot) saveRecent({code:room.code, you:room.you, opp: room.you==='spectator' ? `${(room.seats.red||{}).name||'?'} – ${(room.seats.black||{}).name||'?'}` : (opp?opp.name:''), result:room.result, n:room.moves.length});
     if(room.result && room.you!=='spectator'){
       const key=room.code+'#'+room.game;
       if(st.lastResultKey!==key){ st.lastResultKey=key; if(!history().some(r=>r.id===`ol-${room.code}-${room.game}`)) { saveRecord(recordOf(room)); renderLobby(); } }
@@ -6832,7 +6950,8 @@ const Online = (function(){
     renderClaim();
     $('#olResign').disabled = !hasOpp && !r.moves.length;
     $('#olAfter').hidden = !over;
-    $('#olRematch').hidden = !seated || !hasOpp;
+    $('#olRematch').hidden = !seated || !hasOpp || !!st.ranked;
+    $('#olNextMatch').hidden = !st.ranked;
     $('#olRematch').disabled = pending;
     $('#olChatInput').placeholder = seated ? 'Nhắn cho đối thủ…' : 'Nhắn với hai kỳ thủ…';
   }
@@ -6860,7 +6979,7 @@ const Online = (function(){
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
       return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Chưa có địa chỉ máy chủ Sa trường. Nhập địa chỉ ở mục “Máy chủ (nâng cao)” bên dưới.';
+    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -6872,6 +6991,7 @@ const Online = (function(){
   }
   function renderLobby(){
     renderNotice();
+    renderRanked();
     const u=Account.signedIn() ? Account.user() : null;
     $('.ol-name').hidden=!!u; $('#olRatedWrap').hidden=!u;
     $('#olAsUser').hidden=!u; if(u) $('#olAsUser').innerHTML=`Bạn chơi với tên <b>${esc(u.displayName)}</b> · Elo ${u.elo}.`;
@@ -6912,6 +7032,7 @@ const Online = (function(){
   function enterRoom(code, create){
     if(!myName() && !ensureName()) { showLobby(); return; }
     disconnect();
+    st.ranked=!!(create && create.match);
     st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
     $('#olLobby').hidden=true; $('#olRoom').hidden=false;
     setRoomParam(code);
@@ -6923,6 +7044,154 @@ const Online = (function(){
     showTab('may'); openReview(rec);
   }
 
+
+  /* ---------- Đấu xếp hạng (spec v4): ghép người 8 giây, không có thì ghép máy ---------- */
+  const search = {active:false, t0:0, timer:0, tick:0};
+  function tierBadge(elo){ const t=Ranked.tierOf(elo); return `<span class="tier tier-${t.key}">${esc(t.label)}</span>`; }
+  function renderRanked(){
+    const card=$('#olRanked'); if(!card) return;
+    const signed = typeof Account!=='undefined' && Account.signedIn(), u = signed ? Account.user() : null;
+    card.hidden = !server();
+    $('#olRankedMe').innerHTML = u ? `${tierBadge(u.elo)}<b class="ranked-elo">${u.elo}</b>` : '';
+    const body=$('#olRankedBody'), resume=savedBot();
+    if(!u){ body.innerHTML=`<div class="btn-row"><button type="button" class="btn btn-primary" data-open-login-r>Đăng nhập để đấu xếp hạng</button></div>`;
+      $('[data-open-login-r]',body).addEventListener('click',()=>Account.openLogin()); return; }
+    if(resume && !resume.result){
+      body.innerHTML=`<div class="ranked-resume"><span>Bạn có ván xếp hạng đang dở với <b>${esc(resume.botName)}</b>.</span><button type="button" class="btn btn-primary" id="olResume">Vào tiếp</button></div>`;
+      $('#olResume').addEventListener('click',()=>startBotMatch(resume, true)); return;
+    }
+    if(search.active){
+      const sec=Math.floor((Date.now()-search.t0)/1000);
+      body.innerHTML=`<div class="ranked-search"><span class="spinner" aria-hidden="true"></span><span>Đang tìm đối thủ… <b>0:${String(sec).padStart(2,'0')}</b></span><button type="button" class="btn btn-outline btn-sm" id="olSearchCancel">Huỷ</button></div>`;
+      $('#olSearchCancel').addEventListener('click',cancelSearch); return;
+    }
+    body.innerHTML=`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}Tìm trận</button><p class="hint-text small ranked-note">Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.</p>`;
+    $('#olFindMatch').addEventListener('click',startSearch);
+  }
+  async function startSearch(){
+    if(search.active) return;
+    search.active=true; search.t0=Date.now(); renderRanked();
+    search.tick=setInterval(renderRanked, 1000);
+    const poll=async()=>{
+      if(!search.active) return;
+      let r=null;
+      try{
+        r = Date.now()-search.t0 >= Ranked.MATCH_WAIT_MS ? await Account.call('POST','/api/match/bot') : await Account.call('POST','/api/match/join');
+      }catch(e){ stopSearch(); flashLobby(e.message); return; }
+      if(!search.active) return;
+      if(r.status==='matched'){ stopSearch(); st.ranked=true; enterRoom(r.roomCode, {color:r.color, rated:true, match:true}); return; }
+      if(r.status==='bot'){ stopSearch(); startBotMatch(r.game); return; }
+      search.timer=setTimeout(poll, 1500);
+    };
+    poll();
+  }
+  function stopSearch(){ search.active=false; clearTimeout(search.timer); clearInterval(search.tick); renderRanked(); }
+  async function cancelSearch(){
+    stopSearch();
+    try{ const r=await Account.call('POST','/api/match/cancel'); if(r.status==='matched'){ st.ranked=true; enterRoom(r.roomCode, {color:r.color, rated:true, match:true}); } }catch(e){}
+  }
+  function flashLobby(t){ $('#olJoinMsg').textContent=t; }
+
+  /* Ván với máy: một "phòng ảo" cùng dạng dữ liệu với phòng online để dùng chung giao diện */
+  const BOT_KEY='xq_ranked_bot';
+  function savedBot(){ const v=safeJSON(BOT_KEY,null); return v && v.id ? v : null; }
+  function saveBot(){ if(st.bot) safeLS_set(BOT_KEY, JSON.stringify(Object.assign({}, st.bot, {timer:undefined}))); }
+  function clearBot(){ try{ localStorage.removeItem(BOT_KEY); }catch(e){} }
+  function botRoomView(){
+    const b=st.bot, u=Account.user()||{displayName:myName(), elo:1200}, opp=other(b.color);
+    const seats={}; seats[b.color]={name:u.displayName, online:true, elo:u.elo, username:u.username};
+    seats[opp]={name:b.botName, online:true, elo:b.botElo, username:b.botName};
+    const elo = b.elo ? {[b.color]:{before:b.elo.before, after:b.elo.after}} : null;
+    return {type:'state', code:b.code, you:b.color, seats, game:1, moves:b.moves.map(m=>m.slice()), result:b.result, offer:b.offer,
+      chat:b.chat.slice(), spectators:0, rated:true, elo, abandonMs:300000, serverNow:Date.now()};
+  }
+  function botPush(){ saveBot(); apply(botRoomView()); }
+  function startBotMatch(game, resumed){
+    disconnect(); st.ranked=true;
+    const code = resumed ? game.code : newCode();
+    st.bot = resumed ? Object.assign({}, game) : {id:game.id, level:game.level, botName:game.botName, botElo:game.botElo, color:game.color,
+      code, moves:[], result:null, offer:null, chat:[], elo:null, submitted:false, t0:Date.now()};
+    st.code=st.bot.code; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0; st.everOpen=true;
+    $('#olLobby').hidden=true; $('#olRoom').hidden=false;
+    setConn('open');
+    if(!resumed){
+      const greet=['Chào bạn!','hi','Chào nhé','Đánh vui nha!',''][Math.floor(Math.random()*5)];
+      if(greet) setTimeout(()=>{ if(st.bot && !st.bot.result){ st.bot.chat.push({by:st.bot.botName, seat:other(st.bot.color), text:greet, t:Date.now()}); botPush(); } }, 900+Math.random()*1500);
+    }
+    botPush();
+    if(st.bot.result && !st.bot.submitted) botSubmit();
+    else botMaybeMove();
+    revealBoard($('#olBoardCard'));
+  }
+  function botGame(){ return replay(st.bot.moves, null); }
+  function botMaterial(board, color){
+    const V={R:9,H:4,C:4.5,E:2,A:2,S:1,G:0}; let d=0;
+    for(let r=0;r<10;r++) for(let c=0;c<9;c++){ const p=board[r][c]; if(!p) continue; let v=V[p.type]||0; if(p.type==='S' && (p.color==='red'?r<=4:r>=5)) v=2; d += p.color===color ? v : -v; }
+    return d;
+  }
+  function botFinish(result){ st.bot.result=result; st.bot.offer=null; botPush(); botSubmit(); }
+  async function botSubmit(){
+    const b=st.bot; if(!b || !b.result || b.submitted) return;
+    try{
+      const r=await Account.call('POST',`/api/match/bot/${b.id}/finish`, {moves:b.moves, reason:b.result.reason, winner:b.result.winner});
+      if(st.bot!==b) return;
+      b.submitted=true; b.elo=r.elo||null; if(r.user) Account.setUser(r.user);
+      if(Math.random()<0.6) b.chat.push({by:b.botName, seat:other(b.color), text:['Ván hay, cảm ơn bạn!','gg','Hay quá','gg wp',':)'][Math.floor(Math.random()*5)], t:Date.now()});
+      botPush(); clearBot();
+    }catch(e){ flash('Chưa gửi được kết quả — sẽ thử lại.'); setTimeout(()=>{ if(st.bot===b) botSubmit(); }, 5000); }
+  }
+  function botHandle(o){
+    const b=st.bot; if(!b) return;
+    if(o.type==='chat'){ const t=String(o.text||'').trim().slice(0,200); if(t){ b.chat.push({by:myName(), seat:b.color, text:t, t:Date.now()}); botPush(); } return; }
+    if(b.result) return;
+    if(o.type==='move'){
+      const g=botGame();
+      if(g.turn()!==b.color || o.n!==b.moves.length) return onError('stale');
+      if(!g.legalMoves().some(m=>m.from[0]===o.from[0]&&m.from[1]===o.from[1]&&m.to[0]===o.to[0]&&m.to[1]===o.to[1])) return onError('illegal');
+      g.play({from:o.from, to:o.to}); b.moves.push([o.from[0],o.from[1],o.to[0],o.to[1]]);
+      if(g.result) return botFinish({winner:g.result.winner, reason:g.result.reason});
+      botPush(); botMaybeMove(); return;
+    }
+    if(o.type==='resign') return botFinish({winner:other(b.color), reason:'resign'});
+    if(o.type==='offer' && o.kind==='draw'){
+      b.offer={kind:'draw', by:b.color}; botPush();
+      setTimeout(()=>{
+        if(st.bot!==b || b.result || !b.offer) return;
+        const g=botGame(), ok = b.moves.length>=60 && Math.abs(botMaterial(g.board(), b.color))<=2 && Math.abs(b.lastScore||0)<150;
+        b.offer=null;
+        if(ok){ b.chat.push({sys:true, text:'Hai bên đồng ý hoà.', t:Date.now()}); botFinish({winner:null, reason:'agreed'}); }
+        else { b.chat.push({sys:true, text:`${b.botName} từ chối hoà.`, t:Date.now()}); botPush(); }
+      }, 1500+Math.random()*2500);
+      return;
+    }
+    if(o.type==='cancel'){ b.offer=null; botPush(); }
+  }
+  // Máy đi: nghĩ như người (1–7 giây), đầu hàng khi thua quá rõ
+  function botMaybeMove(){
+    const b=st.bot; if(!b || b.result) return;
+    const g=botGame(); if(g.turn()===b.color) return;
+    const L=Ranked.BOT_LEVELS[b.level-1], t0=Date.now();
+    const want = 1000 + Math.random()*Math.min(6000, 1500 + b.moves.length*60);
+    (async()=>{
+      let mv=null, score=0;
+      if(L.book){ st.book = st.book || buildOpeningBook(OPENINGS); const o=st.book.get(Game.key(g.board(),g.turn())); if(o && o.length) mv=o[Math.floor(Math.random()*o.length)].move; }
+      if(!mv){ try{ const r=await AIEngine.think(aiThinkArgs(g,{timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder})); mv=r&&r.move; score=(r&&r.score)||0; }catch(e){} }
+      b.timer=setTimeout(()=>{
+        if(st.bot!==b || b.result) return;
+        b.lastScore=score;
+        // đầu hàng khi bị dẫn quá xa (máy chủ chỉ nhận khi người chơi hơn rõ về quân)
+        if(score<-900 && botMaterial(g.board(), b.color)>=6 && b.moves.length>=10){
+          b.badTurns=(b.badTurns||0)+1;
+          if(b.badTurns>=2){ b.chat.push({by:b.botName, seat:other(b.color), text:['Thua rồi, bạn giỏi quá','Chịu thua','gg'][Math.floor(Math.random()*3)], t:Date.now()}); return botFinish({winner:b.color, reason:'resign'}); }
+        } else b.badTurns=0;
+        if(!mv) return;
+        g.play(mv); b.moves.push([mv.from[0],mv.from[1],mv.to[0],mv.to[1]]);
+        if(g.result) return botFinish({winner:g.result.winner, reason:g.result.reason});
+        botPush();
+      }, Math.max(150, want-(Date.now()-t0)));
+    })();
+  }
+
   function init(){
     st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ Sa trường'});
     st.ctl=makeClickController({ widget:st.widget, getBoard:board, turn:()=>(st.local||st.game||Game.create()).turn(), canMove, onMove, extraMeta:meta,
@@ -6930,12 +7199,6 @@ const Online = (function(){
     st.game=Game.create();
     $('#olName').value=myName();
     $('#olName').addEventListener('change',()=>{ const v=$('#olName').value.trim(); if(v) safeLS_set('xq_online_name',v.slice(0,24)); });
-    $('#olServer').value=safeLS_get('xq_online_server')||'';
-    $('#olServerSave').addEventListener('click',()=>{
-      const raw=$('#olServer').value.trim(), v=normServer(raw);
-      if(raw && !v){ $('#olServerMsg').textContent='Địa chỉ phải bắt đầu bằng wss:// (hoặc https://).'; return; }
-      safeLS_set('xq_online_server', v); $('#olServerMsg').textContent = v ? 'Đã lưu.' : 'Đã chuyển về server mặc định.'; renderLobby();
-    });
     $('#olCreate').addEventListener('click',()=>{
       if(!ensureName()) return;
       enterRoom(newCode(), {color:($('input[name="olColor"]:checked')||{}).value||'red', rated:Account.signedIn() && $('#olRated').checked});
@@ -6948,7 +7211,8 @@ const Online = (function(){
     };
     $('#olJoin').addEventListener('click',join);
     $('#olJoinCode').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
-    $('#olLeave').addEventListener('click',()=>{ disconnect(); showLobby(); });
+    $('#olLeave').addEventListener('click',()=>{ disconnect(); st.ranked=false; showLobby(); });
+    $('#olNextMatch').addEventListener('click',()=>{ disconnect(); st.ranked=false; showLobby(); startSearch(); });
     $('#olDraw').addEventListener('click',()=>send({type:'offer', kind:'draw'}));
     $('#olTakeback').addEventListener('click',()=>send({type:'offer', kind:'takeback'}));
     $('#olRematch').addEventListener('click',()=>send({type:'offer', kind:'rematch'}));
@@ -6967,13 +7231,19 @@ const Online = (function(){
       if(t && send({type:'chat', text:t})) inp.value='';
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
-    document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('accountchange',()=>{
+      if(st.code) return;
+      // mở link mời khi chưa đăng nhập: đăng nhập xong thì vào phòng luôn
+      const rc=parseCode(params().get('room')||'');
+      if(rc && Account.signedIn()){ showZone('satruong'); enterRoom(rc); return; }
+      renderLobby();
+    });
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }
   }
-  return {init, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
+  return {init, startSearch, renderRanked, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
 })();
 function initOnline(){ Online.init(); }
 /* =========================================================================
@@ -6985,7 +7255,7 @@ function initOnline(){ Online.init(); }
      máy chủ gộp rồi trả về bản đã gộp.
    ========================================================================= */
 const Account = (function(){
-  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta']);
+  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta','xq_ranked_bot']);
   const LEARN_KEYS = ['xq_lessons_done','xq_puzzles_solved','xq_sc_solved','xq_tactics_seen','xq_eg_seen','xq_srs','xq_daily','xq_trainer_best','xq_ai_history','xq_online_history'];
   const USER_RE = /^[a-z0-9_.]{3,20}$/;
   const st = { user:null, sync:'idle', syncTimer:0, applying:false, inbox:null, inboxTimer:0, expired:false, seenInvites:new Set(), seenSent:new Set(),
@@ -7262,7 +7532,7 @@ const Account = (function(){
     });
   }
   function noServerNotice(){
-    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa có địa chỉ máy chủ — xem mục “Máy chủ (nâng cao)” ở Sa trường.');
+    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa kết nối được máy chủ tài khoản — hãy thử lại sau.');
   }
   function confirmDialog(title, html, okLabel, run, danger){
     openDialog(`${dlgHead(title)}${html}<p class="dlg-msg" role="alert"></p>
@@ -7299,13 +7569,14 @@ const Account = (function(){
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
     $('#meAuthBtns').hidden=!available();
     const ns=$('#meNoServer'); ns.hidden=available();
-    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa có địa chỉ máy chủ nên chưa đăng nhập được (xem mục “Máy chủ (nâng cao)” ở Sa trường).';
+    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa kết nối được máy chủ tài khoản nên chưa đăng nhập được.';
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;
     $('#meSub').textContent=`@${u.username} · tham gia ${fmtDate(u.createdAt)}`;
     $('#meElo').textContent=u.elo;
-    $('#meEloSub').textContent = u.ratedGames>=5 ? `Elo · cao nhất ${u.peakElo}` : `Elo · chưa xếp hạng (còn ${5-u.ratedGames} ván)`;
+    const t=Ranked.tierOf(u.elo);
+    $('#meEloSub').innerHTML = `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
     const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
     const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
     $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
@@ -7313,8 +7584,14 @@ const Account = (function(){
       + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
     renderSync();
   }
+  // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
+  function renderGate(){
+    const need = available() && !signedIn();
+    $('#authGate').hidden=!need;
+    document.body.classList.toggle('gated', need);
+  }
   function render(){
-    renderTop(); renderMe();
+    renderTop(); renderMe(); renderGate();
     const on=signedIn();
     $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
     $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });
@@ -7542,7 +7819,7 @@ const Account = (function(){
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
       <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
-      <span class="rank-elo">${x.elo}</span></div>`;
+      <span class="rank-elo"><span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}</span></div>`;
     el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
   }
@@ -7562,7 +7839,7 @@ const Account = (function(){
     render();
     if(token() && available()){ refreshMe().then(()=>{ if(signedIn()){ sync(); startInbox(); } }); }
   }
-  return {init, sync, signedIn, user:()=>st.user, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
+  return {init, sync, signedIn, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
 })();
 function initAccount(){ Account.init(); }
 /* =========================================================================

@@ -1,13 +1,12 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-Đã mở **PR #3** (https://github.com/duckie17-fox/CoTuong/pull/3) gộp nhánh vào main — chờ CI và người dùng merge.
+Trên nhánh (chưa merge): Đấu xếp hạng + tên cấp phòng tập kiểu võ tướng (Tiểu Tốt → Nguyên Soái) + **bắt buộc đăng nhập**.
+78 test + e2e 5/5.
 
 ## Next step
-1. Theo dõi CI của PR #3; đỏ thì sửa.
-2. Người dùng merge → workflow deploy tự tạo D1 + migrations + đưa server/web lên.
-3. Sau deploy: nhờ người dùng thử đăng ký trên https://duckie17-fox.github.io/CoTuong/ (container không vào được workers.dev).
-4. Sau khi merge: dựng lại nhánh làm việc từ origin/main cho việc tiếp theo.
+1. Người dùng xem; ổn thì tạo PR → merge → deploy (migration 0002 tự chạy).
+2. Sau deploy: hiệu chỉnh Elo các cấp máy theo ván thật; cân nhắc dòng "có thể ghép với đối thủ máy" (đã đề xuất, chờ người dùng).
 
 ## Blocker
-- Chờ người dùng merge PR #3.
+- Không có.

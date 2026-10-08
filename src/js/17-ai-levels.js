@@ -3,29 +3,22 @@
    Đây là MÔ PHỎNG TƯƠNG ĐỐI, không phải đo bằng thi đấu với người thật. Phần mô tả
    ghi kết quả đo bằng tools/ladder.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
+// Tên cấp theo cấp bậc võ tướng thời xưa (người dùng chọn): Tiểu Tốt → Nguyên Soái.
+// elo: cùng thông số với cấp máy xếp hạng tương ứng (Ranked.BOT_LEVELS) để quy ra bậc hạng.
 const AI_LEVELS = [
-  {id:1,  name:'Tân thủ',           maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false},
-  {id:2,  name:'Kỳ sĩ cấp 14–12',   maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false},
-  {id:3,  name:'Kỳ sĩ cấp 11–9',    maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false},
-  {id:4,  name:'Kỳ sĩ cấp 8–7',     maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false},
-  {id:5,  name:'Kỳ sĩ cấp 6–5',     maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false},
-  {id:6,  name:'Kỳ sĩ cấp 4–3',     maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false},
-  {id:7,  name:'Kỳ sĩ cấp 2',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false},
-  {id:8,  name:'Kỳ sĩ cấp 1',       maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false},
-  {id:9,  name:'Ứng viên đại sư',   maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true},
-  {id:10, name:'Đại sư địa phương', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true},
+  {id:1,  name:'Tiểu Tốt',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
+  {id:2,  name:'Ngũ Trưởng',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
+  {id:3,  name:'Thập Trưởng',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
+  {id:4,  name:'Bách Hộ',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
+  {id:5,  name:'Thiên Hộ',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
+  {id:6,  name:'Hiệu Úy',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
+  {id:7,  name:'Tướng Quân',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
+  {id:8,  name:'Đại Tướng',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
+  {id:9,  name:'Thượng Tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
+  {id:10, name:'Nguyên Soái', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
 ];
-// Mô tả cho người chơi: cách máy chơi ở mỗi cấp + kết quả đo với cấp ngay dưới (LEVEL_MEASURED)
-// Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp)
+// Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp) — cấp sau thắng cấp trước bao nhiêu %
 const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};
-AI_LEVELS.forEach(l=>{
-  const how = l.blunder>=0.1 ? 'hay đi nước ngẫu nhiên, bỏ sót quân'
-    : l.blunder>0 ? 'thỉnh thoảng sơ suất'
-    : l.noise>0 ? 'không sơ suất ngẫu nhiên, đôi khi chọn nước chưa tối ưu'
-    : 'luôn chọn nước tốt nhất tìm được';
-  const depth = l.maxDepth>=40 ? `tính tới ${l.timeMs/1000} giây/nước` : `nhìn trước ${l.maxDepth} nửa nước`;
-  l.desc = `${depth[0].toUpperCase()+depth.slice(1)}${l.book?', có sách khai cuộc':''}, ${how}` + (LEVEL_MEASURED[l.id] ? ` · thắng cấp ${l.id-1} khoảng ${LEVEL_MEASURED[l.id]}% số ván` : '');
-});
 // Thang cấp cũ (6 cấp) → thang mới (10 cấp): cấp đã lưu và lịch sử ván trước đây vẫn hiển thị đúng
 const LADDER_VERSION=2, OLD_LEVEL_MAP={1:1,2:4,3:6,4:8,5:9,6:10};
 function recLevel(rec){ return rec.ladder===LADDER_VERSION ? rec.level : (OLD_LEVEL_MAP[rec.level]||rec.level); }

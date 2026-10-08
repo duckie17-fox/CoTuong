@@ -7,7 +7,7 @@
      máy chủ gộp rồi trả về bản đã gộp.
    ========================================================================= */
 const Account = (function(){
-  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta']);
+  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta','xq_ranked_bot']);
   const LEARN_KEYS = ['xq_lessons_done','xq_puzzles_solved','xq_sc_solved','xq_tactics_seen','xq_eg_seen','xq_srs','xq_daily','xq_trainer_best','xq_ai_history','xq_online_history'];
   const USER_RE = /^[a-z0-9_.]{3,20}$/;
   const st = { user:null, sync:'idle', syncTimer:0, applying:false, inbox:null, inboxTimer:0, expired:false, seenInvites:new Set(), seenSent:new Set(),
@@ -284,7 +284,7 @@ const Account = (function(){
     });
   }
   function noServerNotice(){
-    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa có địa chỉ máy chủ — xem mục “Máy chủ (nâng cao)” ở Sa trường.');
+    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa kết nối được máy chủ tài khoản — hãy thử lại sau.');
   }
   function confirmDialog(title, html, okLabel, run, danger){
     openDialog(`${dlgHead(title)}${html}<p class="dlg-msg" role="alert"></p>
@@ -321,13 +321,14 @@ const Account = (function(){
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
     $('#meAuthBtns').hidden=!available();
     const ns=$('#meNoServer'); ns.hidden=available();
-    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa có địa chỉ máy chủ nên chưa đăng nhập được (xem mục “Máy chủ (nâng cao)” ở Sa trường).';
+    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa kết nối được máy chủ tài khoản nên chưa đăng nhập được.';
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;
     $('#meSub').textContent=`@${u.username} · tham gia ${fmtDate(u.createdAt)}`;
     $('#meElo').textContent=u.elo;
-    $('#meEloSub').textContent = u.ratedGames>=5 ? `Elo · cao nhất ${u.peakElo}` : `Elo · chưa xếp hạng (còn ${5-u.ratedGames} ván)`;
+    const t=Ranked.tierOf(u.elo);
+    $('#meEloSub').innerHTML = `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
     const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
     const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
     $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
@@ -335,8 +336,14 @@ const Account = (function(){
       + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
     renderSync();
   }
+  // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
+  function renderGate(){
+    const need = available() && !signedIn();
+    $('#authGate').hidden=!need;
+    document.body.classList.toggle('gated', need);
+  }
   function render(){
-    renderTop(); renderMe();
+    renderTop(); renderMe(); renderGate();
     const on=signedIn();
     $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
     $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });
@@ -564,7 +571,7 @@ const Account = (function(){
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
       <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
-      <span class="rank-elo">${x.elo}</span></div>`;
+      <span class="rank-elo"><span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}</span></div>`;
     el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
   }
@@ -584,6 +591,6 @@ const Account = (function(){
     render();
     if(token() && available()){ refreshMe().then(()=>{ if(signedIn()){ sync(); startInbox(); } }); }
   }
-  return {init, sync, signedIn, user:()=>st.user, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
+  return {init, sync, signedIn, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
 })();
 function initAccount(){ Account.init(); }

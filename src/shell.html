@@ -185,7 +185,7 @@
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
+    <p>Chọn cấp và màu quân. Mỗi cấp ghi bậc hạng tương đương ở Đấu xếp hạng. Xong ván, bấm <b>Phân tích ván</b> để xem mình đi hay, dở ở đâu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -349,6 +349,13 @@
  <div data-stpanel="phong">
   <div id="olLobby">
     <div id="olNotice"></div>
+    <div class="card ranked-card" id="olRanked">
+      <div class="ranked-head">
+        <div><h2>Đấu xếp hạng</h2><div class="hint-text small" id="olRankedSub">Ghép với người chơi cùng trình độ</div></div>
+        <div class="ranked-me" id="olRankedMe"></div>
+      </div>
+      <div id="olRankedBody"></div>
+    </div>
     <div id="olFriendsOnline" class="card" hidden></div>
     <div class="ol-grid">
       <div class="card ol-box">
@@ -378,11 +385,6 @@
     </div>
     <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
     <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
-    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
-      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
-      <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
-      <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
-    </details>
   </div>
 
   <div class="card" id="olRoom" hidden>
@@ -407,6 +409,7 @@
         <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
+          <button type="button" class="btn btn-primary btn-sm" id="olNextMatch" hidden><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Tìm trận mới</button>
           <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
         </div>
       </div>
@@ -543,6 +546,18 @@
 </section>
 
 </main>
+<div class="auth-gate" id="authGate" hidden>
+  <div class="gate-box">
+    <span class="seal gate-seal" aria-hidden="true">象</span>
+    <h1 class="gate-title">Cờ Tướng</h1>
+    <p class="gate-sub">Học cờ, đấu với máy và đấu xếp hạng với bạn bè.</p>
+    <div class="gate-btns">
+      <button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button>
+      <button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button>
+    </div>
+    <p class="hint-text small gate-note">Tiến độ của bạn được lưu theo tài khoản, dùng được trên mọi máy.</p>
+  </div>
+</div>
 <div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
 <div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 

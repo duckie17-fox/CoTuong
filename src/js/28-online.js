@@ -74,7 +74,7 @@ const Online = (function(){
 
   /* ---------- kết nối ---------- */
   function setConn(c){ st.conn=c; renderConn(); }
-  function send(o){ if(st.ws && st.ws.readyState===1){ st.ws.send(JSON.stringify(o)); return true; } flash('Mất kết nối — đang kết nối lại…'); return false; }
+  function send(o){ if(st.bot){ botHandle(o); return true; } if(st.ws && st.ws.readyState===1){ st.ws.send(JSON.stringify(o)); return true; } flash('Mất kết nối — đang kết nối lại…'); return false; }
   function connect(){
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const srv=server();
@@ -86,7 +86,7 @@ const Online = (function(){
       if(st.ws!==ws) return;
       st.retry=0; st.everOpen=true; setConn('open');
       const msg={type:'join', name:myName()||'Kỳ thủ', token:token()};
-      if(st.create) msg.create={color:st.create.color, rated:!!st.create.rated};
+      if(st.create) msg.create={color:st.create.color, rated:!!st.create.rated, match:!!st.create.match};
       if(Account.signedIn()) msg.auth=Account.token();
       ws.send(JSON.stringify(msg));
       st.ping=setInterval(()=>{ try{ ws.readyState===1 && ws.send('ping'); }catch(e){} }, 25000);
@@ -118,6 +118,7 @@ const Online = (function(){
   }
   function disconnect(){
     keepAwake(false);
+    if(st.bot){ clearTimeout(st.bot.timer); st.bot=null; }
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const ws=st.ws; st.ws=null; st.code=null; st.room=null;
     if(ws) try{ ws.close(1000); }catch(e){}
@@ -161,7 +162,7 @@ const Online = (function(){
       if(last.t!==seen && !last.sys && !(last.seat ? last.seat===room.you : last.by===myName())) toast(`${last.by}: ${last.text}`);
     }
     const opp=room.seats[other(room.you)];
-    saveRecent({code:room.code, you:room.you, opp: room.you==='spectator' ? `${(room.seats.red||{}).name||'?'} – ${(room.seats.black||{}).name||'?'}` : (opp?opp.name:''), result:room.result, n:room.moves.length});
+    if(!st.bot) saveRecent({code:room.code, you:room.you, opp: room.you==='spectator' ? `${(room.seats.red||{}).name||'?'} – ${(room.seats.black||{}).name||'?'}` : (opp?opp.name:''), result:room.result, n:room.moves.length});
     if(room.result && room.you!=='spectator'){
       const key=room.code+'#'+room.game;
       if(st.lastResultKey!==key){ st.lastResultKey=key; if(!history().some(r=>r.id===`ol-${room.code}-${room.game}`)) { saveRecord(recordOf(room)); renderLobby(); } }
@@ -283,7 +284,8 @@ const Online = (function(){
     renderClaim();
     $('#olResign').disabled = !hasOpp && !r.moves.length;
     $('#olAfter').hidden = !over;
-    $('#olRematch').hidden = !seated || !hasOpp;
+    $('#olRematch').hidden = !seated || !hasOpp || !!st.ranked;
+    $('#olNextMatch').hidden = !st.ranked;
     $('#olRematch').disabled = pending;
     $('#olChatInput').placeholder = seated ? 'Nhắn cho đối thủ…' : 'Nhắn với hai kỳ thủ…';
   }
@@ -311,7 +313,7 @@ const Online = (function(){
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
       return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Chưa có địa chỉ máy chủ Sa trường. Nhập địa chỉ ở mục “Máy chủ (nâng cao)” bên dưới.';
+    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -323,6 +325,7 @@ const Online = (function(){
   }
   function renderLobby(){
     renderNotice();
+    renderRanked();
     const u=Account.signedIn() ? Account.user() : null;
     $('.ol-name').hidden=!!u; $('#olRatedWrap').hidden=!u;
     $('#olAsUser').hidden=!u; if(u) $('#olAsUser').innerHTML=`Bạn chơi với tên <b>${esc(u.displayName)}</b> · Elo ${u.elo}.`;
@@ -363,6 +366,7 @@ const Online = (function(){
   function enterRoom(code, create){
     if(!myName() && !ensureName()) { showLobby(); return; }
     disconnect();
+    st.ranked=!!(create && create.match);
     st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
     $('#olLobby').hidden=true; $('#olRoom').hidden=false;
     setRoomParam(code);
@@ -374,6 +378,154 @@ const Online = (function(){
     showTab('may'); openReview(rec);
   }
 
+
+  /* ---------- Đấu xếp hạng (spec v4): ghép người 8 giây, không có thì ghép máy ---------- */
+  const search = {active:false, t0:0, timer:0, tick:0};
+  function tierBadge(elo){ const t=Ranked.tierOf(elo); return `<span class="tier tier-${t.key}">${esc(t.label)}</span>`; }
+  function renderRanked(){
+    const card=$('#olRanked'); if(!card) return;
+    const signed = typeof Account!=='undefined' && Account.signedIn(), u = signed ? Account.user() : null;
+    card.hidden = !server();
+    $('#olRankedMe').innerHTML = u ? `${tierBadge(u.elo)}<b class="ranked-elo">${u.elo}</b>` : '';
+    const body=$('#olRankedBody'), resume=savedBot();
+    if(!u){ body.innerHTML=`<div class="btn-row"><button type="button" class="btn btn-primary" data-open-login-r>Đăng nhập để đấu xếp hạng</button></div>`;
+      $('[data-open-login-r]',body).addEventListener('click',()=>Account.openLogin()); return; }
+    if(resume && !resume.result){
+      body.innerHTML=`<div class="ranked-resume"><span>Bạn có ván xếp hạng đang dở với <b>${esc(resume.botName)}</b>.</span><button type="button" class="btn btn-primary" id="olResume">Vào tiếp</button></div>`;
+      $('#olResume').addEventListener('click',()=>startBotMatch(resume, true)); return;
+    }
+    if(search.active){
+      const sec=Math.floor((Date.now()-search.t0)/1000);
+      body.innerHTML=`<div class="ranked-search"><span class="spinner" aria-hidden="true"></span><span>Đang tìm đối thủ… <b>0:${String(sec).padStart(2,'0')}</b></span><button type="button" class="btn btn-outline btn-sm" id="olSearchCancel">Huỷ</button></div>`;
+      $('#olSearchCancel').addEventListener('click',cancelSearch); return;
+    }
+    body.innerHTML=`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}Tìm trận</button><p class="hint-text small ranked-note">Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.</p>`;
+    $('#olFindMatch').addEventListener('click',startSearch);
+  }
+  async function startSearch(){
+    if(search.active) return;
+    search.active=true; search.t0=Date.now(); renderRanked();
+    search.tick=setInterval(renderRanked, 1000);
+    const poll=async()=>{
+      if(!search.active) return;
+      let r=null;
+      try{
+        r = Date.now()-search.t0 >= Ranked.MATCH_WAIT_MS ? await Account.call('POST','/api/match/bot') : await Account.call('POST','/api/match/join');
+      }catch(e){ stopSearch(); flashLobby(e.message); return; }
+      if(!search.active) return;
+      if(r.status==='matched'){ stopSearch(); st.ranked=true; enterRoom(r.roomCode, {color:r.color, rated:true, match:true}); return; }
+      if(r.status==='bot'){ stopSearch(); startBotMatch(r.game); return; }
+      search.timer=setTimeout(poll, 1500);
+    };
+    poll();
+  }
+  function stopSearch(){ search.active=false; clearTimeout(search.timer); clearInterval(search.tick); renderRanked(); }
+  async function cancelSearch(){
+    stopSearch();
+    try{ const r=await Account.call('POST','/api/match/cancel'); if(r.status==='matched'){ st.ranked=true; enterRoom(r.roomCode, {color:r.color, rated:true, match:true}); } }catch(e){}
+  }
+  function flashLobby(t){ $('#olJoinMsg').textContent=t; }
+
+  /* Ván với máy: một "phòng ảo" cùng dạng dữ liệu với phòng online để dùng chung giao diện */
+  const BOT_KEY='xq_ranked_bot';
+  function savedBot(){ const v=safeJSON(BOT_KEY,null); return v && v.id ? v : null; }
+  function saveBot(){ if(st.bot) safeLS_set(BOT_KEY, JSON.stringify(Object.assign({}, st.bot, {timer:undefined}))); }
+  function clearBot(){ try{ localStorage.removeItem(BOT_KEY); }catch(e){} }
+  function botRoomView(){
+    const b=st.bot, u=Account.user()||{displayName:myName(), elo:1200}, opp=other(b.color);
+    const seats={}; seats[b.color]={name:u.displayName, online:true, elo:u.elo, username:u.username};
+    seats[opp]={name:b.botName, online:true, elo:b.botElo, username:b.botName};
+    const elo = b.elo ? {[b.color]:{before:b.elo.before, after:b.elo.after}} : null;
+    return {type:'state', code:b.code, you:b.color, seats, game:1, moves:b.moves.map(m=>m.slice()), result:b.result, offer:b.offer,
+      chat:b.chat.slice(), spectators:0, rated:true, elo, abandonMs:300000, serverNow:Date.now()};
+  }
+  function botPush(){ saveBot(); apply(botRoomView()); }
+  function startBotMatch(game, resumed){
+    disconnect(); st.ranked=true;
+    const code = resumed ? game.code : newCode();
+    st.bot = resumed ? Object.assign({}, game) : {id:game.id, level:game.level, botName:game.botName, botElo:game.botElo, color:game.color,
+      code, moves:[], result:null, offer:null, chat:[], elo:null, submitted:false, t0:Date.now()};
+    st.code=st.bot.code; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0; st.everOpen=true;
+    $('#olLobby').hidden=true; $('#olRoom').hidden=false;
+    setConn('open');
+    if(!resumed){
+      const greet=['Chào bạn!','hi','Chào nhé','Đánh vui nha!',''][Math.floor(Math.random()*5)];
+      if(greet) setTimeout(()=>{ if(st.bot && !st.bot.result){ st.bot.chat.push({by:st.bot.botName, seat:other(st.bot.color), text:greet, t:Date.now()}); botPush(); } }, 900+Math.random()*1500);
+    }
+    botPush();
+    if(st.bot.result && !st.bot.submitted) botSubmit();
+    else botMaybeMove();
+    revealBoard($('#olBoardCard'));
+  }
+  function botGame(){ return replay(st.bot.moves, null); }
+  function botMaterial(board, color){
+    const V={R:9,H:4,C:4.5,E:2,A:2,S:1,G:0}; let d=0;
+    for(let r=0;r<10;r++) for(let c=0;c<9;c++){ const p=board[r][c]; if(!p) continue; let v=V[p.type]||0; if(p.type==='S' && (p.color==='red'?r<=4:r>=5)) v=2; d += p.color===color ? v : -v; }
+    return d;
+  }
+  function botFinish(result){ st.bot.result=result; st.bot.offer=null; botPush(); botSubmit(); }
+  async function botSubmit(){
+    const b=st.bot; if(!b || !b.result || b.submitted) return;
+    try{
+      const r=await Account.call('POST',`/api/match/bot/${b.id}/finish`, {moves:b.moves, reason:b.result.reason, winner:b.result.winner});
+      if(st.bot!==b) return;
+      b.submitted=true; b.elo=r.elo||null; if(r.user) Account.setUser(r.user);
+      if(Math.random()<0.6) b.chat.push({by:b.botName, seat:other(b.color), text:['Ván hay, cảm ơn bạn!','gg','Hay quá','gg wp',':)'][Math.floor(Math.random()*5)], t:Date.now()});
+      botPush(); clearBot();
+    }catch(e){ flash('Chưa gửi được kết quả — sẽ thử lại.'); setTimeout(()=>{ if(st.bot===b) botSubmit(); }, 5000); }
+  }
+  function botHandle(o){
+    const b=st.bot; if(!b) return;
+    if(o.type==='chat'){ const t=String(o.text||'').trim().slice(0,200); if(t){ b.chat.push({by:myName(), seat:b.color, text:t, t:Date.now()}); botPush(); } return; }
+    if(b.result) return;
+    if(o.type==='move'){
+      const g=botGame();
+      if(g.turn()!==b.color || o.n!==b.moves.length) return onError('stale');
+      if(!g.legalMoves().some(m=>m.from[0]===o.from[0]&&m.from[1]===o.from[1]&&m.to[0]===o.to[0]&&m.to[1]===o.to[1])) return onError('illegal');
+      g.play({from:o.from, to:o.to}); b.moves.push([o.from[0],o.from[1],o.to[0],o.to[1]]);
+      if(g.result) return botFinish({winner:g.result.winner, reason:g.result.reason});
+      botPush(); botMaybeMove(); return;
+    }
+    if(o.type==='resign') return botFinish({winner:other(b.color), reason:'resign'});
+    if(o.type==='offer' && o.kind==='draw'){
+      b.offer={kind:'draw', by:b.color}; botPush();
+      setTimeout(()=>{
+        if(st.bot!==b || b.result || !b.offer) return;
+        const g=botGame(), ok = b.moves.length>=60 && Math.abs(botMaterial(g.board(), b.color))<=2 && Math.abs(b.lastScore||0)<150;
+        b.offer=null;
+        if(ok){ b.chat.push({sys:true, text:'Hai bên đồng ý hoà.', t:Date.now()}); botFinish({winner:null, reason:'agreed'}); }
+        else { b.chat.push({sys:true, text:`${b.botName} từ chối hoà.`, t:Date.now()}); botPush(); }
+      }, 1500+Math.random()*2500);
+      return;
+    }
+    if(o.type==='cancel'){ b.offer=null; botPush(); }
+  }
+  // Máy đi: nghĩ như người (1–7 giây), đầu hàng khi thua quá rõ
+  function botMaybeMove(){
+    const b=st.bot; if(!b || b.result) return;
+    const g=botGame(); if(g.turn()===b.color) return;
+    const L=Ranked.BOT_LEVELS[b.level-1], t0=Date.now();
+    const want = 1000 + Math.random()*Math.min(6000, 1500 + b.moves.length*60);
+    (async()=>{
+      let mv=null, score=0;
+      if(L.book){ st.book = st.book || buildOpeningBook(OPENINGS); const o=st.book.get(Game.key(g.board(),g.turn())); if(o && o.length) mv=o[Math.floor(Math.random()*o.length)].move; }
+      if(!mv){ try{ const r=await AIEngine.think(aiThinkArgs(g,{timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder})); mv=r&&r.move; score=(r&&r.score)||0; }catch(e){} }
+      b.timer=setTimeout(()=>{
+        if(st.bot!==b || b.result) return;
+        b.lastScore=score;
+        // đầu hàng khi bị dẫn quá xa (máy chủ chỉ nhận khi người chơi hơn rõ về quân)
+        if(score<-900 && botMaterial(g.board(), b.color)>=6 && b.moves.length>=10){
+          b.badTurns=(b.badTurns||0)+1;
+          if(b.badTurns>=2){ b.chat.push({by:b.botName, seat:other(b.color), text:['Thua rồi, bạn giỏi quá','Chịu thua','gg'][Math.floor(Math.random()*3)], t:Date.now()}); return botFinish({winner:b.color, reason:'resign'}); }
+        } else b.badTurns=0;
+        if(!mv) return;
+        g.play(mv); b.moves.push([mv.from[0],mv.from[1],mv.to[0],mv.to[1]]);
+        if(g.result) return botFinish({winner:g.result.winner, reason:g.result.reason});
+        botPush();
+      }, Math.max(150, want-(Date.now()-t0)));
+    })();
+  }
+
   function init(){
     st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ Sa trường'});
     st.ctl=makeClickController({ widget:st.widget, getBoard:board, turn:()=>(st.local||st.game||Game.create()).turn(), canMove, onMove, extraMeta:meta,
@@ -381,12 +533,6 @@ const Online = (function(){
     st.game=Game.create();
     $('#olName').value=myName();
     $('#olName').addEventListener('change',()=>{ const v=$('#olName').value.trim(); if(v) safeLS_set('xq_online_name',v.slice(0,24)); });
-    $('#olServer').value=safeLS_get('xq_online_server')||'';
-    $('#olServerSave').addEventListener('click',()=>{
-      const raw=$('#olServer').value.trim(), v=normServer(raw);
-      if(raw && !v){ $('#olServerMsg').textContent='Địa chỉ phải bắt đầu bằng wss:// (hoặc https://).'; return; }
-      safeLS_set('xq_online_server', v); $('#olServerMsg').textContent = v ? 'Đã lưu.' : 'Đã chuyển về server mặc định.'; renderLobby();
-    });
     $('#olCreate').addEventListener('click',()=>{
       if(!ensureName()) return;
       enterRoom(newCode(), {color:($('input[name="olColor"]:checked')||{}).value||'red', rated:Account.signedIn() && $('#olRated').checked});
@@ -399,7 +545,8 @@ const Online = (function(){
     };
     $('#olJoin').addEventListener('click',join);
     $('#olJoinCode').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
-    $('#olLeave').addEventListener('click',()=>{ disconnect(); showLobby(); });
+    $('#olLeave').addEventListener('click',()=>{ disconnect(); st.ranked=false; showLobby(); });
+    $('#olNextMatch').addEventListener('click',()=>{ disconnect(); st.ranked=false; showLobby(); startSearch(); });
     $('#olDraw').addEventListener('click',()=>send({type:'offer', kind:'draw'}));
     $('#olTakeback').addEventListener('click',()=>send({type:'offer', kind:'takeback'}));
     $('#olRematch').addEventListener('click',()=>send({type:'offer', kind:'rematch'}));
@@ -418,12 +565,18 @@ const Online = (function(){
       if(t && send({type:'chat', text:t})) inp.value='';
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
-    document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('accountchange',()=>{
+      if(st.code) return;
+      // mở link mời khi chưa đăng nhập: đăng nhập xong thì vào phòng luôn
+      const rc=parseCode(params().get('room')||'');
+      if(rc && Account.signedIn()){ showZone('satruong'); enterRoom(rc); return; }
+      renderLobby();
+    });
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }
   }
-  return {init, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
+  return {init, startSearch, renderRanked, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
 })();
 function initOnline(){ Online.init(); }

@@ -113,3 +113,28 @@
   kết quả theo góc nhìn người chơi ("Bạn thắng!"); đầu hàng online xác nhận 2 bước (bỏ confirm()); giữ màn hình sáng (Wake Lock) khi đang đánh online.
   Xem lại khai cuộc/ván danh thủ vẫn giữ nút xoay bàn (là màn xem, không phải đánh).
 - PR #3 mở ngày 2026-10-08 cho toàn bộ spec v3 + góp ý giao diện.
+- **2026-10-08: PR #3 merge + deploy xanh.** Workflow tạo D1 `cotuong` (id 1055ca1a-d0bf-4e94-b344-9bdd2b52dbef, vùng ENAM),
+  `migrations apply --remote` tự chấp nhận khi không tương tác ("Using fallback value in non-interactive context: yes").
+  Lần deploy sau `d1 list` sẽ tìm thấy DB có sẵn. Container không truy cập được github.io (curl trả 000) — giống workers.dev.
+- Bỏ mục "Máy chủ (nâng cao)" khỏi giao diện (người dùng không hiểu mục đích). Vẫn đổi máy chủ được bằng ?server= trên link (dùng cho test/dev) hoặc xq_online_server cũ.
+- **Đề xuất hạng đấu máy (chờ người dùng chọn):** 8 bậc tên quân cờ Tốt → Sĩ → Tượng → Mã → Pháo → Xe → Tướng → Kỳ vương,
+  mỗi bậc (trừ Kỳ vương) chia III/II/I mỗi 50 điểm; dùng chung Elo (khởi điểm 1200 = Sĩ II). Mỗi cấp máy có Elo cố định ước tính
+  (cấp 1: 900 … cấp 10: 2150), ghép máy cấp gần Elo người chơi nhất (hơi cao hơn). Ván xếp hạng với máy: không gợi ý, không đi lại.
+  Elo giữa các cấp đo bằng self-play chênh quá lớn (80% ≈ +240) nên phải nén lại; hiệu chỉnh dần theo ván thật.
+
+## 2026-10-08 — Đấu xếp hạng (spec v4, docs/spec-v4-dau-xep-hang.md)
+- Người dùng chốt: Elo chung; chờ người 5–10s (chọn 8s) rồi ghép máy; máy mang nick giống người thật kiểu game thủ Việt;
+  thêm nhiều cấp máy (20 cấp xếp hạng); đổi tên bậc → mình chọn bậc kiểu game Việt (Đồng → Thách Đấu), người dùng có thể đổi.
+- Thiết kế: hàng chờ ghép trận trong D1 (`match_queue`, hỏi định kỳ), không dùng Durable Object; ván với máy chạy trên trình duyệt
+  (dựng "phòng ảo" cùng dạng state với phòng online để dùng chung giao diện), máy chủ kiểm lại nước đi + kết quả khi nộp (`bot_games`).
+- Tên cấp phòng tập đổi thành: Mới tập, Làm quen, Biết chơi, Khá, Vững vàng, Giỏi, Rất giỏi, Cao thủ, Kiện tướng, Đại kiện tướng (người dùng thấy tên thang Trung Quốc khó hiểu); mỗi cấp có elo ước tính để hiện "Ngang bậc …".
+- Đấu xếp hạng (client): `Online.startSearch` hỏi `/api/match/join` mỗi 1,5s, quá 8s gọi `/api/match/bot`; ván với máy dùng `st.bot` +
+  `send()` chặn lại xử lý cục bộ (`botHandle`), dựng state giống phòng online (`botRoomView`) rồi `apply()` → dùng chung toàn bộ giao diện.
+  Ván dở lưu `xq_ranked_bot` (không đồng bộ, không xuất) để tải lại trang vào tiếp. Phòng xếp hạng: ẩn "Đấu ván nữa", hiện "Tìm trận mới".
+- Thắng tự nhiên (chiếu bí…) được nhận dù < 10 nửa nước; chỉ "máy đầu hàng" mới cần ≥ 10 nửa nước và hơn ≥ 6 điểm quân.
+- Kiểm nhanh 20 cấp máy bằng ladder.js (6 cặp ván, giới hạn 600ms): cấp 3 thắng cấp 1 71%, cấp 7 thắng cấp 5 100%.
+- Tên cấp phòng tập (người dùng chọn kiểu "Võ tướng cổ", chê bản trước "phèn"): Tiểu Tốt, Ngũ Trưởng, Thập Trưởng, Bách Hộ, Thiên Hộ, Hiệu Úy, Tướng Quân, Đại Tướng, Thượng Tướng, Nguyên Soái.
+- **Bắt buộc đăng nhập** (người dùng yêu cầu): màn `#authGate` che toàn app khi `available() && !signedIn()`; Artifact (không có máy chủ)
+  không bị che. Mở link mời khi chưa đăng nhập → đăng nhập xong tự vào phòng (`accountchange` trong Online).
+  Test e2e giờ phải đăng ký trước: helper `test/e2e/helpers.js` (`registerUI`, `chromiumPath`, `PAGE`); browser.e2e chạy kèm dev server.
+  Rủi ro đã biết: máy chủ sập thì người chưa đăng nhập không vào được app (kể cả phần học).
