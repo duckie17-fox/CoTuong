@@ -25,10 +25,17 @@ test('mở lại trang: vào thẳng Sa trường nếu lần trước đang ở
   assert.equal(document.querySelector('section[data-zone-panel="satruong"]').hidden, false);
 });
 
-test('chưa có server: báo rõ, khoá nút tạo / vào phòng', () => {
-  const { document } = load({ fresh: true, storage: { xq_zone: 'satruong' } });
-  assert.match(document.querySelector('#olNotice').textContent, /Chưa cấu hình server/);
-  assert.equal(document.querySelector('#olCreate').disabled, true);
+test('server mặc định (src/online.json) đã gắn vào bản build: không báo lỗi, nút tạo phòng bật', () => {
+  const cfg = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'online.json'), 'utf8'));
+  const { document, window } = load({ fresh: true, storage: { xq_zone: 'satruong' } });
+  if (cfg.server) {
+    assert.equal(document.querySelector('#olNotice').textContent, '');
+    assert.equal(document.querySelector('#olCreate').disabled, false);
+    assert.match(window.eval('Online.inviteLink("AB12CD")'), /\?room=AB12CD$/, 'link mời không cần kèm server mặc định');
+  } else {
+    assert.match(document.querySelector('#olNotice').textContent, /Chưa cấu hình server/);
+    assert.equal(document.querySelector('#olCreate').disabled, true);
+  }
 });
 
 test('đọc mã phòng từ mã trần hoặc link mời; địa chỉ server', () => {
