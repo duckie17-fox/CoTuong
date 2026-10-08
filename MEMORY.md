@@ -157,3 +157,4 @@
 - Bài tập: `PZ_PAGE=24`, nút "Xem thêm bài (còn N)"; `pz.shown/shownKey` reset khi đổi bộ lọc.
 - Tab điện thoại: đổi nhãn "Đấu với máy" → "Đấu máy" + giảm padding ≤420px → 5 tab vừa màn hình 390px, hết cuộn ngang.
 - Trang Học luật trên điện thoại rút từ ~4036px xuống ~2600px.
+- **Gotcha (2026-10-08)**: máy làm việc có thể bị khởi động lại giữa các lượt — commit đã push vẫn còn trên GitHub nhưng thư mục làm việc quay về bản cũ. Đầu mỗi lượt nên `git fetch` và so `git log origin/<nhánh>` với HEAD trước khi sửa/commit; lệch thì rebase lên remote rồi build lại.
