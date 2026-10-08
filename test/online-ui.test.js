@@ -62,3 +62,14 @@ test('ván online đã lưu: hiện trong sảnh, mở Phân tích ván với t�
   document.querySelector('#reviewBack').click();
   assert.equal(document.querySelector('section[data-zone-panel="satruong"]').hidden, false);
 });
+
+test('server không kết nối được: thử vài lần rồi dừng, báo rõ thay vì quay vòng mãi', async () => {
+  const { window, document } = load({ fresh: true, storage: { xq_zone: 'satruong', xq_online_name: 'An', xq_online_server: 'ws://127.0.0.1:9' } });
+  // WebSocket giả: luôn đóng ngay, chưa từng mở
+  window.WebSocket = class { constructor() { setTimeout(() => this.onclose && this.onclose({ code: 1006 }), 0); } send() {} close() {} };
+  window.eval('Online.state.retry=2');   // như thể đã thử lại 2 lần mà chưa lần nào mở được
+  document.querySelector('#olCreate').click();
+  await new Promise(r => setTimeout(r, 300));
+  assert.equal(window.eval('Online.state.conn'), 'blocked');
+  assert.match(document.querySelector('#olStatus').textContent, /Không kết nối được server/);
+});

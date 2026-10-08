@@ -83,7 +83,7 @@ const Online = (function(){
     st.ws=ws; setConn('connecting');
     ws.onopen=()=>{
       if(st.ws!==ws) return;
-      st.retry=0; setConn('open');
+      st.retry=0; st.everOpen=true; setConn('open');
       const msg={type:'join', name:myName()||'Kỳ thủ', token:token()};
       if(st.create) msg.create={color:st.create};
       ws.send(JSON.stringify(msg));
@@ -100,6 +100,8 @@ const Online = (function(){
       clearInterval(st.ping); st.ws=null;
       if(e.code===4000){ setConn('closed'); return; }        // server từ chối hẳn (phòng không có…)
       if(!st.code) return;
+      // chưa từng kết nối được (server sai, mạng chặn, khung Artifact chặn kết nối ra ngoài) → thôi thử
+      if(!st.everOpen && st.retry>=2){ setConn('blocked'); return; }
       setConn('retry');
       const wait=Math.min(15000, 1000*Math.pow(2, st.retry++));
       st.retryTimer=setTimeout(()=>{ if(st.code) connect(); }, wait);
@@ -266,8 +268,11 @@ const Online = (function(){
     $('#olChatInput').placeholder = seated ? 'Nhắn cho đối thủ…' : 'Nhắn với hai kỳ thủ…';
   }
   function noticeText(){
-    if(st.conn==='blocked' || (!server() && isArtifact()))
-      return `Sa trường cần mở bằng trình duyệt thường. Hãy vào <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a> để đấu với bạn bè.`;
+    const web=`<a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>`;
+    if(isArtifact() && (st.conn==='blocked' || !server()))
+      return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
+    if(st.conn==='blocked')
+      return `Không kết nối được server Sa trường. Kiểm tra mạng rồi bấm “← Sảnh” và vào lại phòng; nếu vẫn lỗi, thử bản web ${web}.`;
     if(!server()) return 'Chưa cấu hình server Sa trường. Xem hướng dẫn trong README (mục “Sa trường”) hoặc nhập địa chỉ server ở mục ⚙️ Server bên dưới.';
     return '';
   }
@@ -314,7 +319,7 @@ const Online = (function(){
   function enterRoom(code, create){
     if(!myName() && !ensureName()) { showLobby(); return; }
     disconnect();
-    st.code=code; st.create=create||null; st.room=null; st.local=null; st.showInvite=false; st.lastMoves=-1; st.chatSeen=0;
+    st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.showInvite=false; st.lastMoves=-1; st.chatSeen=0;
     $('#olLobby').hidden=true; $('#olRoom').hidden=false;
     setRoomParam(code);
     render(); connect();
