@@ -47,6 +47,112 @@ const Sound = (function(){
   };
 })();
 
+/* ---------- Nhạc nền: không lời, kiểu đàn tranh ngũ cung — tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
+const Music = (function(){
+  let ctx=null, out=null, drone=null, timer=0, next=0, phrase=[], cur=7, playing=false, armed=false;
+  let on = safeLS_get('xq_music')==='on';
+  // Ngũ cung (cung–thương–giốc–chuỷ–vũ) trên nền Rê, ba quãng tám
+  const scale=[];
+  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) scale.push(146.83*Math.pow(2,(st+12*o)/12));
+  const rnd=a=>a[Math.floor(Math.random()*a.length)];
+  function ac(){
+    if(ctx) return ctx;
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+    try{
+      ctx=new AC();
+      out=ctx.createGain(); out.gain.value=0;
+      // vang kiểu phòng rộng: xung nhiễu tắt dần
+      const len=Math.floor(ctx.sampleRate*3.2), ir=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3); }
+      const rev=ctx.createConvolver(); rev.buffer=ir;
+      const wet=ctx.createGain(); wet.gain.value=0.45;
+      out.connect(ctx.destination); out.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
+    }catch(e){ ctx=null; }
+    return ctx;
+  }
+  // Một tiếng gảy dây: nhấn nhẹ rồi nhả (cao độ trượt về), rung dây cuối nốt, tiếng tắt dần
+  function pluck(t, f, v, len){
+    const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
+    const lfo=ctx.createOscillator(), lg=ctx.createGain();
+    o.type='triangle'; o.frequency.setValueAtTime(f*1.015,t); o.frequency.exponentialRampToValueAtTime(f,t+0.09);
+    o2.type='sine'; o2.frequency.setValueAtTime(f*2,t); h.gain.value=0.2;
+    lfo.frequency.value=5.2; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(f*0.007,t+0.7);
+    lfo.connect(lg); lg.connect(o.frequency);
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*7,6000),t); lp.frequency.exponentialRampToValueAtTime(f*1.4,t+len);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+    o.connect(lp); o2.connect(h); h.connect(lp); lp.connect(g); g.connect(out);
+    for(const x of [o,o2,lfo]){ x.start(t); x.stop(t+len+0.05); }
+  }
+  // Một câu nhạc: đôi khi lướt dây, các nốt đi gần nhau, kết về chủ âm, rồi nghỉ
+  function makePhrase(){
+    const p=[];
+    if(Math.random()<0.22){
+      const s=3+Math.floor(Math.random()*3);
+      for(let k=0;k<6;k++) p.push({i:s+k, v:0.035+k*0.008, len:2, d:0.075});
+      p[p.length-1].d=0.7; cur=s+5;
+    }
+    const n=4+Math.floor(Math.random()*4);
+    for(let k=0;k<n;k++){
+      cur=Math.max(4, Math.min(12, cur+rnd([-2,-1,-1,0,1,1,2])));
+      p.push({i:cur, v:0.09+Math.random()*0.04, len:2.8, d:rnd([0.6,0.85,0.85,1.2,1.7]), bass: k===0 ? rnd([0,3]) : null});
+    }
+    cur=rnd([5,5,8]); p.push({i:cur, v:0.1, len:4.5, d:2.4});
+    p.push({rest:true, d:1.8+Math.random()*2.6});
+    return p;
+  }
+  function schedule(){
+    if(!playing) return;
+    while(next < ctx.currentTime+1.2){
+      if(!phrase.length) phrase=makePhrase();
+      const n=phrase.shift();
+      if(!n.rest){
+        pluck(next, scale[n.i], n.v, n.len);
+        if(n.bass!=null) pluck(next, scale[n.bass], 0.08, 5);
+      }
+      next+=n.d;
+    }
+  }
+  function startDrone(){
+    const t=ctx.currentTime, g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
+    g.gain.value=0.022; lfo.frequency.value=0.07; lg.gain.value=0.012; lfo.connect(lg); lg.connect(g.gain);
+    const os=[73.42, 110, 146.83].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
+    g.connect(out); lfo.start(t);
+    drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
+  }
+  function start(){
+    if(playing || !ac()) return;
+    if(ctx.state==='suspended') ctx.resume();
+    playing=true; phrase=[]; next=ctx.currentTime+0.4;
+    out.gain.cancelScheduledValues(ctx.currentTime);
+    out.gain.setValueAtTime(out.gain.value, ctx.currentTime); out.gain.linearRampToValueAtTime(1, ctx.currentTime+3);
+    startDrone(); schedule(); timer=setInterval(schedule, 250);
+  }
+  function stop(){
+    if(!playing) return;
+    playing=false; clearInterval(timer);
+    const t=ctx.currentTime;
+    out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t+0.8);
+    if(drone){ drone.stop(t+0.9); drone=null; }
+  }
+  // Trình duyệt chỉ cho phát tiếng sau khi người dùng chạm/bấm: chờ lần chạm đầu tiên
+  function arm(){
+    if(armed) return; armed=true;
+    const go=()=>{ document.removeEventListener('pointerdown',go,true); document.removeEventListener('keydown',go,true); armed=false; if(on) start(); };
+    document.addEventListener('pointerdown',go,true); document.addEventListener('keydown',go,true);
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(!ctx) return;
+    if(document.hidden) ctx.suspend().catch(()=>{}); else if(on) ctx.resume().catch(()=>{});
+  });
+  function set(v){
+    on=!!v; safeLS_set('xq_music', on?'on':'off');
+    if(on) start(); else stop();
+    document.dispatchEvent(new CustomEvent('musicchange'));
+  }
+  if(on) arm();
+  return {isOn:()=>on, set, toggle:()=>set(!on), available:()=>!!(window.AudioContext||window.webkitAudioContext)};
+})();
+
 const Progress = (function(){
   const APP='co-tuong-nhap-mon', VERSION=1, PREFIX='xq_';
   // Các mục không phải "tiến độ học" thì không cần mang theo
@@ -89,6 +195,17 @@ function initUxSettings(){
   const syncSound=()=>sndBtns.forEach(b=>b.setAttribute('aria-pressed', (b.dataset.sound==='on')===Sound.isOn()?'true':'false'));
   sndBtns.forEach(b=>b.addEventListener('click',()=>{ Sound.set(b.dataset.sound==='on'); syncSound(); }));
   syncSound();
+  // Nhạc nền: trong Cài đặt và nút nốt nhạc trên đầu trang
+  const musBtns=$$('#musicToggle button'), musTop=$('#musicBtn');
+  const syncMusic=()=>{
+    musBtns.forEach(b=>b.setAttribute('aria-pressed', (b.dataset.music==='on')===Music.isOn()?'true':'false'));
+    if(musTop){ musTop.setAttribute('aria-pressed', Music.isOn()?'true':'false'); musTop.innerHTML=icon(Music.isOn()?'music':'musicOff');
+      const t=Music.isOn()?'Tắt nhạc nền':'Bật nhạc nền'; musTop.title=t; musTop.setAttribute('aria-label',t); }
+  };
+  musBtns.forEach(b=>b.addEventListener('click',()=>Music.set(b.dataset.music==='on')));
+  if(musTop){ musTop.hidden=!Music.available(); musTop.addEventListener('click',()=>Music.toggle()); }
+  document.addEventListener('musicchange',syncMusic);
+  syncMusic();
   // Tiến độ
   const msg=$('#progressMsg'), box=$('#progressText');
   const say=(t,ok)=>{ msg.textContent=t; msg.className='hint-text small '+(ok===false?'msg-bad':ok?'msg-good':''); };

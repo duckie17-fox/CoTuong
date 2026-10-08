@@ -422,7 +422,6 @@ const Accounts = (function(){
   route('GET','/api/inbox', async c=>{
     const u=await requireUser(c), db=c.db, now=c.now;
     await db.prepare('DELETE FROM invites WHERE expires_at<?').bind(now-DAY).run();
-    if(await expireBotGames(db, u, now)) Object.assign(u, await userBy(db,'id',u.id));
     const inv=await db.prepare(`SELECT i.*, u.display_name, u.username, u.elo FROM invites i JOIN users u ON u.id=i.from_user
       WHERE i.to_user=? AND i.status='pending' AND i.expires_at>? ORDER BY i.created_at DESC`).bind(u.id, now).all();
     const sent=await db.prepare(`SELECT i.*, u.display_name, u.username FROM invites i JOIN users u ON u.id=i.to_user
@@ -454,7 +453,7 @@ const Accounts = (function(){
   });
 
   /* ---------- đấu xếp hạng (spec v4): ghép trận, máy thế chỗ khi vắng người ---------- */
-  const QUEUE_STALE_MS=15000, BOT_STALE_MS=2*HOUR, BOT_DAILY_MAX=30;
+  const QUEUE_STALE_MS=15000, BOT_DAILY_MAX=30;   // ván không giới hạn thời gian: ván dở giữ mãi để vào tiếp, được mở thêm ván song song
   const PIECE_VAL={R:9, H:4, C:4.5, E:2, A:2, S:1, G:0};
   // Chênh lệch quân (bên `color` trừ bên kia) — tốt qua sông tính 2
   function materialDiff(board, color){
@@ -484,15 +483,6 @@ const Accounts = (function(){
           bg.color==='red'?u.elo:bg.bot_elo, bg.color==='red'?after:bg.bot_elo, bg.color==='black'?u.elo:bg.bot_elo, bg.color==='black'?after:bg.bot_elo, now),
     ]);
     return {before:u.elo, after, delta:d};
-  }
-  // Ván với máy bỏ dở quá 2 giờ = thua (trừ điểm khi bỏ ván)
-  async function expireBotGames(db, u, now){
-    const {results}=await db.prepare('SELECT * FROM bot_games WHERE user_id=? AND finished_at IS NULL AND created_at<?').bind(u.id, now-BOT_STALE_MS).all();
-    for(const bg of results){
-      const fresh=await userBy(db,'id',u.id);
-      await settleBot(db, bg, fresh, 0, [], 'abandon', now);
-    }
-    return results.length;
   }
   const queueView = q => q && q.room_code ? {status:'matched', roomCode:q.room_code, color:q.color} : {status:'waiting'};
   // Vào hàng chờ / hỏi tình trạng: ghép với người đang chờ có Elo chênh ≤ 200
@@ -527,11 +517,9 @@ const Accounts = (function(){
     const me=await db.prepare('SELECT * FROM match_queue WHERE user_id=?').bind(u.id).first();
     await db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run();
     if(me && me.room_code) return json(200, queueView(me));
-    await expireBotGames(db, u, now);
-    const open=await db.prepare('SELECT * FROM bot_games WHERE user_id=? AND finished_at IS NULL ORDER BY id DESC LIMIT 1').bind(u.id).first();
-    if(open) return json(200, {status:'bot', game:botView(open)});
     const n=await db.prepare('SELECT COUNT(*) AS n FROM bot_games WHERE user_id=? AND created_at>?').bind(u.id, now-DAY).first('n');
     if((n||0)>=BOT_DAILY_MAX) throw new ApiError(429,'bot_daily');
+    // Tìm trận mới cả khi còn ván dở: ván cũ vẫn giữ, các ván chạy song song
     const fresh=await userBy(db,'id',u.id);
     const level=Ranked.botLevelFor(fresh.elo), L=Ranked.BOT_LEVELS[level-1];
     const seed=rand(4).reduce((a,b)=>a*256+b,0);

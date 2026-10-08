@@ -250,19 +250,15 @@ test('phòng tính Elo: ghế theo tài khoản, không xin đi lại, ghi Elo k
   assert.equal((await s.call('GET', '/api/games', null, a.token)).body.games.length, 2, 'ván không tính vẫn vào lịch sử');
 });
 
-test('phòng tính Elo: đối thủ rời ván 5 phút thì được xử thắng; tối đa 10 ván tính Elo/ngày giữa hai người', async () => {
+test('phòng tính Elo: không có xử thắng (ván không giới hạn thời gian); tối đa 10 ván tính Elo/ngày giữa hai người', async () => {
   const s = server();
   const { room, ca, cb, settle, play } = await roomSetup(s);
   await shuffle(play, ca, cb, 10, room);
   room.markLeft('black', s.now());
-  const ctx = () => ({ now: s.now(), online: { red: true, black: false } });
-  assert.equal(room.handle({ type: 'claim' }, ca, ctx()).error, 'too_early');
-  assert.ok(J(room.view({ token: 'a'.repeat(20) }, { red: true, black: false })).seats.black.awaySince);
-  s.tick(5 * 60000);
-  assert.equal(room.handle({ type: 'claim' }, ca, { now: s.now(), online: { red: true, black: true } }).error, 'too_early', 'đối thủ đã quay lại');
-  assert.ok(room.handle({ type: 'claim' }, ca, ctx()).changed);
-  await settle();
-  assert.equal(room.st.result.reason, 'abandon');
+  s.tick(60 * 60000);
+  assert.equal(room.handle({ type: 'claim' }, ca, { now: s.now(), online: { red: true, black: false } }).error, 'unknown', 'không còn xử thắng');
+  assert.equal(J(room.view({ token: 'a'.repeat(20) }, { red: true, black: false })).seats.black.awaySince, undefined);
+  room.handle({ type: 'resign' }, cb); await settle();
   assert.equal(room.st.elo.red.after, 1220);
   // giới hạn mỗi ngày
   for (let g = 2; g <= 11; g++) {
@@ -340,11 +336,15 @@ test('đấu xếp hạng: ghép hai người Elo gần nhau; quá chênh thì k
   assert.equal(bot.game.level, Ranked.botLevelFor(1200));
   assert.ok(Math.abs(bot.game.botElo - Ranked.BOT_LEVELS[bot.game.level - 1].elo) <= 30);
   assert.ok(bot.game.botName.length >= 3 && !/máy|bot/i.test(bot.game.botName));
-  // gọi lại khi đang có ván dở → trả lại đúng ván đó
-  assert.equal((await s.call('POST', '/api/match/bot', null, d.token)).body.game.id, bot.game.id);
+  // tìm trận mới khi còn ván dở → được phép, hai ván song song; ván cũ vẫn nộp kết quả được
+  const bot2 = (await s.call('POST', '/api/match/bot', null, d.token)).body;
+  assert.notEqual(bot2.game.id, bot.game.id);
+  const loser = bot.game.color === 'red' ? 'black' : 'red';
+  const old = (await s.call('POST', `/api/match/bot/${bot.game.id}/finish`, { moves: [[6, 0, 5, 0], [3, 0, 4, 0]], reason: 'resign', winner: loser }, d.token)).body;
+  assert.equal(old.result, 'loss', JSON.stringify(old));
 });
 
-test('ván xếp hạng với máy: kiểm tra nước đi và kết quả, cộng/trừ Elo, bỏ ván 2 giờ = thua', async () => {
+test('ván xếp hạng với máy: kiểm tra nước đi và kết quả, cộng/trừ Elo, ván dở không bị xử thua', async () => {
   const s = server();
   const a = await s.register('bot_an');
   const start = async () => (await s.call('POST', '/api/match/bot', null, a.token)).body.game;
@@ -370,15 +370,14 @@ test('ván xếp hạng với máy: kiểm tra nước đi và kết quả, cộ
   assert.equal(win.result, 'win', JSON.stringify(win));
   assert.ok(win.user.elo > eloBefore);
   assert.equal(win.user.wins, 1);
-  // bỏ ván quá 2 giờ → tự tính thua khi hỏi hộp thư
+  // không giới hạn thời gian: ván dở để lâu vẫn còn, không bị xử thua
   g = await start();
   const before = (await s.call('GET', '/api/me', null, a.token)).body.user;
-  s.tick(2 * 3600000 + 1000);
+  s.tick(48 * 3600000);
   const inbox = (await s.call('GET', '/api/inbox', null, a.token)).body;
-  assert.ok(inbox.user.elo < before.elo);
-  assert.equal(inbox.user.losses, before.losses + 1);
-  const games = (await s.call('GET', '/api/games', null, a.token)).body.games;
-  assert.ok(games.some(x => x.reason === 'abandon'));
+  assert.equal(inbox.user.elo, before.elo);
+  const still = (await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: SEQ.slice(0, 4), reason: 'resign', winner: g.color === 'red' ? 'black' : 'red' }, a.token)).body;
+  assert.equal(still.result, 'loss', JSON.stringify(still));
 });
 
 test('bậc hạng và cấp máy', () => {

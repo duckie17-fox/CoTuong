@@ -127,7 +127,7 @@ Workflow deploy tự tạo D1 lần đầu và tự chạy `migrations/` — tok
   `DELETE /api/friends/:id`, `POST /api/invites`, `POST /api/invites/:id/accept|decline`, `GET /api/inbox` (gọi định kỳ,
   cũng là nhịp "đang online"), `GET /api/leaderboard?scope=friends|all`, `GET /api/games`.
 - Phòng đấu: gửi kèm `auth` (token phiên) khi vào phòng → ghế gắn tài khoản. Phòng "Tính Elo": không xin đi lại,
-  đối thủ rời ván 5 phút thì được xử thắng; ván ≥ 10 nửa nước giữa hai tài khoản khác nhau mới tính, tối đa 10 ván/ngày/cặp.
+  không giới hạn thời gian (không có xử thắng khi đối thủ rời đi); ván ≥ 10 nửa nước giữa hai tài khoản khác nhau mới tính, tối đa 10 ván/ngày/cặp.
   Elo khởi điểm 1200, K = 40 cho 20 ván đầu rồi 24; đủ 5 ván mới có hạng.
 
 Chạy thử tại máy: `node tools/online-dev-server.js 8787 tai-khoan.db` (bỏ tên tệp để dùng DB tạm trong RAM).

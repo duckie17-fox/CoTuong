@@ -78,12 +78,14 @@ function revealBoard(el){
   const r={top:ra.top, bottom:rs.bottom, height:rs.bottom-ra.top};
   // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
   const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
-  const vh=window.innerHeight||document.documentElement.clientHeight;
+  // trừ thanh dưới (bottom nav trên điện thoại)
+  const nav=document.querySelector('.zone-switch'), navH = nav && getComputedStyle(nav).position==='fixed' ? nav.offsetHeight : 0;
+  const vh=(window.innerHeight||document.documentElement.clientHeight)-navH;
   if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
   if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
-function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:600px)').matches); }catch(e){ return false; } }
+function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:767px)').matches); }catch(e){ return false; } }
 // Điện thoại: cuộn xuống thì ẩn thanh trên (nhường chỗ cho bàn cờ), cuộn lên thì hiện lại
 function initAutoHideHeader(){
   let lastY=window.scrollY||0;
@@ -98,6 +100,7 @@ function updateStickyTop(){
   const head=document.querySelector('.app-header');
   const sticky = head && getComputedStyle(head).position==='sticky';
   document.documentElement.style.setProperty('--sticky-top', (sticky?head.offsetHeight:0)+'px');
+  if(head) document.documentElement.style.setProperty('--hdr-h', head.offsetHeight+'px');
 }
 
 /* Trình bày phân tích theo quy trình tư duy: mỗi bước một câu hỏi + câu trả lời ngắn */
@@ -121,6 +124,8 @@ function evalWords(v, who, opp){
 
 /* ---------- Icon nét (SVG) dùng chung — không dùng emoji làm icon ---------- */
 const ICON_PATHS = {
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  musicOff:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="m2 2 20 20"/>',
   academy:'<path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M12 2 21 7H3z"/>',
   swords:'<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="M14.5 6.5 18 3h3v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',

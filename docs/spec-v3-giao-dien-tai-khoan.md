@@ -112,7 +112,7 @@ Giữ nguyên nội dung và chức năng hiện có, chỉ bố trí lại theo
 **Trong phòng** giữ chức năng hiện có (bảng phụ có thẻ Biên bản · Chat), thêm:
 - Tên + Elo của hai người (nếu đăng nhập), nhãn "Tính Elo" / "Giao hữu".
 - Ván tính Elo: **không có xin đi lại**; xin hoà, đầu hàng vẫn có.
-- Đối thủ mất kết nối liên tục **5 phút** trong ván tính Elo → hiện nút "Xử thắng" cho người còn lại.
+- ~~Xử thắng khi đối thủ rời 5 phút~~ — **bỏ** (2026-10-08, người dùng): ván không giới hạn thời gian.
 - Kết thúc ván tính Elo: hiện thay đổi điểm, ví dụ "1216 (+16)".
 
 ### 3.4 Sa trường — Bạn bè (cần đăng nhập)
@@ -205,7 +205,7 @@ Lỗi chung: "Sai tên đăng nhập hoặc mật khẩu" (không nói rõ sai c
 - Elo khởi điểm 1200. Hệ số K = 40 cho 20 ván tính Elo đầu tiên, sau đó K = 24.
 - Ván chỉ tính khi: phòng bật "Tính Elo", **cả hai** người đã đăng nhập, khác tài khoản, ván có ít nhất **10 nửa nước**
   (đầu hàng sớm hơn thì không tính), không có xin đi lại (ván tính Elo không cho xin đi lại).
-- Kết quả: thắng 1, hoà 0,5, thua 0. Xử thắng do đối thủ bỏ đi 5 phút = thắng.
+- Kết quả: thắng 1, hoà 0,5, thua 0.
 - Hai người chỉ được tính tối đa 10 ván tính Elo với nhau mỗi ngày (chống cày điểm).
 
 ---

@@ -138,3 +138,13 @@
   không bị che. Mở link mời khi chưa đăng nhập → đăng nhập xong tự vào phòng (`accountchange` trong Online).
   Test e2e giờ phải đăng ký trước: helper `test/e2e/helpers.js` (`registerUI`, `chromiumPath`, `PAGE`); browser.e2e chạy kèm dev server.
   Rủi ro đã biết: máy chủ sập thì người chưa đăng nhập không vào được app (kể cả phần học).
+- **2026-10-08: PR #4 merge + deploy xanh**: D1 cũ được tìm thấy, chỉ chạy 0002_ranked.sql; Worker có DB + ROOMS; Pages lên bản mới.
+- Người dùng quyết định **không** thêm dòng "có thể được ghép với đối thủ máy" vào luật xếp hạng (2026-10-08). Đừng đề xuất lại.
+- Điện thoại (≤767px): 3 mục chính chuyển xuống bottom nav cố định (.zone-switch position:fixed), thanh trên còn logo + tên + đồng bộ; ẩn thanh trên khi cuộn dùng top âm (--hdr-h) thay transform (transform làm hỏng position:fixed bên trong). Đã rà 320/360/390/412/768px: không tràn ngang.
+
+## 2026-10-08 — Batch: bỏ đồng bộ, kết bạn nhanh, bàn to trên máy tính, nền + nhạc, ván song song
+- Bỏ nút đồng bộ (gây rối) — dữ liệu vẫn tự đồng bộ ngầm; thẻ "Chuyển tiến độ" ẩn khi đã đăng nhập.
+- Đối thủ rời ván: không xử thắng, không giới hạn thời gian (bỏ claim/ABANDON_MS, bỏ xử thua ván máy sau 2h).
+- **Ván xếp hạng với máy song song**: người dùng muốn tìm trận mới khi còn ván dở, các ván cùng tồn tại (đã thử "đóng ván cũ thành bỏ dở" — người dùng bác). `/api/match/bot` luôn tạo ván mới; client lưu `xq_ranked_bot` là MẢNG ván dở (đọc được dạng object cũ), mỗi ván một nút "Vào tiếp".
+- Nền: `body::before` (dấu vị trí quân kiểu bàn cờ, lặp 96px, màu --ink) + `body::after` (mây cát tường ở 2 góc, màu --gold), vẽ bằng CSS mask + SVG data URI để đổi màu theo theme. Phải để body nền trong suốt (chỉ html có nền), nếu không lớp z-index:-1 bị che.
+- Nhạc nền: module `Music` (26-ux.js) tự sinh bằng Web Audio — ngũ cung Rê, tiếng gảy kiểu đàn tranh (triangle + bồi âm, nhấn dây, rung cuối nốt), thỉnh thoảng lướt dây, nền ngân trầm, vang bằng Convolver. Không tệp ngoài. Mặc định tắt (`xq_music`), nút nốt nhạc ở thanh trên + mục Cài đặt; bật lại sau tải trang thì chờ lần chạm đầu (luật autoplay). Tạm dừng khi ẩn tab. Đo bản ghi 45s: trung bình ≈ -29 dB (nhỏ, làm nền).
