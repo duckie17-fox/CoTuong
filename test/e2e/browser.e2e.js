@@ -33,8 +33,9 @@ for (const vp of [{ name: 'máy tính', width: 1200, height: 900 }, { name: 'đi
       const at = (r, c) => ({ x: box.x + box.width * (58 + c * 64) / 628, y: box.y + box.height * (58 + r * 64) / 692 });
       let q = at(7, 1); await page.mouse.click(q.x, q.y);
       q = at(7, 4); await page.mouse.click(q.x, q.y);
-      await page.waitForTimeout(60);
-      assert.ok(await page.evaluate(() => document.getAnimations().length) >= 1, 'không có hiệu ứng đi quân');
+      // chờ hiệu ứng xuất hiện (máy bận thì sự kiện bấm có thể được xử lý trễ vài chục ms)
+      const anim = await page.waitForFunction(() => document.getAnimations().length >= 1, null, { timeout: 1000, polling: 10 }).then(() => true, () => false);
+      assert.ok(anim, 'không có hiệu ứng đi quân');
       await page.waitForFunction(() => document.querySelectorAll('#aiLog .log-cell[data-ply]').length >= 2, null, { timeout: 15000 });
       assert.equal(await page.evaluate(() => AIEngine.mode()), 'worker');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'tràn ngang');

@@ -50,7 +50,7 @@ const Sound = (function(){
 const Progress = (function(){
   const APP='co-tuong-nhap-mon', VERSION=1, PREFIX='xq_';
   // Các mục không phải "tiến độ học" thì không cần mang theo
-  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server']);
+  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server','xq_auth','xq_user','xq_sync_meta']);
   function keys(){
     const out=[];
     try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(PREFIX) && !SKIP.has(k)) out.push(k); } }catch(e){}
@@ -93,7 +93,7 @@ function initUxSettings(){
   const msg=$('#progressMsg'), box=$('#progressText');
   const say=(t,ok)=>{ msg.textContent=t; msg.className='hint-text small '+(ok===false?'msg-bad':ok?'msg-good':''); };
   const refreshSummary=()=>{ const s=Progress.summary(); $('#progressSummary').textContent=`Đang lưu trong trình duyệt này: ${s.lessons} bài học, ${s.puzzles} bài tập, ${s.satcuc} bài sát cục đã giải, ${s.games} ván đấu.`; };
-  panel.addEventListener('toggle',()=>{ if(panel.open) refreshSummary(); });
+  document.addEventListener('zoneshown',e=>{ if(e.detail==='toi') refreshSummary(); });
   refreshSummary();
   $('#progressCopy').addEventListener('click', async ()=>{
     const t=Progress.exportText(); box.value=t; box.select();

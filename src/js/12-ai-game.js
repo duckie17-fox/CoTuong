@@ -37,7 +37,7 @@ function renderHistoryList(){
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
     return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(r)).name)}</b>
       <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]}${r.start?' · từ thế cho trước':''} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
-      <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván">🗑</button></div></div>`;
+      <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván" title="Xoá ván"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trash"></use></svg></button></div></div>`;
   }).join('');
   $$('[data-review]',el).forEach(b=>b.addEventListener('click',()=>openReview(loadHistory().find(x=>x.id===b.dataset.review))));
   $$('[data-del]',el).forEach(b=>b.addEventListener('click',()=>{ saveHistory(loadHistory().filter(x=>x.id!==b.dataset.del)); renderHistoryList(); }));
@@ -82,26 +82,34 @@ function aiRender(){
   const g=aiGame.game, b=g.board(), turn=g.turn();
   aiGame.ctl.render();
   const el=$('#aiStatus');
+  const H=aiGame.humanColor, M=Engine.otherColor(H), over=!!g.result;
+  // thanh người chơi: máy ở trên, bạn ở dưới; sáng lên khi tới lượt
+  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(levelInfo(aiGame.level).name), captured:capturedBy(g.moves,M),
+    active:!over && turn===M, note: !over && aiGame.thinking ? 'đang nghĩ…' : ''});
+  setPlayerBar($('#aiBottom'), {color:H, name:'Bạn', sub:COLOR_VN[H], me:false, captured:capturedBy(g.moves,H),
+    active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
   if(g.result){
-    const human = g.result.winner===aiGame.humanColor, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), (draw?'🤝 ':human?'🎉 ':'♟ ')+Game.resultText(g.result)+' Bấm <b>📊 Phân tích ván</b> để xem mình đi hay/dở ở đâu.');
-  } else if(aiGame.thinking) statusBanner(el,'think','🤔 Máy đang suy nghĩ…');
-  else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===aiGame.humanColor ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
-  else el.innerHTML = (turn===aiGame.humanColor ? `<span class="turn-dot turn-${turn}"></span> Đến lượt bạn (${COLOR_VN[turn]})` : `<span class="turn-dot turn-${turn}"></span> Lượt của máy`) + (aiGame.bookNote?`<div class="hint-text small">${esc(aiGame.bookNote)}</div>`:'');
+    const human = g.result.winner===H, draw=!g.result.winner;
+    statusBanner(el, draw?'draw':(human?'over':'fail'), `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
+  } else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===H ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
+  else if(aiGame.hint && aiGame.hintText) statusBanner(el,'think', aiGame.hintText);
+  else el.innerHTML = turn===H && !aiGame.thinking ? `<span class="hint-text small">Đến lượt bạn — chạm quân rồi chạm ô sáng để đi.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
   renderMoveLog($('#aiLog'), g.moves);
   const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
   $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
   $('#aiHint').disabled = !humanTurn;
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
-  $('#aiLevelTag').textContent = `${levelInfo(aiGame.level).name} · Bạn cầm ${COLOR_VN[aiGame.humanColor]}`;
+  $('#aiActions').hidden = over;
+  $('#aiAfter').hidden = !over;
+  $('#aiLevelTag').textContent = '';
 }
 function aiPersist(){
   if(!aiGame.game.moves.length) return;
   upsertHistory(gameToRecord());
 }
 function aiAfterMove(){
-  aiGame.hint=null;
+  aiGame.hint=null; aiGame.hintText='';
   aiPersist();
   aiRender();
   if(!aiGame.game.result && aiGame.game.turn()!==aiGame.humanColor) triggerAIMove();
@@ -153,6 +161,7 @@ function aiBeginGame(cfg){
   aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
+  revealBoard($('#aiBoardCard'));
 }
 function showAICard(which){
   $('#aiSetupCard').hidden = which!=='setup';
@@ -169,7 +178,6 @@ function initAIGame(){
   renderLevelPicker();
 
   $('#thinkSteps').innerHTML=Coach.THINKING_STEPS.map(([h,t])=>`<li><b>${esc(h)}</b><span>${esc(t)}</span></li>`).join('');
-  if(window.matchMedia && matchMedia('(max-width:860px)').matches) $('#thinkBox').open=false;
   aiGame.widget = createBoardWidget($('#aiBoard'), {onSquareClick:(r,c)=>aiGame.ctl.click(r,c), label:'Bàn cờ đấu với máy'});
   aiGame.ctl = makeClickController({
     widget:aiGame.widget,
@@ -185,30 +193,32 @@ function initAIGame(){
     const g=aiGame.game; aiGame.token++; aiGame.thinking=false;
     // lùi tới trước nước gần nhất của người chơi
     let n=0; while(g.moves.length && (n===0 || g.turn()!==aiGame.humanColor)){ g.undo(1); n++; if(g.turn()===aiGame.humanColor) break; }
-    aiGame.hint=null; aiGame.ctl.clear(); aiPersist(); aiRender();
+    aiGame.hint=null; aiGame.hintText=''; aiGame.ctl.clear(); aiPersist(); aiRender();
   });
   $('#aiHint').addEventListener('click', async ()=>{
     const g=aiGame.game; $('#aiHint').disabled=true;
-    statusBanner($('#aiStatus'),'think','💡 Đang tìm gợi ý…');
+    statusBanner($('#aiStatus'),'think','Đang tìm gợi ý…'); aiGame.hintText='';
     const r=await AIEngine.think(aiThinkArgs(g,{timeMs:1200, maxDepth:40}));
     if(r&&r.move){
-      aiGame.hint=r.move; aiRender();
       const why=Coach.whyGood(g.board(),r.move), danger=Coach.endangered(g.board(),g.turn());
       const warn = danger.length ? ` Lưu ý: ${Coach.NAME[danger[0].type]} của bạn đang bị doạ.` : '';
-      statusBanner($('#aiStatus'),'think',`💡 Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`);
+      aiGame.hint=r.move;
+      aiGame.hintText=`Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`;
+      aiRender();
     }
   });
+  const RESIGN_HTML=$('#aiResign').innerHTML;
   $('#aiResign').addEventListener('click', ()=>{
     const g=aiGame.game; if(g.result) return;
     const btn=$('#aiResign');
     // xác nhận 2 bước ngay trên nút (không dùng confirm() vì có thể bị chặn trong khung nhúng)
-    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng'; },3000); return; }
-    delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng';
+    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML; },3000); return; }
+    delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML;
     aiGame.token++; aiGame.thinking=false;
     g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();
   });
-  $('#aiFlip').addEventListener('click', ()=> aiGame.widget.setFlipped(!aiGame.widget.isFlipped()));
+  $('#aiAgainBtn').addEventListener('click', ()=>aiBeginGame({humanColor:aiGame.humanColor, level:aiGame.level}));
   $('#aiReviewBtn').addEventListener('click', ()=>{ aiPersist(); openReview(gameToRecord()); });
   initReview();
   renderHistoryList();

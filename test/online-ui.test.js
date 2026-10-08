@@ -25,10 +25,17 @@ test('mở lại trang: vào thẳng Sa trường nếu lần trước đang ở
   assert.equal(document.querySelector('section[data-zone-panel="satruong"]').hidden, false);
 });
 
-test('chưa có server: báo rõ, khoá nút tạo / vào phòng', () => {
-  const { document } = load({ fresh: true, storage: { xq_zone: 'satruong' } });
-  assert.match(document.querySelector('#olNotice').textContent, /Chưa cấu hình server/);
-  assert.equal(document.querySelector('#olCreate').disabled, true);
+test('server mặc định (src/online.json) đã gắn vào bản build: không báo lỗi, nút tạo phòng bật', () => {
+  const cfg = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'online.json'), 'utf8'));
+  const { document, window } = load({ fresh: true, storage: { xq_zone: 'satruong' } });
+  if (cfg.server) {
+    assert.equal(document.querySelector('#olNotice').textContent, '');
+    assert.equal(document.querySelector('#olCreate').disabled, false);
+    assert.match(window.eval('Online.inviteLink("AB12CD")'), /\?room=AB12CD$/, 'link mời không cần kèm server mặc định');
+  } else {
+    assert.match(document.querySelector('#olNotice').textContent, /Chưa có địa chỉ máy chủ/);
+    assert.equal(document.querySelector('#olCreate').disabled, true);
+  }
 });
 
 test('đọc mã phòng từ mã trần hoặc link mời; địa chỉ server', () => {
@@ -54,4 +61,67 @@ test('ván online đã lưu: hiện trong sảnh, mở Phân tích ván với t�
   window.eval('review.token++');
   document.querySelector('#reviewBack').click();
   assert.equal(document.querySelector('section[data-zone-panel="satruong"]').hidden, false);
+});
+
+test('server không kết nối được: thử vài lần rồi dừng, báo rõ thay vì quay vòng mãi', async () => {
+  const { window, document } = load({ fresh: true, storage: { xq_zone: 'satruong', xq_online_name: 'An', xq_online_server: 'ws://127.0.0.1:9' } });
+  // WebSocket giả: luôn đóng ngay, chưa từng mở
+  window.WebSocket = class { constructor() { setTimeout(() => this.onclose && this.onclose({ code: 1006 }), 0); } send() {} close() {} };
+  window.eval('Online.state.retry=2');   // như thể đã thử lại 2 lần mà chưa lần nào mở được
+  document.querySelector('#olCreate').click();
+  await new Promise(r => setTimeout(r, 300));
+  assert.equal(window.eval('Online.state.conn'), 'blocked');
+  assert.match(document.querySelector('#olStatus').textContent, /Không kết nối được máy chủ/);
+});
+
+test('ba phần Kỳ viện / Sa trường / Tôi: thẻ con, trang Tôi, giao diện sáng/tối', () => {
+  const { window, document } = load({ fresh: true });
+  const zone = z => document.querySelector(`.zone-btn[data-zone="${z}"]`);
+  const panel = z => document.querySelector(`section[data-zone-panel="${z}"]`);
+  // Sa trường: ba thẻ con, mặc định Phòng đấu
+  zone('satruong').click();
+  assert.equal(document.querySelector('[data-zone-tabs="satruong"]').hidden, false);
+  assert.equal(document.querySelector('[data-zone-tabs="kyvien"]').hidden, true);
+  assert.equal(document.querySelector('[data-stpanel="phong"]').hidden, false);
+  document.querySelector('.st-btn[data-stab="xephang"]').click();
+  assert.equal(document.querySelector('[data-stpanel="phong"]').hidden, true);
+  assert.equal(document.querySelector('[data-stpanel="xephang"]').hidden, false);
+  // Tôi: không có hàng thẻ con, có cài đặt + chuyển tiến độ
+  zone('toi').click();
+  assert.equal(panel('toi').hidden, false);
+  assert.equal(panel('satruong').hidden, true);
+  assert.ok([...document.querySelectorAll('[data-zone-tabs]')].every(t => t.hidden));
+  assert.match(document.querySelector('#progressSummary').textContent, /bài học/);
+  assert.equal(window.localStorage.getItem('xq_zone'), 'toi');
+  document.querySelector('#themeToggle [data-theme-set="dark"]').click();
+  assert.equal(document.documentElement.dataset.theme, 'dark');
+  assert.equal(window.localStorage.getItem('xq_theme'), 'dark');
+  document.querySelector('#themeToggle [data-theme-set="auto"]').click();
+  assert.equal(document.documentElement.dataset.theme, undefined);
+  // quay lại Sa trường thì nhớ thẻ con đang mở
+  zone('satruong').click();
+  assert.equal(document.querySelector('[data-stpanel="xephang"]').hidden, false);
+});
+
+test('mở lại trang: vào thẳng Tôi nếu lần trước đang ở đó; theme đã lưu được áp dụng', () => {
+  const { document } = load({ fresh: true, storage: { xq_zone: 'toi', xq_theme: 'light' } });
+  assert.equal(document.querySelector('section[data-zone-panel="toi"]').hidden, false);
+  assert.equal(document.documentElement.dataset.theme, 'light');
+});
+
+test('bảng phụ có thẻ cạnh bàn cờ: chuyển thẻ, chấm báo khi có nội dung mới', () => {
+  const { window, document } = load({ fresh: true });
+  const side = document.querySelector('#olLog').closest('.side-panel');
+  const pane = k => side.querySelector(`[data-side-pane="${k}"]`);
+  assert.equal(pane('log').hidden, false);
+  assert.equal(pane('chat').hidden, true);
+  window.eval("sideTabNotify('#olChat')");
+  assert.equal(side.querySelector('[data-side-tab="chat"] .side-dot').hidden, false);
+  side.querySelector('[data-side-tab="chat"]').click();
+  assert.equal(pane('chat').hidden, false);
+  assert.equal(pane('log').hidden, true);
+  assert.equal(side.querySelector('[data-side-tab="chat"] .side-dot').hidden, true);
+  // phân tích ván: mặc định mở thẻ Giải thích
+  const rv = document.querySelector('#reviewDetail').closest('.side-panel');
+  assert.equal(rv.querySelector('[data-side-pane="explain"]').hidden, false);
 });

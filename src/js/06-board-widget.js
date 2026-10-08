@@ -13,14 +13,16 @@ const PIECE_CHAR = {
 const VN_NAME = {G:'Tướng',A:'Sĩ',E:'Tượng',H:'Mã',R:'Xe',C:'Pháo',S:'Tốt'};
 
 function safeLS_get(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
-function safeLS_set(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+// LS_HOOK: báo cho phần đồng bộ tài khoản biết khoá nào vừa đổi (ghi thời điểm sửa)
+let LS_HOOK=null;
+function safeLS_set(key,val){ try{ localStorage.setItem(key,val); }catch(e){} if(LS_HOOK) try{ LS_HOOK(key); }catch(e){} }
 function safeJSON(key,fallback){ try{ const v=JSON.parse(safeLS_get(key)); return v==null?fallback:v; }catch(e){ return fallback; } }
 
 /* ---------- Cài đặt hiển thị dùng chung ---------- */
 const Settings = {
-  pieceStyle: safeLS_get('xq_piece_style')==='vn' ? 'vn' : 'han',
+  pieceStyle: 'han',   // quân luôn ghi chữ Hán (đã bỏ lựa chọn chữ Việt)
   listeners: [],
-  set(key,val){ this[key]=val; if(key==='pieceStyle') safeLS_set('xq_piece_style',val); this.listeners.forEach(f=>f()); },
+  set(key,val){ this[key]=val; this.listeners.forEach(f=>f()); },
   onChange(f){ this.listeners.push(f); }
 };
 

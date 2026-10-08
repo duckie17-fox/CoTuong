@@ -17,7 +17,7 @@ function renderMasterList(){
   const el=$('#masterGrid'); if(!el || typeof MASTER_GAMES==='undefined') return;
   el.innerHTML=MASTER_GAMES.map(g=>`<button class="opening-card topic-card" data-master="${g.id}">
     <div class="puzzle-top"><span class="badge ${g.result==='1-0'?'badge-hard':g.result==='0-1'?'badge-mid':'badge-easy'}">${g.year}</span>
-      <span class="badge ${g.verified>=2?'badge-verified':'badge-source'}">${g.verified>=2?'✓ 2 nguồn':'1 nguồn'}</span></div>
+      <span class="badge ${g.verified>=2?'badge-verified':'badge-source'}">${g.verified>=2?'2 nguồn':'1 nguồn'}</span></div>
     <h4>${esc(g.red)} – ${esc(g.black)}</h4><span class="han-sm">${esc(g.redHan)} – ${esc(g.blackHan)}</span>
     <p>${esc(g.resultText)} · ${Math.ceil(g.plies.length/2)} nước · ${esc(g.event)}</p></button>`).join('');
   $$('[data-master]',el).forEach(b=>b.addEventListener('click',()=>openMaster(b.dataset.master)));
@@ -73,16 +73,16 @@ function masterExplain(k){
   const who = m.color===RED ? g.red : g.black;
   const head=`<div class="rv-head"><b>${Math.floor(k/2)+1}${m.color===RED?'.':'...'} ${esc(m.text.short)}</b> <span class="hint-text">(${esc(who)}, ${m.color===RED?'Đỏ':'Đen'} · ${esc(m.text.long)})</span></div>`;
   const steps=[
-    g.notes[k] && {ic:'📝', q:'Chú giải', cls:'ts-q-row', html:g.notes[k]},
-    {ic:'👀', q:'Trước nước này: đối phương đang doạ gì?', html:esc(Coach.threatText(before,m.color))},
-    {ic:'🔎', q:`${esc(who)} làm gì?`, html:esc(Coach.plainMove(before,m))+'.'},
+    g.notes[k] && {ic:'note', q:'Chú giải', cls:'ts-q-row', html:g.notes[k]},
+    {ic:'eye', q:'Trước nước này: đối phương đang doạ gì?', html:esc(Coach.threatText(before,m.color))},
+    {ic:'search', q:`${esc(who)} làm gì?`, html:esc(Coach.plainMove(before,m))+'.'},
   ];
-  if(p.l<=40) steps.push({ic:'✅', q:'Máy đánh giá', cls:'ts-good', html:'Ngang với lựa chọn của máy.'});
+  if(p.l<=40) steps.push({ic:'check', q:'Máy đánh giá', cls:'ts-good', html:'Ngang với lựa chọn của máy.'});
   else {
     const bm={from:[p.b[0],p.b[1]],to:[p.b[2],p.b[3]]};
     const bt=Notation.describe(before,bm), bw=Coach.whyGood(before,bm);
-    steps.push({ic:p.l>=150?'⚠️':'💡', q:p.l>=150?'Máy không đồng ý':'Máy có lựa chọn khác', cls:p.l>=150?'ts-bad':'', html:`Máy thích <b>${esc(bt.short)}</b> (mũi tên xanh)${bw.length?' vì nó '+esc(bw.join('; ')):''}; ${lossWords(p.l)}.`});
-    if(p.l>=150) steps.push({ic:'🧠', q:'Tự hỏi', cls:'ts-q-row', html:'Danh thủ thấy gì mà chọn nước khác? Đôi khi đó là kế hoạch dài hơn tầm tính của máy, đôi khi đó thật sự là sai lầm — thử tự tính vài nước tiếp theo.'});
+    steps.push({ic:p.l>=150?'alert':'bulb', q:p.l>=150?'Máy không đồng ý':'Máy có lựa chọn khác', cls:p.l>=150?'ts-bad':'', html:`Máy thích <b>${esc(bt.short)}</b> (mũi tên xanh)${bw.length?' vì nó '+esc(bw.join('; ')):''}; ${lossWords(p.l)}.`});
+    if(p.l>=150) steps.push({ic:'question', q:'Tự hỏi', cls:'ts-q-row', html:'Danh thủ thấy gì mà chọn nước khác? Đôi khi đó là kế hoạch dài hơn tầm tính của máy, đôi khi đó thật sự là sai lầm — thử tự tính vài nước tiếp theo.'});
   }
   return head+thinkStepsHTML(steps)+`<p class="hint-text small">Sau nước này: ${masterEvalText(p.e)}.</p>`;
 }
@@ -95,9 +95,9 @@ function masterRender(){
   $('#masterNext').disabled=pos>=n;
   const det=$('#masterDetail');
   let html=ms.feedback;
-  if(masterGuessing()) html+=`<p class="rv-text">🎯 Đến lượt <b>${esc(pos%2===0?g.red:g.black)}</b> (${pos%2===0?'Đỏ':'Đen'}). Bạn sẽ đi nước nào? Hãy tự hỏi: đối phương vừa doạ gì, có nước Chiếu – Ăn – Doạ nào không? Rồi đi thử trên bàn. (Bấm "Nước tiếp" để bỏ qua.)</p>`;
+  if(masterGuessing()) html+=`<p class="rv-text">Đến lượt <b>${esc(pos%2===0?g.red:g.black)}</b> (${pos%2===0?'Đỏ':'Đen'}). Bạn sẽ đi nước nào? Hãy tự hỏi: đối phương vừa doạ gì, có nước Chiếu – Ăn – Doạ nào không? Rồi đi thử trên bàn. (Bấm "Nước tiếp" để bỏ qua.)</p>`;
   else if(pos>0) html+=masterExplain(pos-1);
-  else html+=`<p class="hint-text">Thế xuất phát. Bấm <b>Nước tiếp →</b> để xem từng nước, hoặc bật <b>Đoán nước</b> để tự đoán trước.</p>`;
+  else html+=`<p class="hint-text">Thế xuất phát. Bấm <b>Nước tiếp</b> để xem từng nước, hoặc bật <b>Đoán nước</b> để tự đoán trước.</p>`;
   if(pos>=n) html+=`<p class="rv-text"><b>Kết thúc: ${esc(g.resultText)}.</b>${ms.guess&&ms.total?` Bạn đoán đúng ${ms.right}/${ms.total} nước (${Math.round(100*ms.right/ms.total)}%).`:''}</p>`;
   det.innerHTML=html;
   masterChart();
@@ -112,7 +112,7 @@ function masterChart(){
   $('#masterChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="eval-svg" role="img" aria-label="Biểu đồ đánh giá của máy theo từng nước (phía trên: Đỏ hơn)">
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${path}" class="line"/>${keys}
     <line class="cursor" x1="${x(ms.pos)}" x2="${x(ms.pos)}" y1="0" y2="${H}"/></svg>
-    <div class="chart-legend"><span>▲ Đỏ hơn</span><span>● nước then chốt</span><span>▼ Đen hơn</span></div>`;
+    <div class="chart-legend"><span>Phía trên: Đỏ hơn</span><span>Chấm vàng: nước quan trọng</span><span>Phía dưới: Đen hơn</span></div>`;
   $$('.dot-key',$('#masterChart')).forEach(d=>d.addEventListener('click',()=>{ ms.pos=+d.dataset.k+1; ms.feedback=''; masterRender(); revealBoard($('#masterBoard')); }));
 }
 function masterGuessMove(mv){
@@ -121,8 +121,8 @@ function masterGuessMove(mv){
   const before=masterBoard();
   const tried=Notation.describe(before,mv).short, realTxt=Notation.describe(before,real).short;
   ms.total++;
-  if(same(mv,real)){ ms.right++; ms.feedback=`<p class="rv-text ok-text">✔ Chính xác! Bạn đi giống danh thủ: <b>${esc(realTxt)}</b>.</p>`; }
-  else if(p.b && same(mv,{from:[p.b[0],p.b[1]],to:[p.b[2],p.b[3]]})) ms.feedback=`<p class="rv-text">👍 <b>${esc(tried)}</b> là nước máy đánh giá cao nhất — rất tốt! Danh thủ chọn <b>${esc(realTxt)}</b>.</p>`;
+  if(same(mv,real)){ ms.right++; ms.feedback=`<p class="rv-text ok-text">Chính xác! Bạn đi giống danh thủ: <b>${esc(realTxt)}</b>.</p>`; }
+  else if(p.b && same(mv,{from:[p.b[0],p.b[1]],to:[p.b[2],p.b[3]]})) ms.feedback=`<p class="rv-text"><b>${esc(tried)}</b> là nước máy đánh giá cao nhất — rất tốt! Danh thủ chọn <b>${esc(realTxt)}</b>.</p>`;
   else ms.feedback=`<p class="rv-text">Bạn đi <b>${esc(tried)}</b>, danh thủ chọn <b>${esc(realTxt)}</b>. Xem phần giải thích bên dưới để hiểu vì sao.</p>`;
   ms.pos++;
   // sau nước đoán, tự đi luôn các nước của bên không cần đoán

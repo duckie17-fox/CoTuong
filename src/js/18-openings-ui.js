@@ -13,7 +13,7 @@ function renderOpeningList(){
       <h3 class="group-h">${esc(g.name)}</h3><p class="hint-text">${esc(g.desc)}</p>
       <div class="opening-cards">${OPENINGS.filter(o=>o.group===g.id).map(o=>{
         const b=[best[o.id+':red'],best[o.id+':black']].filter(x=>x!=null);
-        const star = b.length ? `<span class="solved-check" title="Điểm Trainer cao nhất">🎓 ${Math.max(...b)}%</span>` : '';
+        const star = b.length ? `<span class="solved-check" title="Điểm cao nhất khi tự đi lại">${Math.max(...b)}%</span>` : '';
         return `<button class="opening-card" data-id="${o.id}">
           <div class="puzzle-top">${o.isTrap?'<span class="badge badge-hard">Bẫy</span>':`<span class="badge ${['','badge-easy','badge-mid','badge-hard'][o.level]}">${['','Cơ bản','Phổ biến','Nâng cao'][o.level]}</span>`}${o.lines.length>1?`<span class="hint-text small">${o.lines.length-1} nhánh</span>`:''}${star}</div>
           <h4>${esc(o.name)} <span class="han-sm">${esc(o.han)}</span></h4>
@@ -36,8 +36,8 @@ function openOpening(id, lineId){
   showOpeningCard('detail');
   $('#openingTitle').innerHTML = `${esc(o.name)} <span class="han-sm">${esc(o.han)}</span>`;
   $('#openingSummary').textContent = o.summary;
-  $('#openingIdeasH').textContent = o.isTrap ? '📌 Bài học' : '💡 Ý chính';
-  $('#openingTrapsH').textContent = o.isTrap ? '⚠️ Chỗ mắc bẫy' : '⚠️ Bẫy thường gặp';
+  $('#openingIdeasH').textContent = o.isTrap ? 'Bài học' : 'Ý chính';
+  $('#openingTrapsH').textContent = o.isTrap ? 'Chỗ mắc bẫy' : 'Bẫy thường gặp';
   $('#openingIdeas').innerHTML = o.ideas.map(t=>`<li>${esc(t)}</li>`).join('');
   $('#openingTraps').innerHTML = o.traps.map(t=>`<li>${esc(t)}</li>`).join('') + (o.isTrap?`<li>${esc(o.result)}</li>`:'');
   $('#trainBlackBtn').style.display = o.isTrap ? 'none' : '';
@@ -71,7 +71,7 @@ function openingRender(){
   $('#openingProgress').textContent = `${idx} / ${total}`;
   const isTrapPly = o.isTrap && idx-1===o.trapPly;
   $('#openingCaption').innerHTML = idx===0
-    ? 'Thế xuất phát. Mũi tên đỏ chỉ nước sắp đi; bấm <b>Nước tiếp ▶</b> để xem.'
+    ? 'Thế xuất phát. Mũi tên đỏ chỉ nước sắp đi; bấm <b>Nước tiếp</b> để xem.'
     : `<b>${Math.ceil(idx/2)}${idx%2?'.':'...'} ${esc(last.text)}</b> — ${esc(last.caption)}`+(o.isTrap&&idx===total?`<br><b>${esc(o.result)}</b>`:'');
   $('#openingCaption').classList.toggle('trap-hit', !!isTrapPly);
   $('#openingPrev').disabled = idx===0;
@@ -160,7 +160,7 @@ function trainerUserMove(mv){
     const exp=hit[n];
     trainer.game.play(mv); trainer.mine++;
     trainer.hint=false; trainer.wrongHere=0;
-    trainer.feedback={kind:'over', fresh:true, html:`✔ Đúng: <b>${esc(exp.text)}</b> — ${esc(exp.caption)}`};
+    trainer.feedback={kind:'over', fresh:true, html:`Đúng: <b>${esc(exp.text)}</b> — ${esc(exp.caption)}`};
     trainerAdvance();
   } else {
     const exp=cands[0][n];
@@ -170,8 +170,8 @@ function trainerUserMove(mv){
     trainer.busy=true;
     const alts=[...new Set(cands.map(l=>l[n].text))];
     trainer.feedback={kind:'fail', html: trainer.wrongHere>=2
-      ? `✘ ${esc(tried)} chưa đúng. Nước lý thuyết là <b>${esc(alts.join(' hoặc '))}</b> (mũi tên xanh). Vì sao: ${esc(exp.caption)}`
-      : `✘ ${esc(tried)} chưa đúng lý thuyết của thế này.${(()=>{ const w=Coach.whyBad(b,mv,null); return w.length?' Vì sao chưa ổn: '+esc(w[0].text)+'.':''; })()} 🧠 Tự hỏi: quân nào của mình chưa ra trận, và Pháo đầu đối phương đang nhắm vào đâu? (bấm 💡 để được gợi ý)`,
+      ? `${esc(tried)} chưa đúng. Nước lý thuyết là <b>${esc(alts.join(' hoặc '))}</b> (mũi tên xanh). Vì sao: ${esc(exp.caption)}`
+      : `${esc(tried)} chưa đúng lý thuyết của thế này.${(()=>{ const w=Coach.whyBad(b,mv,null); return w.length?' Vì sao chưa ổn: '+esc(w[0].text)+'.':''; })()} Tự hỏi: quân nào của mình chưa ra trận, và Pháo đầu đối phương đang nhắm vào đâu? (bấm “Gợi ý” nếu cần)`,
       arrow: trainer.wrongHere>=2 ? {from:exp.from,to:exp.to} : null};
     trainerRender();
     setTimeout(()=>{ trainer.game.undo(1); trainer.busy=false; if(trainer.wrongHere>=2) trainer.hint=true; trainerRender(); }, 900);
@@ -182,9 +182,9 @@ function trainerFinish(){
   const score=mine?Math.max(0, Math.round(100*trainer.mine/mine)):100;
   const best=trainerBest(); const k=trainer.op.id+':'+trainer.color;
   if(best[k]==null || score>best[k]){ best[k]=score; safeLS_set('xq_trainer_best', JSON.stringify(best)); }
-  const stars = score>=100?'⭐⭐⭐':score>=70?'⭐⭐':score>=40?'⭐':'';
+  const stars = score>=100?'3/3 sao':score>=70?'2/3 sao':score>=40?'1/3 sao':'';
   const played=trainer.game.moves; const li=trainer.lines.findIndex(l=>l.length===played.length&&played.every((m,i)=>sameMv(m,l[i])));
-  trainer.feedback={kind:'over', html:`🎓 Hoàn thành${trainer.multi&&li>=0?` nhánh “${esc(trainer.lineNames[li])}”`:''}! Điểm: <b>${score}%</b> ${stars} (${trainer.mistakes} lần sai). ${score<100?'Luyện lại để đạt 100% nhé.':'Bạn đã thuộc thế này!'}${trainer.multi?' Bấm ↺ để máy chọn nhánh khác.':''}`};
+  trainer.feedback={kind:'over', html:`Hoàn thành${trainer.multi&&li>=0?` nhánh “${esc(trainer.lineNames[li])}”`:''}! Điểm: <b>${score}%</b> ${stars} (${trainer.mistakes} lần sai). ${score<100?'Luyện lại để đạt 100% nhé.':'Bạn đã thuộc thế này!'}${trainer.multi?' Bấm “Làm lại” để máy chọn biến khác.':''}`};
   trainerRender();
 }
 

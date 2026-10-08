@@ -21,7 +21,7 @@ test('mã Web Worker chứa đúng module XQSearch đang chạy trên trang', ()
 
 test('có đủ 5 tab và mỗi tab hiển thị được', () => {
   const { document } = load();
-  const tabs = [...document.querySelectorAll('.tab-btn')];
+  const tabs = [...document.querySelectorAll('.tab-btn[data-tab]')];
   assert.ok(tabs.length >= 5);
   for (const t of tabs) {
     t.click();

@@ -70,8 +70,12 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     await A.waitForFunction(() => document.querySelectorAll('#olLog .log-cell[data-ply]').length === 2);
 
     // chat
+    // chat nằm ở thẻ riêng của bảng phụ; A chưa mở thẻ Chat thì thấy chấm báo tin mới
+    await B.click('#olRoom [data-side-tab="chat"]');
     await B.click('.ol-chip >> nth=1');
     await A.waitForFunction(() => /Nước hay/.test(document.querySelector('#olChat').textContent));
+    assert.equal(await A.evaluate(() => document.querySelector('#olRoom [data-side-tab="chat"] .side-dot').hidden), false);
+    await A.click('#olRoom [data-side-tab="chat"]');
     await A.fill('#olChatInput', '<b>chào</b>');
     await A.press('#olChatInput', 'Enter');
     await B.waitForFunction(() => document.querySelector('#olChat').textContent.includes('<b>chào</b>'));
@@ -97,7 +101,7 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     assert.equal(await B.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'tràn ngang trên điện thoại');
 
     // Bình đầu hàng
-    await B.click('#olResign');
+    await B.click('#olResign'); await B.click('#olResign');   // xác nhận 2 bước
     await A.waitForFunction(() => Online.state.room.result);
     assert.match(await text(A, '#olStatus'), /Đỏ thắng/);
     await A.waitForSelector('#olAfter:not([hidden])');
@@ -120,4 +124,73 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     await browser.close(); srv.close();
   }
   assert.deepEqual(errors, []);
+});
+
+test('tài khoản trên trình duyệt thật: đăng ký, kết bạn, mời đấu, ván tính Elo', async () => {
+  const srv = await start(0);
+  const browser = await chromium.launch({ executablePath: chromiumPath() });
+  const errors = [];
+  try {
+    const url = PAGE + `?server=ws://localhost:${srv.port}`;
+    const ctxA = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const ctxB = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const A = await ctxA.newPage(), B = await ctxB.newPage();
+    for (const p of [A, B]) { p.on('pageerror', e => errors.push(e.message)); p.on('dialog', d => d.accept()); }
+    async function register(p, user, name) {
+      await p.goto(url);
+      await p.click('.zone-btn[data-zone="toi"]');
+      await p.click('#meIntro [data-open-register]');
+      await p.fill('#rgUser', user); await p.fill('#rgName', name);
+      await p.fill('#rgPass', 'matkhau123'); await p.fill('#rgPass2', 'matkhau123');
+      await p.click('#dlgBody button[type=submit]');
+      await p.waitForSelector('#rcCode');
+      await p.check('#rcOk'); await p.click('#rcNext');
+      await p.waitForSelector('#meSigned:not([hidden])');
+    }
+    await register(A, 'an_e2e', 'An');
+    await register(B, 'binh_e2e', 'Bình');
+    assert.equal(await text(A, '#meName'), 'An');
+    // An tìm và kết bạn với Bình
+    await A.click('.zone-btn[data-zone="satruong"]');
+    await A.click('.st-btn[data-stab="banbe"]');
+    await A.fill('#friendSearch', 'binh');
+    await A.click('#friendResults [data-add]');
+    await A.waitForSelector('#friendOutgoing .person');
+    // Bình đồng ý
+    await B.click('.zone-btn[data-zone="satruong"]');
+    await B.click('.st-btn[data-stab="banbe"]');
+    await B.click('#friendRequests [data-accept]');
+    await B.waitForSelector('#friendList [data-invite]');
+    // An mời Bình đấu (tính Elo) → An vào phòng ngay
+    await A.click('.st-btn[data-stab="phong"]'); await A.click('.st-btn[data-stab="banbe"]');
+    await A.click('#friendList [data-invite]');
+    await A.click('#ivSend');
+    await A.waitForSelector('#olRoom:not([hidden])');
+    await A.waitForFunction(() => Online.state.room && Online.state.room.rated);
+    assert.equal(await text(A, '#olKind'), 'Tính Elo');
+    // Bình thấy lời mời (hỏi hộp thư khi quay lại trang) → vào phòng
+    await B.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    await B.waitForSelector('#noticeStack [data-notice^="inv"]');
+    await B.click('#noticeStack [data-notice^="inv"] [data-i="0"]');
+    await B.waitForFunction(() => Online.state.room && Online.state.room.you === 'black');
+    await A.waitForFunction(() => /Tới lượt bạn/.test(document.querySelector('#olStatus').textContent));
+    assert.match(await text(A, '#olTop'), /Bình.*Elo 1200/);
+    assert.equal(await A.evaluate(() => document.querySelector('#olTakeback').hidden), true, 'ván tính Elo không có nút xin đi lại');
+    // 10 nửa nước: hai bên lần lượt tiến Tốt
+    for (let i = 0; i < 10; i++) {
+      const c = [0, 2, 4, 6, 8][i >> 1], red = i % 2 === 0, p = red ? A : B;
+      await clickSq(p, red ? 6 : 3, c); await clickSq(p, red ? 5 : 4, c);
+      await A.waitForFunction(n => document.querySelectorAll('#olLog .log-cell[data-ply]').length === n, i + 1);
+    }
+    await B.click('#olResign'); await B.click('#olResign');   // xác nhận 2 bước
+    await A.waitForFunction(() => /Elo của bạn: 1220 \(\+20\)/.test(document.querySelector('#olStatus').textContent));
+    await B.waitForFunction(() => /Elo của bạn: 1180 \(-20\)/.test(document.querySelector('#olStatus').textContent));
+    // trang Tôi cập nhật Elo
+    await A.click('.zone-btn[data-zone="toi"]');
+    await A.waitForFunction(() => document.querySelector('#meElo').textContent === '1220');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+    srv.close();
+  }
 });

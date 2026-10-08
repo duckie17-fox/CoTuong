@@ -1,6 +1,7 @@
 # Đăng bản mới mỗi khi merge vào main:
-#  1. Server Sa trường lên Cloudflare Workers (cần secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID;
-#     chưa có thì bước này tự bỏ qua).
+#  1. Server Sa trường + tài khoản lên Cloudflare Workers, kèm cơ sở dữ liệu D1 "cotuong" (tự tạo lần đầu,
+#     tự chạy migrations). Cần secrets CLOUDFLARE_API_TOKEN (quyền Workers + D1 Edit), CLOUDFLARE_ACCOUNT_ID;
+#     chưa có thì bước này tự bỏ qua.
 #  2. Trang web lên GitHub Pages, gắn sẵn địa chỉ server (cần bật Settings → Pages → Source: GitHub Actions).
 # Hướng dẫn từng bước: README.md, mục "Sa trường".
 name: Deploy
@@ -24,8 +25,8 @@ jobs:
     outputs:
       url: ${{ steps.deploy.outputs.url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Có token Cloudflare chưa?
@@ -44,6 +45,13 @@ jobs:
         run: |
           npm ci
           node ../tools/build-server.js
+          # D1 "cotuong" (tài khoản): tìm, chưa có thì tạo; điền id vào wrangler.toml rồi chạy migrations
+          d1id() { npx wrangler d1 list --json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const l=JSON.parse(s.slice(s.indexOf('[')));const d=l.find(x=>x.name==='cotuong');console.log(d?d.uuid:'')}catch(e){console.log('')}})"; }
+          id=$(d1id)
+          if [ -z "$id" ]; then npx wrangler d1 create cotuong; id=$(d1id); fi
+          if [ -z "$id" ]; then echo "::error::Không tìm/tạo được D1 'cotuong' — token Cloudflare cần quyền D1 Edit."; exit 1; fi
+          sed -i "s/00000000-0000-0000-0000-000000000000/$id/" wrangler.toml
+          npx wrangler d1 migrations apply cotuong --remote
           npx wrangler deploy | tee deploy.log
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "Server: $url"
@@ -57,8 +65,8 @@ jobs:
       name: github-pages
       url: ${{ steps.pages.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Build trang web (gắn địa chỉ server)

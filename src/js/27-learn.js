@@ -73,7 +73,7 @@ const Fen = (function(){
 })();
 
 async function copyText(text, el){
-  try{ await navigator.clipboard.writeText(text); if(el) statusBanner(el,'over','📋 Đã sao chép FEN: <code>'+esc(text)+'</code>'); }
+  try{ await navigator.clipboard.writeText(text); if(el) statusBanner(el,'over','Đã sao chép mã thế cờ (FEN): <code>'+esc(text)+'</code>'); }
   catch(e){ if(el) statusBanner(el,'think','FEN của thế này (hãy tự sao chép): <code>'+esc(text)+'</code>'); }
 }
 
@@ -175,13 +175,13 @@ function renderProgressDashboard(){
     <div class="dash-grid">
       <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
       <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
-      <div class="dash-tile"><b>${st?'🔥 '+st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
+      <div class="dash-tile"><b>${st?st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
       <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy${acc!=null?` · chính xác TB ${acc}%`:''}</span></div>
     </div>
     <details class="dash-more"><summary>Chi tiết theo chủ đề bài tập</summary>
       <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
     </details>
-    ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview">🔁 Ôn ${due} bài từng làm sai</button></p>`:''}`;
+    ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ôn lại ${due} bài từng làm sai</button></p>`:''}`;
   const rb=$('#dashReview',el); if(rb) rb.addEventListener('click',()=>{ showTab('baitap'); pz.filter.topic='review'; renderPuzzleGrid(); });
 }
 
@@ -190,8 +190,8 @@ function renderDailyCard(){
   const el=$('#dailyCard'); if(!el) return;
   const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
   const streak=Learn.streak();
-  el.innerHTML=`<div class="daily-inner"><div><b>🌅 Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
-      <div class="hint-text small">${done?'✓ Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · 🔥 Chuỗi ${streak} ngày`:''}</div></div>
+  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
+      <div class="hint-text small">${done?'Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · Chuỗi ${streak} ngày liên tiếp`:''}</div></div>
     <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
   $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
 }
@@ -200,7 +200,7 @@ function renderAiSuggestion(){
   const s=suggestAiLevel(loadHistory());
   if(!s){ el.innerHTML=''; return; }
   const name=levelInfo(s.level).name;
-  el.innerHTML=`<div class="suggest-box">💡 ${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
+  el.innerHTML=`<div class="suggest-box">${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
   $('#aiSuggestBtn',el).addEventListener('click',()=>{ const r=$(`input[name="aiLevel"][value="${s.level}"]`); if(r){ r.checked=true; } el.innerHTML=''; });
 }
 function initLearn(){
@@ -226,7 +226,7 @@ function initLearn(){
       out.textContent='';
       const human=$('input[name="aiColor"]:checked').value;
       aiBeginGame({board, turn, humanColor:human, level:parseInt($('input[name="aiLevel"]:checked').value,10), source:'FEN'});
-    }catch(e){ out.textContent='✘ '+e.message; }
+    }catch(e){ out.textContent=e.message; }
   });
   renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
   document.addEventListener('tabshown',e=>{

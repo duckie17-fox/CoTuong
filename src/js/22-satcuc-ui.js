@@ -33,9 +33,9 @@ function openSatcuc(key){
       <p><b>Ý tưởng.</b> ${esc(it.idea)}</p>
       <p><b>Vì sao hiệu quả?</b> ${esc(it.why)}</p>
       <p><b>Nhận ra khi nào?</b> ${esc(it.spot)}</p>
-      <p class="hint-text">🧠 Trước khi đi, hãy tự hỏi: <i>Tướng đối phương còn những ô nào để chạy? Quân nào của mình đang khoá các ô đó? Nước chiếu cuối cùng do quân nào thực hiện?</i></p>
+      <p class="hint-text">Trước khi đi, hãy tự hỏi: <i>Tướng đối phương còn những ô nào để chạy? Quân nào của mình đang khoá các ô đó? Nước chiếu cuối cùng do quân nào thực hiện?</i></p>
     </div><div class="lesson-demos"></div></div>
-    <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}>← Trước</button><span class="hint-text">Sát cục ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp →</button></div>`;
+    <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Trước</button><span class="hint-text">Sát cục ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button></div>`;
   const host=$('.lesson-demos',$('#tacticContent'));
   it.drills.forEach((d,i)=>{
     const slot=document.createElement('div'); slot.className='lesson-demo-slot'; host.appendChild(slot);

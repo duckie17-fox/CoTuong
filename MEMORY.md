@@ -1,0 +1,115 @@
+# MEMORY — Cờ Tướng Nhập Môn
+
+> File này trả lời câu "tại sao lại làm thế này" — cái mất đi khi context bị compact.
+> Append-only, ghi nhớ đầy đủ — không tự xoá/archive.
+
+## Quyết định & lý do
+
+### Cách làm việc với người dùng
+- Người dùng nói tiếng Việt, xưng "mình"; trả lời bằng tiếng Việt, ngắn gọn, ít thuật ngữ.
+- Người dùng muốn **Artifact luôn được cập nhật** sau mỗi thay đổi giao diện (publish `dist/co-tuong.html` lên
+  https://claude.ai/artifact/2Q3tvYxR3sbNeBAuW4yKKp, capability `downloads`).
+- Chỉ tạo PR / merge khi người dùng bảo. PR #1, #2 đã merge. Sau khi PR merge: dựng lại nhánh làm việc từ `origin/main`.
+- Có điểm chưa rõ thì hỏi (người dùng nói "Nếu có gì chưa rõ thì hỏi mình").
+
+### Kỹ thuật
+- **Build:** `src/` → `dist/co-tuong.html` bằng `tools/build.js` (một file tự chứa). CI kiểm `dist/` khớp `src/` → luôn
+  `npm run build` rồi commit cả `dist/`. Mã Web Worker (`XQ_WORKER_SRC`) tự sinh từ `04-xqsearch.js` + `worker-shim.js`.
+- **Địa chỉ server Sa trường** chèn lúc build qua `/*@@ONLINE_SERVER@@*/''`: biến môi trường `ONLINE_SERVER`, nếu không có
+  thì `src/online.json`. Workflow deploy tự lấy URL từ log `wrangler deploy`.
+- **Server = trọng tài:** `server/src/room.js` (RoomCore) dùng lại đúng `00-engine.js`, `01-notation.js`, `02-game.js`
+  (ghép bởi `tools/build-server.js`), nên luật ván ở server và app không bao giờ lệch.
+  `tools/online-dev-server.js` chạy cùng RoomCore bằng Node để test e2e.
+- **Durable Object dùng SQLite** (`new_sqlite_classes`) vì gói miễn phí Cloudflare chỉ có loại này; dùng WebSocket Hibernation
+  + `setWebSocketAutoResponse('ping','pong')` để không tốn tiền khi người chơi đang nghĩ.
+- **Người chơi Sa trường v1** nhận diện bằng token ngẫu nhiên trong localStorage (`xq_online_token`), không gửi token cho ai.
+- **Xếp hạng nước đi** theo mức tụt "cơ hội thắng" `winChance(cp)=2/(1+e^(-0.003cp))-1`: <0.03 tốt nhất, <0.1 tốt,
+  <0.2 `?!`, <0.3 `?`, còn lại `??`; "nước duy nhất" (nước thứ 2 kém ≥0.25) → `!`, kèm thí quân → `!!`.
+  Bỏ lỡ đòn thắng mà vẫn đang hơn → chỉ `?!`. Ngưỡng nhỏ hơn Lichess vì người mới mất một Mã khi cân bằng là lỗi nặng.
+- **Thang cấp máy** đo bằng `tools/ladder.js`; LEVEL_MEASURED {2:83,3:84,4:75,5:84,6:84,7:96,8:85,9:85,10:74}.
+- **Spec v3 (chờ duyệt):** mật khẩu băm PBKDF2-SHA256 600k vòng **ở trình duyệt** rồi server băm thêm SHA-256 + muối riêng —
+  vì Worker gói miễn phí giới hạn ~10ms CPU/request, không chạy nổi PBKDF2 đủ mạnh ở server. Phiên dùng Bearer token
+  (web `github.io` và server `workers.dev` khác tên miền → cookie bị chặn). Không email → có **mã khôi phục** để lấy lại mật khẩu.
+
+## Gotcha / bài học
+- `pkill -f <mẫu>` có thể giết chính shell đang chạy lệnh (mẫu khớp dòng lệnh của nó) → tìm PID bằng `ps | awk` với mẫu không khớp chính lệnh.
+- Không dùng `npm test | grep` trong chuỗi `&&` để quyết định commit: grep thành công che mất test thất bại → chạy `npm test > log; echo $?`.
+- jsdom: thiếu `scrollIntoView` (đã stub trong `test/helpers/load.js`); mảng tạo trong jsdom khác realm → so bằng `JSON.stringify` hoặc `[...x]`.
+- Re-render bàn cờ giữa mousedown và mouseup làm hỏng click → chỉ vẽ lại khi focus bằng bàn phím (`:focus-visible`).
+- E2E kiểm hiệu ứng đúng mốc 60ms bị lỗi khi máy bận → dùng `waitForFunction` chờ tối đa 1s.
+- Thông báo chat dưới bàn cờ từng che kết quả ván → chat dùng dòng riêng (`#olToast`), kết quả ván luôn ưu tiên.
+- Lúc khởi động, `showTab()` ghi đè `xq_zone` → phải đọc khu đã lưu **trước** khi gọi `showTab`.
+- Artifact trên Claude không kết nối ra ngoài được → Sa trường trong Artifact dừng thử lại sau 2 lần và chỉ sang bản web.
+- Container phiên Claude **không truy cập được `*.workers.dev`** (proxy chặn) → không tự kiểm server thật; nhờ người dùng mở URL.
+- GitHub Pages: môi trường `github-pages` từng chặn nhánh `main` ("not allowed to deploy… protection rules") → người dùng
+  phải thêm `main` trong Settings → Environments → github-pages.
+- Lần đầu người dùng lỡ tạo app `cotuong` qua "Create application → Import repository" trên Cloudflare → không cần, đã hướng dẫn xoá.
+  Token tự sinh kiểu `round-night-a7ab` không xem lại được chuỗi bí mật → phải tự tạo token mẫu "Edit Cloudflare Workers".
+- Token Cloudflare mẫu "Edit Cloudflare Workers" **không có quyền D1** → khi làm tài khoản cần thêm "D1 Edit".
+
+## 2026-10-08 (phiên 2)
+- **Spec v3 đã duyệt nguyên trạng** (giữ: mã khôi phục, Elo không xin đi lại, K=40→24 sau 20 ván, ≥5 ván mới xếp hạng, ≤10 ván Elo/ngày/cặp).
+- **Bỏ bước Figma / design-instruction**: người dùng bảo "design luôn bằng html" → thiết kế thẳng trong code app (`src/`),
+  xem trước qua Artifact thay cho Figma.
+- **Khung 3 phần (đã làm):** `.app-header` dính trên cùng ở mọi kích thước (thanh trên + `.tabs[data-zone-tabs]`);
+  Sa trường có thẻ con `.st-btn[data-stab]` / `[data-stpanel]`; Tôi = `section[data-zone-panel="toi"]` (cài đặt + chuyển tiến độ,
+  thay cho menu ⚙️ cũ). Theme lưu `xq_theme` (light/dark/auto → bỏ `data-theme`).
+- **Bảng phụ có thẻ:** `.side-panel[data-side-default]` > `.side-tab[data-side-tab]` + `.side-pane[data-side-pane]`;
+  `sideTabFor(sel)` mở thẻ chứa phần tử, `sideTabNotify(sel)` hiện chấm đỏ. Thanh công cụ ván đã chuyển xuống **dưới** bàn cờ,
+  không còn dính (sticky) → `revealBoard` giờ tính cả thanh công cụ phía dưới.
+- Gotcha: `.tab-btn` giờ gồm cả thẻ Sa trường → chọn thẻ Kỳ viện bằng `.tab-btn[data-tab]`. Chat online nằm ở thẻ ẩn →
+  e2e phải bấm `[data-side-tab="chat"]` trước khi bấm câu chat nhanh.
+- Container phiên này cần `npm install` trước `npm test`; Chromium e2e: `CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`.
+
+## 2026-10-08 (phiên 2, góp ý khung 3 phần)
+- Người dùng: **bỏ cài đặt "Chữ trên quân cờ"** (luôn dùng chữ Hán); **review lại giao diện tối**;
+  **wording dễ hiểu, không dùng emoji làm icon** cho nút/thẻ/tiêu đề → dùng icon SVG nét (inline) hoặc chỉ chữ.
+- Người dùng không tìm thấy chỗ sửa quyền token Cloudflare → hướng dẫn phải kèm link trực tiếp + tên nút chính xác + cách khác (tạo token mới).
+- Người dùng đã thêm quyền **D1 Edit** cho token Cloudflare (2026-10-08).
+- **Icon:** `ICON_PATHS` + `icon(name)` trong `07-ui-common.js` (nét kiểu Lucide, sprite `<symbol id="i-…">` chèn đầu body).
+  Trong shell.html viết thẳng `<svg class="ic"><use href="#i-…"></use></svg>`. Bước tư duy (`thinkStepsHTML`) nhận `ic` là **tên icon**.
+  Nút có icon mà đổi chữ bằng JS → dùng `innerHTML` (vd. lưu `RESIGN_HTML`), không dùng `textContent`.
+- Lời trên giao diện: "server"→"máy chủ", "Biên bản"→"Các nước đã đi", "Lật"→"Xoay bàn", "Trainer"→"Tự đi lại",
+  "FEN"→"Sao chép thế cờ", "Sảnh"→"Rời phòng", "Tái đấu"→"Đấu ván nữa". Tiêu đề app chỉ còn "Cờ Tướng" (bỏ "Nhập Môn").
+- Giao diện tối: bàn cờ có bộ màu riêng (gỗ/giấy dịu hơn, số cột sáng) qua biến `--b-*`, `--b-file-red/black`.
+- Điện thoại: thanh công cụ ván xếp 1 hàng lưới, icon trên chữ (tránh nút rơi xuống dòng 2).
+
+## 2026-10-08 — Server tài khoản (thiết kế)
+- **API HTTP JSON** trong cùng Worker (`/api/*`), logic ở `server/src/accounts.js` (thuần Web API: Request/Response/crypto.subtle)
+  → chạy được cả Cloudflare lẫn Node (test + `online-dev-server`). DB truy cập qua giao diện kiểu D1
+  (`prepare().bind().first/all/run`, `batch`); ở Node dùng `tools/d1-shim.js` bọc `node:sqlite` (Node ≥22).
+- **Bỏ Durable Object "Sảnh" ở bản đầu**: online = `last_seen` trong 2 phút (app gửi nhịp 60s), lời mời đấu/kết bạn lấy bằng
+  hỏi định kỳ 15–20s khi app mở. Lý do: đơn giản, rẻ, gói miễn phí D1 đủ (5M đọc, 100k ghi/ngày) cho nhóm bạn bè. Cần thì thêm DO sau.
+- **Elo do GameRoom ghi thẳng vào D1** khi ván xong (DO có `env.DB`); ghế gắn `user_id` khi join kèm phiên đăng nhập.
+- **D1 trong CI:** `wrangler.toml` để `database_id` giữ chỗ; workflow tìm/tạo DB `cotuong` (`wrangler d1 list --json` / `d1 create`),
+  thay id vào toml rồi `d1 migrations apply --remote` trước `wrangler deploy`.
+- **Đã kiểm trên workerd thật** (`wrangler dev --persist-to`, sau `d1 migrations apply --local`): API + ván tính Elo qua WS chạy đúng.
+  Proxy của container chặn telemetry/update của wrangler ("Request was cancelled") — bỏ qua được.
+- Gotcha: lịch sử ván khi một bên rỗng vẫn phải sắp xếp lại (mergeKey không được trả nguyên bản chưa sort) — nếu không,
+  bước cắt 512 KB sẽ cắt nhầm ván mới. Test gộp phải dùng chuỗi nước **không lặp thế** (lặp 3 lần → hoà, ván dừng sớm).
+- Phòng: `seatFor(conn)` (token hoặc uid) thay `seatOf(token)` ở mọi chỗ; `st.report` (ván vừa xong) → adapter gọi
+  `Accounts.recordGame` rồi `room.setElo(r)`; `markLeft/markBack` để tính "rời ván 5 phút"; lý do kết thúc mới `abandon`.
+
+## 2026-10-08 — Giao diện tài khoản
+- Module `src/js/29-account.js` (Account): gọi API qua `fetch(base()+path)`, base = địa chỉ máy chủ Sa trường đổi `ws→http`.
+  Không có máy chủ hoặc đang trong Artifact → `available()=false`: nút đăng nhập tắt, trang Tôi chỉ đường sang bản web.
+- Phiên hết hạn nhận biết bằng `error==='unauthorized'` (KHÔNG theo mã 401 — sai mật khẩu ở đổi mật khẩu cũng trả 401).
+- Đồng bộ: `LS_HOOK` trong `safeLS_set` ghi `xq_sync_meta.t[key]` rồi hẹn gửi sau 5s; `applyRemote` bật cờ `applying` để không ghi đè thời điểm.
+  Có thay đổi từ máy khác → thông báo nổi "Tải lại để xem" (không tự tải lại giữa chừng). Lần đăng nhập đầu: hai bên đều có tiến độ
+  thì hỏi Gộp / Bỏ qua, xong thì tải lại trang (`Account.api.reload`, test thay bằng bộ đếm).
+- Mời đấu: người mời tạo phòng ngay (`Online.enterRoom(code,{color,rated})`), người được mời thấy thông báo khi hỏi `/api/inbox`
+  (20s, và khi quay lại tab — `visibilitychange`).
+- Test jsdom tài khoản: `load({setup})` gắn `window.fetch` → `Accounts.handle` (D1 giả), `crypto` = Node webcrypto, `TextEncoder` của Node;
+  PBKDF2 hạ còn 1000 vòng trong test. Đóng cửa sổ jsdom ở `test.after` (đóng giữa test làm timer còn chạy → lỗi sau khi test xong).
+- Gotcha lặp lại: đừng `pkill -f` theo tên tệp test — giết luôn shell đang chạy.
+- Người dùng xem bản web github.io (bản main cũ) và tưởng chưa sửa → nhắc: bản web chỉ đổi sau khi merge.
+- **Góp ý vòng 3 (điện thoại khi đánh cờ):** thanh trên tự ẩn khi cuộn xuống trên điện thoại (`initAutoHideHeader`, lớp `body.hdr-hide`);
+  bàn cờ tràn sát mép card (`.card .board-shell{margin-inline:-12px}`); đầu phòng đấu một dòng (nút chỉ icon trên điện thoại);
+  nút ván online dùng chung `.board-toolbar` ngay dưới bàn; máy tính: bàn cờ co theo chiều cao màn hình
+  (`min(580px, (100vh-330px)*0.92)`) để thấy cả bàn + thanh nút. Sảnh Sa trường bỏ đoạn mô tả, ẩn mục rỗng (Phòng gần đây/Ván đã đấu).
+- **Góp ý vòng 4:** bỏ nút **Xoay bàn** (đấu máy + online; bàn tự quay theo màu của mình) và **Mời bạn** (hộp mời tự hiện khi đang chờ đối thủ).
+  Màn ván đấu: thanh người chơi chung `setPlayerBar` (tên, cấp/Elo, quân đã ăn, sáng xanh + "tới lượt"/"đang nghĩ…");
+  đang đánh chỉ có thanh nút chính (đấu máy: Đi lại/Gợi ý/Đầu hàng), xong ván mới hiện Ván mới/Phân tích/Sao chép thế cờ;
+  kết quả theo góc nhìn người chơi ("Bạn thắng!"); đầu hàng online xác nhận 2 bước (bỏ confirm()); giữ màn hình sáng (Wake Lock) khi đang đánh online.
+  Xem lại khai cuộc/ván danh thủ vẫn giữ nút xoay bàn (là màn xem, không phải đánh).
+- PR #3 mở ngày 2026-10-08 cho toàn bộ spec v3 + góp ý giao diện.

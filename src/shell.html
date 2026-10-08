@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cờ Tướng Nhập Môn</title>
+<title>Cờ Tướng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Serif:wght@400;600;700&family=Ma+Shan+Zheng&display=swap">
 <style>
@@ -12,59 +12,36 @@
 </head>
 <body>
 
-<div class="app-header">
-  <div class="title-row">
+<header class="app-header">
+  <div class="topbar">
     <span class="seal" aria-hidden="true">象</span>
-    <div class="title-text">
-      <h1>Cờ Tướng Nhập Môn</h1>
-      <span class="sub">Học cờ, đấu với máy và đấu với bạn bè</span>
-    </div>
-    <div class="seg" id="pieceStyleToggle" role="group" aria-label="Kiểu chữ trên quân cờ">
-      <button type="button" data-style="han" title="Quân chữ Hán truyền thống">帥 Hán</button>
-      <button type="button" data-style="vn" title="Quân ghi tên tiếng Việt">Việt</button>
-    </div>
-    <details class="settings-menu" id="settingsPanel">
-      <summary aria-label="Cài đặt và tiến độ" title="Cài đặt và tiến độ">⚙️</summary>
-      <div class="settings-pop">
-        <div class="settings-row"><span>Âm thanh nước đi</span>
-          <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
-            <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
-          </div>
-        </div>
-        <p class="hint-text small">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
-        <h4>Tiến độ học</h4>
-        <p class="hint-text small" id="progressSummary"></p>
-        <div class="btn-row">
-          <button type="button" class="btn btn-outline btn-sm" id="progressCopy">📋 Sao chép mã</button>
-          <button type="button" class="btn btn-outline btn-sm" id="progressDownload">⬇ Tải tệp</button>
-        </div>
-        <label class="hint-text small" for="progressText">Chuyển sang máy khác: dán mã (hoặc chọn tệp) rồi bấm Nhập.</label>
-        <textarea id="progressText" rows="3" spellcheck="false" placeholder='{"app":"co-tuong-nhap-mon",…}'></textarea>
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary btn-sm" id="progressImport">⬆ Nhập</button>
-          <label class="btn btn-outline btn-sm file-btn">📂 Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
-        </div>
-        <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
-      </div>
-    </details>
+    <h1 class="app-name">Cờ Tướng</h1>
+    <nav class="zone-switch" aria-label="Chọn phần">
+      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
+      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
+      <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
+    </nav>
+    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ tiến độ" title="Đồng bộ tiến độ"></button>
   </div>
-  <div class="zone-switch" role="group" aria-label="Chọn khu">
-    <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><span class="zone-ic" aria-hidden="true">🏯</span><span><b>Kỳ viện</b><small>Học · đấu máy · phân tích</small></span></button>
-    <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><span class="zone-ic" aria-hidden="true">⚔️</span><span><b>Sa trường</b><small>Đấu với bạn bè</small></span></button>
-  </div>
-  <nav class="tabs" role="tablist" aria-label="Chọn phần học">
-    <button class="tab-btn" data-tab="hoc" role="tab">📖 Học luật</button>
-    <button class="tab-btn" data-tab="khaicuoc" role="tab">🚩 Khai cuộc</button>
-    <button class="tab-btn" data-tab="chienthuat" role="tab">⚔️ Chiến thuật</button>
-    <button class="tab-btn" data-tab="may" role="tab">🤖 Đấu với máy</button>
-    <button class="tab-btn" data-tab="baitap" role="tab">🧩 Bài tập</button>
+  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
+    <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
+    <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
+    <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
+    <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
+    <button class="tab-btn" data-tab="may" role="tab">Đấu với máy</button>
   </nav>
-</div>
+  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
+    <button class="tab-btn st-btn" data-stab="phong" role="tab">Phòng đấu</button>
+    <button class="tab-btn st-btn" data-stab="banbe" role="tab">Bạn bè</button>
+    <button class="tab-btn st-btn" data-stab="xephang" role="tab">Xếp hạng</button>
+  </nav>
+</header>
+<main class="app-main">
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
   <div class="card" id="progressCard">
-    <h2>📈 Tiến độ của bạn</h2>
+    <h2>Tiến độ của bạn</h2>
     <div id="progressDash"></div>
   </div>
   <div class="card">
@@ -81,9 +58,9 @@
     <div class="lesson-nav" id="lessonNav"></div>
     <div id="lessonContent"></div>
     <div class="lesson-foot">
-      <button class="btn btn-outline" id="lessonPrev">← Bài trước</button>
+      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
       <span id="lessonProgress" class="hint-text"></span>
-      <button class="btn btn-jade" id="lessonNext">Bài tiếp →</button>
+      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
     </div>
   </div>
 </section>
@@ -92,105 +69,113 @@
 <section data-panel="khaicuoc" hidden>
   <div class="card" id="openingListCard">
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mục">
-      <button class="chip on" data-osub="open" role="tab" aria-selected="true">🚩 Khai cuộc</button>
-      <button class="chip" data-osub="master" role="tab" aria-selected="false">📜 Ván danh thủ</button>
+      <button class="chip on" data-osub="open" role="tab" aria-selected="true">Khai cuộc</button>
+      <button class="chip" data-osub="master" role="tab" aria-selected="false">Ván danh thủ</button>
     </div>
     <div data-opanel="master" hidden>
       <h2>Ván danh thủ có chú giải</h2>
       <p class="serif">Xem lại những ván cờ nổi tiếng từng nước một. Mỗi nước có đánh giá của máy và lời giải thích <b>vì sao</b>; bật <b>“Đoán nước”</b> để tự đoán nước tiếp theo của danh thủ trước khi xem — cách luyện tư duy rất hiệu quả.</p>
-      <p class="hint-text">Chỉ đưa vào các ván có biên bản lấy từ nguồn ghi rõ (bấm vào ván để xem nguồn). Nhãn “✓ 2 nguồn” nghĩa là biên bản đã được đối chiếu khớp từng nước ở hai nguồn độc lập; “1 nguồn” là mới có một nguồn. Mọi nước đều đã được máy kiểm tra là hợp lệ.</p>
+      <p class="hint-text">Chỉ đưa vào các ván có biên bản lấy từ nguồn ghi rõ (bấm vào ván để xem nguồn). Nhãn “2 nguồn” nghĩa là biên bản đã được đối chiếu khớp từng nước ở hai nguồn độc lập; “1 nguồn” là mới có một nguồn. Mọi nước đều đã được máy kiểm tra là hợp lệ.</p>
       <div class="topic-grid" id="masterGrid"></div>
     </div>
     <div data-opanel="open">
     <h2>Các thế trận khai cuộc</h2>
-    <p class="serif">Khai cuộc là khoảng 10–15 nước đầu ván. Mục tiêu là đưa quân ra vị trí tốt, giữ cung Tướng an toàn và chuẩn bị cho trung cuộc. Chọn một thế trận để xem từng nước kèm giải thích, rồi luyện với <b>Trainer</b>: bạn tự đi, sai là được nhắc ngay.</p>
-    <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn">🎲 Trainer ngẫu nhiên</button></div>
+    <p class="serif">Khai cuộc là khoảng 10–15 nước đầu ván. Mục tiêu là đưa quân ra vị trí tốt, giữ cung Tướng an toàn và chuẩn bị cho trung cuộc. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b>: bạn tự đi các nước, sai là được nhắc ngay.</p>
+    <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện một thế ngẫu nhiên</button></div>
     <div id="openingGrid"></div>
     <p class="sources">Các nước định danh đối chiếu theo <a href="https://www.xiangqi.com/articles/glossary-of-basic-xiangqi-chinese-chess-opening-systems" target="_blank" rel="noopener">xiangqi.com</a>, <a href="https://mocvien.com/tin-tuc/khai-cuoc--phao-dau-doi-voi-ban-do-nghich-phao" target="_blank" rel="noopener">mocvien.com</a>, <a href="https://zigavn.com/cotuong/tuyet-chieu-khai-cuoc-tien-nhan-chi-lo" target="_blank" rel="noopener">zigavn.com</a>. Các nước tiếp theo là diễn biến phát triển quân tiêu biểu cho người mới, không phải bảng biến đầy đủ.</p>
     </div>
   </div>
 
   <div class="card" id="masterCard" hidden>
-    <button class="btn btn-outline" id="masterBackBtn">← Danh sách ván</button>
+    <button class="btn btn-outline" id="masterBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách ván</button>
     <h2 id="masterTitle" class="mt10"></h2>
     <div id="masterHead" class="hint-text"></div>
-    <div class="btn-row mt10"><label class="toggle"><input type="checkbox" id="masterGuess"> 🎯 Đoán nước (tự đoán trước khi xem)</label>
+    <div class="btn-row mt10"><label class="toggle"><input type="checkbox" id="masterGuess"> Tự đoán nước tiếp theo trước khi xem</label>
       <select id="masterSide" aria-label="Đoán nước của bên"><option value="both">Đoán cả hai bên</option><option value="red">Chỉ đoán nước Đỏ</option><option value="black">Chỉ đoán nước Đen</option></select></div>
     <div id="masterChart" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
-        <div class="board-toolbar">
-          <button class="btn btn-outline" id="masterPrev" aria-label="Nước trước">◀</button>
-          <span id="masterProgress" class="hint-text tb-count"></span>
-          <button class="btn btn-jade" id="masterNext">Nước tiếp ▶</button>
-          <button class="btn btn-outline" id="masterKey">⭐ Then chốt</button>
-          <button class="btn btn-outline" id="masterFlip" aria-label="Lật bàn">⇅</button>
-        </div>
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
-        <div class="btn-row btn-row-center mt10">
-          <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn">♟ Đấu với máy từ thế này</button>
-          <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn">📋 FEN</button>
+        <div class="board-toolbar">
+          <button class="btn btn-outline" id="masterPrev" aria-label="Nước trước"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg></button>
+          <span id="masterProgress" class="hint-text tb-count"></span>
+          <button class="btn btn-jade" id="masterNext">Nước tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+          <button class="btn btn-outline" id="masterKey"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-star"></use></svg>Nước quan trọng</button>
+          <button class="btn btn-outline" id="masterFlip" aria-label="Xoay bàn cờ" title="Xoay bàn cờ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg></button>
         </div>
-        <div id="masterDetail" class="review-detail" aria-live="polite"></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="masterLog"></div>
+      <div class="play-side side-panel" data-side-default="explain">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
+        <div class="side-pane" data-side-pane="explain">
+          <div id="masterDetail" class="review-detail" aria-live="polite"></div>
+        </div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="masterLog"></div>
+        </div>
       </div>
     </div>
     <p class="sources" id="masterSources"></p>
   </div>
 
   <div class="card" id="openingDetailCard" hidden>
-    <button class="btn btn-outline" id="openingBackBtn">← Danh sách khai cuộc</button>
+    <button class="btn btn-outline" id="openingBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách khai cuộc</button>
     <h2 id="openingTitle" class="mt10"></h2>
     <p id="openingSummary" class="hint-text"></p>
     <div id="openingLines"></div>
     <div class="play-layout">
       <div class="play-board">
-        <div class="board-toolbar">
-          <button class="btn btn-outline" id="openingPrev" aria-label="Nước trước">◀</button>
-          <span id="openingProgress" class="hint-text tb-count"></span>
-          <button class="btn btn-jade" id="openingNext">Nước tiếp ▶</button>
-          <button class="btn btn-outline" id="openingFlip" aria-label="Lật bàn">⇅</button>
-        </div>
         <div class="board-shell board-card" id="openingBoardCard"><div id="openingBoard"></div></div>
+        <div class="board-toolbar">
+          <button class="btn btn-outline" id="openingPrev" aria-label="Nước trước"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg></button>
+          <span id="openingProgress" class="hint-text tb-count"></span>
+          <button class="btn btn-jade" id="openingNext">Nước tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+          <button class="btn btn-outline" id="openingFlip" aria-label="Xoay bàn cờ" title="Xoay bàn cờ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg></button>
+        </div>
         <div id="openingCaption" class="board-caption caption-box" aria-live="polite"></div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="openingLog"></div>
+      <div class="play-side side-panel" data-side-default="log">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="openingLog"></div>
+        </div>
       </div>
     </div>
     <div class="info-grid mt16">
-      <div class="info-box"><h3 id="openingIdeasH">💡 Ý chính</h3><ul id="openingIdeas"></ul></div>
-      <div class="info-box warn"><h3 id="openingTrapsH">⚠️ Bẫy thường gặp</h3><ul id="openingTraps"></ul></div>
+      <div class="info-box"><h3 id="openingIdeasH">Ý chính</h3><ul id="openingIdeas"></ul></div>
+      <div class="info-box warn"><h3 id="openingTrapsH">Bẫy thường gặp</h3><ul id="openingTraps"></ul></div>
     </div>
     <div class="trainer-cta mt16">
-      <div><b>🎓 Luyện với Trainer</b><br><span class="hint-text">Tự đi các nước của một bên, máy đi bên kia. Sai sẽ được nhắc ngay.</span></div>
+      <div><b>Tự đi lại thế này</b><br><span class="hint-text">Bạn đi các nước của một bên, máy đi bên kia. Đi sai sẽ được nhắc ngay.</span></div>
       <div class="btn-row"><button class="btn btn-primary" id="trainRedBtn">Cầm Đỏ</button><button class="btn btn-outline" id="trainBlackBtn">Cầm Đen</button></div>
-      <label class="toggle" id="trainMultiWrap"><input type="checkbox" id="trainMulti"> 🔀 Máy chọn nhánh ngẫu nhiên (luyện mọi nhánh của thế này)</label>
+      <label class="toggle" id="trainMultiWrap"><input type="checkbox" id="trainMulti"> Máy chọn ngẫu nhiên một biến của thế này</label>
     </div>
   </div>
 
   <div class="card" id="trainerCard" hidden>
-    <button class="btn btn-outline" id="trainerBackBtn">← Về thế khai cuộc</button>
+    <button class="btn btn-outline" id="trainerBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Về thế khai cuộc</button>
     <h2 id="trainerTitle" class="mt10"></h2>
     <p id="trainerSide" class="hint-text"></p>
     <div class="progress"><div class="progress-bar" id="trainerProgress"></div></div>
     <div class="hint-text small mt10" id="trainerCount"></div>
     <div class="play-layout mt10">
       <div class="play-board">
-        <div class="board-toolbar">
-          <button class="btn btn-outline" id="trainerHint">💡 Gợi ý</button>
-          <button class="btn btn-outline" id="trainerRestart">↺ Làm lại</button>
-        </div>
         <div class="board-shell board-card"><div id="trainerBoard"></div></div>
+        <div class="board-toolbar">
+          <button class="btn btn-outline" id="trainerHint"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
+          <button class="btn btn-outline" id="trainerRestart"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Làm lại</button>
+        </div>
         <div id="trainerMsg" class="board-caption" aria-live="polite"></div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="trainerLog"></div>
+      <div class="play-side side-panel" data-side-default="log">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="trainerLog"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -200,7 +185,7 @@
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>📊 Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
+    <p>Chọn cấp độ và màu quân. Cấp độ được đặt tên theo thang đẳng cấp kỳ thủ để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>, được hiệu chỉnh bằng cách cho máy tự đấu với nhau. Sau mỗi ván, bấm <b>Phân tích ván</b> để máy chấm từng nước và chỉ ra nước tốt hơn.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -209,48 +194,54 @@
       </div>
     </fieldset>
     <div id="aiSuggest"></div>
-    <button class="btn btn-primary mt10" id="aiStartBtn">▶ Bắt đầu ván mới</button>
-    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ (FEN)</summary>
-      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
+    <button class="btn btn-primary mt10" id="aiStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu ván mới</button>
+    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ có sẵn (mã FEN)</summary>
+      <p class="hint-text small">Dán mã thế cờ FEN (ví dụ sao chép từ nút “Sao chép thế cờ” ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
       <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
-      <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn">▶ Bắt đầu từ FEN</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
+      <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu từ thế này</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
     </details>
-    <h3 class="group-h mt16">🗂 Lịch sử ván</h3>
+    <h3 class="group-h mt16">Các ván đã chơi</h3>
     <div id="aiHistory"></div>
   </div>
 
   <div class="card" id="aiGameCard" hidden>
-    <div class="btn-row" style="justify-content:space-between;">
-      <div><h2 style="margin:0;">Ván đấu với máy</h2><div class="hint-text small" id="aiLevelTag"></div></div>
-      <button class="btn btn-outline" id="aiNewGameBtn">⟲ Ván mới</button>
+    <div class="game-head">
+      <button class="btn btn-outline btn-sm" id="aiNewGameBtn" aria-label="Chọn cấp, ván mới" title="Chọn cấp, ván mới"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Chọn cấp</span></button>
+      <div class="game-title"><b>Đấu với máy</b> <span class="hint-text small" id="aiLevelTag"></span></div>
     </div>
     <div class="play-layout mt10">
       <div class="play-board">
-        <div class="board-toolbar">
-          <button class="btn btn-outline" id="aiUndo">↺ Đi lại</button>
-          <button class="btn btn-outline" id="aiHint">💡 Gợi ý</button>
-          <button class="btn btn-outline" id="aiFlip">⇅ Lật</button>
-          <button class="btn btn-outline" id="aiResign">🏳 Đầu hàng</button>
-        </div>
+        <div class="ol-player" id="aiTop"></div>
         <div class="board-shell board-card" id="aiBoardCard">
           <div id="aiBoard"></div>
         </div>
+        <div class="ol-player" id="aiBottom"></div>
+        <div class="board-toolbar" id="aiActions">
+          <button class="btn btn-outline" id="aiUndo"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Đi lại</button>
+          <button class="btn btn-outline" id="aiHint"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
+          <button class="btn btn-outline" id="aiResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
+        </div>
         <div id="aiStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button><button type="button" class="btn btn-outline" id="aiFenBtn">📋 FEN</button></div>
+        <div class="btn-row btn-row-center mt10" id="aiAfter" hidden>
+          <button class="btn btn-primary" id="aiAgainBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ván mới</button>
+          <button class="btn btn-jade" id="aiReviewBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
+          <button type="button" class="btn btn-outline" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="aiLog"></div>
-        <details class="think-box mt10" open id="thinkBox">
-          <summary>🧠 Trước mỗi nước, tự hỏi</summary>
-          <ol id="thinkSteps"></ol>
-        </details>
+      <div class="play-side side-panel" data-side-default="log">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button><button type="button" class="side-tab" data-side-tab="think">Cách suy nghĩ</button></div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="aiLog"></div>
+        </div>
+        <div class="side-pane" data-side-pane="think">
+          <div class="think-box" id="thinkBox"><p class="hint-text small">Trước mỗi nước, tự hỏi:</p><ol id="thinkSteps"></ol></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="card" id="aiReviewCard" hidden>
-    <button class="btn btn-outline" id="reviewBack">← Quay lại</button>
+    <button class="btn btn-outline" id="reviewBack"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Quay lại</button>
     <h2 class="mt10">Phân tích ván cờ</h2>
     <div id="reviewHead" class="hint-text"></div>
     <div id="reviewProgress" class="mt10" hidden><div class="progress"><div class="progress-bar" id="reviewProgressBar"></div></div><div class="hint-text small mt10" id="reviewProgressTxt"></div></div>
@@ -259,23 +250,27 @@
     <div class="play-layout mt10">
       <div class="play-board">
         <div id="reviewStep" class="review-step" aria-live="polite"></div>
+        <div class="board-shell board-card"><div id="reviewBoard"></div></div>
         <div class="board-toolbar">
-          <button class="btn btn-outline" id="reviewPrev" aria-label="Nửa nước trước">◀</button>
-          <button class="btn btn-outline" id="reviewPrevMistake">⏮ Lỗi trước</button>
-          <button class="btn btn-primary" id="reviewNextMistake">Lỗi tiếp ⏭</button>
-          <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau">▶</button>
+          <button class="btn btn-outline" id="reviewPrev" aria-label="Nửa nước trước"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg></button>
+          <button class="btn btn-outline" id="reviewPrevMistake"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-prevErr"></use></svg>Lỗi trước</button>
+          <button class="btn btn-primary" id="reviewNextMistake">Lỗi tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-nextErr"></use></svg></button>
+          <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
           <span class="tb-extra" id="reviewTools"></span>
         </div>
-        <div class="board-shell board-card"><div id="reviewBoard"></div></div>
         <div class="btn-row btn-row-center mt10">
-          <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem">♟ Thử lại từ thế này</button>
-          <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn">📋 FEN</button>
+          <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Chơi lại từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
         </div>
-        <div id="reviewDetail" class="review-detail" aria-live="polite"></div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="reviewLog"></div>
+      <div class="play-side side-panel" data-side-default="explain">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
+        <div class="side-pane" data-side-pane="explain">
+          <div id="reviewDetail" class="review-detail" aria-live="polite"></div>
+        </div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="reviewLog"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -287,9 +282,9 @@
     <h2>Chiến thuật & Tàn cuộc</h2>
     <p class="serif">Ba mảng kiến thức phải thuộc: <b>sát cục</b> (các mẫu chiếu bí kinh điển), <b>đòn chiến thuật</b> để ăn quân, và <b>tàn cuộc</b> để biết thế nào thắng được, thế nào chỉ hoà.</p>
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mảng">
-      <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">🎯 Sát cục</button>
-      <button class="chip" data-sub="don" role="tab" aria-selected="false">⚔️ Đòn chiến thuật</button>
-      <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">🏁 Tàn cuộc</button>
+      <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">Thế chiếu bí</button>
+      <button class="chip" data-sub="don" role="tab" aria-selected="false">Đòn ăn quân</button>
+      <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">Tàn cuộc</button>
     </div>
     <div data-subpanel="satcuc">
       <p class="hint-text">Mỗi mẫu sát cục có: ý tưởng, <b>vì sao</b> nó hiệu quả, dấu hiệu nhận ra trong ván cờ, và 3 thế để bạn tự chiếu bí. Học thuộc mẫu hình giúp bạn nhìn ra đòn kết thúc nhanh hơn nhiều so với tính từng nước.</p>
@@ -303,13 +298,13 @@
       <h3 class="group-h mt16">Tàn cuộc nhập môn</h3>
       <p class="hint-text">Ở mỗi thế tàn cuộc, bạn cầm Đỏ, còn máy phòng thủ bằng những nước kéo dài nhất có thể.</p>
       <div class="topic-grid" id="endgameGrid"></div>
-      <h3 class="group-h mt16">📚 Tàn cuộc lý thuyết</h3>
-      <p class="hint-text">Những thế tàn cuộc kinh điển: thế nào thắng, thế nào chỉ hoà, và <b>vì sao</b>. Thế có nhãn “✓ Máy kiểm chứng” được bảng tàn cuộc tính hết mọi khả năng; thế “📖 Theo sách” quá lớn để tính hết nên ghi theo sách tàn cuộc.</p>
+      <h3 class="group-h mt16">Tàn cuộc lý thuyết</h3>
+      <p class="hint-text">Những thế tàn cuộc kinh điển: thế nào thắng, thế nào chỉ hoà, và <b>vì sao</b>. Thế có nhãn “Máy kiểm chứng” được bảng tàn cuộc tính hết mọi khả năng; thế “Theo sách” quá lớn để tính hết nên ghi theo sách tàn cuộc.</p>
       <div id="egTheory"></div>
     </div>
   </div>
   <div class="card" id="tacticDetailCard" hidden>
-    <button class="btn btn-outline" id="tacticBackBtn">← Danh sách</button>
+    <button class="btn btn-outline" id="tacticBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách</button>
     <div id="tacticContent" class="mt10"></div>
   </div>
 </section>
@@ -322,28 +317,28 @@
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn">🎲 Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
   </div>
 
   <div class="card" id="puzzleDetailCard" hidden>
-    <button class="btn btn-outline" id="puzzleBackBtn">← Danh sách bài tập</button>
+    <button class="btn btn-outline" id="puzzleBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách bài tập</button>
     <h2 id="puzzleTitle" class="mt10"></h2>
     <div id="puzzleMeta"></div>
     <p id="puzzlePrompt" class="hint-text mt10"></p>
-    <div class="board-toolbar mt10">
-      <button class="btn btn-outline" id="puzzleHintBtn">💡 Gợi ý</button>
-      <button class="btn btn-outline" id="puzzleRetryBtn">↺ Thử lại</button>
-      <button class="btn btn-outline" id="puzzleAnswerBtn">👁 Đáp án</button>
-      <button class="btn btn-jade" id="puzzleNextBtn">Bài tiếp →</button>
-    </div>
     <div class="board-shell board-card" id="puzzleBoardCard">
       <div id="puzzleBoard"></div>
     </div>
+    <div class="board-toolbar">
+      <button class="btn btn-outline" id="puzzleHintBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
+      <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Thử lại</button>
+      <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem đáp án</button>
+      <button class="btn btn-jade" id="puzzleNextBtn">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+    </div>
     <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
     <div class="btn-row btn-row-center mt10">
-      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn">♟ Đấu với máy từ thế này</button>
-      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn">📋 FEN</button>
+      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
+      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
     </div>
     <div id="puzzleExplain" class="explain-box mt10" hidden></div>
   </div>
@@ -351,40 +346,40 @@
 
 <!-- ===================== SA TRƯỜNG: ĐẤU VỚI BẠN BÈ ===================== -->
 <section data-zone-panel="satruong" hidden>
-  <div class="card" id="olLobby">
-    <h2>⚔️ Sa trường</h2>
-    <p>Tạo phòng, gửi link cho bạn rồi cùng đánh. Server làm trọng tài: kiểm từng nước theo đúng luật ván (chiếu mãi, lặp thế, 60 nước…). Rớt mạng hay tải lại trang thì mở lại link là vào đúng ghế cũ.</p>
+ <div data-stpanel="phong">
+  <div id="olLobby">
     <div id="olNotice"></div>
-    <label class="setup-field ol-name">Tên của bạn
-      <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
-    </label>
-    <div class="ol-grid mt10">
-      <div class="ol-box">
-        <h3>➕ Tạo phòng mới</h3>
+    <div id="olFriendsOnline" class="card" hidden></div>
+    <div class="ol-grid">
+      <div class="card ol-box">
+        <h2>Tạo phòng</h2>
+        <p class="hint-text small" id="olAsUser" hidden></p>
+        <label class="setup-field ol-name">Tên của bạn
+          <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
+        </label>
         <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
           <div class="seg-radio">
-            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ (đi trước)</span></label>
+            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ</span></label>
             <label><input type="radio" name="olColor" value="black"><span>Đen</span></label>
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
-        <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
+        <label class="switch" id="olRatedWrap" hidden title="Chỉ tính khi đối thủ cũng đã đăng nhập. Không xin đi lại được."><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+        <button type="button" class="btn btn-primary ol-wide" id="olCreate">Tạo phòng</button>
       </div>
-      <div class="ol-box">
-        <h3>🚪 Vào phòng của bạn</h3>
-        <label class="setup-field">Mã phòng hoặc link mời
-          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Ví dụ: K7M2QX">
-        </label>
-        <button type="button" class="btn btn-jade mt10" id="olJoin">Vào phòng</button>
-        <div class="hint-text small mt10" id="olJoinMsg" aria-live="polite"></div>
+      <div class="card ol-box">
+        <h2>Vào phòng</h2>
+        <div class="ol-join-row">
+          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Mã phòng hoặc link" aria-label="Mã phòng hoặc link mời">
+          <button type="button" class="btn btn-jade" id="olJoin">Vào</button>
+        </div>
+        <div class="hint-text small" id="olJoinMsg" aria-live="polite"></div>
       </div>
     </div>
-    <h3 class="group-h mt16">🕘 Phòng gần đây</h3>
-    <div id="olRecent"></div>
-    <h3 class="group-h mt16">🗂 Ván đã đấu</h3>
-    <div id="olHistory"></div>
-    <details class="fen-box mt16" id="olServerBox"><summary>⚙️ Server</summary>
-      <p class="hint-text small">Địa chỉ server Sa trường (bắt đầu bằng <code>wss://</code>). Bỏ trống để dùng server mặc định.</p>
+    <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
+    <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
+    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
+      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
       <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
       <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
     </details>
@@ -392,9 +387,8 @@
 
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
-      <button type="button" class="btn btn-outline btn-sm" id="olLeave">← Sảnh</button>
-      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="ol-conn" id="olConn"></span></div>
-      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn">🔗 Mời bạn</button>
+      <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
+      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
@@ -402,34 +396,155 @@
         <div class="ol-player" id="olTop"></div>
         <div class="board-shell board-card" id="olBoardCard"><div id="olBoard"></div></div>
         <div class="ol-player" id="olBottom"></div>
+        <div class="board-toolbar" id="olActions">
+          <button type="button" class="btn btn-outline" id="olDraw"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-draw"></use></svg>Xin hoà</button>
+          <button type="button" class="btn btn-outline" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
+          <button type="button" class="btn btn-outline" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
+        </div>
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
-        <div class="btn-row btn-row-center mt10" id="olActions">
-          <button type="button" class="btn btn-outline btn-sm" id="olDraw">🤝 Xin hoà</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olTakeback">↺ Xin đi lại</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olResign">🏳 Đầu hàng</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olFlip">⇅ Lật</button>
-        </div>
+        <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
-          <button type="button" class="btn btn-primary btn-sm" id="olRematch">🔁 Tái đấu (đổi màu)</button>
-          <button type="button" class="btn btn-jade btn-sm" id="olReview">📊 Phân tích ván</button>
+          <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
+          <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
         </div>
       </div>
-      <div class="play-side">
-        <h3 class="side-h">Biên bản</h3>
-        <div class="movelog" id="olLog"></div>
-        <h3 class="side-h mt10">💬 Trò chuyện</h3>
+      <div class="play-side side-panel" data-side-default="log">
+        <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button><button type="button" class="side-tab" data-side-tab="chat">Trò chuyện<span class="side-dot" hidden></span></button></div>
+        <div class="side-pane" data-side-pane="log">
+          <div class="movelog" id="olLog"></div>
+        </div>
+        <div class="side-pane" data-side-pane="chat">
         <div class="ol-chat" id="olChat" aria-live="polite"></div>
         <div class="ol-chips" id="olChips"></div>
         <form class="ol-chat-form" id="olChatForm">
           <input class="field" id="olChatInput" maxlength="200" autocomplete="off" placeholder="Nhắn cho đối thủ…" aria-label="Tin nhắn">
           <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
         </form>
+        </div>
       </div>
     </div>
   </div>
+
+ </div>
+ <div data-stpanel="banbe" hidden>
+  <div class="card need-account" data-need-login>
+    <h2>Bạn bè</h2>
+    <p class="hint-text">Đăng nhập để kết bạn và mời đấu.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div data-when-login hidden>
+    <div class="card">
+      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
+      <div id="friendResults" class="mt10" aria-live="polite"></div>
+    </div>
+    <div class="card" id="friendRequestsCard" hidden>
+      <h2>Lời mời kết bạn</h2>
+      <div id="friendRequests"></div>
+    </div>
+    <div class="card">
+      <h2>Bạn bè</h2>
+      <div id="friendList"></div>
+      <div id="friendOutgoing"></div>
+    </div>
+  </div>
+ </div>
+ <div data-stpanel="xephang" hidden>
+  <div class="card need-account" data-need-login>
+    <h2>Xếp hạng</h2>
+    <p class="hint-text">Đăng nhập để có Elo và xếp hạng.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div class="card" data-when-login hidden>
+    <div class="btn-row" style="justify-content:space-between">
+      <h2 style="margin:0">Xếp hạng</h2>
+      <div class="seg" id="rankScope" role="group" aria-label="Phạm vi xếp hạng"><button type="button" data-scope="friends" aria-pressed="true">Bạn bè</button><button type="button" data-scope="all" aria-pressed="false">Toàn bộ</button></div>
+    </div>
+    <div id="rankList" aria-live="polite"></div>
+  </div>
+ </div>
 </section>
+
+
+<!-- ===================== TÔI ===================== -->
+<section data-zone-panel="toi" hidden>
+  <div id="meExpired" hidden></div>
+  <div class="card me-intro" id="meIntro">
+    <div class="me-head"><span class="me-avatar"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><div><h2>Tài khoản</h2><div class="hint-text small">Bạn đang dùng không cần tài khoản — tiến độ lưu trong trình duyệt này.</div></div></div>
+    <ul class="me-benefits">
+      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Tiến độ học, bài tập, ván đã đấu đi theo bạn sang mọi máy</li>
+      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng ở Sa trường, kết bạn và mời đấu trực tiếp</li>
+      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
+    </ul>
+    <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <p class="hint-text small" id="meNoServer" hidden></p>
+  </div>
+  <div id="meSigned" hidden>
+    <div class="card me-profile">
+      <div class="me-head">
+        <span class="me-avatar me-letter" id="meAvatar"></span>
+        <div class="me-id">
+          <div class="me-name-row"><h2 id="meName"></h2><button type="button" class="btn btn-outline btn-sm" id="meRename">Đổi tên</button></div>
+          <form id="meRenameForm" class="btn-row" hidden><input class="field" id="meRenameInput" maxlength="24" aria-label="Tên hiển thị mới"><button type="submit" class="btn btn-primary btn-sm">Lưu</button><button type="button" class="btn btn-outline btn-sm" id="meRenameCancel">Huỷ</button></form>
+          <div class="hint-text small" id="meSub"></div>
+        </div>
+        <div class="me-elo"><b id="meElo"></b><small id="meEloSub"></small></div>
+      </div>
+    </div>
+    <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
+    <div class="card">
+      <h2>Đồng bộ</h2>
+      <p class="hint-text" id="meSyncText"></p>
+      <button type="button" class="btn btn-outline btn-sm" id="meSyncNow"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Đồng bộ ngay</button>
+    </div>
+  </div>
+  <div class="me-grid">
+    <div class="card" id="settingsPanel">
+      <h2>Cài đặt</h2>
+      <div class="settings-row"><span>Âm thanh nước đi</span>
+        <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
+          <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
+        </div>
+      </div>
+      <div class="settings-row"><span>Giao diện</span>
+        <div class="seg" id="themeToggle" role="group" aria-label="Giao diện sáng hoặc tối">
+          <button type="button" data-theme-set="light">Sáng</button><button type="button" data-theme-set="dark">Tối</button><button type="button" data-theme-set="auto">Theo máy</button>
+        </div>
+      </div>
+      <p class="hint-text small mt10">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+    </div>
+    <div class="card">
+      <h2>Chuyển tiến độ sang máy khác</h2>
+      <p class="hint-text small" id="progressSummary"></p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-outline btn-sm" id="progressCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép mã</button>
+        <button type="button" class="btn btn-outline btn-sm" id="progressDownload"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-download"></use></svg>Tải tệp về</button>
+      </div>
+      <label class="hint-text small mt10" for="progressText" style="display:block">Ở máy kia: dán mã (hoặc chọn tệp) rồi bấm Nhập.</label>
+      <textarea id="progressText" class="progress-text" rows="3" spellcheck="false" placeholder='{"app":"co-tuong-nhap-mon",…}'></textarea>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary btn-sm" id="progressImport"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-upload"></use></svg>Nhập</button>
+        <label class="btn btn-outline btn-sm file-btn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-folder"></use></svg>Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
+      </div>
+      <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="card mt16" id="meAccount" hidden>
+    <h2>Tài khoản</h2>
+    <div class="me-actions">
+      <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
+      <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
+      <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
+      <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+      <button type="button" class="btn btn-danger" id="meDelete">Xoá tài khoản</button>
+    </div>
+  </div>
+</section>
+
+</main>
+<div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
+<div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 
 <script>
 /*@@JS@@*/

@@ -6,8 +6,8 @@ function initLessonDemo(container, demo){
   const turnBased = mode==='game' || mode==='free' || mode==='endgame';
   const hasSolution = demo.solution || (mode==='endgame' && (demo.pv || demo.defender!=='engine'));
   container.innerHTML = `<div class="board-caption demo-cap">${demo.caption}</div>
-    <div class="board-toolbar"><button class="btn btn-outline demo-reset">↺ Đặt lại</button>
-    ${hasSolution && (demo.result!=='draw' || demo.pv) ?`<button class="btn btn-outline demo-show">${demo.result==='draw'?'▶ Xem cách giữ hoà':'💡 Xem lời giải'}</button>`:''}</div>
+    <div class="board-toolbar"><button class="btn btn-outline demo-reset"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Làm lại</button>
+    ${hasSolution && (demo.result!=='draw' || demo.pv) ?`<button class="btn btn-outline demo-show">${demo.result==='draw'?'<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Xem cách giữ hoà':'<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Xem lời giải'}</button>`:''}</div>
     <div class="board-shell board-card"><div class="demo-board"></div></div>
     <div class="demo-msg" aria-live="polite"></div>
     <div class="demo-log movelog" hidden></div>`;
@@ -56,8 +56,8 @@ function initLessonDemo(container, demo){
   }
   function endgameResult(){
     const res=game.result; solved=true;
-    if(res.winner===userColor) say('ok','✔ '+Game.resultText(res));
-    else if(!res.winner) say('ok','🤝 '+Game.resultText(res)+(demo.result==='draw'?' Đúng như lý thuyết: thế này là hoà.':''));
+    if(res.winner===userColor) say('ok',Game.resultText(res));
+    else if(!res.winner) say('ok',Game.resultText(res)+(demo.result==='draw'?' Đúng như lý thuyết: thế này là hoà.':''));
     else say('bad',Game.resultText(res));
   }
   const ctl = makeClickController({
@@ -88,16 +88,16 @@ function initLessonDemo(container, demo){
       board=Engine.applyMove(board,mv);
       if(demo.hero) demo.hero=demo.hero.map(h=>(h[0]===mv.from[0]&&h[1]===mv.from[1])?mv.to.slice():h);
       if(demo.goal==='escape'){
-        if(!Engine.isInCheck(board,mover)){ say('ok','✔ Chính xác! Bạn đã giải chiếu.'); solved=true; }
+        if(!Engine.isInCheck(board,mover)){ say('ok','Chính xác! Bạn đã giải chiếu.'); solved=true; }
       } else if(demo.goal==='mate' || (demo.goal==='mate2' && stage===1)){
         solved=true;
         const st=Engine.gameStatus(board,opp);
-        if(st==='checkmate'||st==='stalemate'){ if(demo.onSolved && !shown) demo.onSolved(); } if(st==='checkmate'||st==='stalemate') say('ok',(st==='checkmate'?'✔ Chiếu bí! Tướng đối phương hết đường.':'✔ Đối phương hết nước đi (bị vây) — thắng!')+(demo.explain?' '+esc(demo.explain):''));
-        else say('bad', Engine.isInCheck(board,opp) ? '✘ Có chiếu nhưng đối phương vẫn thoát được. Bấm "Đặt lại" để thử lại.' : '✘ Chưa chiếu bí. Bấm "Đặt lại" để thử lại.');
+        if(st==='checkmate'||st==='stalemate'){ if(demo.onSolved && !shown) demo.onSolved(); } if(st==='checkmate'||st==='stalemate') say('ok',(st==='checkmate'?'Chiếu bí! Tướng đối phương hết đường.':'Đối phương hết nước đi (bị vây) — thắng!')+(demo.explain?' '+esc(demo.explain):''));
+        else say('bad', Engine.isInCheck(board,opp) ? 'Có chiếu nhưng đối phương vẫn thoát được. Bấm "Làm lại" để thử lại.' : 'Chưa chiếu bí. Bấm "Làm lại" để thử lại.');
       } else if(demo.goal==='mate2'){
         const replies=Engine.generateLegalMoves(board,opp);
-        if(!replies.length){ solved=true; say('ok','✔ Chiếu bí luôn!'); }
-        else if(!replies.every(r=>Solver.findMate(Engine.applyMove(board,r),mover,1))){ solved=true; say('bad','✘ Nước này chưa ép được chiếu bí: đối phương có đường thoát. Bấm "Đặt lại" để thử lại.'); }
+        if(!replies.length){ solved=true; say('ok','Chiếu bí luôn!'); }
+        else if(!replies.every(r=>Solver.findMate(Engine.applyMove(board,r),mover,1))){ solved=true; say('bad','Nước này chưa ép được chiếu bí: đối phương có đường thoát. Bấm "Làm lại" để thử lại.'); }
         else {
           busy=true; say('think','Hay lắm! Đối phương đang đáp…');
           const my=token={};
@@ -111,13 +111,13 @@ function initLessonDemo(container, demo){
         solved=true;
         const danger=Coach.endangered(board,mover);
         const gain=-Solver.materialSearch(board,opp,2)-Solver.material(before,mover);
-        if(!danger.length && gain>-0.5) say('ok',`✔ An toàn! Vì sao đúng: nước này ${esc(Coach.whyGood(before,mv).join('; ')||'không để quân nào bị bỏ ngỏ')}.`);
-        else { const why=Coach.whyBad(before,mv,null); say('bad',`✘ Chưa ổn: ${esc((why[0]&&why[0].text)||'vẫn còn quân bị doạ')}. 🧠 ${esc(Coach.QUESTIONS[(why[0]&&why[0].key)||'ignored-threat'])}`); }
+        if(!danger.length && gain>-0.5) say('ok',`An toàn! Vì sao đúng: nước này ${esc(Coach.whyGood(before,mv).join('; ')||'không để quân nào bị bỏ ngỏ')}.`);
+        else { const why=Coach.whyBad(before,mv,null); say('bad',`Chưa ổn: ${esc((why[0]&&why[0].text)||'vẫn còn quân bị doạ')}. Tự hỏi: ${esc(Coach.QUESTIONS[(why[0]&&why[0].key)||'ignored-threat'])}`); }
       } else if(demo.goal==='win'){
         solved=true;
         const gain = -Solver.materialSearch(board,opp,3) - Solver.material(before,mover);
-        if(gain>=demo.minGain) say('ok',`✔ Chính xác! Sau khi đối phương đáp tốt nhất, bạn vẫn lãi khoảng ${Math.round(gain)} điểm quân.`);
-        else say('bad','✘ Chưa đúng: đối phương vẫn giữ được quân. Bấm "Đặt lại" để thử lại.');
+        if(gain>=demo.minGain) say('ok',`Chính xác! Sau khi đối phương đáp tốt nhất, bạn vẫn lãi khoảng ${Math.round(gain)} điểm quân.`);
+        else say('bad','Chưa đúng: đối phương vẫn giữ được quân. Bấm "Làm lại" để thử lại.');
       }
       ctl.render();
     },
@@ -206,7 +206,7 @@ function renderLesson(scroll){
   $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;
-  $('#lessonNext').textContent = currentLessonIdx===LESSONS.length-1 ? 'Đã hết bài ✓' : 'Bài tiếp →';
+  $('#lessonNext').innerHTML = currentLessonIdx===LESSONS.length-1 ? 'Đã hết bài' : 'Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg>';
   if(scroll) content.scrollIntoView({behavior:'smooth', block:'start'});
 }
 $('#lessonPrev').addEventListener('click',()=>{ if(currentLessonIdx>0){ currentLessonIdx--; renderLesson(true); } });
