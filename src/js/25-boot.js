@@ -27,6 +27,7 @@ initLearn();
 const lastZone=safeLS_get('xq_zone');
 initZones();
 initOnline();
+initAccount();
 showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
 if(Online.wantsZone() || lastZone==='satruong') showZone('satruong');
 else if(lastZone==='toi') showZone('toi');

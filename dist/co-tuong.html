@@ -674,6 +674,90 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
 .ol-chat-form .field{flex:1;min-width:0;}
 .ol-toast{margin-top:6px;text-align:center;font-size:13.5px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ol-toast[hidden]{display:none;}
+
+/* ---------- Tài khoản: hộp thoại, avatar, bạn bè, xếp hạng, thông báo nổi ---------- */
+.btn-danger{background:var(--accent);color:var(--accent-ink);}
+.btn-danger:hover{background:var(--accent-2);}
+.link-btn{appearance:none;border:0;background:none;color:var(--accent);font:600 14px 'Be Vietnam Pro',sans-serif;cursor:pointer;padding:8px 2px;min-height:40px;text-decoration:underline;text-underline-offset:3px;}
+.dlg-backdrop{position:fixed;inset:0;z-index:100;background:rgba(20,14,8,.55);display:flex;align-items:center;justify-content:center;padding:16px;}
+.dlg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.35);width:100%;max-width:440px;max-height:calc(100vh - 32px);overflow:auto;padding:18px 20px 20px;outline:none;}
+body.dlg-open{overflow:hidden;}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.dlg-head h2{margin:0;font-size:20px;}
+.dlg-x{appearance:none;border:0;background:transparent;color:var(--ink-soft);width:40px;height:40px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.dlg-x:hover{background:var(--paper-2);}
+.dlg-x .ic{width:20px;height:20px;}
+.dlg-field{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-weight:700;font-size:13.5px;color:var(--ink-soft);}
+.dlg-input{position:relative;display:flex;}
+.dlg-input .field{flex:1;min-height:44px;font-size:15px;}
+.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);appearance:none;border:0;background:transparent;color:var(--ink-soft);width:38px;height:38px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.dlg-input .field[type=password],.dlg-input .field[data-pw]{padding-right:44px;}
+.dlg-err{color:var(--accent);font-weight:600;min-height:0;}
+.dlg-err:empty{display:none;}
+.dlg-hint{display:block;margin-top:4px;}
+.dlg-msg{color:var(--accent);font-weight:600;font-size:14px;margin:10px 0 0;}
+.dlg-msg:empty{display:none;}
+.dlg-main{width:100%;margin-top:14px;}
+.dlg-links{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-top:8px;}
+.spinner{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;display:inline-block;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.recovery-code{font:700 22px ui-monospace,Menlo,monospace;letter-spacing:.06em;text-align:center;background:var(--paper-2);border:1px dashed var(--gold);border-radius:12px;padding:14px 8px;margin:8px 0 10px;user-select:all;word-break:break-all;}
+.check-line{display:flex;align-items:center;gap:10px;font-weight:700;margin-top:12px;min-height:40px;cursor:pointer;}
+.check-line input{width:20px;height:20px;accent-color:var(--accent);}
+.switch{display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
+.switch input{position:absolute;opacity:0;pointer-events:none;}
+.switch-ui{flex:none;width:44px;height:26px;border-radius:13px;background:color-mix(in srgb, var(--ink) 25%, transparent);position:relative;transition:background .15s;margin-top:2px;}
+.switch-ui::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--card);box-shadow:0 1px 3px var(--shadow);transition:transform .15s;}
+.switch input:checked + .switch-ui{background:var(--jade);}
+.switch input:checked + .switch-ui::after{transform:translateX(18px);}
+.switch input:focus-visible + .switch-ui{outline:2px solid var(--gold);outline-offset:2px;}
+.avatar{--av:20;display:inline-flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border-radius:50%;
+  background:hsl(var(--av) 45% 42%);color:#fff;font:800 14px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;}
+.avatar-xs{width:24px;height:24px;font-size:10px;}
+.me-letter{background:hsl(var(--av,20) 45% 42%);color:#fff;font:800 22px 'Be Vietnam Pro',sans-serif;border:0;}
+.me-profile .me-head{flex-wrap:wrap;margin:0;}
+.me-id{flex:1;min-width:180px;}
+.me-name-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.me-name-row h2{margin:0;}
+.me-elo{display:flex;flex-direction:column;align-items:flex-end;}
+.me-elo b{font-size:30px;line-height:1.1;color:var(--accent);}
+.me-elo small{color:var(--ink-soft);font-size:12.5px;}
+.me-actions{display:flex;flex-wrap:wrap;gap:8px;}
+#meSigned .card + .card{margin-top:14px;}
+#meSigned{margin-bottom:14px;}
+.person{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
+.person:last-child{border-bottom:0;}
+.person-main{flex:1;min-width:150px;display:flex;flex-direction:column;gap:2px;}
+.person-main small{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.person-act{display:flex;gap:6px;flex-wrap:wrap;}
+.friends-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;}
+.friend-chip{appearance:none;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:8px 4px;border:1px solid var(--line);border-radius:12px;background:var(--paper-2);color:var(--ink);cursor:pointer;font:600 13px 'Be Vietnam Pro',sans-serif;}
+.friend-chip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.friend-chip small{color:var(--jade);font-weight:700;font-size:11.5px;}
+.friend-chip:hover{border-color:var(--gold);}
+.rank-row{display:grid;grid-template-columns:36px 40px 1fr auto;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed var(--line);}
+.rank-row.me{background:color-mix(in srgb, var(--gold) 16%, transparent);border-radius:10px;}
+.rank-n{font-weight:800;text-align:center;color:var(--ink-soft);}
+.rank-name{display:flex;flex-direction:column;min-width:0;}
+.rank-name b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-elo{font-weight:800;font-size:17px;}
+.rank-pin{margin-top:10px;border-top:2px solid var(--line);padding-top:6px;}
+.notice-stack{position:fixed;z-index:90;left:50%;transform:translateX(-50%);bottom:max(16px, env(safe-area-inset-bottom));width:min(480px, calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.notice{pointer-events:auto;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--jade);border-radius:12px;box-shadow:0 10px 30px var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;}
+.notice .btn-row{justify-content:flex-end;}
+.notice-x{appearance:none;border:0;background:transparent;color:var(--ink-soft);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sync-ic{display:flex;align-items:center;justify-content:center;}
+.sync-ic .ic{width:18px;height:18px;}
+.sync-ic.spin .ic{animation:spin 1s linear infinite;}
+.sync-ic.bad{color:var(--accent);border-color:var(--accent);}
+#meIcon .avatar-xs{margin:-2px 0;}
+.ol-elo{color:var(--ink-soft);font-weight:600;}
+#olClaim{margin-top:8px;}
+@media (max-width:600px){
+  .me-elo{align-items:flex-start;width:100%;flex-direction:row;gap:8px;align-items:baseline;}
+  .person-act{width:100%;justify-content:flex-end;}
+  .dlg{padding:16px 14px 18px;}
+}
 </style>
 </head>
 <body>
@@ -685,9 +769,9 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
     <nav class="zone-switch" aria-label="Chọn phần">
       <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
       <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
-      <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Tôi</span></button>
+      <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
-    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ"></button>
+    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ tiến độ" title="Đồng bộ tiến độ"></button>
   </div>
   <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
@@ -1012,6 +1096,8 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
     <h2>Đấu với bạn bè</h2>
     <p>Tạo phòng, gửi link cho bạn rồi cùng chơi. Máy chủ kiểm tra từng nước theo đúng luật. Nếu rớt mạng hay tải lại trang, mở lại link là vào lại đúng chỗ cũ.</p>
     <div id="olNotice"></div>
+    <div id="olFriendsOnline" hidden></div>
+    <p class="hint-text" id="olAsUser" hidden></p>
     <label class="setup-field ol-name">Tên của bạn
       <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
     </label>
@@ -1025,6 +1111,7 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
+        <label class="switch mt10" id="olRatedWrap" hidden><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Chỉ tính khi đối thủ cũng đã đăng nhập. Ván tính Elo không xin đi lại được.</small></span></label>
         <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
       </div>
       <div class="ol-box">
@@ -1050,7 +1137,7 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
       <button type="button" class="btn btn-outline btn-sm" id="olLeave"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Rời phòng</button>
-      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="ol-conn" id="olConn"></span></div>
+      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
       <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg>Mời bạn</button>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
@@ -1062,6 +1149,7 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
+        <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olActions">
           <button type="button" class="btn btn-outline btn-sm" id="olDraw">Xin hoà</button>
           <button type="button" class="btn btn-outline btn-sm" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
@@ -1092,18 +1180,44 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
 
  </div>
  <div data-stpanel="banbe" hidden>
-  <div class="card need-account">
+  <div class="card need-account" data-need-login>
     <h2>Bạn bè</h2>
     <p>Kết bạn theo tên đăng nhập, xem ai đang online và mời đấu trực tiếp.</p>
-    <p class="hint-text">Phần này cần <b>tài khoản</b>. Đăng ký / đăng nhập sắp có — trong lúc chờ, bạn vẫn đấu với bạn bè bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
-    <button type="button" class="btn btn-outline" data-goto-stab="phong">Sang Phòng đấu</button>
+    <p class="hint-text">Phần này cần tài khoản. Chưa có tài khoản, bạn vẫn đấu với bạn bè được bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div data-when-login hidden>
+    <div class="card">
+      <h2>Tìm bạn</h2>
+      <label class="setup-field">Tên đăng nhập của bạn bè
+        <input class="field" id="friendSearch" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Gõ ít nhất 3 ký tự">
+      </label>
+      <div id="friendResults" class="mt10" aria-live="polite"></div>
+    </div>
+    <div class="card" id="friendRequestsCard" hidden>
+      <h2>Lời mời kết bạn</h2>
+      <div id="friendRequests"></div>
+    </div>
+    <div class="card">
+      <h2>Bạn bè của bạn</h2>
+      <div id="friendList"></div>
+      <div id="friendOutgoing"></div>
+    </div>
   </div>
  </div>
  <div data-stpanel="xephang" hidden>
-  <div class="card need-account">
+  <div class="card need-account" data-need-login>
     <h2>Xếp hạng</h2>
-    <p>Bảng Elo của bạn bè và toàn bộ người chơi (top 50). Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
-    <p class="hint-text">Phần này cần <b>tài khoản</b> — sắp có.</p>
+    <p>Bảng Elo của bạn bè và toàn bộ người chơi. Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div class="card" data-when-login hidden>
+    <div class="btn-row" style="justify-content:space-between">
+      <h2 style="margin:0">Xếp hạng</h2>
+      <div class="seg" id="rankScope" role="group" aria-label="Phạm vi xếp hạng"><button type="button" data-scope="friends" aria-pressed="true">Bạn bè</button><button type="button" data-scope="all" aria-pressed="false">Toàn bộ</button></div>
+    </div>
+    <p class="hint-text small mt10">Chỉ tính ván bật “Tính Elo” giữa hai người đã đăng nhập. Cần ít nhất 5 ván để có hạng.</p>
+    <div id="rankList" aria-live="polite"></div>
   </div>
  </div>
 </section>
@@ -1111,6 +1225,7 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
 
 <!-- ===================== TÔI ===================== -->
 <section data-zone-panel="toi" hidden>
+  <div id="meExpired" hidden></div>
   <div class="card me-intro" id="meIntro">
     <div class="me-head"><span class="me-avatar"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><div><h2>Tài khoản</h2><div class="hint-text small">Bạn đang dùng không cần tài khoản — tiến độ lưu trong trình duyệt này.</div></div></div>
     <ul class="me-benefits">
@@ -1118,7 +1233,27 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng ở Sa trường, kết bạn và mời đấu trực tiếp</li>
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
     </ul>
-    <div class="btn-row"><button type="button" class="btn btn-primary" disabled>Đăng nhập</button><button type="button" class="btn btn-outline" disabled>Đăng ký</button><span class="hint-text small">Sắp có</span></div>
+    <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <p class="hint-text small" id="meNoServer" hidden></p>
+  </div>
+  <div id="meSigned" hidden>
+    <div class="card me-profile">
+      <div class="me-head">
+        <span class="me-avatar me-letter" id="meAvatar"></span>
+        <div class="me-id">
+          <div class="me-name-row"><h2 id="meName"></h2><button type="button" class="btn btn-outline btn-sm" id="meRename">Đổi tên</button></div>
+          <form id="meRenameForm" class="btn-row" hidden><input class="field" id="meRenameInput" maxlength="24" aria-label="Tên hiển thị mới"><button type="submit" class="btn btn-primary btn-sm">Lưu</button><button type="button" class="btn btn-outline btn-sm" id="meRenameCancel">Huỷ</button></form>
+          <div class="hint-text small" id="meSub"></div>
+        </div>
+        <div class="me-elo"><b id="meElo"></b><small id="meEloSub"></small></div>
+      </div>
+    </div>
+    <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
+    <div class="card">
+      <h2>Đồng bộ</h2>
+      <p class="hint-text" id="meSyncText"></p>
+      <button type="button" class="btn btn-outline btn-sm" id="meSyncNow"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Đồng bộ ngay</button>
+    </div>
   </div>
   <div class="me-grid">
     <div class="card" id="settingsPanel">
@@ -1151,9 +1286,21 @@ button.ol-item{cursor:pointer;} button.ol-item:hover{border-color:var(--gold);}
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
     </div>
   </div>
+  <div class="card mt16" id="meAccount" hidden>
+    <h2>Tài khoản</h2>
+    <div class="me-actions">
+      <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
+      <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
+      <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
+      <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+      <button type="button" class="btn btn-danger" id="meDelete">Xoá tài khoản</button>
+    </div>
+  </div>
 </section>
 
 </main>
+<div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
+<div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 
 <script>
 'use strict';
@@ -2374,7 +2521,9 @@ const PIECE_CHAR = {
 const VN_NAME = {G:'Tướng',A:'Sĩ',E:'Tượng',H:'Mã',R:'Xe',C:'Pháo',S:'Tốt'};
 
 function safeLS_get(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
-function safeLS_set(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+// LS_HOOK: báo cho phần đồng bộ tài khoản biết khoá nào vừa đổi (ghi thời điểm sửa)
+let LS_HOOK=null;
+function safeLS_set(key,val){ try{ localStorage.setItem(key,val); }catch(e){} if(LS_HOOK) try{ LS_HOOK(key); }catch(e){} }
 function safeJSON(key,fallback){ try{ const v=JSON.parse(safeLS_get(key)); return v==null?fallback:v; }catch(e){ return fallback; } }
 
 /* ---------- Cài đặt hiển thị dùng chung ---------- */
@@ -5980,7 +6129,7 @@ const Sound = (function(){
 const Progress = (function(){
   const APP='co-tuong-nhap-mon', VERSION=1, PREFIX='xq_';
   // Các mục không phải "tiến độ học" thì không cần mang theo
-  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server']);
+  const SKIP=new Set(['xq_last_tab','xq_zone','xq_online_server','xq_auth','xq_user','xq_sync_meta']);
   function keys(){
     const out=[];
     try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(PREFIX) && !SKIP.has(k)) out.push(k); } }catch(e){}
@@ -6324,6 +6473,7 @@ const ONLINE_ERR = {
   not_your_turn:'Chưa tới lượt bạn.', illegal:'Nước đi không hợp lệ.', stale:'Ván vừa thay đổi, đã cập nhật lại bàn cờ.',
   game_over:'Ván đã kết thúc.', spectator:'Bạn đang xem, không đi quân được.', no_opponent:'Chưa có đối thủ trong phòng.',
   nothing_to_take_back:'Bạn chưa có nước nào để xin đi lại.', no_offer:'Đề nghị không còn hiệu lực.',
+  rated_no_takeback:'Ván tính Elo không xin đi lại được.', too_early:'Chưa đủ 5 phút kể từ khi đối thủ rời ván.', bad_claim:'Không xử thắng được lúc này.',
 };
 
 const Online = (function(){
@@ -6333,7 +6483,7 @@ const Online = (function(){
   /* ---------- tiện ích ---------- */
   function randomHex(n){ const a=new Uint8Array(n); (window.crypto||{}).getRandomValues ? crypto.getRandomValues(a) : a.forEach((_,i)=>a[i]=Math.random()*256|0); return [...a].map(x=>x.toString(16).padStart(2,'0')).join(''); }
   function token(){ let t=safeLS_get('xq_online_token'); if(!t || t.length<16){ t=randomHex(16); safeLS_set('xq_online_token',t); } return t; }
-  function myName(){ return (safeLS_get('xq_online_name')||'').trim(); }
+  function myName(){ const u=typeof Account!=='undefined' && Account.signedIn() ? Account.user() : null; return u ? u.displayName : (safeLS_get('xq_online_name')||'').trim(); }
   function newCode(){ const a=new Uint8Array(6); crypto.getRandomValues(a); return [...a].map(x=>ONLINE_CODE_CHARS[x%ONLINE_CODE_CHARS.length]).join(''); }
   function params(){ try{ return new URLSearchParams(location.search); }catch(e){ return new URLSearchParams(''); } }
   // Mã phòng từ chuỗi người dùng dán vào: mã trần hoặc link có ?room=
@@ -6394,7 +6544,8 @@ const Online = (function(){
       if(st.ws!==ws) return;
       st.retry=0; st.everOpen=true; setConn('open');
       const msg={type:'join', name:myName()||'Kỳ thủ', token:token()};
-      if(st.create) msg.create={color:st.create};
+      if(st.create) msg.create={color:st.create.color, rated:!!st.create.rated};
+      if(Account.signedIn()) msg.auth=Account.token();
       ws.send(JSON.stringify(msg));
       st.ping=setInterval(()=>{ try{ ws.readyState===1 && ws.send('ping'); }catch(e){} }, 25000);
     };
@@ -6446,7 +6597,7 @@ const Online = (function(){
   }
   function apply(room){
     const prev=st.room;
-    st.room=room;
+    st.room=room; st.roomAt=Date.now();
     st.game=replay(room.moves, room.result); st.local=null;
     if(prev===null || prev.you!==room.you){ st.flipped = room.you==='black'; st.widget.setFlipped(st.flipped); }
     // âm thanh khi có nước mới của đối phương
@@ -6489,7 +6640,7 @@ const Online = (function(){
     const r=st.room, s=r.seats[color], g=st.local||st.game, isTurn=!r.result && g.turn()===color;
     const me = r.you===color;
     if(!s) return `<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`;
-    return `<span class="turn-dot turn-${color}"></span><span class="ol-pname">${esc(s.name)}${me?' <small>(bạn)</small>':''}</span>
+    return `<span class="turn-dot turn-${color}"></span><span class="ol-pname">${esc(s.name)}${me?' <small>(bạn)</small>':''}</span>${s.elo!=null?`<small class="ol-elo">Elo ${s.elo}</small>`:''}
       <span class="ol-dot ${s.online?'on':''}" title="${s.online?'Đang trong phòng':'Đã rời phòng'}"></span><small class="hint-text">${s.online?'':'mất kết nối'}</small>
       ${isTurn?'<span class="ol-turn">đang đi</span>':''}`;
   }
@@ -6510,7 +6661,10 @@ const Online = (function(){
     if(r.result){
       const res=r.result, txt=Game.resultText(res);
       const kind = !res.winner || r.you==='spectator' ? 'draw' : res.winner===r.you ? 'over' : 'fail';
-      statusBanner(el, kind, esc(txt)); return;
+      let elo='';
+      if(r.elo && r.you!=='spectator' && r.elo[r.you]){ const e=r.elo[r.you], d=e.after-e.before; elo=`<br>Elo của bạn: <b>${e.after}</b> (${d>=0?'+':''}${d})`; }
+      else if(r.rated && r.you!=='spectator') elo='<br><small>Ván này không tính Elo (cần cả hai người đăng nhập và ít nhất 10 nửa nước).</small>';
+      statusBanner(el, kind, esc(txt)+elo); return;
     }
     if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng — gửi link mời ở trên cho bạn của bạn.'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
@@ -6560,7 +6714,7 @@ const Online = (function(){
     const r=st.room;
     $('#olCode').textContent=st.code||'';
     renderInvite();
-    if(!r){ st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
+    if(!r){ $('#olKind').hidden=true; $('#olClaim').hidden=true; st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
     const me = r.you==='spectator' ? 'red' : r.you;
     const bottom = st.flipped ? 'black' : 'red';
     $('#olBottom').innerHTML=playerHTML(bottom); $('#olTop').innerHTML=playerHTML(other(bottom));
@@ -6571,11 +6725,32 @@ const Online = (function(){
     $('#olActions').hidden = !seated || over;
     $('#olDraw').disabled = !hasOpp || pending || !r.moves.length;
     $('#olTakeback').disabled = !hasOpp || pending || !r.moves.some((m,i)=>(i%2===0?'red':'black')===r.you);
+    $('#olTakeback').hidden = !!r.rated;
+    const kind=$('#olKind'); kind.hidden=false; kind.textContent = r.rated ? 'Tính Elo' : 'Giao hữu'; kind.className='badge '+(r.rated?'badge-hard':'badge-mid');
+    renderClaim();
     $('#olResign').disabled = !hasOpp && !r.moves.length;
     $('#olAfter').hidden = !over;
     $('#olRematch').hidden = !seated || !hasOpp;
     $('#olRematch').disabled = pending;
     $('#olChatInput').placeholder = seated ? 'Nhắn cho đối thủ…' : 'Nhắn với hai kỳ thủ…';
+  }
+  // Ván tính Elo: đối thủ rời ván ≥ 5 phút → nút "Xử thắng"
+  function renderClaim(){
+    const el=$('#olClaim'), r=st.room;
+    clearTimeout(st.claimTimer);
+    const opp = r && r.you!=='spectator' ? r.seats[other(r.you)] : null;
+    if(!r || !r.rated || r.result || !opp || opp.online || !opp.awaySince || !r.moves.length){ el.hidden=true; return; }
+    const skew=(r.serverNow||Date.now())-(st.roomAt||Date.now());   // giờ máy chủ − giờ máy mình
+    const left=Math.max(0, opp.awaySince + (r.abandonMs||300000) - (Date.now()+skew));
+    el.hidden=false;
+    if(left>0){
+      const m=Math.floor(left/60000), sec=String(Math.ceil(left/1000)%60).padStart(2,'0');
+      el.innerHTML=`<span>${esc(opp.name)} đã rời ván. Nếu không quay lại, bạn được xử thắng sau <b>${m}:${sec}</b>.</span>`;
+      st.claimTimer=setTimeout(renderClaim, 1000);
+    } else {
+      el.innerHTML=`<span>${esc(opp.name)} đã rời ván hơn 5 phút.</span><button type="button" class="btn btn-primary btn-sm" id="olClaimBtn">Xử thắng</button>`;
+      $('#olClaimBtn').addEventListener('click',()=>send({type:'claim'}));
+    }
   }
   function noticeText(){
     const web=`<a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>`;
@@ -6595,6 +6770,9 @@ const Online = (function(){
   }
   function renderLobby(){
     renderNotice();
+    const u=Account.signedIn() ? Account.user() : null;
+    $('.ol-name').hidden=!!u; $('#olRatedWrap').hidden=!u;
+    $('#olAsUser').hidden=!u; if(u) $('#olAsUser').innerHTML=`Bạn chơi với tên <b>${esc(u.displayName)}</b> · Elo ${u.elo}.`;
     const rc=recent();
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
         <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
@@ -6622,6 +6800,7 @@ const Online = (function(){
 
   /* ---------- hành động ---------- */
   function ensureName(){
+    if(Account.signedIn()) return true;
     let n=$('#olName').value.trim();
     if(!n){ $('#olName').focus(); $('#olJoinMsg').textContent='Hãy nhập tên của bạn trước.'; return false; }
     safeLS_set('xq_online_name', n.slice(0,24)); return true;
@@ -6655,7 +6834,7 @@ const Online = (function(){
     });
     $('#olCreate').addEventListener('click',()=>{
       if(!ensureName()) return;
-      enterRoom(newCode(), ($('input[name="olColor"]:checked')||{}).value||'red');
+      enterRoom(newCode(), {color:($('input[name="olColor"]:checked')||{}).value||'red', rated:Account.signedIn() && $('#olRated').checked});
     });
     const join=()=>{
       if(!ensureName()) return;
@@ -6680,13 +6859,603 @@ const Online = (function(){
       if(t && send({type:'chat', text:t})) inp.value='';
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
+    document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }
   }
-  return {init, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink};
+  return {init, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
 })();
 function initOnline(){ Online.init(); }
+/* =========================================================================
+   TÀI KHOẢN — đăng ký/đăng nhập, mã khôi phục, đồng bộ tiến độ, trang Tôi,
+   bạn bè + mời đấu, xếp hạng (spec v3). Máy chủ: server/src/accounts.js.
+   - Mật khẩu băm PBKDF2-SHA256 600.000 vòng ngay trên trình duyệt rồi mới gửi.
+   - Phiên: token trong xq_auth, gửi qua "Authorization: Bearer".
+   - Đồng bộ: mỗi khoá xq_* nhớ thời điểm sửa (xq_sync_meta); 5 giây sau thay đổi thì gửi lên,
+     máy chủ gộp rồi trả về bản đã gộp.
+   ========================================================================= */
+const Account = (function(){
+  const NO_SYNC = new Set(['xq_last_tab','xq_zone','xq_online_server','xq_online_token','xq_online_rooms','xq_auth','xq_user','xq_sync_meta']);
+  const LEARN_KEYS = ['xq_lessons_done','xq_puzzles_solved','xq_sc_solved','xq_tactics_seen','xq_eg_seen','xq_srs','xq_daily','xq_trainer_best','xq_ai_history','xq_online_history'];
+  const USER_RE = /^[a-z0-9_.]{3,20}$/;
+  const st = { user:null, sync:'idle', syncTimer:0, applying:false, inbox:null, inboxTimer:0, expired:false, seenInvites:new Set(), seenSent:new Set(),
+    friends:null, rankScope:'friends', searchTimer:0, lastSync:0 };
+  const api = {iterations:600000, reload:()=>location.reload()};   // test có thể chỉnh
+
+  /* ---------- tiện ích ---------- */
+  const token = () => safeLS_get('xq_auth');
+  const signedIn = () => !!token() && !!st.user;
+  function base(){
+    const ws = Online.server(); if(!ws) return '';
+    return ws.replace(/^ws/i, 'http');
+  }
+  function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
+  const available = () => !!base() && !isArtifact();
+  const I = n => icon(n);
+  const enc = s => new TextEncoder().encode(s);
+  async function passHash(username, pw){
+    const key=await crypto.subtle.importKey('raw', enc(pw), 'PBKDF2', false, ['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt:enc('cotuong:'+username.toLowerCase()), iterations:api.iterations}, key, 256);
+    return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  class ApiErr extends Error { constructor(status, body){ super((body&&body.message)||'Không kết nối được máy chủ'); this.status=status; this.code=body&&body.error; this.body=body; } }
+  async function call(method, path, body){
+    const headers={'content-type':'application/json'};
+    if(token()) headers.authorization='Bearer '+token();
+    let res;
+    try{ res=await fetch(base()+path, {method, headers, body: body ? JSON.stringify(body) : undefined}); }
+    catch(e){ throw new ApiErr(0, {message:'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.'}); }
+    let data=null; try{ data=await res.json(); }catch(e){}
+    if(!res.ok){
+      if(res.status===401 && data && data.error==='unauthorized' && token()) sessionExpired();
+      throw new ApiErr(res.status, data);
+    }
+    return data;
+  }
+  function initials(name){ const w=String(name||'?').trim().split(/\s+/); return (w.length>1 ? w[0][0]+w[w.length-1][0] : w[0].slice(0,2)).toUpperCase(); }
+  function hue(s){ let h=0; for(const ch of String(s)) h=(h*31+ch.charCodeAt(0))>>>0; return h%360; }
+  function avatar(u, cls){ const name=u.displayName||u.username; return `<span class="avatar${cls?' '+cls:''}" style="--av:${hue(u.username||name)}" aria-hidden="true">${esc(initials(name))}</span>`; }
+  const fmtDate = t => new Date(t).toLocaleDateString('vi-VN');
+
+  /* ---------- lưu phiên ---------- */
+  function setUser(u){ st.user=u; if(u) safeLS_set('xq_user', JSON.stringify(u)); render(); }
+  function saveSession(tok, u){ safeLS_set('xq_auth', tok); st.expired=false; setUser(u); startInbox(); }
+  function clearSession(){
+    try{ localStorage.removeItem('xq_auth'); localStorage.removeItem('xq_user'); localStorage.removeItem('xq_sync_meta'); }catch(e){}
+    st.user=null; st.inbox=null; clearInterval(st.inboxTimer); clearTimeout(st.syncTimer); st.sync='idle';
+    render(); renderBadge();
+  }
+  function sessionExpired(){
+    if(st.expired) return;
+    st.expired=true;
+    try{ localStorage.removeItem('xq_auth'); }catch(e){}
+    clearInterval(st.inboxTimer);
+    const was=st.user; st.user=null; render();
+    notice({id:'expired', html:`<b>Phiên đăng nhập đã hết hạn.</b> Tiến độ trên máy này vẫn còn nguyên.`, actions:[{label:'Đăng nhập lại', primary:true, run:()=>openLogin(was&&was.username)}]});
+  }
+
+  /* ---------- đồng bộ tiến độ ---------- */
+  function meta(){ const m=safeJSON('xq_sync_meta',{}); m.t=m.t||{}; return m; }
+  function saveMeta(m){ try{ localStorage.setItem('xq_sync_meta', JSON.stringify(m)); }catch(e){} }
+  function syncedKeys(){
+    const out=[];
+    try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith('xq_') && !NO_SYNC.has(k)) out.push(k); } }catch(e){}
+    return out;
+  }
+  function collect(){ const d={}; for(const k of syncedKeys()){ const v=safeLS_get(k); if(v!=null) d[k]=v; } return d; }
+  function hasLocalProgress(){
+    return LEARN_KEYS.some(k=>{ const v=safeJSON(k,null); return v && (Array.isArray(v) ? v.length : Object.keys(v).length); });
+  }
+  function onLocalChange(key){
+    if(st.applying || !key || !key.startsWith('xq_') || NO_SYNC.has(key)) return;
+    const m=meta(); m.t[key]=Date.now(); saveMeta(m);
+    if(signedIn()){ clearTimeout(st.syncTimer); st.syncTimer=setTimeout(()=>sync(), 5000); }
+  }
+  // Ghi bản đã gộp từ máy chủ xuống máy; trả về các khoá học tập đã đổi
+  function applyRemote(r, replace){
+    st.applying=true;
+    const changed=[];
+    try{
+      if(replace) for(const k of syncedKeys()) if(!(k in r.data)){ try{ localStorage.removeItem(k); }catch(e){} changed.push(k); }
+      for(const [k,v] of Object.entries(r.data||{})){
+        if(NO_SYNC.has(k) || !k.startsWith('xq_')) continue;
+        if(safeLS_get(k)!==v){ safeLS_set(k, v); changed.push(k); }
+      }
+      const m=meta(); m.t=Object.assign({}, r.t||{}); m.last=Date.now(); saveMeta(m);
+    } finally { st.applying=false; }
+    return changed;
+  }
+  async function sync(opts){
+    opts=opts||{};
+    if(!signedIn() || st.sync==='syncing') return null;
+    clearTimeout(st.syncTimer);
+    st.sync='syncing'; renderSync();
+    try{
+      const r=await call('PUT','/api/progress',{data:collect(), t:meta().t});
+      const changed=applyRemote(r);
+      st.sync='ok'; st.lastSync=Date.now();
+      renderSync();
+      if(!opts.quiet && changed.some(k=>LEARN_KEYS.includes(k)))
+        notice({id:'synced', html:'Tiến độ vừa được cập nhật từ máy khác.', actions:[{label:'Tải lại để xem', primary:true, run:()=>api.reload()}]});
+      return changed;
+    }catch(e){
+      st.sync = e.status===401 ? 'idle' : 'error'; renderSync();
+      return null;
+    }
+  }
+
+  /* ---------- hộp thoại ---------- */
+  let dlgDone=null, dlgPrevFocus=null;
+  function openDialog(html, onMount){
+    const root=$('#dlg'), body=$('#dlgBody');
+    dlgPrevFocus=document.activeElement;
+    body.innerHTML=html; root.hidden=false;
+    document.body.classList.add('dlg-open');
+    const first=$('input,button:not(.dlg-x)',body); (first||$('.dlg',root)).focus();
+    $$('[data-dlg-close]',body).forEach(b=>b.addEventListener('click',closeDialog));
+    if(onMount) onMount(body);
+  }
+  function closeDialog(){
+    const root=$('#dlg'); if(root.hidden) return;
+    root.hidden=true; $('#dlgBody').innerHTML=''; document.body.classList.remove('dlg-open');
+    if(dlgDone){ const f=dlgDone; dlgDone=null; f(); }
+    if(dlgPrevFocus && dlgPrevFocus.focus) try{ dlgPrevFocus.focus(); }catch(e){}
+  }
+  const dlgHead = (title, closable=true) => `<div class="dlg-head"><h2 id="dlgTitle">${title}</h2>${closable?`<button type="button" class="dlg-x" data-dlg-close aria-label="Đóng">${I('x')}</button>`:''}</div>`;
+  function fieldHTML(id, label, type, extra){
+    const pw=type==='password';
+    return `<label class="dlg-field" for="${id}"><span>${label}</span>
+      <span class="dlg-input">${`<input class="field" id="${id}" type="${type}" ${extra||''}>`}${pw?`<button type="button" class="pw-eye" data-eye="${id}" aria-label="Hiện mật khẩu" title="Hiện mật khẩu">${I('eye')}</button>`:''}</span>
+      <small class="dlg-err" id="${id}Err" aria-live="polite"></small></label>`;
+  }
+  function wireForm(body, onSubmit){
+    $$('[data-eye]',body).forEach(b=>b.addEventListener('click',()=>{ const i=$('#'+b.dataset.eye); const show=i.type==='password'; i.type=show?'text':'password'; b.setAttribute('aria-label', show?'Ẩn mật khẩu':'Hiện mật khẩu'); }));
+    const form=$('form',body), btn=$('button[type=submit]',form), msg=$('.dlg-msg',body);
+    form.addEventListener('submit', async e=>{
+      e.preventDefault();
+      $$('.dlg-err',body).forEach(x=>x.textContent=''); if(msg) msg.textContent='';
+      const label=btn.innerHTML; btn.disabled=true; btn.innerHTML=`<span class="spinner" aria-hidden="true"></span>${btn.textContent}`;
+      try{ await onSubmit(); }
+      catch(err){ if(msg) msg.textContent=err.message||'Có lỗi, thử lại sau.'; }
+      finally{ if(btn.isConnected){ btn.disabled=false; btn.innerHTML=label; } }
+    });
+  }
+  const fieldErr = (id, t) => { const el=$('#'+id+'Err'); if(el) el.textContent=t; return false; };
+  const val = id => ($('#'+id)||{}).value||'';
+
+  function openLogin(prefill){
+    if(!available()) return noServerNotice();
+    openDialog(`${dlgHead('Đăng nhập')}
+      <form novalidate>
+        ${fieldHTML('lgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
+        ${fieldHTML('lgPass','Mật khẩu','password','autocomplete="current-password"')}
+        <p class="dlg-msg" role="alert"></p>
+        <button type="submit" class="btn btn-primary dlg-main">Đăng nhập</button>
+      </form>
+      <div class="dlg-links"><button type="button" class="link-btn" id="lgForgot">Quên mật khẩu?</button><button type="button" class="link-btn" id="lgReg">Chưa có tài khoản? Đăng ký</button></div>`, body=>{
+      if(prefill){ $('#lgUser').value=prefill; $('#lgPass').focus(); }
+      $('#lgForgot').addEventListener('click',()=>openForgot(val('lgUser')));
+      $('#lgReg').addEventListener('click',()=>openRegister());
+      wireForm(body, async ()=>{
+        const u=val('lgUser').trim().toLowerCase(), p=val('lgPass');
+        if(!u) return fieldErr('lgUser','Nhập tên đăng nhập');
+        if(!p) return fieldErr('lgPass','Nhập mật khẩu');
+        const r=await call('POST','/api/login',{username:u, passHash:await passHash(u,p)});
+        await afterSignIn(r, false);
+      });
+    });
+  }
+  function openRegister(){
+    if(!available()) return noServerNotice();
+    openDialog(`${dlgHead('Tạo tài khoản')}
+      <form novalidate>
+        ${fieldHTML('rgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
+        <small class="hint-text small dlg-hint">3–20 ký tự: chữ không dấu, số, dấu _ và dấu chấm. Bạn bè tìm bạn bằng tên này.</small>
+        ${fieldHTML('rgName','Tên hiển thị','text','autocomplete="nickname" maxlength="24"')}
+        ${fieldHTML('rgPass','Mật khẩu','password','autocomplete="new-password"')}
+        ${fieldHTML('rgPass2','Nhập lại mật khẩu','password','autocomplete="new-password"')}
+        <p class="dlg-msg" role="alert"></p>
+        <button type="submit" class="btn btn-primary dlg-main">Tạo tài khoản</button>
+      </form>
+      <div class="dlg-links"><button type="button" class="link-btn" id="rgLogin">Đã có tài khoản? Đăng nhập</button></div>`, body=>{
+      $('#rgLogin').addEventListener('click',()=>openLogin());
+      $('#rgUser').addEventListener('input',()=>{ if(!$('#rgName').dataset.touched) $('#rgName').placeholder=$('#rgUser').value.trim(); });
+      $('#rgName').addEventListener('input',()=>{ $('#rgName').dataset.touched='1'; });
+      wireForm(body, async ()=>{
+        const u=val('rgUser').trim().toLowerCase(), name=val('rgName').trim()||u, p=val('rgPass'), p2=val('rgPass2');
+        let ok=true;
+        if(!USER_RE.test(u)) ok=fieldErr('rgUser','Tên đăng nhập 3–20 ký tự, chỉ gồm chữ không dấu, số, _ và .');
+        if(p.length<8) ok=fieldErr('rgPass','Mật khẩu cần ít nhất 8 ký tự');
+        else if(p!==p2) ok=fieldErr('rgPass2','Hai mật khẩu chưa khớp');
+        if(!ok) return;
+        try{
+          const r=await call('POST','/api/register',{username:u, displayName:name, passHash:await passHash(u,p)});
+          showRecoveryCode(r.recoveryCode, 'Tài khoản đã tạo xong', ()=>afterSignIn(r, true));
+        }catch(e){ if(e.code==='username_taken'||e.code==='bad_username') return fieldErr('rgUser', e.message); throw e; }
+      });
+    });
+  }
+  function openForgot(prefill){
+    openDialog(`${dlgHead('Lấy lại mật khẩu')}
+      <p class="hint-text small">Dùng mã khôi phục bạn đã lưu khi tạo tài khoản (dạng ABCD-EFGH-JKLM-NPQR).</p>
+      <form novalidate>
+        ${fieldHTML('fgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
+        ${fieldHTML('fgCode','Mã khôi phục','text','autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"')}
+        ${fieldHTML('fgPass','Mật khẩu mới','password','autocomplete="new-password"')}
+        ${fieldHTML('fgPass2','Nhập lại mật khẩu mới','password','autocomplete="new-password"')}
+        <p class="dlg-msg" role="alert"></p>
+        <button type="submit" class="btn btn-primary dlg-main">Đặt mật khẩu mới</button>
+      </form>
+      <div class="dlg-links"><button type="button" class="link-btn" id="fgBack">Quay lại đăng nhập</button></div>`, body=>{
+      if(prefill) $('#fgUser').value=prefill;
+      $('#fgBack').addEventListener('click',()=>openLogin(val('fgUser')));
+      wireForm(body, async ()=>{
+        const u=val('fgUser').trim().toLowerCase(), code=val('fgCode'), p=val('fgPass'), p2=val('fgPass2');
+        let ok=true;
+        if(!u) ok=fieldErr('fgUser','Nhập tên đăng nhập');
+        if(code.replace(/[^A-Za-z0-9]/g,'').length!==16) ok=fieldErr('fgCode','Mã khôi phục gồm 16 chữ và số');
+        if(p.length<8) ok=fieldErr('fgPass','Mật khẩu cần ít nhất 8 ký tự');
+        else if(p!==p2) ok=fieldErr('fgPass2','Hai mật khẩu chưa khớp');
+        if(!ok) return;
+        const r=await call('POST','/api/recover',{username:u, recoveryCode:code, newPassHash:await passHash(u,p)});
+        showRecoveryCode(r.recoveryCode, 'Đã đặt mật khẩu mới', ()=>afterSignIn(r, false), 'Mã khôi phục cũ đã hết hiệu lực và các máy khác đã bị đăng xuất. Đây là mã mới của bạn:');
+      });
+    });
+  }
+  // Hiện mã khôi phục một lần; bắt buộc tích "đã lưu" mới đi tiếp
+  function showRecoveryCode(code, title, next, lead){
+    const file='ma-khoi-phuc-co-tuong.txt';
+    openDialog(`${dlgHead(title, false)}
+      <p>${lead||'Đây là <b>mã khôi phục</b> của bạn:'}</p>
+      <div class="recovery-code" id="rcCode">${esc(code)}</div>
+      <div class="btn-row"><button type="button" class="btn btn-outline btn-sm" id="rcCopy">${I('copy')}Sao chép</button><button type="button" class="btn btn-outline btn-sm" id="rcSave">${I('download')}Tải về</button></div>
+      <p class="hint-text small mt10">Không có email nên đây là cách duy nhất để lấy lại tài khoản khi quên mật khẩu. Mã chỉ hiện một lần — hãy chép ra giấy hoặc lưu vào nơi an toàn.</p>
+      <label class="check-line"><input type="checkbox" id="rcOk"> Tôi đã lưu mã này</label>
+      <p class="dlg-msg" role="alert"></p>
+      <button type="button" class="btn btn-primary dlg-main" id="rcNext" disabled>Tiếp tục</button>`, body=>{
+      const msg=$('.dlg-msg',body);
+      $('#rcOk').addEventListener('change',()=>{ $('#rcNext').disabled=!$('#rcOk').checked; });
+      $('#rcCopy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(code); msg.textContent='Đã sao chép mã.'; }catch(e){ msg.textContent='Hãy tự chép mã ở trên.'; } });
+      $('#rcSave').addEventListener('click', async ()=>{
+        const text=`Mã khôi phục Cờ Tướng (${ONLINE_WEB_URL})\n${code}\n`;
+        try{
+          if(window.claude && window.claude.use){ const d=await window.claude.use('downloads'); await d.save({filename:file, data:text}); }
+          else { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download=file; document.body.appendChild(a); a.click(); a.remove(); }
+          msg.textContent='Đã tải tệp mã khôi phục.';
+        }catch(e){ msg.textContent='Không tải được tệp — hãy sao chép mã.'; }
+      });
+      $('#rcNext').addEventListener('click',()=>{ closeDialog(); next && next(); });
+    });
+  }
+  // Sau đăng nhập / đăng ký / khôi phục: lưu phiên, gộp tiến độ
+  async function afterSignIn(r, fresh){
+    saveSession(r.token, r.user);
+    closeDialog();
+    if(fresh){ await sync({quiet:true}); toastMsg(`Chào ${r.user.displayName}! Tiến độ trên máy này đã được lưu vào tài khoản.`); return; }
+    let remote=null;
+    try{ remote=await call('GET','/api/progress'); }catch(e){}
+    const remoteHas = remote && Object.keys(remote.data||{}).some(k=>LEARN_KEYS.includes(k));
+    if(!hasLocalProgress() || !remoteHas){
+      // một bên trống: gộp luôn, không cần hỏi
+      const changed=await sync({quiet:true});
+      if(changed && changed.some(k=>LEARN_KEYS.includes(k))) api.reload();
+      else toastMsg(`Đã đăng nhập: ${r.user.displayName}.`);
+      return;
+    }
+    openDialog(`${dlgHead('Gộp tiến độ?', false)}
+      <p>Máy này đã có tiến độ học. Bạn muốn gộp vào tài khoản không?</p>
+      <ul class="lesson-list"><li><b>Gộp</b>: giữ cả hai — bài đã học, bài tập đã giải, ván đã đấu ở máy này và trong tài khoản.</li>
+      <li><b>Bỏ qua</b>: dùng tiến độ của tài khoản, bỏ tiến độ đang có trên máy này.</li></ul>
+      <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="mgMerge">Gộp</button><button type="button" class="btn btn-outline" id="mgSkip">Bỏ qua, dùng tiến độ tài khoản</button></div>`, ()=>{
+      $('#mgMerge').addEventListener('click', async ()=>{ closeDialog(); await sync({quiet:true}); api.reload(); });
+      $('#mgSkip').addEventListener('click', ()=>{ closeDialog(); applyRemote(remote, true); api.reload(); });
+    });
+  }
+  function noServerNotice(){
+    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa có địa chỉ máy chủ — xem mục “Máy chủ (nâng cao)” ở Sa trường.');
+  }
+  function confirmDialog(title, html, okLabel, run, danger){
+    openDialog(`${dlgHead(title)}${html}<p class="dlg-msg" role="alert"></p>
+      <div class="btn-row mt10"><button type="button" class="btn ${danger?'btn-danger':'btn-primary'}" id="cfOk">${okLabel}</button><button type="button" class="btn btn-outline" data-dlg-close>Huỷ</button></div>`, body=>{
+      $('#cfOk').addEventListener('click', async ()=>{
+        const b=$('#cfOk'); b.disabled=true;
+        try{ await run(body); }catch(e){ $('.dlg-msg',body).textContent=e.message; b.disabled=false; }
+      });
+    });
+  }
+
+  /* ---------- trang Tôi ---------- */
+  function renderTop(){
+    const lab=$('#meLabel'), ic=$('#meIcon'), u=st.user;
+    if(u){ lab.textContent='Tôi'; ic.innerHTML=avatar(u,'avatar-xs'); }
+    else { lab.textContent = available() ? 'Đăng nhập' : 'Tôi'; ic.innerHTML=icon('user','zone-ic'); }
+    renderSync();
+  }
+  function renderSync(){
+    const b=$('#syncIcon'); if(!b) return;
+    b.hidden=!signedIn();
+    const s=st.sync, map={syncing:['sync','Đang đồng bộ…','spin'], error:['alert','Đồng bộ lỗi — bấm để thử lại','bad'], ok:['check','Đã đồng bộ',''], idle:['check','Đồng bộ tiến độ','']}[s]||['check','',''];
+    b.innerHTML=icon(map[0]); b.title=map[1]; b.setAttribute('aria-label',map[1]); b.className='sync-ic '+map[2];
+    const t=$('#meSyncText');
+    if(t){
+      const m=meta();
+      t.textContent = s==='syncing' ? 'Đang đồng bộ…' : s==='error' ? 'Chưa đồng bộ được (mất mạng?). Tiến độ vẫn lưu trên máy này, sẽ thử lại sau.'
+        : m.last ? `Lần đồng bộ cuối: ${new Date(m.last).toLocaleString('vi-VN')}. Tiến độ tự đồng bộ vài giây sau mỗi thay đổi.` : 'Chưa đồng bộ lần nào.';
+    }
+  }
+  function statTile(big, small){ return `<div class="dash-tile"><b>${big}</b><span>${small}</span></div>`; }
+  function renderMe(){
+    const u=st.user;
+    $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
+    $('#meAuthBtns').hidden=!available();
+    const ns=$('#meNoServer'); ns.hidden=available();
+    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa có địa chỉ máy chủ nên chưa đăng nhập được (xem mục “Máy chủ (nâng cao)” ở Sa trường).';
+    if(!u) return;
+    $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
+    $('#meName').textContent=u.displayName;
+    $('#meSub').textContent=`@${u.username} · tham gia ${fmtDate(u.createdAt)}`;
+    $('#meElo').textContent=u.elo;
+    $('#meEloSub').textContent = u.ratedGames>=5 ? `Elo · cao nhất ${u.peakElo}` : `Elo · chưa xếp hạng (còn ${5-u.ratedGames} ván)`;
+    const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
+    const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
+    $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
+      + statTile(streak||'—','ngày liên tiếp làm bài hôm nay') + statTile(`${w}-${d}-${l}`,'đấu với máy: thắng-hoà-thua')
+      + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
+    renderSync();
+  }
+  function render(){
+    renderTop(); renderMe();
+    const on=signedIn();
+    $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
+    $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });
+    $$('[data-open-login],[data-open-register]').forEach(b=>{ b.disabled=!available(); });
+    document.dispatchEvent(new CustomEvent('accountchange'));
+  }
+  async function refreshMe(){ try{ const r=await call('GET','/api/me'); setUser(r.user); }catch(e){} }
+
+  function initMe(){
+    $$('[data-open-login]').forEach(b=>b.addEventListener('click',()=>openLogin()));
+    $$('[data-open-register]').forEach(b=>b.addEventListener('click',()=>openRegister()));
+    $('#syncIcon').addEventListener('click',()=>sync());
+    $('#meSyncNow').addEventListener('click',()=>sync());
+    $('#meRename').addEventListener('click',()=>{ $('#meRenameForm').hidden=false; $('#meRename').hidden=true; const i=$('#meRenameInput'); i.value=st.user.displayName; i.focus(); i.select(); });
+    $('#meRenameCancel').addEventListener('click',()=>{ $('#meRenameForm').hidden=true; $('#meRename').hidden=false; });
+    $('#meRenameForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      try{ const r=await call('PATCH','/api/me',{displayName:$('#meRenameInput').value}); setUser(r.user); $('#meRenameForm').hidden=true; $('#meRename').hidden=false; }
+      catch(err){ toastMsg(err.message); }
+    });
+    $('#meChangePass').addEventListener('click',()=>{
+      openDialog(`${dlgHead('Đổi mật khẩu')}<form novalidate>
+        ${fieldHTML('cpOld','Mật khẩu hiện tại','password','autocomplete="current-password"')}
+        ${fieldHTML('cpNew','Mật khẩu mới','password','autocomplete="new-password"')}
+        ${fieldHTML('cpNew2','Nhập lại mật khẩu mới','password','autocomplete="new-password"')}
+        <p class="dlg-msg" role="alert"></p><button type="submit" class="btn btn-primary dlg-main">Đổi mật khẩu</button></form>`, body=>{
+        wireForm(body, async ()=>{
+          const o=val('cpOld'), n=val('cpNew'), n2=val('cpNew2'), u=st.user.username;
+          if(n.length<8) return fieldErr('cpNew','Mật khẩu cần ít nhất 8 ký tự');
+          if(n!==n2) return fieldErr('cpNew2','Hai mật khẩu chưa khớp');
+          try{ await call('POST','/api/password',{oldPassHash:await passHash(u,o), newPassHash:await passHash(u,n)}); }
+          catch(e){ if(e.status===401) return fieldErr('cpOld','Mật khẩu hiện tại chưa đúng'); throw e; }
+          closeDialog(); toastMsg('Đã đổi mật khẩu. Các máy khác đã được đăng xuất.');
+        });
+      });
+    });
+    $('#meNewCode').addEventListener('click',()=>{
+      openDialog(`${dlgHead('Tạo mã khôi phục mới')}<p class="hint-text small">Mã cũ sẽ hết hiệu lực.</p><form novalidate>
+        ${fieldHTML('ncPass','Mật khẩu','password','autocomplete="current-password"')}
+        <p class="dlg-msg" role="alert"></p><button type="submit" class="btn btn-primary dlg-main">Tạo mã mới</button></form>`, body=>{
+        wireForm(body, async ()=>{
+          try{ const r=await call('POST','/api/recovery-code',{passHash:await passHash(st.user.username, val('ncPass'))}); showRecoveryCode(r.recoveryCode,'Mã khôi phục mới',null); }
+          catch(e){ if(e.status===401) return fieldErr('ncPass','Mật khẩu chưa đúng'); throw e; }
+        });
+      });
+    });
+    $('#meLogout').addEventListener('click',()=>{
+      openDialog(`${dlgHead('Đăng xuất')}<p>Giữ tiến độ học trên máy này sau khi đăng xuất?</p>
+        <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="loKeep">Đăng xuất, giữ tiến độ</button><button type="button" class="btn btn-outline" id="loWipe">Đăng xuất và xoá tiến độ trên máy này</button></div>`, ()=>{
+        $('#loKeep').addEventListener('click',()=>logout(false));
+        $('#loWipe').addEventListener('click',()=>logout(true));
+      });
+    });
+    $('#meLogoutAll').addEventListener('click',()=>confirmDialog('Đăng xuất mọi thiết bị','<p>Tất cả các máy đang đăng nhập tài khoản này (kể cả máy này) sẽ bị đăng xuất.</p>','Đăng xuất tất cả', async ()=>{
+      await call('POST','/api/logout-all'); closeDialog(); clearSession(); toastMsg('Đã đăng xuất khỏi mọi thiết bị.');
+    }));
+    $('#meDelete').addEventListener('click',()=>{
+      openDialog(`${dlgHead('Xoá tài khoản')}<p><b>Không thể hoàn tác.</b> Tài khoản, tiến độ đã đồng bộ, bạn bè và lời mời sẽ bị xoá. Ván đã đấu vẫn còn trong lịch sử của đối thủ, tên bạn đổi thành “Người chơi đã xoá”.</p>
+        <form novalidate>${fieldHTML('dlUser','Gõ lại tên đăng nhập','text','autocomplete="off" autocapitalize="none" spellcheck="false"')}${fieldHTML('dlPass','Mật khẩu','password','autocomplete="current-password"')}
+        <p class="dlg-msg" role="alert"></p><button type="submit" class="btn btn-danger dlg-main">Xoá tài khoản vĩnh viễn</button></form>`, body=>{
+        wireForm(body, async ()=>{
+          const u=st.user.username;
+          if(val('dlUser').trim().toLowerCase()!==u) return fieldErr('dlUser','Tên đăng nhập chưa khớp');
+          try{ await call('DELETE','/api/me',{username:u, passHash:await passHash(u, val('dlPass'))}); }
+          catch(e){ if(e.status===401) return fieldErr('dlPass','Mật khẩu chưa đúng'); throw e; }
+          closeDialog(); clearSession(); toastMsg('Đã xoá tài khoản. Tiến độ trên máy này vẫn giữ nguyên.');
+        });
+      });
+    });
+    $('#dlg').addEventListener('click',e=>{ if(e.target.id==='dlg' && $('.dlg-x',$('#dlg'))) closeDialog(); });
+    document.addEventListener('keydown',e=>{
+      if($('#dlg').hidden) return;
+      if(e.key==='Escape' && $('.dlg-x',$('#dlg'))) closeDialog();
+      if(e.key==='Tab'){   // giữ Tab trong hộp thoại
+        const f=$$('button:not([disabled]),input,select,textarea,a[href]',$('#dlg')).filter(x=>!x.hidden); if(!f.length) return;
+        const first=f[0], last=f[f.length-1];
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      }
+    });
+    document.addEventListener('zoneshown',e=>{ if(e.detail==='toi'){ renderMe(); if(signedIn()) refreshMe(); } });
+  }
+  async function logout(wipe){
+    closeDialog();
+    if(!wipe) await sync({quiet:true});
+    try{ await call('POST','/api/logout'); }catch(e){}
+    const keys=syncedKeys();
+    clearSession();
+    if(wipe){ for(const k of keys) try{ localStorage.removeItem(k); }catch(e){} api.reload(); return; }
+    toastMsg('Đã đăng xuất. Tiến độ trên máy này vẫn giữ nguyên.');
+  }
+
+  /* ---------- thông báo nổi (lời mời đấu, phiên hết hạn…) ---------- */
+  function notice(n){
+    const stack=$('#noticeStack'); if(!stack) return;
+    const old=$(`[data-notice="${n.id}"]`,stack); if(old) old.remove();
+    const el=document.createElement('div'); el.className='notice'; el.dataset.notice=n.id; el.setAttribute('role','status');
+    el.innerHTML=`<div class="notice-text">${n.html}</div><div class="btn-row">${(n.actions||[]).map((a,i)=>`<button type="button" class="btn btn-sm ${a.primary?'btn-primary':'btn-outline'}" data-i="${i}">${a.label}</button>`).join('')}
+      <button type="button" class="notice-x" aria-label="Đóng">${I('x')}</button></div>`;
+    $$('[data-i]',el).forEach(b=>b.addEventListener('click',()=>{ el.remove(); n.actions[+b.dataset.i].run(); }));
+    $('.notice-x',el).addEventListener('click',()=>{ el.remove(); n.onClose && n.onClose(); });
+    stack.appendChild(el);
+    if(n.timeout) setTimeout(()=>el.remove(), n.timeout);
+    return el;
+  }
+  const dropNotice = id => { const el=$(`#noticeStack [data-notice="${id}"]`); if(el) el.remove(); };
+  function toastMsg(text){ notice({id:'toast', html:esc(text), timeout:5000}); }
+
+  /* ---------- hộp thư: lời mời đấu, lời mời kết bạn, nhịp online ---------- */
+  function startInbox(){
+    clearInterval(st.inboxTimer);
+    if(!signedIn()) return;
+    pollInbox();
+    st.inboxTimer=setInterval(()=>{ if(!document.hidden) pollInbox(); }, 20000);
+  }
+  async function pollInbox(){
+    if(!signedIn()) return;
+    let r; try{ r=await call('GET','/api/inbox'); }catch(e){ return; }
+    st.inbox=r;
+    if(r.user && JSON.stringify(r.user)!==JSON.stringify(st.user)) setUser(Object.assign({}, r.user, {online:undefined}));
+    renderBadge();
+    for(const inv of r.invites){
+      if(st.seenInvites.has(inv.id)) continue;
+      st.seenInvites.add(inv.id);
+      notice({id:'inv'+inv.id, html:`<b>${esc(inv.from.displayName)}</b> mời bạn đấu một ván ${inv.rated?'(tính Elo)':'(giao hữu)'}.`, actions:[
+        {label:'Vào phòng', primary:true, run:()=>answerInvite(inv, true)},
+        {label:'Từ chối', run:()=>answerInvite(inv, false)}]});
+    }
+    for(const s of r.sent){
+      if(s.status==='declined' && !st.seenSent.has(s.id)){ st.seenSent.add(s.id); toastMsg(`${s.to.displayName} đã từ chối lời mời đấu.`); }
+    }
+    if(r.friendRequests && $('[data-stpanel="banbe"]') && !$('[data-stpanel="banbe"]').hidden) loadFriends();
+  }
+  async function answerInvite(inv, accept){
+    try{
+      await call('POST',`/api/invites/${inv.id}/${accept?'accept':'decline'}`);
+      if(accept){ showStab('phong'); Online.enterRoom(inv.roomCode); }
+    }catch(e){ toastMsg(e.status===404 ? 'Lời mời đã hết hạn.' : e.message); }
+    pollInbox();
+  }
+  function renderBadge(){
+    const b=$('#zoneBadge'); if(!b) return;
+    const n = st.inbox && signedIn() ? st.inbox.invites.length + (st.inbox.friendRequests||0) : 0;
+    b.hidden=!n; b.textContent=n>9?'9+':String(n||'');
+    const sb=$('.st-btn[data-stab="banbe"]'); if(sb) sb.dataset.count = st.inbox && st.inbox.friendRequests ? st.inbox.friendRequests : '';
+  }
+
+  /* ---------- bạn bè ---------- */
+  function relBtn(u){
+    if(u.relation==='friend') return `<span class="hint-text small">Đã là bạn</span>`;
+    if(u.relation==='sent') return `<span class="hint-text small">Đã gửi lời mời</span>`;
+    if(u.relation==='received') return `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý kết bạn</button>`;
+    return `<button type="button" class="btn btn-outline btn-sm" data-add="${esc(u.username)}">${I('plus')}Kết bạn</button>`;
+  }
+  function personRow(u, right){
+    return `<div class="person">${avatar(u)}<div class="person-main"><b>${esc(u.displayName)}</b>
+      <small class="hint-text">@${esc(u.username)} · Elo ${u.elo}${u.online!=null?` · <span class="ol-dot ${u.online?'on':''}"></span>${u.online?'đang online':'không online'}`:''}</small></div>
+      <div class="person-act">${right||''}</div></div>`;
+  }
+  async function search(){
+    const q=$('#friendSearch').value.trim().toLowerCase(), out=$('#friendResults');
+    if(q.length<3){ out.innerHTML = q ? '<p class="hint-text small">Gõ ít nhất 3 ký tự.</p>' : ''; return; }
+    try{
+      const r=await call('GET','/api/users?q='+encodeURIComponent(q));
+      if($('#friendSearch').value.trim().toLowerCase()!==q) return;
+      out.innerHTML = r.users.length ? r.users.map(u=>personRow(u, relBtn(u))).join('') : '<p class="hint-text small">Không tìm thấy ai có tên đăng nhập bắt đầu bằng “'+esc(q)+'”.</p>';
+      wireFriendBtns(out);
+    }catch(e){ out.innerHTML=`<p class="hint-text small">${esc(e.message)}</p>`; }
+  }
+  function wireFriendBtns(root){
+    $$('[data-add]',root).forEach(b=>b.addEventListener('click', async ()=>{ b.disabled=true; try{ await call('POST','/api/friends',{username:b.dataset.add}); }catch(e){ toastMsg(e.message); } search(); loadFriends(); }));
+    $$('[data-accept]',root).forEach(b=>b.addEventListener('click', async ()=>{ b.disabled=true; try{ await call('POST',`/api/friends/${b.dataset.accept}/accept`); }catch(e){ toastMsg(e.message); } loadFriends(); search(); pollInbox(); }));
+    $$('[data-remove]',root).forEach(b=>b.addEventListener('click', async ()=>{
+      if(b.dataset.confirm!=='1'){ b.dataset.confirm='1'; b.textContent=b.dataset.ask||'Bấm lần nữa để xác nhận'; setTimeout(()=>{ if(b.isConnected){ b.dataset.confirm=''; b.textContent=b.dataset.label; } },3000); return; }
+      b.disabled=true; try{ await call('DELETE',`/api/friends/${b.dataset.remove}`); }catch(e){ toastMsg(e.message); } loadFriends(); pollInbox();
+    }));
+    $$('[data-invite]',root).forEach(b=>b.addEventListener('click',()=>{ const f=(st.friends&&st.friends.friends||[]).find(x=>x.id===+b.dataset.invite); if(f) openInvite(f); }));
+  }
+  async function loadFriends(){
+    if(!signedIn()) return;
+    let r; try{ r=await call('GET','/api/friends'); }catch(e){ $('#friendList').innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
+    st.friends=r;
+    $('#friendRequestsCard').hidden=!r.incoming.length;
+    $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
+    $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
+        <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
+      : '<p class="hint-text">Chưa có bạn nào. Tìm theo tên đăng nhập để kết bạn.</p>';
+    $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
+    wireFriendBtns($('[data-stpanel="banbe"]'));
+    renderFriendsOnline();
+  }
+  // Hàng "Bạn bè đang online" ở thẻ Phòng đấu
+  function renderFriendsOnline(){
+    const el=$('#olFriendsOnline'); if(!el) return;
+    const on=signedIn() && st.friends ? st.friends.friends.filter(f=>f.online) : [];
+    el.hidden=!on.length;
+    el.innerHTML = on.length ? `<h3 class="group-h">Bạn bè đang online</h3><div class="friends-row">${on.map(f=>`<button type="button" class="friend-chip" data-invite="${f.id}" title="Mời ${esc(f.displayName)} đấu">${avatar(f)}<span>${esc(f.displayName)}</span><small>Mời đấu</small></button>`).join('')}</div>` : '';
+    $$('[data-invite]',el).forEach(b=>b.addEventListener('click',()=>{ const f=on.find(x=>x.id===+b.dataset.invite); if(f) openInvite(f); }));
+  }
+  function openInvite(f){
+    openDialog(`${dlgHead('Mời '+esc(f.displayName)+' đấu')}
+      <fieldset class="setup-field"><legend>Bạn cầm quân</legend><div class="seg-radio">
+        <label><input type="radio" name="ivColor" value="red" checked><span>Đỏ</span></label><label><input type="radio" name="ivColor" value="black"><span>Đen</span></label><label><input type="radio" name="ivColor" value="random"><span>Ngẫu nhiên</span></label></div></fieldset>
+      <label class="switch mt16"><input type="checkbox" id="ivRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Ván tính Elo không xin đi lại được.</small></span></label>
+      <p class="hint-text small mt10">${f.online?'Bạn ấy đang online, sẽ thấy lời mời ngay.':'Bạn ấy không online — lời mời nằm ở mục Bạn bè của bạn ấy trong 10 phút.'}</p>
+      <p class="dlg-msg" role="alert"></p>
+      <button type="button" class="btn btn-primary dlg-main" id="ivSend">Gửi lời mời và vào phòng</button>`, body=>{
+      $('#ivSend').addEventListener('click', async ()=>{
+        const color=($('input[name="ivColor"]:checked',body)||{}).value||'red', rated=$('#ivRated').checked;
+        $('#ivSend').disabled=true;
+        try{
+          const r=await call('POST','/api/invites',{to:f.id, color, rated});
+          closeDialog(); showStab('phong');
+          Online.enterRoom(r.invite.roomCode, {color, rated});
+        }catch(e){ $('.dlg-msg',body).textContent=e.message; $('#ivSend').disabled=false; }
+      });
+    });
+  }
+
+  /* ---------- xếp hạng ---------- */
+  async function loadRank(){
+    if(!signedIn()) return;
+    const el=$('#rankList');
+    $$('#rankScope button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.scope===st.rankScope?'true':'false'));
+    let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
+    const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
+      <span class="rank-name"><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}<small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
+      <span class="rank-elo">${x.elo}</span></div>`;
+    el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
+      + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
+  }
+
+  function init(){
+    LS_HOOK=onLocalChange;
+    try{ const u=JSON.parse(safeLS_get('xq_user')||'null'); if(u && token()) st.user=u; }catch(e){}
+    initMe();
+    $('#friendSearch').addEventListener('input',()=>{ clearTimeout(st.searchTimer); st.searchTimer=setTimeout(search, 300); });
+    $$('#rankScope button').forEach(b=>b.addEventListener('click',()=>{ st.rankScope=b.dataset.scope; loadRank(); }));
+    document.addEventListener('zoneshown',e=>{
+      if(e.detail!=='satruong' || !signedIn()) return;
+      if(currentStab==='banbe' || currentStab==='phong') loadFriends();
+      if(currentStab==='xephang') loadRank();
+    });
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden && signedIn()){ pollInbox(); } });
+    render();
+    if(token() && available()){ refreshMe().then(()=>{ if(signedIn()){ sync(); startInbox(); } }); }
+  }
+  return {init, sync, signedIn, user:()=>st.user, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
+})();
+function initAccount(){ Account.init(); }
 /* =========================================================================
    BOOT
    ========================================================================= */
@@ -6716,6 +7485,7 @@ initLearn();
 const lastZone=safeLS_get('xq_zone');
 initZones();
 initOnline();
+initAccount();
 showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
 if(Online.wantsZone() || lastZone==='satruong') showZone('satruong');
 else if(lastZone==='toi') showZone('toi');

@@ -202,7 +202,7 @@ const RoomCore = (function(){
         return v; };
       return {type:'state', code:st.code, you: you||'spectator', seats:{red:seat('red'), black:seat('black')}, game:st.game,
         moves:st.moves, result:st.result, offer: st.offer ? {kind:st.offer.kind, by:st.offer.by} : null, chat:st.chat, spectators:online.spectators||0,
-        rated:!!st.rated, elo:st.elo||null, abandonMs:ABANDON_MS};
+        rated:!!st.rated, elo:st.elo||null, abandonMs:ABANDON_MS, serverNow:Date.now()};
     }
   }
   return {Room, fresh, NAME_MAX, TEXT_MAX, ABANDON_MS};

@@ -19,9 +19,9 @@
     <nav class="zone-switch" aria-label="Chọn phần">
       <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
       <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
-      <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Tôi</span></button>
+      <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
-    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ"></button>
+    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ tiến độ" title="Đồng bộ tiến độ"></button>
   </div>
   <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
@@ -346,6 +346,8 @@
     <h2>Đấu với bạn bè</h2>
     <p>Tạo phòng, gửi link cho bạn rồi cùng chơi. Máy chủ kiểm tra từng nước theo đúng luật. Nếu rớt mạng hay tải lại trang, mở lại link là vào lại đúng chỗ cũ.</p>
     <div id="olNotice"></div>
+    <div id="olFriendsOnline" hidden></div>
+    <p class="hint-text" id="olAsUser" hidden></p>
     <label class="setup-field ol-name">Tên của bạn
       <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
     </label>
@@ -359,6 +361,7 @@
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
+        <label class="switch mt10" id="olRatedWrap" hidden><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Chỉ tính khi đối thủ cũng đã đăng nhập. Ván tính Elo không xin đi lại được.</small></span></label>
         <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
       </div>
       <div class="ol-box">
@@ -384,7 +387,7 @@
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
       <button type="button" class="btn btn-outline btn-sm" id="olLeave"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Rời phòng</button>
-      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="ol-conn" id="olConn"></span></div>
+      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
       <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg>Mời bạn</button>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
@@ -396,6 +399,7 @@
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
+        <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olActions">
           <button type="button" class="btn btn-outline btn-sm" id="olDraw">Xin hoà</button>
           <button type="button" class="btn btn-outline btn-sm" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
@@ -426,18 +430,44 @@
 
  </div>
  <div data-stpanel="banbe" hidden>
-  <div class="card need-account">
+  <div class="card need-account" data-need-login>
     <h2>Bạn bè</h2>
     <p>Kết bạn theo tên đăng nhập, xem ai đang online và mời đấu trực tiếp.</p>
-    <p class="hint-text">Phần này cần <b>tài khoản</b>. Đăng ký / đăng nhập sắp có — trong lúc chờ, bạn vẫn đấu với bạn bè bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
-    <button type="button" class="btn btn-outline" data-goto-stab="phong">Sang Phòng đấu</button>
+    <p class="hint-text">Phần này cần tài khoản. Chưa có tài khoản, bạn vẫn đấu với bạn bè được bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div data-when-login hidden>
+    <div class="card">
+      <h2>Tìm bạn</h2>
+      <label class="setup-field">Tên đăng nhập của bạn bè
+        <input class="field" id="friendSearch" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Gõ ít nhất 3 ký tự">
+      </label>
+      <div id="friendResults" class="mt10" aria-live="polite"></div>
+    </div>
+    <div class="card" id="friendRequestsCard" hidden>
+      <h2>Lời mời kết bạn</h2>
+      <div id="friendRequests"></div>
+    </div>
+    <div class="card">
+      <h2>Bạn bè của bạn</h2>
+      <div id="friendList"></div>
+      <div id="friendOutgoing"></div>
+    </div>
   </div>
  </div>
  <div data-stpanel="xephang" hidden>
-  <div class="card need-account">
+  <div class="card need-account" data-need-login>
     <h2>Xếp hạng</h2>
-    <p>Bảng Elo của bạn bè và toàn bộ người chơi (top 50). Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
-    <p class="hint-text">Phần này cần <b>tài khoản</b> — sắp có.</p>
+    <p>Bảng Elo của bạn bè và toàn bộ người chơi. Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+  </div>
+  <div class="card" data-when-login hidden>
+    <div class="btn-row" style="justify-content:space-between">
+      <h2 style="margin:0">Xếp hạng</h2>
+      <div class="seg" id="rankScope" role="group" aria-label="Phạm vi xếp hạng"><button type="button" data-scope="friends" aria-pressed="true">Bạn bè</button><button type="button" data-scope="all" aria-pressed="false">Toàn bộ</button></div>
+    </div>
+    <p class="hint-text small mt10">Chỉ tính ván bật “Tính Elo” giữa hai người đã đăng nhập. Cần ít nhất 5 ván để có hạng.</p>
+    <div id="rankList" aria-live="polite"></div>
   </div>
  </div>
 </section>
@@ -445,6 +475,7 @@
 
 <!-- ===================== TÔI ===================== -->
 <section data-zone-panel="toi" hidden>
+  <div id="meExpired" hidden></div>
   <div class="card me-intro" id="meIntro">
     <div class="me-head"><span class="me-avatar"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><div><h2>Tài khoản</h2><div class="hint-text small">Bạn đang dùng không cần tài khoản — tiến độ lưu trong trình duyệt này.</div></div></div>
     <ul class="me-benefits">
@@ -452,7 +483,27 @@
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng ở Sa trường, kết bạn và mời đấu trực tiếp</li>
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
     </ul>
-    <div class="btn-row"><button type="button" class="btn btn-primary" disabled>Đăng nhập</button><button type="button" class="btn btn-outline" disabled>Đăng ký</button><span class="hint-text small">Sắp có</span></div>
+    <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <p class="hint-text small" id="meNoServer" hidden></p>
+  </div>
+  <div id="meSigned" hidden>
+    <div class="card me-profile">
+      <div class="me-head">
+        <span class="me-avatar me-letter" id="meAvatar"></span>
+        <div class="me-id">
+          <div class="me-name-row"><h2 id="meName"></h2><button type="button" class="btn btn-outline btn-sm" id="meRename">Đổi tên</button></div>
+          <form id="meRenameForm" class="btn-row" hidden><input class="field" id="meRenameInput" maxlength="24" aria-label="Tên hiển thị mới"><button type="submit" class="btn btn-primary btn-sm">Lưu</button><button type="button" class="btn btn-outline btn-sm" id="meRenameCancel">Huỷ</button></form>
+          <div class="hint-text small" id="meSub"></div>
+        </div>
+        <div class="me-elo"><b id="meElo"></b><small id="meEloSub"></small></div>
+      </div>
+    </div>
+    <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
+    <div class="card">
+      <h2>Đồng bộ</h2>
+      <p class="hint-text" id="meSyncText"></p>
+      <button type="button" class="btn btn-outline btn-sm" id="meSyncNow"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Đồng bộ ngay</button>
+    </div>
   </div>
   <div class="me-grid">
     <div class="card" id="settingsPanel">
@@ -485,9 +536,21 @@
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
     </div>
   </div>
+  <div class="card mt16" id="meAccount" hidden>
+    <h2>Tài khoản</h2>
+    <div class="me-actions">
+      <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
+      <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
+      <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
+      <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+      <button type="button" class="btn btn-danger" id="meDelete">Xoá tài khoản</button>
+    </div>
+  </div>
 </section>
 
 </main>
+<div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
+<div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 
 <script>
 /*@@JS@@*/
