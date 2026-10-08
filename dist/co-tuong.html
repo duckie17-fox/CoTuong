@@ -1182,11 +1182,6 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
     </div>
     <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
     <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
-    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
-      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
-      <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
-      <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
-    </details>
   </div>
 
   <div class="card" id="olRoom" hidden>
@@ -6860,7 +6855,7 @@ const Online = (function(){
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
       return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Chưa có địa chỉ máy chủ Sa trường. Nhập địa chỉ ở mục “Máy chủ (nâng cao)” bên dưới.';
+    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -6930,12 +6925,6 @@ const Online = (function(){
     st.game=Game.create();
     $('#olName').value=myName();
     $('#olName').addEventListener('change',()=>{ const v=$('#olName').value.trim(); if(v) safeLS_set('xq_online_name',v.slice(0,24)); });
-    $('#olServer').value=safeLS_get('xq_online_server')||'';
-    $('#olServerSave').addEventListener('click',()=>{
-      const raw=$('#olServer').value.trim(), v=normServer(raw);
-      if(raw && !v){ $('#olServerMsg').textContent='Địa chỉ phải bắt đầu bằng wss:// (hoặc https://).'; return; }
-      safeLS_set('xq_online_server', v); $('#olServerMsg').textContent = v ? 'Đã lưu.' : 'Đã chuyển về server mặc định.'; renderLobby();
-    });
     $('#olCreate').addEventListener('click',()=>{
       if(!ensureName()) return;
       enterRoom(newCode(), {color:($('input[name="olColor"]:checked')||{}).value||'red', rated:Account.signedIn() && $('#olRated').checked});
@@ -7262,7 +7251,7 @@ const Account = (function(){
     });
   }
   function noServerNotice(){
-    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa có địa chỉ máy chủ — xem mục “Máy chủ (nâng cao)” ở Sa trường.');
+    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa kết nối được máy chủ tài khoản — hãy thử lại sau.');
   }
   function confirmDialog(title, html, okLabel, run, danger){
     openDialog(`${dlgHead(title)}${html}<p class="dlg-msg" role="alert"></p>
@@ -7299,7 +7288,7 @@ const Account = (function(){
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
     $('#meAuthBtns').hidden=!available();
     const ns=$('#meNoServer'); ns.hidden=available();
-    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa có địa chỉ máy chủ nên chưa đăng nhập được (xem mục “Máy chủ (nâng cao)” ở Sa trường).';
+    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa kết nối được máy chủ tài khoản nên chưa đăng nhập được.';
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;

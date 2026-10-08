@@ -116,3 +116,4 @@
 - **2026-10-08: PR #3 merge + deploy xanh.** Workflow tạo D1 `cotuong` (id 1055ca1a-d0bf-4e94-b344-9bdd2b52dbef, vùng ENAM),
   `migrations apply --remote` tự chấp nhận khi không tương tác ("Using fallback value in non-interactive context: yes").
   Lần deploy sau `d1 list` sẽ tìm thấy DB có sẵn. Container không truy cập được github.io (curl trả 000) — giống workers.dev.
+- Bỏ mục "Máy chủ (nâng cao)" khỏi giao diện (người dùng không hiểu mục đích). Vẫn đổi máy chủ được bằng ?server= trên link (dùng cho test/dev) hoặc xq_online_server cũ.

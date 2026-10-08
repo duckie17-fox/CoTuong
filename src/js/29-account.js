@@ -284,7 +284,7 @@ const Account = (function(){
     });
   }
   function noServerNotice(){
-    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa có địa chỉ máy chủ — xem mục “Máy chủ (nâng cao)” ở Sa trường.');
+    toastMsg(isArtifact() ? 'Đăng nhập chỉ dùng được ở bản web.' : 'Chưa kết nối được máy chủ tài khoản — hãy thử lại sau.');
   }
   function confirmDialog(title, html, okLabel, run, danger){
     openDialog(`${dlgHead(title)}${html}<p class="dlg-msg" role="alert"></p>
@@ -321,7 +321,7 @@ const Account = (function(){
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
     $('#meAuthBtns').hidden=!available();
     const ns=$('#meNoServer'); ns.hidden=available();
-    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa có địa chỉ máy chủ nên chưa đăng nhập được (xem mục “Máy chủ (nâng cao)” ở Sa trường).';
+    ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa kết nối được máy chủ tài khoản nên chưa đăng nhập được.';
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;

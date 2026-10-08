@@ -311,7 +311,7 @@ const Online = (function(){
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
       return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Chưa có địa chỉ máy chủ Sa trường. Nhập địa chỉ ở mục “Máy chủ (nâng cao)” bên dưới.';
+    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -381,12 +381,6 @@ const Online = (function(){
     st.game=Game.create();
     $('#olName').value=myName();
     $('#olName').addEventListener('change',()=>{ const v=$('#olName').value.trim(); if(v) safeLS_set('xq_online_name',v.slice(0,24)); });
-    $('#olServer').value=safeLS_get('xq_online_server')||'';
-    $('#olServerSave').addEventListener('click',()=>{
-      const raw=$('#olServer').value.trim(), v=normServer(raw);
-      if(raw && !v){ $('#olServerMsg').textContent='Địa chỉ phải bắt đầu bằng wss:// (hoặc https://).'; return; }
-      safeLS_set('xq_online_server', v); $('#olServerMsg').textContent = v ? 'Đã lưu.' : 'Đã chuyển về server mặc định.'; renderLobby();
-    });
     $('#olCreate').addEventListener('click',()=>{
       if(!ensureName()) return;
       enterRoom(newCode(), {color:($('input[name="olColor"]:checked')||{}).value||'red', rated:Account.signedIn() && $('#olRated').checked});

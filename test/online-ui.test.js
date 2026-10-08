@@ -33,7 +33,7 @@ test('server mặc định (src/online.json) đã gắn vào bản build: không
     assert.equal(document.querySelector('#olCreate').disabled, false);
     assert.match(window.eval('Online.inviteLink("AB12CD")'), /\?room=AB12CD$/, 'link mời không cần kèm server mặc định');
   } else {
-    assert.match(document.querySelector('#olNotice').textContent, /Chưa có địa chỉ máy chủ/);
+    assert.match(document.querySelector('#olNotice').textContent, /chưa kết nối được máy chủ/);
     assert.equal(document.querySelector('#olCreate').disabled, true);
   }
 });
