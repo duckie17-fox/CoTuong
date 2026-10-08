@@ -33,7 +33,7 @@ test('server mặc định (src/online.json) đã gắn vào bản build: không
     assert.equal(document.querySelector('#olCreate').disabled, false);
     assert.match(window.eval('Online.inviteLink("AB12CD")'), /\?room=AB12CD$/, 'link mời không cần kèm server mặc định');
   } else {
-    assert.match(document.querySelector('#olNotice').textContent, /Chưa cấu hình server/);
+    assert.match(document.querySelector('#olNotice').textContent, /Chưa có địa chỉ máy chủ/);
     assert.equal(document.querySelector('#olCreate').disabled, true);
   }
 });
@@ -71,7 +71,7 @@ test('server không kết nối được: thử vài lần rồi dừng, báo r�
   document.querySelector('#olCreate').click();
   await new Promise(r => setTimeout(r, 300));
   assert.equal(window.eval('Online.state.conn'), 'blocked');
-  assert.match(document.querySelector('#olStatus').textContent, /Không kết nối được server/);
+  assert.match(document.querySelector('#olStatus').textContent, /Không kết nối được máy chủ/);
 });
 
 test('ba phần Kỳ viện / Sa trường / Tôi: thẻ con, trang Tôi, giao diện sáng/tối', () => {

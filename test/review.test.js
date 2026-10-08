@@ -121,7 +121,7 @@ test('bảng ký hiệu, nước tốt có gợi ý tối ưu hơn, phân tích 
   const st = txt(sum.querySelector('.style-box'));
   assert.match(st, /Phong cách của bạn/);
   assert.match(st, /Tấn công|Cân bằng|Chắc chắn/);
-  assert.match(st, /Đề xuất cho bạn/);
+  assert.match(st, /Nên học tiếp/);
   assert.doesNotMatch(st, /undefined|NaN/);
   assert.doesNotMatch(txt(sum.querySelector('.cls-chips')) + legend, /[★✓✗📖]/, 'chỉ dùng 5 ký hiệu !! ! ?! ? ??');
   const op = sum.querySelector('[data-op]');

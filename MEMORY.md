@@ -60,3 +60,16 @@
 - Gotcha: `.tab-btn` giờ gồm cả thẻ Sa trường → chọn thẻ Kỳ viện bằng `.tab-btn[data-tab]`. Chat online nằm ở thẻ ẩn →
   e2e phải bấm `[data-side-tab="chat"]` trước khi bấm câu chat nhanh.
 - Container phiên này cần `npm install` trước `npm test`; Chromium e2e: `CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`.
+
+## 2026-10-08 (phiên 2, góp ý khung 3 phần)
+- Người dùng: **bỏ cài đặt "Chữ trên quân cờ"** (luôn dùng chữ Hán); **review lại giao diện tối**;
+  **wording dễ hiểu, không dùng emoji làm icon** cho nút/thẻ/tiêu đề → dùng icon SVG nét (inline) hoặc chỉ chữ.
+- Người dùng không tìm thấy chỗ sửa quyền token Cloudflare → hướng dẫn phải kèm link trực tiếp + tên nút chính xác + cách khác (tạo token mới).
+- Người dùng đã thêm quyền **D1 Edit** cho token Cloudflare (2026-10-08).
+- **Icon:** `ICON_PATHS` + `icon(name)` trong `07-ui-common.js` (nét kiểu Lucide, sprite `<symbol id="i-…">` chèn đầu body).
+  Trong shell.html viết thẳng `<svg class="ic"><use href="#i-…"></use></svg>`. Bước tư duy (`thinkStepsHTML`) nhận `ic` là **tên icon**.
+  Nút có icon mà đổi chữ bằng JS → dùng `innerHTML` (vd. lưu `RESIGN_HTML`), không dùng `textContent`.
+- Lời trên giao diện: "server"→"máy chủ", "Biên bản"→"Các nước đã đi", "Lật"→"Xoay bàn", "Trainer"→"Tự đi lại",
+  "FEN"→"Sao chép thế cờ", "Sảnh"→"Rời phòng", "Tái đấu"→"Đấu ván nữa". Tiêu đề app chỉ còn "Cờ Tướng" (bỏ "Nhập Môn").
+- Giao diện tối: bàn cờ có bộ màu riêng (gỗ/giấy dịu hơn, số cột sáng) qua biến `--b-*`, `--b-file-red/black`.
+- Điện thoại: thanh công cụ ván xếp 1 hàng lưới, icon trên chữ (tránh nút rơi xuống dòng 2).

@@ -37,7 +37,7 @@ function renderHistoryList(){
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
     return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(r)).name)}</b>
       <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]}${r.start?' · từ thế cho trước':''} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
-      <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván">🗑</button></div></div>`;
+      <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván" title="Xoá ván"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trash"></use></svg></button></div></div>`;
   }).join('');
   $$('[data-review]',el).forEach(b=>b.addEventListener('click',()=>openReview(loadHistory().find(x=>x.id===b.dataset.review))));
   $$('[data-del]',el).forEach(b=>b.addEventListener('click',()=>{ saveHistory(loadHistory().filter(x=>x.id!==b.dataset.del)); renderHistoryList(); }));
@@ -84,8 +84,8 @@ function aiRender(){
   const el=$('#aiStatus');
   if(g.result){
     const human = g.result.winner===aiGame.humanColor, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), (draw?'🤝 ':human?'🎉 ':'♟ ')+Game.resultText(g.result)+' Bấm <b>📊 Phân tích ván</b> để xem mình đi hay/dở ở đâu.');
-  } else if(aiGame.thinking) statusBanner(el,'think','🤔 Máy đang suy nghĩ…');
+    statusBanner(el, draw?'draw':(human?'over':'fail'), Game.resultText(g.result)+' Bấm <b>Phân tích ván</b> để xem mình đi hay/dở ở đâu.');
+  } else if(aiGame.thinking) statusBanner(el,'think','Máy đang suy nghĩ…');
   else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===aiGame.humanColor ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
   else el.innerHTML = (turn===aiGame.humanColor ? `<span class="turn-dot turn-${turn}"></span> Đến lượt bạn (${COLOR_VN[turn]})` : `<span class="turn-dot turn-${turn}"></span> Lượt của máy`) + (aiGame.bookNote?`<div class="hint-text small">${esc(aiGame.bookNote)}</div>`:'');
   renderMoveLog($('#aiLog'), g.moves);
@@ -188,21 +188,22 @@ function initAIGame(){
   });
   $('#aiHint').addEventListener('click', async ()=>{
     const g=aiGame.game; $('#aiHint').disabled=true;
-    statusBanner($('#aiStatus'),'think','💡 Đang tìm gợi ý…');
+    statusBanner($('#aiStatus'),'think','Đang tìm gợi ý…');
     const r=await AIEngine.think(aiThinkArgs(g,{timeMs:1200, maxDepth:40}));
     if(r&&r.move){
       aiGame.hint=r.move; aiRender();
       const why=Coach.whyGood(g.board(),r.move), danger=Coach.endangered(g.board(),g.turn());
       const warn = danger.length ? ` Lưu ý: ${Coach.NAME[danger[0].type]} của bạn đang bị doạ.` : '';
-      statusBanner($('#aiStatus'),'think',`💡 Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`);
+      statusBanner($('#aiStatus'),'think',`Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`);
     }
   });
+  const RESIGN_HTML=$('#aiResign').innerHTML;
   $('#aiResign').addEventListener('click', ()=>{
     const g=aiGame.game; if(g.result) return;
     const btn=$('#aiResign');
     // xác nhận 2 bước ngay trên nút (không dùng confirm() vì có thể bị chặn trong khung nhúng)
-    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng'; },3000); return; }
-    delete btn.dataset.confirm; btn.textContent='🏳 Đầu hàng';
+    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML; },3000); return; }
+    delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML;
     aiGame.token++; aiGame.thinking=false;
     g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();

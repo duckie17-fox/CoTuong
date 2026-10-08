@@ -14,7 +14,7 @@
 const OPENING_GROUPS = [
   {id:'phaodau', name:'Đỏ đi Pháo đầu', desc:'Nước mở màn phổ biến nhất: Pháo vào cột giữa nhắm Tốt đầu. Các thế dưới đây là những cách Đen đáp lại.'},
   {id:'mem', name:'Khai cuộc mềm', desc:'Đỏ không vào Pháo đầu ngay mà chuẩn bị kín đáo hơn, giữ thế linh hoạt.'},
-  {id:'bay', name:'⚠️ Bẫy khai cuộc', desc:'Những cái bẫy có thật trong sách và thực chiến, mỗi bẫy đều có nguồn. Xem bên mắc bẫy sai ở đâu và vì sao — để mình không mắc, và biết cách trừng phạt khi đối phương mắc.'},
+  {id:'bay', name:'Bẫy khai cuộc', desc:'Những cái bẫy có thật trong sách và thực chiến, mỗi bẫy đều có nguồn. Xem bên mắc bẫy sai ở đâu và vì sao — để mình không mắc, và biết cách trừng phạt khi đối phương mắc.'},
 ];
 
 const OPENINGS_RAW = [
@@ -352,7 +352,7 @@ if(typeof OPENING_TRAPS!=='undefined') OPENING_TRAPS.forEach(t=>{
   const pt = t.point ? 2*t.point-1 : null;
   OPENINGS.push({id:'trap-'+t.id, group:'bay', level:2, isTrap:true, name:t.name, han:t.han, sources:t.sources, trapPly:pt,
     summary:t.lesson, ideas:[t.lesson],
-    traps:[pt!=null && moves[pt] ? `Nước mắc bẫy: ${Math.floor(pt/2)+1}${pt%2?'...':'.'} ${moves[pt].text} — ${moves[pt].caption.replace(/^⚠️\s*/,'')}` : ''].filter(Boolean),
+    traps:[pt!=null && moves[pt] ? `Nước mắc bẫy: ${Math.floor(pt/2)+1}${pt%2?'...':'.'} ${moves[pt].text} — ${moves[pt].caption}` : ''].filter(Boolean),
     result: t.mate ? 'Kết thúc bằng chiếu bí.' : 'Kết thúc: bên đặt bẫy hơn rõ (máy đã kiểm).',
     moves, lines:[{id:'main', name:'Diễn biến', moves}]});
 });

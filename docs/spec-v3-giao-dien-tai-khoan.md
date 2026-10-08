@@ -164,7 +164,7 @@ Lỗi chung: "Sai tên đăng nhập hoặc mật khẩu" (không nói rõ sai c
   - Đầu trang: avatar chữ cái (màu theo tên), tên hiển thị (sửa được), @tên đăng nhập, Elo, ngày tham gia.
   - Thống kê: tiến độ học (bài học, bài tập, chuỗi ngày), đấu máy (thắng/hoà/thua theo cấp), Sa trường (thắng/hoà/thua, Elo cao nhất).
   - Đồng bộ: trạng thái + "Lần đồng bộ cuối: …" + nút Đồng bộ ngay.
-  - Cài đặt: âm thanh, kiểu chữ quân (Hán / Việt), giao diện (Sáng / Tối / Theo máy).
+  - Cài đặt: âm thanh, giao diện (Sáng / Tối / Theo máy). Quân cờ luôn ghi chữ Hán.
   - Tài khoản: Đổi mật khẩu (mật khẩu cũ + mới), Tạo mã khôi phục mới, Đăng xuất, Đăng xuất mọi thiết bị, **Xoá tài khoản**
     (hộp thoại xác nhận, phải gõ lại tên đăng nhập + mật khẩu).
 
@@ -191,7 +191,7 @@ Lỗi chung: "Sai tên đăng nhập hoặc mật khẩu" (không nói rõ sai c
 | `xq_daily` (chuỗi ngày) | Lấy chuỗi dài hơn, ngày gần nhất |
 | `xq_ai_history`, `xq_online_history` | Hợp theo `id`, giữ bản có phân tích; tối đa 100 ván mỗi loại |
 | `xq_ai_ladder`, `xq_ai_level` | Bản mới hơn |
-| Cài đặt (`xq_sound`, `xq_piece_style`, giao diện) | Bản mới hơn |
+| Cài đặt (`xq_sound`, `xq_theme`) | Bản mới hơn |
 | `xq_last_tab`, `xq_zone`, `xq_online_server`, `xq_online_token` | Không đồng bộ (theo từng máy) |
 
 - Giới hạn dữ liệu đồng bộ: 512 KB / tài khoản; vượt thì bỏ bớt ván cũ nhất (giữ ván đã phân tích).

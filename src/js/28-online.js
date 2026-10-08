@@ -9,7 +9,7 @@
 const ONLINE_DEFAULT_SERVER = /*@@ONLINE_SERVER@@*/'';
 const ONLINE_WEB_URL = 'https://duckie17-fox.github.io/CoTuong/';
 const ONLINE_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // bỏ O/0, I/1 cho dễ đọc
-const ONLINE_QUICK = ['Chào bạn 👋', 'Nước hay! 👍', 'Để mình nghĩ chút 🤔', 'Ối, sơ suất rồi 😅', 'Ván hay, cảm ơn bạn! 🤝'];
+const ONLINE_QUICK = ['Chào bạn!', 'Nước hay!', 'Để mình nghĩ chút', 'Ối, sơ suất rồi', 'Ván hay, cảm ơn bạn!'];
 const ONLINE_ERR = {
   not_found:'Không có phòng này. Kiểm tra lại mã phòng.', exists:'Mã phòng đã có người dùng.', bad_token:'Lỗi nhận diện trình duyệt.',
   not_your_turn:'Chưa tới lượt bạn.', illegal:'Nước đi không hợp lệ.', stale:'Ván vừa thay đổi, đã cập nhật lại bàn cờ.',
@@ -148,7 +148,7 @@ const Online = (function(){
     // tin nhắn mới của người khác: hiện nhanh dưới bàn cờ (trên điện thoại khung chat nằm xa)
     if(prev && room.chat.length){
       const last=room.chat[room.chat.length-1], seen=prev.chat.length && prev.chat[prev.chat.length-1].t;
-      if(last.t!==seen && !last.sys && !(last.seat ? last.seat===room.you : last.by===myName())) toast(`💬 ${last.by}: ${last.text}`);
+      if(last.t!==seen && !last.sys && !(last.seat ? last.seat===room.you : last.by===myName())) toast(`${last.by}: ${last.text}`);
     }
     const opp=room.seats[other(room.you)];
     saveRecent({code:room.code, you:room.you, opp: room.you==='spectator' ? `${(room.seats.red||{}).name||'?'} – ${(room.seats.black||{}).name||'?'}` : (opp?opp.name:''), result:room.result, n:room.moves.length});
@@ -186,8 +186,8 @@ const Online = (function(){
   }
   function renderConn(){
     const el=$('#olConn'); if(!el) return;
-    const t={connecting:'⏳ đang kết nối…', open:'🟢 đã kết nối', retry:'🟠 mất kết nối, đang thử lại…', closed:'🔴 đã ngắt', noserver:'🔴 chưa cấu hình server', blocked:'🔴 trình duyệt chặn kết nối'}[st.conn]||'';
-    el.textContent=t;
+    const t={connecting:['wait','đang kết nối…'], open:['ok','đã kết nối'], retry:['wait','mất kết nối, đang thử lại…'], closed:['bad','đã ngắt'], noserver:['bad','chưa cấu hình máy chủ'], blocked:['bad','trình duyệt chặn kết nối']}[st.conn];
+    el.innerHTML = t ? `<span class="conn-dot conn-${t[0]}"></span>${t[1]}` : '';
     renderNotice();
     if(st.room || st.code) renderStatus();
   }
@@ -196,26 +196,26 @@ const Online = (function(){
     const r=st.room;
     if(st.msg && !(r && r.result)){ statusBanner(el,'think',esc(st.msg)); return; }
     if(st.conn==='noserver' || st.conn==='blocked'){ statusBanner(el,'fail', noticeText()); return; }
-    if(!r){ statusBanner(el,'think','⏳ Đang vào phòng…'); return; }
+    if(!r){ statusBanner(el,'think','Đang vào phòng…'); return; }
     const g=st.local||st.game;
     if(r.result){
       const res=r.result, txt=Game.resultText(res);
       const kind = !res.winner || r.you==='spectator' ? 'draw' : res.winner===r.you ? 'over' : 'fail';
-      statusBanner(el, kind, (kind==='over'?'🎉 ':kind==='fail'?'😔 ':'🤝 ')+esc(txt)); return;
+      statusBanner(el, kind, esc(txt)); return;
     }
-    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','⏳ Đang chờ đối thủ vào phòng — gửi link mời ở trên cho bạn của bạn.'); return; }
+    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng — gửi link mời ở trên cho bạn của bạn.'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
-    if(st.local){ statusBanner(el,'think','⏳ Đang gửi nước đi…'); return; }
-    if(r.you==='spectator'){ statusBanner(el,'think',`👀 Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
+    if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
+    if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
     statusBanner(el, turn===r.you?(chk?'check':'over'):'think', turn===r.you ? `<span class="turn-dot turn-${turn}"></span> Tới lượt bạn${chk?' — <b>bạn đang bị chiếu!</b>':''}` : `Đối thủ đang nghĩ…${chk?' (bạn đang chiếu)':''}`);
   }
   function renderOffer(){
     const el=$('#olOffer'), r=st.room;
     if(!r || !r.offer){ el.innerHTML=''; return; }
     const what={draw:'xin hoà', takeback:'xin đi lại nước vừa rồi', rematch:'muốn tái đấu (đổi màu quân)'}[r.offer.kind];
-    if(r.offer.by===r.you){ el.innerHTML=`<div class="ol-offer"><span>⏳ Bạn ${what}. Đang chờ đối thủ trả lời…</span><button type="button" class="btn btn-outline btn-sm" data-ol="cancel">Huỷ</button></div>`; }
+    if(r.offer.by===r.you){ el.innerHTML=`<div class="ol-offer"><span>Bạn ${what}. Đang chờ đối thủ trả lời…</span><button type="button" class="btn btn-outline btn-sm" data-ol="cancel">Huỷ</button></div>`; }
     else if(r.you!=='spectator'){ const who=esc((r.seats[r.offer.by]||{}).name||'Đối thủ');
-      el.innerHTML=`<div class="ol-offer ol-offer-in"><span>📨 <b>${who}</b> ${what}.</span><button type="button" class="btn btn-primary btn-sm" data-ol="accept">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-ol="decline">Từ chối</button></div>`; }
+      el.innerHTML=`<div class="ol-offer ol-offer-in"><span><b>${who}</b> ${what}.</span><button type="button" class="btn btn-primary btn-sm" data-ol="accept">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-ol="decline">Từ chối</button></div>`; }
     else el.innerHTML=`<div class="ol-offer"><span>${esc((r.seats[r.offer.by]||{}).name||'')} ${what}.</span></div>`;
     $$('[data-ol]',el).forEach(b=>b.addEventListener('click',()=>{
       const a=b.dataset.ol; send(a==='cancel'?{type:'cancel'}:{type:'reply', accept:a==='accept'});
@@ -226,7 +226,7 @@ const Online = (function(){
     if(!r){ el.innerHTML=''; return; }
     const atBottom = el.scrollHeight-el.scrollTop-el.clientHeight < 40;
     el.innerHTML = r.chat.length ? r.chat.map(m=> m.sys ? `<div class="ol-msg ol-sys">${esc(m.text)}</div>`
-      : `<div class="ol-msg ${m.seat && m.seat===r.you?'ol-mine':''}"><b>${esc(m.by)}${m.seat?'':' 👀'}:</b> ${esc(m.text)}</div>`).join('')
+      : `<div class="ol-msg ${m.seat && m.seat===r.you?'ol-mine':''}"><b>${esc(m.by)}${m.seat?'':' (người xem)'}:</b> ${esc(m.text)}</div>`).join('')
       : '<div class="hint-text small">Chưa có tin nhắn.</div>';
     if(atBottom || st.chatSeen!==r.chat.length) el.scrollTop=el.scrollHeight;
     if(st.chatSeen!=null && r.chat.length>st.chatSeen && r.chat.slice(st.chatSeen).some(m=>!m.sys && m.seat!==r.you)) sideTabNotify('#olChat');
@@ -240,7 +240,7 @@ const Online = (function(){
     el.hidden=false;
     el.innerHTML=`<div><b>Mời bạn vào phòng</b> — gửi link này (Zalo, Messenger…), hoặc đọc mã phòng <b class="ol-bigcode">${st.code}</b></div>
       <div class="btn-row mt10"><input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời">
-      <button type="button" class="btn btn-primary btn-sm" id="olCopy">📋 Sao chép</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare">📤 Chia sẻ</button>':''}</div>`;
+      <button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</div>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
       const inp=$('.ol-link',el); inp.select();
       try{ await navigator.clipboard.writeText(link); flash('Đã sao chép link mời.'); }catch(e){ flash('Hãy tự sao chép link trong ô (Ctrl/⌘+C).'); }
@@ -273,8 +273,8 @@ const Online = (function(){
     if(isArtifact() && (st.conn==='blocked' || !server()))
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
-      return `Không kết nối được server Sa trường. Kiểm tra mạng rồi bấm “← Sảnh” và vào lại phòng; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Chưa cấu hình server Sa trường. Xem hướng dẫn trong README (mục “Sa trường”) hoặc nhập địa chỉ server ở mục ⚙️ Server bên dưới.';
+      return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
+    if(!server()) return 'Chưa có địa chỉ máy chủ Sa trường. Nhập địa chỉ ở mục “Máy chủ (nâng cao)” bên dưới.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -288,7 +288,7 @@ const Online = (function(){
     renderNotice();
     const rc=recent();
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
-        <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'👀 xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
+        <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
         <small class="hint-text">${r.result?esc(Game.resultText(r.result)):r.n?`đang đánh · ${Math.ceil(r.n/2)} nước`:'chưa đi'}</small></button>`).join('')}</div>`
       : '<p class="hint-text">Chưa có phòng nào.</p>';
     $$('.ol-item',$('#olRecent')).forEach(b=>b.addEventListener('click',()=>enterRoom(b.dataset.code)));
@@ -296,7 +296,7 @@ const Online = (function(){
     $('#olHistory').innerHTML = h.length ? `<div class="ol-list">${h.map(r=>{ const rs=resultForHuman(r);
         return `<div class="ol-item ol-hist"><span class="badge ${rs.cls}">${rs.txt}</span> <span>với <b>${esc(r.oppName)}</b> · cầm ${colorVN(r.human)} · ${Math.ceil(r.moves.length/2)} nước</span>
         <small class="hint-text">${new Date(r.date).toLocaleDateString('vi-VN')}${r.analysis?' · đã phân tích':''}</small>
-        <button type="button" class="btn btn-jade btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button></div>`; }).join('')}</div>`
+        <button type="button" class="btn btn-jade btn-sm" data-review="${esc(r.id)}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích</button></div>`; }).join('')}</div>`
       : '<p class="hint-text">Ván đấu với bạn bè sẽ được lưu ở đây để xem lại và phân tích.</p>';
     $$('[data-review]',$('#olHistory')).forEach(b=>b.addEventListener('click',()=>review(b.dataset.review)));
   }

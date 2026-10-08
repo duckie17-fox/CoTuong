@@ -2,10 +2,6 @@
    BOOT
    ========================================================================= */
 function initSettings(){
-  const sel=$('#pieceStyleToggle');
-  const sync=()=>{ $$('button',sel).forEach(b=>b.setAttribute('aria-pressed', b.dataset.style===Settings.pieceStyle?'true':'false')); };
-  $$('button',sel).forEach(b=>b.addEventListener('click',()=>{ Settings.set('pieceStyle', b.dataset.style); sync(); buildLegend(); }));
-  sync();
   // Giao diện Sáng / Tối / Theo máy (xq_theme; "Theo máy" = bỏ thuộc tính data-theme)
   const th=$('#themeToggle');
   const applyTheme=v=>{

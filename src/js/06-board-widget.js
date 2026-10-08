@@ -18,9 +18,9 @@ function safeJSON(key,fallback){ try{ const v=JSON.parse(safeLS_get(key)); retur
 
 /* ---------- Cài đặt hiển thị dùng chung ---------- */
 const Settings = {
-  pieceStyle: safeLS_get('xq_piece_style')==='vn' ? 'vn' : 'han',
+  pieceStyle: 'han',   // quân luôn ghi chữ Hán (đã bỏ lựa chọn chữ Việt)
   listeners: [],
-  set(key,val){ this[key]=val; if(key==='pieceStyle') safeLS_set('xq_piece_style',val); this.listeners.forEach(f=>f()); },
+  set(key,val){ this[key]=val; this.listeners.forEach(f=>f()); },
   onChange(f){ this.listeners.push(f); }
 };
 

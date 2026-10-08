@@ -17,7 +17,7 @@ function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
   const due=Learn.due().length;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','🔁 Cần ôn',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
     <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
@@ -30,7 +30,7 @@ function renderPuzzleGrid(){
     const [label,cls] = DIFF_LABEL[p.difficulty];
     return `<button class="puzzle-card ${solved.includes(p.id)?'solved':''}" data-id="${p.id}">
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
-        ${solved.includes(p.id) ? '<span class="solved-check">✓</span>' : ''}</div>
+        ${solved.includes(p.id) ? '<span class="solved-check" title="Đã giải"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>' : ''}</div>
       <h4>${esc(p.title)}</h4>
       <p>${esc(p.prompt)}</p>
     </button>`;
@@ -44,7 +44,7 @@ function openPuzzle(id){
   $('#puzzleDetailCard').hidden = false;
   $('#puzzleTitle').textContent = pz.active.title;
   const [label,cls]=DIFF_LABEL[pz.active.difficulty];
-  $('#puzzleMeta').innerHTML = `<span class="badge ${cls}">${label}</span> <span class="topic-tag">${esc(PUZZLE_TOPICS[pz.active.topic])}${pz.random?' · 🎲 Luyện ngẫu nhiên':''}</span>`;
+  $('#puzzleMeta').innerHTML = `<span class="badge ${cls}">${label}</span> <span class="topic-tag">${esc(PUZZLE_TOPICS[pz.active.topic])}${pz.random?' · Luyện ngẫu nhiên':''}</span>`;
   $('#puzzlePrompt').textContent = pz.active.prompt;
   if(!pz.widget){
     pz.widget = createBoardWidget($('#puzzleBoard'), {onSquareClick:(r,c)=>pz.ctl.click(r,c), label:'Bàn cờ bài tập'});
@@ -85,13 +85,13 @@ function puzzleExplainHTML(){
           : p.type==='fork' ? 'Tìm ô mà từ đó một quân của mình tấn công được HAI mục tiêu cùng lúc — đối phương chỉ cứu được một.'
           : Coach.QUESTIONS['missed-capture'];
   return thinkStepsHTML([
-    {ic:'👀', q:'Trước tiên: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
-    {ic:'🔎', q:'Nước giải làm gì?', html:`<b>${esc(d.short)}</b> (${esc(d.long)}): ${esc(Coach.plainMove(p.board,sol))}.`},
-    {ic:'✅', q:'Vì sao đúng?', cls:'ts-good', html:esc(
+    {ic:'eye', q:'Trước tiên: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
+    {ic:'search', q:'Nước giải làm gì?', html:`<b>${esc(d.short)}</b> (${esc(d.long)}): ${esc(Coach.plainMove(p.board,sol))}.`},
+    {ic:'check', q:'Vì sao đúng?', cls:'ts-good', html:esc(
       p.type==='defend' ? 'Sau nước này, đối phương đáp cách nào bạn cũng không bị mất quân. Các nước khác đều để mất ít nhất một quân nhỏ.'
       : (p.type==='capture'||p.type==='fork') && !p.explain ? `Đối phương đáp tốt nhất rồi mà bạn vẫn lãi khoảng ${Math.max(1,Math.round(pz.targetGain||0))} điểm quân.${p.type==='fork'?' Đối phương chỉ cứu được một trong hai quân bị nhắm.':''}`
       : puzzleExplainText())},
-    {ic:'🧠', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
+    {ic:'question', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
   ]);
 }
 function puzzleExplainText(){
@@ -120,7 +120,7 @@ function puzzleSuccess(){
   puzzleRecord(pz.peeked?'fail':pz.usedHint?'help':'ok');
   const daily = !pz.peeked && Learn.markDailyDone(pz.active.id);
   if(pz.random && !pz.peeked){ pz.streak=(pz.streak||0)+1; }
-  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` 🌅 Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
+  statusBanner($('#puzzleStatus'),'over','Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
   pz.ctl.render();
@@ -128,7 +128,7 @@ function puzzleSuccess(){
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
   puzzleRecord('fail');
-  statusBanner($('#puzzleStatus'),'fail',msg||'✘ Chưa đúng. Thử lại nhé!');
+  statusBanner($('#puzzleStatus'),'fail',msg||'Chưa đúng. Thử lại nhé!');
   pz.ctl.render();
   const token = pz.token = {};
   setTimeout(()=>{ if(pz.token===token) puzzleResetBoard(); }, 3200);
@@ -143,8 +143,8 @@ function puzzleTryMove(mv){
     const replies=Engine.generateLegalMoves(pz.board,opp);
     if(replies.length===0) return puzzleSuccess();   // bí sớm hơn cũng tính đúng
     if(remaining===1){
-      const how = ` Vì sao chưa được: đối phương thoát bằng <b>${esc(Notation.describe(pz.board,replies[0]).short)}</b>. 🧠 Hãy liệt kê mọi ô Tướng có thể chạy và mọi cách chặn/ăn quân chiếu, rồi tìm nước khoá hết.`;
-      return puzzleFail((Engine.isInCheck(pz.board,opp) ? '✘ Có chiếu nhưng đối phương vẫn giải được.' : '✘ Chưa chiếu bí.')+how);
+      const how = ` Vì sao chưa được: đối phương thoát bằng <b>${esc(Notation.describe(pz.board,replies[0]).short)}</b>. Tự hỏi: hãy liệt kê mọi ô Tướng có thể chạy và mọi cách chặn/ăn quân chiếu, rồi tìm nước khoá hết.`;
+      return puzzleFail((Engine.isInCheck(pz.board,opp) ? 'Có chiếu nhưng đối phương vẫn giải được.' : 'Chưa chiếu bí.')+how);
     }
     pz.locked=true; pz.ctl.render();
     statusBanner($('#puzzleStatus'),'think','Đang kiểm tra nước của bạn…');
@@ -169,7 +169,7 @@ function puzzleTryMove(mv){
       if(pz.token!==token) return;
       if(!ck.forced){
         pz.locked=false;
-        return puzzleFail('✘ Nước này chưa ép được chiếu bí: đối phương có cách thoát'+(ck.escape?` (<b>${esc(Notation.describe(afterMe,ck.escape).short)}</b>)`:'')+'. 🧠 Ở bài ép bí, hãy ưu tiên nước CHIẾU hoặc nước lấy mất ô chạy của Tướng, để đối phương không có thời gian phản công.');
+        return puzzleFail('Nước này chưa ép được chiếu bí: đối phương có cách thoát'+(ck.escape?` (<b>${esc(Notation.describe(afterMe,ck.escape).short)}</b>)`:'')+'. Tự hỏi: ở bài ép bí, hãy ưu tiên nước CHIẾU hoặc nước lấy mất ô chạy của Tướng, để đối phương không có thời gian phản công.');
       }
       statusBanner($('#puzzleStatus'),'think','Tốt lắm! Đối phương đang đáp…');
       let d;
@@ -189,11 +189,11 @@ function puzzleTryMove(mv){
   if(p.type==='defend'){
     const danger=Coach.endangered(before,me);
     const q=danger.length?` Quân đang bị doạ: <b>${esc(danger.map(d=>Coach.NAME[d.type]).join(', '))}</b>.`:'';
-    return puzzleFail(`✘ Chưa giữ được: sau nước này bạn vẫn mất khoảng ${Math.max(1,Math.round(pz.targetGain-gain))} điểm quân.${q} 🧠 ${esc(Coach.QUESTIONS['ignored-threat'])}`);
+    return puzzleFail(`Chưa giữ được: sau nước này bạn vẫn mất khoảng ${Math.max(1,Math.round(pz.targetGain-gain))} điểm quân.${q} Tự hỏi: ${esc(Coach.QUESTIONS['ignored-threat'])}`);
   }
   const wb=Coach.whyBad(before,mv,null);
-  if(wb.length) return puzzleFail(`✘ Chưa đúng: ${esc(wb[0].text)}. 🧠 ${esc(Coach.QUESTIONS[wb[0].key])}`);
-  return puzzleFail(gain>0 ? `✘ Có lãi ${gain.toFixed(1).replace('.',',')} điểm nhưng vẫn còn nước tốt hơn. Thử lại nhé!` : '✘ Chưa đúng: nước này không lãi quân. Thử lại nhé!');
+  if(wb.length) return puzzleFail(`Chưa đúng: ${esc(wb[0].text)}. Tự hỏi: ${esc(Coach.QUESTIONS[wb[0].key])}`);
+  return puzzleFail(gain>0 ? `Có lãi ${gain.toFixed(1).replace('.',',')} điểm nhưng vẫn còn nước tốt hơn. Thử lại nhé!` : 'Chưa đúng: nước này không lãi quân. Thử lại nhé!');
 }
 function puzzleNext(){
   if(pz.random){ const p=puzzlePickRandom(); if(p) openPuzzle(p.id); return; }
@@ -224,7 +224,7 @@ function initPuzzles(){
   $('#puzzleRandomBtn').addEventListener('click',()=>{ pz.random=true; pz.streak=0; const p=puzzlePickRandom(); if(p) openPuzzle(p.id); });
   $('#puzzleBackBtn').addEventListener('click', ()=>{ pz.random=false; $('#puzzleListCard').hidden=false; $('#puzzleDetailCard').hidden=true; renderPuzzleGrid(); });
   $('#puzzleRetryBtn').addEventListener('click', puzzleResetBoard);
-  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.usedHint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
+  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.usedHint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','Gợi ý: quân cần đi được khoanh nét đứt.'); } });
   $('#puzzleNextBtn').addEventListener('click', puzzleNext);
   $('#puzzleAnswerBtn').addEventListener('click', ()=>{
     puzzleResetBoard(); pz.peeked=true; puzzleRecord('fail'); revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;

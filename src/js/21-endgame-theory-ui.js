@@ -16,8 +16,8 @@ let egFilter='all';
 function egSeen(){ return safeJSON('xq_eg_seen',[]); }
 function egBadge(it,compact){
   const res = it.result==='win' ? '<span class="badge badge-easy">Thắng</span>' : '<span class="badge badge-mid">Hoà</span>';
-  const ver = it.verified ? '<span class="badge badge-verified" title="Máy đã tính hết mọi thế của loại tàn cuộc này">✓ Máy kiểm chứng</span>'
-                          : '<span class="badge badge-source" title="Thế quá lớn để tính hết; kết luận theo sách tàn cuộc">📖 Theo sách</span>';
+  const ver = it.verified ? '<span class="badge badge-verified" title="Máy đã tính hết mọi thế của loại tàn cuộc này">Máy kiểm chứng</span>'
+                          : '<span class="badge badge-source" title="Thế quá lớn để tính hết; kết luận theo sách tàn cuộc">Theo sách</span>';
   return compact ? res : res+ver;
 }
 function renderEndgameTheoryList(){
@@ -30,7 +30,7 @@ function renderEndgameTheoryList(){
     if(!items.length) return '';
     return `<h4 class="eg-group-h">${esc(g.name)}</h4><div class="topic-grid">${items.map(it=>
       `<button class="opening-card topic-card ${seen.includes(it.key)?'seen':''}" data-eg="${it.key}">
-        <div class="puzzle-top">${egBadge(it,true)}${seen.includes(it.key)?'<span class="solved-check">✓</span>':''}</div>
+        <div class="puzzle-top">${egBadge(it,true)}${seen.includes(it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}</div>
         <h4>${esc(it.title)}</h4><span class="han-sm">${esc(it.han)}</span></button>`).join('')}</div>`;
   }).join('');
   host.innerHTML=`<div class="chip-row" role="group" aria-label="Lọc theo nhóm">${chips}</div>${groups}`;
@@ -38,9 +38,9 @@ function renderEndgameTheoryList(){
   $$('[data-eg]',host).forEach(b=>b.addEventListener('click',()=>openEndgameTheory(b.dataset.eg)));
 }
 function egStatsHtml(it){
-  if(!it.verified || !it.stats) return `<div class="eg-stats eg-stats-src"><b>📖 Theo sách.</b> Thế này có quá nhiều quân để máy tính hết mọi khả năng, nên kết luận được ghi theo sách tàn cuộc. Bạn vẫn có thể tự đánh thử với máy.</div>`;
+  if(!it.verified || !it.stats) return `<div class="eg-stats eg-stats-src"><b>Theo sách.</b> Thế này có quá nhiều quân để máy tính hết mọi khả năng, nên kết luận được ghi theo sách tàn cuộc. Bạn vẫn có thể tự đánh thử với máy.</div>`;
   const s=it.stats, fmt=n=>n.toLocaleString('vi-VN');
-  let h=`<div class="eg-stats"><b>✓ Máy đã kiểm chứng.</b> Bảng tàn cuộc đã tính <b>${fmt(s.n)}</b> thế loại này (Đỏ đi trước): Đỏ thắng <b>${String(s.winPct).replace('.',',')}%</b>.`;
+  let h=`<div class="eg-stats"><b>Máy đã kiểm chứng.</b> Bảng tàn cuộc đã tính <b>${fmt(s.n)}</b> thế loại này (Đỏ đi trước): Đỏ thắng <b>${String(s.winPct).replace('.',',')}%</b>.`;
   if(s.std && s.filtWinPct!=null) h+=` Riêng khi ${esc(s.std)}: Đỏ thắng <b>${String(s.filtWinPct).replace('.',',')}%</b>${s.sampled?' (ước tính trên mẫu '+fmt(s.filtN)+' thế)':''}.`;
   const rate = s.std && s.filtWinPct!=null ? s.filtWinPct : s.winPct;
   if(it.result==='draw') h+= rate<=10 ? ' → Phần lớn là <b>hoà</b>: bên mạnh chỉ thắng khi bên yếu đứng sai.' : ' → Thắng được khi bên yếu chưa đứng vững, còn phòng thủ đúng thì <b>thường hoà</b>.';
@@ -65,7 +65,7 @@ function openEndgameTheory(key){
       ${it.position && it.position.pvText && it.result==='win' ? `<p class="hint-text">Mẹo: bấm "Xem lời giải" để xem cả hai bên đánh tối ưu (${it.position.pvText.length} nửa nước). Để ý <b>quân nào khoá đường, quân nào chiếu</b>, đừng chỉ nhớ nước.</p>`:''}
       <p class="sources">Nguồn kết luận: ${esc(it.source||'')}</p>
     </div><div class="lesson-demos"><div class="lesson-demo-slot"></div></div></div>
-    <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}>← Trước</button><span class="hint-text">Tàn cuộc lý thuyết ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp →</button></div>`;
+    <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Trước</button><span class="hint-text">Tàn cuộc lý thuyết ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button></div>`;
   initLessonDemo($('.lesson-demo-slot',$('#tacticContent')), {
     board, toMove:RED, mode:'endgame', result:it.result, defender:'engine', thinkMs:700,
     pv: it.position ? it.position.pv : undefined, caption });
