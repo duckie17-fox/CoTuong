@@ -100,7 +100,7 @@ function summarizeAnalysis(rec, plies, finalRed){
   return {plies, finalRed, accuracy:acc, counts};
 }
 // Tên bên trong phân tích: người chơi là "Bạn", bên kia là "Máy"
-const sideName=(color)=> review.rec && color===review.rec.human ? 'Bạn' : 'Máy';
+const sideName=(color)=> review.rec && color===review.rec.human ? 'Bạn' : review.rec && review.rec.online ? 'Đối thủ' : 'Máy';
 // Đọc một chuỗi nước (PV) thành lời: ghi rõ bên nào đi và ai ăn quân gì
 function lineText(startBoard, line, max){
   let b=startBoard; const parts=[], caps=[];
@@ -108,7 +108,7 @@ function lineText(startBoard, line, max){
     const pc=b[mv.from[0]] && b[mv.from[0]][mv.from[1]]; if(!pc) break;
     const victim=b[mv.to[0]][mv.to[1]];
     parts.push(`${sideName(pc.color)} <b>${esc(Notation.describe(b,mv).short)}</b>`);
-    if(victim) caps.push(`${sideName(pc.color)==='Bạn'?'bạn':'máy'} ăn ${VN_NAME[victim.type]}`);
+    if(victim) caps.push(`${sideName(pc.color)==='Bạn'?'bạn':sideName(pc.color).toLowerCase()} ăn ${VN_NAME[victim.type]}`);
     b=Engine.applyMove(b,mv);
   }
   return {html: parts.join(' → '), caps, end:b, n:parts.length};
@@ -350,7 +350,7 @@ function openReview(rec){
   if(!review.widget) review.widget=createBoardWidget($('#reviewBoard'),{label:'Bàn cờ xem lại ván'});
   review.widget.setFlipped(rec.human===BLACK);
   const rs=resultForHuman(rec);
-  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(rec)).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
+  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${rec.online?`Đấu với ${esc(rec.oppName||'bạn')}`:esc(levelInfo(recLevel(rec)).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
   $('#reviewSummary').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
   reviewRender();
   $('#aiReviewCard').scrollIntoView({block:'start'});
@@ -370,7 +370,8 @@ async function runAnalysis(){
   review.an=an; review.ms=Date.now()-t0;
   // lưu kết quả để lần sau không phải phân tích lại
   rec.analysis={version:3, accuracy:an.accuracy, plies:an.plies.map(p=>({c:p.cls,g:p.second,l:Math.round(p.loss),b:p.bestMove?[p.bestMove.from,p.bestMove.to]:null,s:p.bestScore,pl:p.played,r:p.reply?[p.reply.from,p.reply.to]:null,rp:(p.replyPv||[]).map(m=>[m.from,m.to]),bp:(p.bestPv||[]).map(m=>[m.from,m.to]),e:p.evalRed})), finalRed:an.finalRed};
-  if(loadHistory().some(x=>x.id===rec.id)) upsertHistory(rec);
+  if(rec.online) Online.saveRecord(rec);
+  else if(loadHistory().some(x=>x.id===rec.id)) upsertHistory(rec);
   reviewShowAnalysis();
 }
 function applyStoredAnalysis(rec){
@@ -542,7 +543,7 @@ function reviewRender(){
   $('#reviewNext').disabled = !ov && idx===-1;
 }
 function initReview(){
-  $('#reviewBack').addEventListener('click',()=>{ review.token++; showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
+  $('#reviewBack').addEventListener('click',()=>{ review.token++; if(review.rec && review.rec.online){ showZone('satruong'); return; } showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
   // ◀ ▶: từng nửa nước. Tổng quan ↔ nước đầu ↔ … ↔ nước cuối (tổng kết)
   $('#reviewPrev').addEventListener('click',()=>{ const n=review.game.moves.length;
     if(review.overview) return;

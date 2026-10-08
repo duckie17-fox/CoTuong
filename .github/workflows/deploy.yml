@@ -1,0 +1,77 @@
+# Đăng bản mới mỗi khi merge vào main:
+#  1. Server Sa trường lên Cloudflare Workers (cần secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID;
+#     chưa có thì bước này tự bỏ qua).
+#  2. Trang web lên GitHub Pages, gắn sẵn địa chỉ server (cần bật Settings → Pages → Source: GitHub Actions).
+# Hướng dẫn từng bước: README.md, mục "Sa trường".
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Có token Cloudflare chưa?
+        id: check
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::notice::Chưa có secret CLOUDFLARE_API_TOKEN — bỏ qua deploy server."; fi
+      - name: Deploy server lên Cloudflare
+        id: deploy
+        if: steps.check.outputs.ok == 'true'
+        working-directory: server
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm ci
+          node ../tools/build-server.js
+          npx wrangler deploy | tee deploy.log
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "Server: $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  pages:
+    needs: server
+    if: always()
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build trang web (gắn địa chỉ server)
+        env:
+          SERVER_URL: ${{ needs.server.outputs.url || vars.ONLINE_SERVER }}
+        run: |
+          if [ -n "$SERVER_URL" ]; then export ONLINE_SERVER="$SERVER_URL"; fi
+          echo "Server Sa trường: ${ONLINE_SERVER:-(lấy từ src/online.json)}"
+          mkdir -p _site
+          node tools/build.js _site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: pages
+        uses: actions/deploy-pages@v4

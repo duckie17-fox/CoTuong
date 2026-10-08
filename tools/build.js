@@ -27,6 +27,12 @@ function build() {
   if (!js.includes('/*@@WORKER@@*/')) throw new Error('thiếu /*@@WORKER@@*/');
   js = js.replace('/*@@WORKER@@*/', () => workerLine);
 
+  // Địa chỉ server Sa trường: biến môi trường ONLINE_SERVER, nếu không có thì src/online.json
+  let onlineServer = process.env.ONLINE_SERVER;
+  if (onlineServer == null) { try { onlineServer = JSON.parse(read('online.json')).server || ''; } catch (e) { onlineServer = ''; } }
+  if (!js.includes("/*@@ONLINE_SERVER@@*/''")) throw new Error('thiếu /*@@ONLINE_SERVER@@*/');
+  js = js.replace("/*@@ONLINE_SERVER@@*/''", () => JSON.stringify(onlineServer));
+
   const css = read('style.css').replace(/\n$/, '');
   return read('shell.html').replace('/*@@CSS@@*/', () => css).replace('/*@@JS@@*/', () => js);
 }

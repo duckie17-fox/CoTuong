@@ -17,7 +17,7 @@
     <span class="seal" aria-hidden="true">象</span>
     <div class="title-text">
       <h1>Cờ Tướng Nhập Môn</h1>
-      <span class="sub">Học luật · Khai cuộc · Bài tập · Đấu và rút kinh nghiệm với máy</span>
+      <span class="sub">Học cờ, đấu với máy và đấu với bạn bè</span>
     </div>
     <div class="seg" id="pieceStyleToggle" role="group" aria-label="Kiểu chữ trên quân cờ">
       <button type="button" data-style="han" title="Quân chữ Hán truyền thống">帥 Hán</button>
@@ -47,6 +47,10 @@
         <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
       </div>
     </details>
+  </div>
+  <div class="zone-switch" role="group" aria-label="Chọn khu">
+    <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><span class="zone-ic" aria-hidden="true">🏯</span><span><b>Kỳ viện</b><small>Học · đấu máy · phân tích</small></span></button>
+    <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><span class="zone-ic" aria-hidden="true">⚔️</span><span><b>Sa trường</b><small>Đấu với bạn bè</small></span></button>
   </div>
   <nav class="tabs" role="tablist" aria-label="Chọn phần học">
     <button class="tab-btn" data-tab="hoc" role="tab">📖 Học luật</button>
@@ -342,6 +346,88 @@
       <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn">📋 FEN</button>
     </div>
     <div id="puzzleExplain" class="explain-box mt10" hidden></div>
+  </div>
+</section>
+
+<!-- ===================== SA TRƯỜNG: ĐẤU VỚI BẠN BÈ ===================== -->
+<section data-zone-panel="satruong" hidden>
+  <div class="card" id="olLobby">
+    <h2>⚔️ Sa trường</h2>
+    <p>Tạo phòng, gửi link cho bạn rồi cùng đánh. Server làm trọng tài: kiểm từng nước theo đúng luật ván (chiếu mãi, lặp thế, 60 nước…). Rớt mạng hay tải lại trang thì mở lại link là vào đúng ghế cũ.</p>
+    <div id="olNotice"></div>
+    <label class="setup-field ol-name">Tên của bạn
+      <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
+    </label>
+    <div class="ol-grid mt10">
+      <div class="ol-box">
+        <h3>➕ Tạo phòng mới</h3>
+        <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
+          <div class="seg-radio">
+            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ (đi trước)</span></label>
+            <label><input type="radio" name="olColor" value="black"><span>Đen</span></label>
+            <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
+          </div>
+        </fieldset>
+        <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
+      </div>
+      <div class="ol-box">
+        <h3>🚪 Vào phòng của bạn</h3>
+        <label class="setup-field">Mã phòng hoặc link mời
+          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Ví dụ: K7M2QX">
+        </label>
+        <button type="button" class="btn btn-jade mt10" id="olJoin">Vào phòng</button>
+        <div class="hint-text small mt10" id="olJoinMsg" aria-live="polite"></div>
+      </div>
+    </div>
+    <h3 class="group-h mt16">🕘 Phòng gần đây</h3>
+    <div id="olRecent"></div>
+    <h3 class="group-h mt16">🗂 Ván đã đấu</h3>
+    <div id="olHistory"></div>
+    <details class="fen-box mt16" id="olServerBox"><summary>⚙️ Server</summary>
+      <p class="hint-text small">Địa chỉ server Sa trường (bắt đầu bằng <code>wss://</code>). Bỏ trống để dùng server mặc định.</p>
+      <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
+      <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
+    </details>
+  </div>
+
+  <div class="card" id="olRoom" hidden>
+    <div class="btn-row ol-room-head">
+      <button type="button" class="btn btn-outline btn-sm" id="olLeave">← Sảnh</button>
+      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="ol-conn" id="olConn"></span></div>
+      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn">🔗 Mời bạn</button>
+    </div>
+    <div id="olInvite" class="ol-invite mt10" hidden></div>
+    <div class="play-layout mt10">
+      <div class="play-board">
+        <div class="ol-player" id="olTop"></div>
+        <div class="board-shell board-card" id="olBoardCard"><div id="olBoard"></div></div>
+        <div class="ol-player" id="olBottom"></div>
+        <div id="olStatus" class="board-caption" aria-live="polite"></div>
+        <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
+        <div id="olOffer" aria-live="assertive"></div>
+        <div class="btn-row btn-row-center mt10" id="olActions">
+          <button type="button" class="btn btn-outline btn-sm" id="olDraw">🤝 Xin hoà</button>
+          <button type="button" class="btn btn-outline btn-sm" id="olTakeback">↺ Xin đi lại</button>
+          <button type="button" class="btn btn-outline btn-sm" id="olResign">🏳 Đầu hàng</button>
+          <button type="button" class="btn btn-outline btn-sm" id="olFlip">⇅ Lật</button>
+        </div>
+        <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
+          <button type="button" class="btn btn-primary btn-sm" id="olRematch">🔁 Tái đấu (đổi màu)</button>
+          <button type="button" class="btn btn-jade btn-sm" id="olReview">📊 Phân tích ván</button>
+        </div>
+      </div>
+      <div class="play-side">
+        <h3 class="side-h">Biên bản</h3>
+        <div class="movelog" id="olLog"></div>
+        <h3 class="side-h mt10">💬 Trò chuyện</h3>
+        <div class="ol-chat" id="olChat" aria-live="polite"></div>
+        <div class="ol-chips" id="olChips"></div>
+        <form class="ol-chat-form" id="olChatForm">
+          <input class="field" id="olChatInput" maxlength="200" autocomplete="off" placeholder="Nhắn cho đối thủ…" aria-label="Tin nhắn">
+          <button type="submit" class="btn btn-primary btn-sm">Gửi</button>
+        </form>
+      </div>
+    </div>
   </div>
 </section>
 
