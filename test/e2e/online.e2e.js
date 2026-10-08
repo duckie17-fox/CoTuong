@@ -70,8 +70,12 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     await A.waitForFunction(() => document.querySelectorAll('#olLog .log-cell[data-ply]').length === 2);
 
     // chat
+    // chat nằm ở thẻ riêng của bảng phụ; A chưa mở thẻ Chat thì thấy chấm báo tin mới
+    await B.click('#olRoom [data-side-tab="chat"]');
     await B.click('.ol-chip >> nth=1');
     await A.waitForFunction(() => /Nước hay/.test(document.querySelector('#olChat').textContent));
+    assert.equal(await A.evaluate(() => document.querySelector('#olRoom [data-side-tab="chat"] .side-dot').hidden), false);
+    await A.click('#olRoom [data-side-tab="chat"]');
     await A.fill('#olChatInput', '<b>chào</b>');
     await A.press('#olChatInput', 'Enter');
     await B.waitForFunction(() => document.querySelector('#olChat').textContent.includes('<b>chào</b>'));

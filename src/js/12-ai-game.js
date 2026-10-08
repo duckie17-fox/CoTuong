@@ -169,7 +169,6 @@ function initAIGame(){
   renderLevelPicker();
 
   $('#thinkSteps').innerHTML=Coach.THINKING_STEPS.map(([h,t])=>`<li><b>${esc(h)}</b><span>${esc(t)}</span></li>`).join('');
-  if(window.matchMedia && matchMedia('(max-width:860px)').matches) $('#thinkBox').open=false;
   aiGame.widget = createBoardWidget($('#aiBoard'), {onSquareClick:(r,c)=>aiGame.ctl.click(r,c), label:'Bàn cờ đấu với máy'});
   aiGame.ctl = makeClickController({
     widget:aiGame.widget,

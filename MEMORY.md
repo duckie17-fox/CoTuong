@@ -46,3 +46,17 @@
 - Lần đầu người dùng lỡ tạo app `cotuong` qua "Create application → Import repository" trên Cloudflare → không cần, đã hướng dẫn xoá.
   Token tự sinh kiểu `round-night-a7ab` không xem lại được chuỗi bí mật → phải tự tạo token mẫu "Edit Cloudflare Workers".
 - Token Cloudflare mẫu "Edit Cloudflare Workers" **không có quyền D1** → khi làm tài khoản cần thêm "D1 Edit".
+
+## 2026-10-08 (phiên 2)
+- **Spec v3 đã duyệt nguyên trạng** (giữ: mã khôi phục, Elo không xin đi lại, K=40→24 sau 20 ván, ≥5 ván mới xếp hạng, ≤10 ván Elo/ngày/cặp).
+- **Bỏ bước Figma / design-instruction**: người dùng bảo "design luôn bằng html" → thiết kế thẳng trong code app (`src/`),
+  xem trước qua Artifact thay cho Figma.
+- **Khung 3 phần (đã làm):** `.app-header` dính trên cùng ở mọi kích thước (thanh trên + `.tabs[data-zone-tabs]`);
+  Sa trường có thẻ con `.st-btn[data-stab]` / `[data-stpanel]`; Tôi = `section[data-zone-panel="toi"]` (cài đặt + chuyển tiến độ,
+  thay cho menu ⚙️ cũ). Theme lưu `xq_theme` (light/dark/auto → bỏ `data-theme`).
+- **Bảng phụ có thẻ:** `.side-panel[data-side-default]` > `.side-tab[data-side-tab]` + `.side-pane[data-side-pane]`;
+  `sideTabFor(sel)` mở thẻ chứa phần tử, `sideTabNotify(sel)` hiện chấm đỏ. Thanh công cụ ván đã chuyển xuống **dưới** bàn cờ,
+  không còn dính (sticky) → `revealBoard` giờ tính cả thanh công cụ phía dưới.
+- Gotcha: `.tab-btn` giờ gồm cả thẻ Sa trường → chọn thẻ Kỳ viện bằng `.tab-btn[data-tab]`. Chat online nằm ở thẻ ẩn →
+  e2e phải bấm `[data-side-tab="chat"]` trước khi bấm câu chat nhanh.
+- Container phiên này cần `npm install` trước `npm test`; Chromium e2e: `CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`.

@@ -1,9 +1,11 @@
 # Cờ Tướng Nhập Môn
 
-Ứng dụng học cờ tướng chạy trong **một file HTML tự chứa**, chia làm hai khu:
+Ứng dụng học cờ tướng chạy trong **một file HTML tự chứa**, chia làm ba phần (điện thoại và máy tính dùng chung
+một kiểu điều hướng: thanh trên + hàng thẻ con; màn có bàn cờ thì bảng phụ có thẻ nằm bên phải hoặc ngay dưới bàn):
 
 - **🏯 Kỳ viện**: học luật, khai cuộc, ván danh thủ, chiến thuật, sát cục, tàn cuộc, bài tập, đấu với máy (có phân tích ván).
-- **⚔️ Sa trường**: đấu với bạn bè qua mạng — tạo phòng, gửi link mời, server làm trọng tài.
+- **⚔️ Sa trường**: đấu với bạn bè qua mạng — tạo phòng, gửi link mời, server làm trọng tài. (Bạn bè, Xếp hạng: cần tài khoản — đang làm.)
+- **👤 Tôi**: cài đặt (âm thanh, chữ quân, sáng/tối), chuyển tiến độ sang máy khác; sau này là tài khoản, Elo, đồng bộ.
 
 Bản web (có Sa trường): https://duckie17-fox.github.io/CoTuong/ (sau khi làm các bước ở mục [Sa trường](#sa-trường-đấu-với-bạn-bè)).
 

@@ -70,18 +70,19 @@ function stickyTop(){ const v=parseFloat(getComputedStyle(document.documentEleme
 function revealBoard(el){
   if(!el) return;
   const shell = el.closest ? (el.closest('.board-shell')||el) : el;
-  const tb = shell.previousElementSibling && shell.previousElementSibling.classList.contains('board-toolbar') ? shell.previousElementSibling : null;
+  // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
+  const tb = shell.nextElementSibling && shell.nextElementSibling.classList.contains('board-toolbar') ? shell.nextElementSibling : null;
   const r=shell.getBoundingClientRect();
-  const top=stickyTop()+(tb?tb.offsetHeight+6:0)+4;
+  const top=stickyTop()+4, extra=tb?tb.offsetHeight+6:0;
   const vh=window.innerHeight||document.documentElement.clientHeight;
-  if(r.top>=top && r.bottom<=vh) return;              // đã thấy đủ
-  if(r.top>=top && r.height>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
+  if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
+  if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
 function updateStickyTop(){
-  const tabs=document.querySelector('.tabs');
-  const sticky = tabs && getComputedStyle(tabs).position==='sticky';
-  document.documentElement.style.setProperty('--sticky-top', (sticky?tabs.offsetHeight:0)+'px');
+  const head=document.querySelector('.app-header');
+  const sticky = head && getComputedStyle(head).position==='sticky';
+  document.documentElement.style.setProperty('--sticky-top', (sticky?head.offsetHeight:0)+'px');
 }
 
 /* Trình bày phân tích theo quy trình tư duy: mỗi bước một câu hỏi + câu trả lời ngắn */

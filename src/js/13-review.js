@@ -552,8 +552,8 @@ function initReview(){
   $('#reviewNext').addEventListener('click',()=>{ const n=review.game.moves.length;
     if(review.overview){ reviewGo(n?0:-1); return; }
     reviewGo(review.idx>=n-1 ? -1 : review.idx+1); });
-  $('#reviewNextMistake').addEventListener('click',reviewNextErr);
-  $('#reviewPrevMistake').addEventListener('click',reviewPrevErr);
+  $('#reviewNextMistake').addEventListener('click',()=>{ sideTabFor('#reviewDetail'); reviewNextErr(); });
+  $('#reviewPrevMistake').addEventListener('click',()=>{ sideTabFor('#reviewDetail'); reviewPrevErr(); });
 }
 
 /* Tự sinh bởi tools/gen-puzzles.js + tools/make-puzzles.js: thế cờ lấy từ ván máy tự đánh, đã kiểm lại bằng Solver. Không sửa tay. */

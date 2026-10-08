@@ -229,6 +229,7 @@ const Online = (function(){
       : `<div class="ol-msg ${m.seat && m.seat===r.you?'ol-mine':''}"><b>${esc(m.by)}${m.seat?'':' 👀'}:</b> ${esc(m.text)}</div>`).join('')
       : '<div class="hint-text small">Chưa có tin nhắn.</div>';
     if(atBottom || st.chatSeen!==r.chat.length) el.scrollTop=el.scrollHeight;
+    if(st.chatSeen!=null && r.chat.length>st.chatSeen && r.chat.slice(st.chatSeen).some(m=>!m.sys && m.seat!==r.you)) sideTabNotify('#olChat');
     st.chatSeen=r.chat.length;
   }
   function renderInvite(){
