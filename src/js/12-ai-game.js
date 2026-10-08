@@ -215,13 +215,8 @@ function initAIGame(){
       aiRender();
     }
   });
-  const RESIGN_HTML=$('#aiResign').innerHTML;
-  $('#aiResign').addEventListener('click', ()=>{
+  confirmTap($('#aiResign'), ()=>{
     const g=aiGame.game; if(g.result) return;
-    const btn=$('#aiResign');
-    // xác nhận 2 bước ngay trên nút (không dùng confirm() vì có thể bị chặn trong khung nhúng)
-    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML; },3000); return; }
-    delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML;
     aiGame.token++; aiGame.thinking=false;
     g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();

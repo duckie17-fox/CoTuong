@@ -323,7 +323,7 @@
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
     <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
@@ -332,22 +332,26 @@
     <button class="btn btn-outline" id="puzzleBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách bài tập</button>
     <h2 id="puzzleTitle" class="mt10"></h2>
     <div id="puzzleMeta"></div>
-    <p id="puzzlePrompt" class="hint-text mt10"></p>
-    <div class="board-shell board-card" id="puzzleBoardCard">
-      <div id="puzzleBoard"></div>
+    <div class="play-layout mt10">
+      <div class="play-board">
+        <p id="puzzlePrompt" class="hint-text"></p>
+        <div class="board-shell board-card" id="puzzleBoardCard">
+          <div id="puzzleBoard"></div>
+        </div>
+        <div class="board-toolbar">
+          <button class="btn btn-outline" id="puzzleHintBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
+          <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Thử lại</button>
+          <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem đáp án</button>
+          <button class="btn btn-outline" id="puzzleNextBtn">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+        </div>
+        <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
+        <div class="btn-row btn-row-center">
+          <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div>
+        <div id="puzzleExplain" class="explain-box" hidden></div>
+      </div>
     </div>
-    <div class="board-toolbar">
-      <button class="btn btn-outline" id="puzzleHintBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
-      <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Thử lại</button>
-      <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem đáp án</button>
-      <button class="btn btn-jade" id="puzzleNextBtn">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
-    </div>
-    <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
-    <div class="btn-row btn-row-center mt10">
-      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
-      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-    </div>
-    <div id="puzzleExplain" class="explain-box mt10" hidden></div>
   </div>
 </section>
 
@@ -551,8 +555,9 @@
       <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
       <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
       <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
-      <button type="button" class="btn btn-danger" id="meDelete">Xoá tài khoản</button>
     </div>
+    <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
+    <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
   </div>
 </section>
 

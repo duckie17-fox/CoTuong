@@ -158,3 +158,16 @@
 - Tab điện thoại: đổi nhãn "Đấu với máy" → "Đấu máy" + giảm padding ≤420px → 5 tab vừa màn hình 390px, hết cuộn ngang.
 - Trang Học luật trên điện thoại rút từ ~4036px xuống ~2600px.
 - **Gotcha (2026-10-08)**: máy làm việc có thể bị khởi động lại giữa các lượt — commit đã push vẫn còn trên GitHub nhưng thư mục làm việc quay về bản cũ. Đầu mỗi lượt nên `git fetch` và so `git log origin/<nhánh>` với HEAD trước khi sửa/commit; lệch thì rebase lên remote rồi build lại.
+
+## 2026-10-08 — Nhạc nền mới + rà UI/UX toàn bộ
+- Người dùng muốn đổi nhạc → bài "Trúc lâm": tiêu (sine+triangle, vuốt nốt, rung cuối nốt, tiếng hơi qua bandpass Q=3) thổi các câu soạn sẵn
+  trên điệu Vũ (La Đô Rê Mi Sol), ~52 nhịp/phút; cổ cầm gảy trầm theo câu; thỉnh thoảng bồi âm như chuông; vang 4,5s. Tiếng hơi lúc đầu quá to (phổ nhiễu rộng) → đã giảm.
+- Cách rà UI: script playwright chụp ~20 màn × (390, 390 tối, 360, 768, 1366, 1366 tối, 1920) có đăng nhập qua online-dev-server; giao 3 trợ lý xem ảnh song song, tự kiểm lại lỗi họ báo trước khi sửa (vài lỗi họ báo sai, vd. thông báo nổi đè hộp thoại — thật ra z-index đã đúng).
+- **Lỗi thật đã sửa**: báo "Tiến độ vừa được cập nhật từ máy khác" khi chỉ dùng 1 máy — do máy chủ gộp xong trả cùng dữ liệu khác thứ tự (union) hoặc thêm trường mặc định (`best:0` ở xq_daily). Giờ chỉ báo khi có thông tin mới thật (`hasNew`). Đồng thời: khoá nào trên máy đổi trong lúc chờ máy chủ thì giữ bản trên máy (trước đây có thể bị ghi đè mất).
+- Chữ kết quả "Đen thắng — đối phương đầu hàng" gây hiểu nhầm khi chính mình đầu hàng → "Đen thắng — Đỏ đầu hàng".
+- Nút 2 bước dùng chung `confirmTap(btn, run)`: lần 1 đổi thành nút đỏ "Chắc chắn?", bỏ qua lần bấm thứ hai trong 400ms (chống chạm đúp), 3s tự trở lại. Test e2e phải chờ 450ms giữa 2 lần bấm.
+- `makeClickController.render()` tự bỏ quân đang chọn khi không còn được đi (hết ván/hết lượt).
+- `revealBoard` trên điện thoại: cuộn < 60px thì thanh trên không tự ẩn → phải chừa chỗ cho nó (trước đây che thanh đối thủ ở màn 360px).
+- Bài tập trên máy tính dùng chung bố cục 2 cột `.play-layout`; cột bàn + cột phải được canh giữa thành một cặp (`--bw`).
+- Phân tích ván < 6 nước của mình: không chấm %, không đoán phong cách, không vẽ biểu đồ.
+- Cấp máy mặc định cho người mới: 2 (trước là 5 — quá khó). Bài tập xếp dễ → khó. "Bài tiếp" chỉ nổi bật khi đã giải xong.

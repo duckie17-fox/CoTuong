@@ -11,7 +11,8 @@ function markPuzzleSolved(id){
 }
 function puzzleList(){
   if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
-  return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff));
+  return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff))
+    .map((p,i)=>[p,i]).sort((a,b)=>a[0].difficulty-b[0].difficulty || a[1]-b[1]).map(x=>x[0]);   // dễ trước cho người mới
 }
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
@@ -59,6 +60,7 @@ function openPuzzle(id){
   const [label,cls]=DIFF_LABEL[pz.active.difficulty];
   $('#puzzleMeta').innerHTML = `<span class="badge ${cls}">${label}</span> <span class="topic-tag">${esc(PUZZLE_TOPICS[pz.active.topic])}${pz.random?' · Luyện ngẫu nhiên':''}</span>`;
   $('#puzzlePrompt').textContent = pz.active.prompt;
+  setNextPrimary(false);
   if(!pz.widget){
     pz.widget = createBoardWidget($('#puzzleBoard'), {onSquareClick:(r,c)=>pz.ctl.click(r,c), label:'Bàn cờ bài tập'});
     pz.ctl = makeClickController({
@@ -136,8 +138,11 @@ function puzzleSuccess(){
   statusBanner($('#puzzleStatus'),'over','Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
+  setNextPrimary(true);
   pz.ctl.render();
 }
+// "Bài tiếp" chỉ nổi bật khi đã giải xong (trước đó là nút phụ, tránh khuyến khích bỏ qua)
+function setNextPrimary(on){ const b=$('#puzzleNextBtn'); b.classList.toggle('btn-jade',on); b.classList.toggle('btn-outline',!on); }
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
   puzzleRecord('fail');

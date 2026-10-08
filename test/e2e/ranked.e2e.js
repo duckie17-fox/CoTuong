@@ -70,7 +70,7 @@ test('đấu xếp hạng: ghép hai người; một mình thì ghép máy, đ�
     await C.click(`[data-resume="${oldId}"]`);
     await C.waitForFunction(n => Online.state.room && Online.state.room.moves.length >= n + 2, n0);
     // đầu hàng (2 bước) → thua, bị trừ Elo
-    await C.click('#olResign'); await C.click('#olResign');
+    await C.click('#olResign'); await C.waitForTimeout(450); await C.click('#olResign');   // xác nhận 2 bước (bấm đúp quá nhanh bị bỏ qua)
     await C.waitForFunction(() => /Elo của bạn: \d+ \(-\d+\)/.test(document.querySelector('#olStatus').textContent), null, { timeout: 10000 });
     assert.equal(await C.evaluate(() => JSON.parse(localStorage.getItem('xq_ranked_bot')).length), 1, 'còn lại đúng ván mới');
     await C.click('#olLeave');
