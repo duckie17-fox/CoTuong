@@ -133,6 +133,7 @@ const Game = (function(){
       return `${who} thắng — ${loser} ${REASON_TEXT[res.reason]}.`;
     }
     if(res.reason==='resign') return `${who} thắng — đối phương đầu hàng.`;
+    if(res.reason==='abandon') return `${who} thắng — đối phương rời ván quá 5 phút.`;
     return `${who} thắng — ${REASON_TEXT[res.reason]}.`;
   }
   return {create, key, resultText, REASON_TEXT};

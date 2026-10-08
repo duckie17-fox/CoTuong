@@ -1,4 +1,5 @@
-# Server Sa trường (đấu cờ với bạn bè). Build: node ../tools/build-server.js ; deploy: npx wrangler deploy
+# Server Sa trường (đấu cờ với bạn bè) + tài khoản. Build: node ../tools/build-server.js ; deploy: npx wrangler deploy
+# database_id được workflow deploy tự điền (tìm hoặc tạo D1 "cotuong"); chạy tay thì xem README, mục "Tài khoản".
 name = "cotuong-online"
 main = "dist/worker.js"
 compatibility_date = "2025-09-01"
@@ -11,3 +12,10 @@ class_name = "GameRoom"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["GameRoom"]
+
+# Tài khoản, tiến độ, bạn bè, Elo (Cloudflare D1)
+[[d1_databases]]
+binding = "DB"
+database_name = "cotuong"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

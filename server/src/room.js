@@ -4,9 +4,12 @@
    chỉ nhận nước hợp lệ, đúng lượt; tự xử thắng/thua/hoà theo luật ván.
    Người chơi nhận diện bằng "token" bí mật do trình duyệt tạo và giữ —
    mở lại trang hoặc rớt mạng thì vào lại đúng ghế. Không gửi token cho ai khác.
+   Người đã đăng nhập (conn.user, do adapter xác thực) thì ghế gắn với tài khoản: vào từ máy khác vẫn đúng ghế.
+   Phòng "Tính Elo": không cho xin đi lại; đối thủ rời ván ≥ 5 phút thì được xử thắng.
+   Ván xong → st.report để adapter ghi vào D1 (Accounts.recordGame) rồi gọi setElo().
    ========================================================================= */
 const RoomCore = (function(){
-  const NAME_MAX=24, TEXT_MAX=200, CHAT_MAX=60, MOVES_MAX=600;
+  const NAME_MAX=24, TEXT_MAX=200, CHAT_MAX=60, MOVES_MAX=600, ABANDON_MS=5*60000;
   const SEATS=['red','black'];
   const other = s => s==='red' ? 'black' : 'red';
   const cleanName = s => String(s||'').replace(/[\u0000-\u001f\u007f<>]/g,'').trim().slice(0,NAME_MAX) || 'Kỳ thủ';
@@ -14,7 +17,8 @@ const RoomCore = (function(){
   const isSq = a => Array.isArray(a) && a.length===2 && Number.isInteger(a[0]) && Number.isInteger(a[1]) && a[0]>=0 && a[0]<10 && a[1]>=0 && a[1]<9;
 
   function fresh(code){
-    return {v:1, code, created:Date.now(), updated:Date.now(), seats:{red:null, black:null}, game:1, moves:[], result:null, offer:null, chat:[], history:[]};
+    return {v:1, code, created:Date.now(), updated:Date.now(), seats:{red:null, black:null}, game:1, moves:[], result:null, offer:null, chat:[], history:[],
+      rated:false, left:{}, report:null, elo:null};
   }
   function replay(st){
     const g=Game.create();
@@ -32,48 +36,76 @@ const RoomCore = (function(){
   }
 
   class Room {
-    constructor(state){ this.st=state||null; this.g=state ? replay(state) : null; }
+    constructor(state){
+      if(state){ state.left=state.left||{}; if(state.rated==null) state.rated=false; }
+      this.st=state||null; this.g=state ? replay(state) : null;
+    }
     exists(){ return !!this.st; }
     seatOf(token){
       if(!this.st || !token) return null;
       for(const s of SEATS) if(this.st.seats[s] && this.st.seats[s].token===token) return s;
       return null;
     }
+    // Ghế của một kết nối: theo token trình duyệt, hoặc theo tài khoản (conn.uid)
+    seatFor(conn){
+      if(!this.st || !conn) return null;
+      const s=this.seatOf(conn.token); if(s) return s;
+      if(conn.uid) for(const x of SEATS) if(this.st.seats[x] && this.st.seats[x].uid===conn.uid) return x;
+      return null;
+    }
+    // Adapter báo khi ghế không còn kết nối nào (để tính "rời ván 5 phút")
+    markLeft(seat, now){ if(this.st && seat && !this.st.left[seat]){ this.st.left[seat]=now; return true; } return false; }
+    markBack(seat){ if(this.st && seat && this.st.left[seat]){ delete this.st.left[seat]; return true; } return false; }
+    // Kết quả Elo sau khi adapter ghi ván (r = Accounts.recordGame)
+    setElo(r){
+      const st=this.st, rep=st.report; st.report=null;
+      if(!r || !r.rated || !rep){ st.elo=null; return; }
+      st.elo={game:rep.game, red:r.red, black:r.black};
+      // cập nhật Elo đang hiện ở ghế (theo tài khoản, vì tái đấu có thể đã đổi màu)
+      for(const side of SEATS){ const uid=rep[side]&&rep[side].uid; for(const x of SEATS) if(uid && st.seats[x] && st.seats[x].uid===uid) st.seats[x].elo=r[side].after; }
+    }
     sys(text){ this.pushChat({sys:true, text}); }
     pushChat(m){ m.t=Date.now(); this.st.chat.push(m); if(this.st.chat.length>CHAT_MAX) this.st.chat.splice(0, this.st.chat.length-CHAT_MAX); }
 
-    // conn: {token, name}. Trả về {changed} hoặc {error, close}
+    // conn: {token, name, user?}. Trả về {changed} hoặc {error, close}
     join(msg, conn, code){
       const token = typeof msg.token==='string' && msg.token.length>=16 && msg.token.length<=64 ? msg.token : null;
       if(!token) return {error:'bad_token', close:true};
-      const name = cleanName(msg.name);
-      conn.token=token; conn.name=name;
+      const u=conn.user||null;
+      const name = u ? cleanName(u.display_name) : cleanName(msg.name);
+      conn.token=token; conn.name=name; conn.uid = u ? u.id : null;
+      const who = () => u ? {name, token, uid:u.id, username:u.username, elo:u.elo} : {name, token};
       if(!this.st){
         if(!msg.create) return {error:'not_found', close:true};
         this.st=fresh(code); this.g=replay(this.st);
         let color = msg.create.color;
         if(color!=='red' && color!=='black') color = Math.random()<0.5 ? 'red' : 'black';
-        this.st.seats[color]={name, token};
-        this.sys(`${name} đã tạo phòng (cầm quân ${color==='red'?'Đỏ':'Đen'}).`);
+        this.st.seats[color]=who();
+        this.st.rated = !!(u && msg.create.rated);
+        this.sys(`${name} đã tạo phòng (cầm quân ${color==='red'?'Đỏ':'Đen'}${this.st.rated?', ván tính Elo':''}).`);
         return {changed:true};
       }
-      let seat=this.seatOf(token);
+      let seat=this.seatFor(conn);
       if(!seat && msg.create) return {error:'exists', close:true};
       if(seat){
-        if(this.st.seats[seat].name!==name){ this.st.seats[seat].name=name; return {changed:true}; }
-        return {changed:false};
+        const cur=this.st.seats[seat];
+        let changed=this.markBack(seat);
+        if(cur.name!==name){ cur.name=name; changed=true; }
+        if(u && cur.uid===u.id && cur.elo!==u.elo){ cur.elo=u.elo; changed=true; }
+        return {changed};
       }
       const free = SEATS.find(s=>!this.st.seats[s]);
       if(free){
-        this.st.seats[free]={name, token};
+        this.st.seats[free]=who();
         this.sys(`${name} đã vào phòng (cầm quân ${free==='red'?'Đỏ':'Đen'}).`);
         return {changed:true};
       }
       return {changed:false};   // phòng đủ người → vào xem
     }
 
-    handle(msg, conn){
-      const st=this.st, g=this.g, seat=this.seatOf(conn.token);
+    // ctx: {now, online:{red,black}} — dùng cho "xử thắng" khi đối thủ rời ván
+    handle(msg, conn, ctx){
+      const st=this.st, g=this.g, seat=this.seatFor(conn);
       if(!st) return {error:'not_found'};
       const t=msg.type;
       if(t==='chat'){
@@ -102,6 +134,7 @@ const RoomCore = (function(){
         if(!['draw','takeback','rematch'].includes(kind)) return {error:'bad_offer'};
         if(!st.seats[other(seat)]) return {error:'no_opponent'};
         if(kind==='rematch' ? !st.result : !!st.result) return {error:'bad_offer'};
+        if(kind==='takeback' && st.rated) return {error:'rated_no_takeback'};
         if(st.offer && st.offer.by!==seat && st.offer.kind===kind) return this.accept(seat);   // hai bên cùng đề nghị
         let n=0;
         if(kind==='takeback'){ n=takebackCount(st,g,seat); if(!n) return {error:'nothing_to_take_back'}; }
@@ -125,6 +158,13 @@ const RoomCore = (function(){
         st.result={winner:other(seat), reason:'resign'}; st.offer=null; this.finish();
         return {changed:true};
       }
+      if(t==='claim'){
+        const o=other(seat), now=(ctx&&ctx.now)||Date.now(), online=(ctx&&ctx.online)||{};
+        if(!st.rated || st.result || !st.seats[o] || !st.moves.length) return {error:'bad_claim'};
+        if(online[o] || !st.left[o] || now-st.left[o]<ABANDON_MS) return {error:'too_early'};
+        st.result={winner:seat, reason:'abandon'}; st.offer=null; this.finish();
+        return {changed:true};
+      }
       return {error:'unknown'};
     }
     accept(seat){
@@ -138,7 +178,7 @@ const RoomCore = (function(){
       } else {
         // tái đấu: đổi màu quân
         const r=st.seats.red; st.seats.red=st.seats.black; st.seats.black=r;
-        st.moves=[]; st.result=null; st.game++; this.g=replay(st);
+        st.moves=[]; st.result=null; st.game++; st.elo=null; this.g=replay(st);
         this.sys(`Ván ${st.game} bắt đầu — hai bên đổi màu quân.`);
       }
       return {changed:true};
@@ -147,14 +187,23 @@ const RoomCore = (function(){
       const st=this.st;
       st.history.push({game:st.game, red:st.seats.red&&st.seats.red.name, black:st.seats.black&&st.seats.black.name, moves:st.moves.slice(), result:st.result, t:Date.now()});
       if(st.history.length>20) st.history.shift();
+      const p = s => st.seats[s] ? {uid:st.seats[s].uid||null, name:st.seats[s].name} : null;
+      if((st.seats.red&&st.seats.red.uid) || (st.seats.black&&st.seats.black.uid)){
+        st.report={code:st.code, game:st.game, red:p('red'), black:p('black'), moves:st.moves.slice(), result:st.result, rated:!!st.rated};
+      }
     }
     // Trạng thái gửi cho một kết nối (không bao giờ kèm token)
     view(conn, online){
-      const st=this.st, you=this.seatOf(conn.token);
-      const seat=s=> st.seats[s] ? {name:st.seats[s].name, online:!!online[s]} : null;
+      const st=this.st, you=this.seatFor(conn);
+      const seat=s=>{ const x=st.seats[s]; if(!x) return null;
+        const v={name:x.name, online:!!online[s]};
+        if(x.username){ v.username=x.username; v.elo=x.elo; }
+        if(!online[s] && st.left && st.left[s]) v.awaySince=st.left[s];
+        return v; };
       return {type:'state', code:st.code, you: you||'spectator', seats:{red:seat('red'), black:seat('black')}, game:st.game,
-        moves:st.moves, result:st.result, offer: st.offer ? {kind:st.offer.kind, by:st.offer.by} : null, chat:st.chat, spectators:online.spectators||0};
+        moves:st.moves, result:st.result, offer: st.offer ? {kind:st.offer.kind, by:st.offer.by} : null, chat:st.chat, spectators:online.spectators||0,
+        rated:!!st.rated, elo:st.elo||null, abandonMs:ABANDON_MS};
     }
   }
-  return {Room, fresh, NAME_MAX, TEXT_MAX};
+  return {Room, fresh, NAME_MAX, TEXT_MAX, ABANDON_MS};
 })();

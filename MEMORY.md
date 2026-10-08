@@ -73,3 +73,19 @@
   "FEN"→"Sao chép thế cờ", "Sảnh"→"Rời phòng", "Tái đấu"→"Đấu ván nữa". Tiêu đề app chỉ còn "Cờ Tướng" (bỏ "Nhập Môn").
 - Giao diện tối: bàn cờ có bộ màu riêng (gỗ/giấy dịu hơn, số cột sáng) qua biến `--b-*`, `--b-file-red/black`.
 - Điện thoại: thanh công cụ ván xếp 1 hàng lưới, icon trên chữ (tránh nút rơi xuống dòng 2).
+
+## 2026-10-08 — Server tài khoản (thiết kế)
+- **API HTTP JSON** trong cùng Worker (`/api/*`), logic ở `server/src/accounts.js` (thuần Web API: Request/Response/crypto.subtle)
+  → chạy được cả Cloudflare lẫn Node (test + `online-dev-server`). DB truy cập qua giao diện kiểu D1
+  (`prepare().bind().first/all/run`, `batch`); ở Node dùng `tools/d1-shim.js` bọc `node:sqlite` (Node ≥22).
+- **Bỏ Durable Object "Sảnh" ở bản đầu**: online = `last_seen` trong 2 phút (app gửi nhịp 60s), lời mời đấu/kết bạn lấy bằng
+  hỏi định kỳ 15–20s khi app mở. Lý do: đơn giản, rẻ, gói miễn phí D1 đủ (5M đọc, 100k ghi/ngày) cho nhóm bạn bè. Cần thì thêm DO sau.
+- **Elo do GameRoom ghi thẳng vào D1** khi ván xong (DO có `env.DB`); ghế gắn `user_id` khi join kèm phiên đăng nhập.
+- **D1 trong CI:** `wrangler.toml` để `database_id` giữ chỗ; workflow tìm/tạo DB `cotuong` (`wrangler d1 list --json` / `d1 create`),
+  thay id vào toml rồi `d1 migrations apply --remote` trước `wrangler deploy`.
+- **Đã kiểm trên workerd thật** (`wrangler dev --persist-to`, sau `d1 migrations apply --local`): API + ván tính Elo qua WS chạy đúng.
+  Proxy của container chặn telemetry/update của wrangler ("Request was cancelled") — bỏ qua được.
+- Gotcha: lịch sử ván khi một bên rỗng vẫn phải sắp xếp lại (mergeKey không được trả nguyên bản chưa sort) — nếu không,
+  bước cắt 512 KB sẽ cắt nhầm ván mới. Test gộp phải dùng chuỗi nước **không lặp thế** (lặp 3 lần → hoà, ván dừng sớm).
+- Phòng: `seatFor(conn)` (token hoặc uid) thay `seatOf(token)` ở mọi chỗ; `st.report` (ván vừa xong) → adapter gọi
+  `Accounts.recordGame` rồi `room.setElo(r)`; `markLeft/markBack` để tính "rời ván 5 phút"; lý do kết thúc mới `abandon`.

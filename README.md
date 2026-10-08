@@ -41,12 +41,15 @@ src/
   online.json       địa chỉ server Sa trường mặc định (CI tự gắn khi deploy)
 server/             server Sa trường: Cloudflare Worker + Durable Object
   src/room.js       logic một phòng (trọng tài) — dùng lại Engine/Game của ứng dụng
+  src/accounts.js   tài khoản, đồng bộ tiến độ, bạn bè, mời đấu, Elo (API /api/*, dữ liệu ở D1)
   src/worker.js     adapter Cloudflare (WebSocket Hibernation)
+  migrations/*.sql  bảng D1 (users, sessions, progress, friends, invites, games, login_attempts)
   wrangler.toml     cấu hình Cloudflare
 tools/
   build.js          ghép src/ → dist/co-tuong.html
   build-server.js   ghép server → server/dist/worker.js
-  online-dev-server.js  server Sa trường chạy bằng Node (test, chơi trong mạng nhà)
+  online-dev-server.js  server Sa trường + tài khoản chạy bằng Node (test, chơi trong mạng nhà)
+  d1-shim.js        giả lập Cloudflare D1 bằng node:sqlite (Node ≥ 22)
   selfplay.js       cho các cấp máy tự đấu theo đúng luật của ứng dụng
   match.js          đấu hai bản build với nhau để đo thay đổi sức mạnh (điểm + Elo)
   ladder.js         đấu hai cấu hình cấp máy để hiệu chỉnh thang cấp
@@ -110,3 +113,22 @@ Bản Artifact trên Claude không kết nối ra ngoài được, nên ở đó
 
 Chơi trong mạng nhà không cần Cloudflare: chạy `node tools/online-dev-server.js` trên một máy, mở
 `dist/co-tuong.html?server=ws://<IP-máy-đó>:8787` trên các máy cùng Wi-Fi.
+
+## Tài khoản (máy chủ)
+
+Theo `docs/spec-v3-giao-dien-tai-khoan.md`. Cùng Worker với Sa trường, dữ liệu ở Cloudflare D1 tên `cotuong`.
+Workflow deploy tự tạo D1 lần đầu và tự chạy `migrations/` — token Cloudflare cần thêm quyền **D1 Edit**.
+
+- Mật khẩu: trình duyệt băm PBKDF2 rồi mới gửi; máy chủ băm thêm SHA-256 với muối riêng. Không có email → **mã khôi phục**.
+- Phiên: token gửi qua `Authorization: Bearer …`, hạn 60 ngày, gia hạn khi dùng.
+- Sai mật khẩu 5 lần → khoá tài khoản 15 phút; 30 lần sai / IP / giờ → chặn IP.
+- API chính: `POST /api/register|login|recover|logout|logout-all|password|recovery-code`, `GET|PATCH|DELETE /api/me`,
+  `GET|PUT /api/progress` (gộp tiến độ), `GET /api/users?q=`, `GET|POST /api/friends`, `POST /api/friends/:id/accept`,
+  `DELETE /api/friends/:id`, `POST /api/invites`, `POST /api/invites/:id/accept|decline`, `GET /api/inbox` (gọi định kỳ,
+  cũng là nhịp "đang online"), `GET /api/leaderboard?scope=friends|all`, `GET /api/games`.
+- Phòng đấu: gửi kèm `auth` (token phiên) khi vào phòng → ghế gắn tài khoản. Phòng "Tính Elo": không xin đi lại,
+  đối thủ rời ván 5 phút thì được xử thắng; ván ≥ 10 nửa nước giữa hai tài khoản khác nhau mới tính, tối đa 10 ván/ngày/cặp.
+  Elo khởi điểm 1200, K = 40 cho 20 ván đầu rồi 24; đủ 5 ván mới có hạng.
+
+Chạy thử tại máy: `node tools/online-dev-server.js 8787 tai-khoan.db` (bỏ tên tệp để dùng DB tạm trong RAM).
+Kiểm trên runtime Cloudflare: `cd server && npx wrangler d1 migrations apply cotuong --local && npm run dev`.
