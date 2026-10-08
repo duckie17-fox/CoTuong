@@ -112,3 +112,4 @@
   đang đánh chỉ có thanh nút chính (đấu máy: Đi lại/Gợi ý/Đầu hàng), xong ván mới hiện Ván mới/Phân tích/Sao chép thế cờ;
   kết quả theo góc nhìn người chơi ("Bạn thắng!"); đầu hàng online xác nhận 2 bước (bỏ confirm()); giữ màn hình sáng (Wake Lock) khi đang đánh online.
   Xem lại khai cuộc/ván danh thủ vẫn giữ nút xoay bàn (là màn xem, không phải đánh).
+- PR #3 mở ngày 2026-10-08 cho toàn bộ spec v3 + góp ý giao diện.
