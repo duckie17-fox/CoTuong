@@ -138,3 +138,4 @@
   không bị che. Mở link mời khi chưa đăng nhập → đăng nhập xong tự vào phòng (`accountchange` trong Online).
   Test e2e giờ phải đăng ký trước: helper `test/e2e/helpers.js` (`registerUI`, `chromiumPath`, `PAGE`); browser.e2e chạy kèm dev server.
   Rủi ro đã biết: máy chủ sập thì người chưa đăng nhập không vào được app (kể cả phần học).
+- **2026-10-08: PR #4 merge + deploy xanh**: D1 cũ được tìm thấy, chỉ chạy 0002_ranked.sql; Worker có DB + ROOMS; Pages lên bản mới.
