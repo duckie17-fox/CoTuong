@@ -207,7 +207,7 @@
   <div class="card" id="aiGameCard" hidden>
     <div class="btn-row" style="justify-content:space-between;">
       <div><h2 style="margin:0;">Ván đấu với máy</h2><div class="hint-text small" id="aiLevelTag"></div></div>
-      <button class="btn btn-outline" id="aiNewGameBtn">⟲ Ván mới</button>
+      <button class="btn btn-outline" id="aiNewGameBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg>Ván mới</button>
     </div>
     <div class="play-layout mt10">
       <div class="play-board">
@@ -342,43 +342,39 @@
 <!-- ===================== SA TRƯỜNG: ĐẤU VỚI BẠN BÈ ===================== -->
 <section data-zone-panel="satruong" hidden>
  <div data-stpanel="phong">
-  <div class="card" id="olLobby">
-    <h2>Đấu với bạn bè</h2>
-    <p>Tạo phòng, gửi link cho bạn rồi cùng chơi. Máy chủ kiểm tra từng nước theo đúng luật. Nếu rớt mạng hay tải lại trang, mở lại link là vào lại đúng chỗ cũ.</p>
+  <div id="olLobby">
     <div id="olNotice"></div>
-    <div id="olFriendsOnline" hidden></div>
-    <p class="hint-text" id="olAsUser" hidden></p>
-    <label class="setup-field ol-name">Tên của bạn
-      <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
-    </label>
-    <div class="ol-grid mt10">
-      <div class="ol-box">
-        <h3>Tạo phòng mới</h3>
+    <div id="olFriendsOnline" class="card" hidden></div>
+    <div class="ol-grid">
+      <div class="card ol-box">
+        <h2>Tạo phòng</h2>
+        <p class="hint-text small" id="olAsUser" hidden></p>
+        <label class="setup-field ol-name">Tên của bạn
+          <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
+        </label>
         <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
           <div class="seg-radio">
-            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ (đi trước)</span></label>
+            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ</span></label>
             <label><input type="radio" name="olColor" value="black"><span>Đen</span></label>
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
-        <label class="switch mt10" id="olRatedWrap" hidden><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Chỉ tính khi đối thủ cũng đã đăng nhập. Ván tính Elo không xin đi lại được.</small></span></label>
-        <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
+        <label class="switch" id="olRatedWrap" hidden title="Chỉ tính khi đối thủ cũng đã đăng nhập. Không xin đi lại được."><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+        <button type="button" class="btn btn-primary ol-wide" id="olCreate">Tạo phòng</button>
       </div>
-      <div class="ol-box">
-        <h3>Vào phòng bạn đã tạo</h3>
-        <label class="setup-field">Mã phòng hoặc link mời
-          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Ví dụ: K7M2QX">
-        </label>
-        <button type="button" class="btn btn-jade mt10" id="olJoin">Vào phòng</button>
-        <div class="hint-text small mt10" id="olJoinMsg" aria-live="polite"></div>
+      <div class="card ol-box">
+        <h2>Vào phòng</h2>
+        <div class="ol-join-row">
+          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Mã phòng hoặc link" aria-label="Mã phòng hoặc link mời">
+          <button type="button" class="btn btn-jade" id="olJoin">Vào</button>
+        </div>
+        <div class="hint-text small" id="olJoinMsg" aria-live="polite"></div>
       </div>
     </div>
-    <h3 class="group-h mt16">Phòng gần đây</h3>
-    <div id="olRecent"></div>
-    <h3 class="group-h mt16">Các ván đã đấu</h3>
-    <div id="olHistory"></div>
-    <details class="fen-box mt16" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
-      <p class="hint-text small">Địa chỉ máy chủ Sa trường (bắt đầu bằng <code>wss://</code>). Bỏ trống để dùng máy chủ mặc định.</p>
+    <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
+    <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
+    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
+      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
       <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
       <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
     </details>
@@ -386,9 +382,9 @@
 
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
-      <button type="button" class="btn btn-outline btn-sm" id="olLeave"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Rời phòng</button>
+      <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
       <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
-      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg>Mời bạn</button>
+      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn" aria-label="Mời bạn" title="Mời bạn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg><span class="btn-label">Mời bạn</span></button>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
@@ -396,16 +392,16 @@
         <div class="ol-player" id="olTop"></div>
         <div class="board-shell board-card" id="olBoardCard"><div id="olBoard"></div></div>
         <div class="ol-player" id="olBottom"></div>
+        <div class="board-toolbar" id="olActions">
+          <button type="button" class="btn btn-outline" id="olDraw"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-draw"></use></svg>Xin hoà</button>
+          <button type="button" class="btn btn-outline" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
+          <button type="button" class="btn btn-outline" id="olFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
+          <button type="button" class="btn btn-outline" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
+        </div>
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
         <div id="olClaim" class="ol-offer" hidden></div>
-        <div class="btn-row btn-row-center mt10" id="olActions">
-          <button type="button" class="btn btn-outline btn-sm" id="olDraw">Xin hoà</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
-        </div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
           <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
@@ -432,16 +428,12 @@
  <div data-stpanel="banbe" hidden>
   <div class="card need-account" data-need-login>
     <h2>Bạn bè</h2>
-    <p>Kết bạn theo tên đăng nhập, xem ai đang online và mời đấu trực tiếp.</p>
-    <p class="hint-text">Phần này cần tài khoản. Chưa có tài khoản, bạn vẫn đấu với bạn bè được bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
+    <p class="hint-text">Đăng nhập để kết bạn và mời đấu.</p>
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div data-when-login hidden>
     <div class="card">
-      <h2>Tìm bạn</h2>
-      <label class="setup-field">Tên đăng nhập của bạn bè
-        <input class="field" id="friendSearch" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Gõ ít nhất 3 ký tự">
-      </label>
+      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
       <div id="friendResults" class="mt10" aria-live="polite"></div>
     </div>
     <div class="card" id="friendRequestsCard" hidden>
@@ -449,7 +441,7 @@
       <div id="friendRequests"></div>
     </div>
     <div class="card">
-      <h2>Bạn bè của bạn</h2>
+      <h2>Bạn bè</h2>
       <div id="friendList"></div>
       <div id="friendOutgoing"></div>
     </div>
@@ -458,7 +450,7 @@
  <div data-stpanel="xephang" hidden>
   <div class="card need-account" data-need-login>
     <h2>Xếp hạng</h2>
-    <p>Bảng Elo của bạn bè và toàn bộ người chơi. Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
+    <p class="hint-text">Đăng nhập để có Elo và xếp hạng.</p>
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div class="card" data-when-login hidden>
@@ -466,7 +458,6 @@
       <h2 style="margin:0">Xếp hạng</h2>
       <div class="seg" id="rankScope" role="group" aria-label="Phạm vi xếp hạng"><button type="button" data-scope="friends" aria-pressed="true">Bạn bè</button><button type="button" data-scope="all" aria-pressed="false">Toàn bộ</button></div>
     </div>
-    <p class="hint-text small mt10">Chỉ tính ván bật “Tính Elo” giữa hai người đã đăng nhập. Cần ít nhất 5 ván để có hạng.</p>
     <div id="rankList" aria-live="polite"></div>
   </div>
  </div>

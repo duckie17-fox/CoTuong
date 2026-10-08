@@ -13,6 +13,7 @@ function initSettings(){
 }
 initTabs();
 updateStickyTop(); window.addEventListener('resize', updateStickyTop);
+initAutoHideHeader();
 initSettings();
 initUxSettings();
 buildLegend();

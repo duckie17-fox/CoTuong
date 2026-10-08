@@ -73,11 +73,23 @@ function revealBoard(el){
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
   const tb = shell.nextElementSibling && shell.nextElementSibling.classList.contains('board-toolbar') ? shell.nextElementSibling : null;
   const r=shell.getBoundingClientRect();
-  const top=stickyTop()+4, extra=tb?tb.offsetHeight+6:0;
+  // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
+  const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
   const vh=window.innerHeight||document.documentElement.clientHeight;
   if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
   if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   window.scrollBy({top:r.top-top, behavior:'smooth'});
+}
+function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:600px)').matches); }catch(e){ return false; } }
+// Điện thoại: cuộn xuống thì ẩn thanh trên (nhường chỗ cho bàn cờ), cuộn lên thì hiện lại
+function initAutoHideHeader(){
+  let lastY=window.scrollY||0;
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY||0, d=y-lastY; lastY=y;
+    const dlg=document.getElementById('dlg');
+    if(!isPhone() || y<60 || (dlg && !dlg.hidden)){ document.body.classList.remove('hdr-hide'); return; }
+    if(d>4) document.body.classList.add('hdr-hide'); else if(d<-4) document.body.classList.remove('hdr-hide');
+  }, {passive:true});
 }
 function updateStickyTop(){
   const head=document.querySelector('.app-header');
@@ -151,6 +163,7 @@ const ICON_PATHS = {
   plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
   login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
   sync:'<path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/>',
+  draw:'<circle cx="12" cy="12" r="10"/><path d="M8 10h8"/><path d="M8 14h8"/>',
   note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>',
 };
 // icon('undo') → <svg> dùng symbol trong sprite (chèn một lần vào đầu body)

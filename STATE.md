@@ -14,4 +14,5 @@ Chờ người dùng xem và quyết định tạo PR → merge → deploy.
 - Nhánh có nhiều commit chưa merge vào main. Chỉ PR khi người dùng bảo.
 
 ## Vừa xong
+- Góp ý vòng 3: Sa trường gọn chữ, tối ưu màn đánh cờ trên điện thoại (thanh trên tự ẩn, bàn cờ to hơn, đầu phòng 1 dòng); 74 test + e2e 4/4.
 - Giao diện tài khoản: 74 test đơn vị (6 test giao diện tài khoản mới), e2e 4/4 (thêm ván tính Elo hai trình duyệt từ đăng ký → kết bạn → mời → Elo).

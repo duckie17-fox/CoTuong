@@ -108,7 +108,7 @@ a{color:var(--accent);}
 .wrap{max-width:1100px;margin:0 auto;}
 
 /* ---------- Khung app: thanh trên + hàng thẻ con (dính khi cuộn, mọi kích thước) ---------- */
-.app-header{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line);
+.app-header{position:sticky;top:0;z-index:30;transition:transform .22s ease;background:var(--paper);border-bottom:1px solid var(--line);
   padding-top:env(safe-area-inset-top,0px);box-shadow:0 2px 10px color-mix(in srgb, var(--shadow) 35%, transparent);}
 .topbar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 24px;}
 .topbar .seal{
@@ -199,7 +199,7 @@ select.field, input.field{
   padding:14px;box-shadow:0 4px 16px var(--shadow);
 }
 .board-shell{max-width:460px;margin:0 auto;}
-@media(min-width:900px){ .play-layout .board-shell{max-width:580px;} }
+@media(min-width:900px){ .play-layout .board-shell{max-width:max(360px, min(580px, calc((100vh - 330px) * 0.92)));} }
 .xq-board-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
 .xq-piece{cursor:pointer;}
 .xq-piece-outer{stroke:var(--b-line);stroke-width:2;}
@@ -758,6 +758,38 @@ body.dlg-open{overflow:hidden;}
   .person-act{width:100%;justify-content:flex-end;}
   .dlg{padding:16px 14px 18px;}
 }
+
+/* ---------- Sảnh Sa trường gọn + màn đánh cờ trên điện thoại ---------- */
+body.hdr-hide .app-header{transform:translateY(-100%);}
+#olLobby > * + *{margin-top:14px;}
+#olLobby .ol-grid{gap:14px;align-items:start;}
+#olLobby .ol-grid .card + .card{margin-top:0;}
+#olLobby .ol-box{background:var(--card);padding:16px 18px;gap:12px;}
+#olLobby .ol-box h2,#olLobby .card > h2,#olFriendsOnline h2{font-size:17px;margin:0;}
+#olLobby .ol-box .setup-field{margin:0;}
+#olLobby .ol-box .ol-wide{align-self:stretch;}
+.ol-wide{width:100%;}
+.ol-join-row{display:flex;gap:8px;}
+.ol-join-row .field{flex:1;min-width:0;min-height:44px;}
+.ol-join-row .btn{flex:none;}
+.ol-server{padding:0 4px;}
+#olLobby .seg-radio{display:flex;} #olLobby .seg-radio label{flex:1;text-align:center;}
+#olLobby .seg-radio span{padding:10px 8px;}
+.ol-room-head{gap:8px;}
+.ol-room-title{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+#olActions{margin-top:6px;}
+@media (max-width:600px){
+  .card .board-shell{margin-inline:-12px;}
+  .play-layout.mt10{margin-top:6px;}
+  .ol-room-head .btn-label{display:none;}
+  .ol-room-head .btn{padding:8px 10px;min-height:40px;}
+  .ol-room-title{flex-wrap:nowrap;white-space:nowrap;font-size:14px;}
+  .ol-conn{font-size:0;} .ol-conn .conn-dot{margin:0;}
+  .ol-player{min-height:30px;font-size:14px;}
+  #olStatus .status-banner{padding:6px 10px;font-size:14px;margin-top:6px;}
+  .board-caption{margin-top:6px;}
+  #aiGameCard > .btn-row h2{font-size:18px;}
+}
 </style>
 </head>
 <body>
@@ -957,7 +989,7 @@ body.dlg-open{overflow:hidden;}
   <div class="card" id="aiGameCard" hidden>
     <div class="btn-row" style="justify-content:space-between;">
       <div><h2 style="margin:0;">Ván đấu với máy</h2><div class="hint-text small" id="aiLevelTag"></div></div>
-      <button class="btn btn-outline" id="aiNewGameBtn">⟲ Ván mới</button>
+      <button class="btn btn-outline" id="aiNewGameBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg>Ván mới</button>
     </div>
     <div class="play-layout mt10">
       <div class="play-board">
@@ -1092,43 +1124,39 @@ body.dlg-open{overflow:hidden;}
 <!-- ===================== SA TRƯỜNG: ĐẤU VỚI BẠN BÈ ===================== -->
 <section data-zone-panel="satruong" hidden>
  <div data-stpanel="phong">
-  <div class="card" id="olLobby">
-    <h2>Đấu với bạn bè</h2>
-    <p>Tạo phòng, gửi link cho bạn rồi cùng chơi. Máy chủ kiểm tra từng nước theo đúng luật. Nếu rớt mạng hay tải lại trang, mở lại link là vào lại đúng chỗ cũ.</p>
+  <div id="olLobby">
     <div id="olNotice"></div>
-    <div id="olFriendsOnline" hidden></div>
-    <p class="hint-text" id="olAsUser" hidden></p>
-    <label class="setup-field ol-name">Tên của bạn
-      <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
-    </label>
-    <div class="ol-grid mt10">
-      <div class="ol-box">
-        <h3>Tạo phòng mới</h3>
+    <div id="olFriendsOnline" class="card" hidden></div>
+    <div class="ol-grid">
+      <div class="card ol-box">
+        <h2>Tạo phòng</h2>
+        <p class="hint-text small" id="olAsUser" hidden></p>
+        <label class="setup-field ol-name">Tên của bạn
+          <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
+        </label>
         <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
           <div class="seg-radio">
-            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ (đi trước)</span></label>
+            <label><input type="radio" name="olColor" value="red" checked><span>Đỏ</span></label>
             <label><input type="radio" name="olColor" value="black"><span>Đen</span></label>
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
-        <label class="switch mt10" id="olRatedWrap" hidden><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Chỉ tính khi đối thủ cũng đã đăng nhập. Ván tính Elo không xin đi lại được.</small></span></label>
-        <button type="button" class="btn btn-primary mt10" id="olCreate">Tạo phòng</button>
+        <label class="switch" id="olRatedWrap" hidden title="Chỉ tính khi đối thủ cũng đã đăng nhập. Không xin đi lại được."><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+        <button type="button" class="btn btn-primary ol-wide" id="olCreate">Tạo phòng</button>
       </div>
-      <div class="ol-box">
-        <h3>Vào phòng bạn đã tạo</h3>
-        <label class="setup-field">Mã phòng hoặc link mời
-          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Ví dụ: K7M2QX">
-        </label>
-        <button type="button" class="btn btn-jade mt10" id="olJoin">Vào phòng</button>
-        <div class="hint-text small mt10" id="olJoinMsg" aria-live="polite"></div>
+      <div class="card ol-box">
+        <h2>Vào phòng</h2>
+        <div class="ol-join-row">
+          <input class="field" id="olJoinCode" spellcheck="false" autocapitalize="characters" placeholder="Mã phòng hoặc link" aria-label="Mã phòng hoặc link mời">
+          <button type="button" class="btn btn-jade" id="olJoin">Vào</button>
+        </div>
+        <div class="hint-text small" id="olJoinMsg" aria-live="polite"></div>
       </div>
     </div>
-    <h3 class="group-h mt16">Phòng gần đây</h3>
-    <div id="olRecent"></div>
-    <h3 class="group-h mt16">Các ván đã đấu</h3>
-    <div id="olHistory"></div>
-    <details class="fen-box mt16" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
-      <p class="hint-text small">Địa chỉ máy chủ Sa trường (bắt đầu bằng <code>wss://</code>). Bỏ trống để dùng máy chủ mặc định.</p>
+    <div class="card" id="olRecentCard"><h2>Phòng gần đây</h2><div id="olRecent"></div></div>
+    <div class="card" id="olHistoryCard"><h2>Ván đã đấu</h2><div id="olHistory"></div></div>
+    <details class="fen-box ol-server" id="olServerBox"><summary>Máy chủ (nâng cao)</summary>
+      <p class="hint-text small">Địa chỉ máy chủ (<code>wss://…</code>). Bỏ trống để dùng mặc định.</p>
       <div class="btn-row"><input class="field" id="olServer" spellcheck="false" placeholder="wss://…"><button type="button" class="btn btn-outline btn-sm" id="olServerSave">Lưu</button></div>
       <div class="hint-text small mt10" id="olServerMsg" aria-live="polite"></div>
     </details>
@@ -1136,9 +1164,9 @@ body.dlg-open{overflow:hidden;}
 
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
-      <button type="button" class="btn btn-outline btn-sm" id="olLeave"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Rời phòng</button>
+      <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
       <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
-      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg>Mời bạn</button>
+      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn" aria-label="Mời bạn" title="Mời bạn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg><span class="btn-label">Mời bạn</span></button>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
@@ -1146,16 +1174,16 @@ body.dlg-open{overflow:hidden;}
         <div class="ol-player" id="olTop"></div>
         <div class="board-shell board-card" id="olBoardCard"><div id="olBoard"></div></div>
         <div class="ol-player" id="olBottom"></div>
+        <div class="board-toolbar" id="olActions">
+          <button type="button" class="btn btn-outline" id="olDraw"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-draw"></use></svg>Xin hoà</button>
+          <button type="button" class="btn btn-outline" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
+          <button type="button" class="btn btn-outline" id="olFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
+          <button type="button" class="btn btn-outline" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
+        </div>
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
         <div id="olClaim" class="ol-offer" hidden></div>
-        <div class="btn-row btn-row-center mt10" id="olActions">
-          <button type="button" class="btn btn-outline btn-sm" id="olDraw">Xin hoà</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
-          <button type="button" class="btn btn-outline btn-sm" id="olFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
-        </div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
           <button type="button" class="btn btn-jade btn-sm" id="olReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
@@ -1182,16 +1210,12 @@ body.dlg-open{overflow:hidden;}
  <div data-stpanel="banbe" hidden>
   <div class="card need-account" data-need-login>
     <h2>Bạn bè</h2>
-    <p>Kết bạn theo tên đăng nhập, xem ai đang online và mời đấu trực tiếp.</p>
-    <p class="hint-text">Phần này cần tài khoản. Chưa có tài khoản, bạn vẫn đấu với bạn bè được bằng link mời ở thẻ <b>Phòng đấu</b>.</p>
+    <p class="hint-text">Đăng nhập để kết bạn và mời đấu.</p>
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div data-when-login hidden>
     <div class="card">
-      <h2>Tìm bạn</h2>
-      <label class="setup-field">Tên đăng nhập của bạn bè
-        <input class="field" id="friendSearch" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Gõ ít nhất 3 ký tự">
-      </label>
+      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
       <div id="friendResults" class="mt10" aria-live="polite"></div>
     </div>
     <div class="card" id="friendRequestsCard" hidden>
@@ -1199,7 +1223,7 @@ body.dlg-open{overflow:hidden;}
       <div id="friendRequests"></div>
     </div>
     <div class="card">
-      <h2>Bạn bè của bạn</h2>
+      <h2>Bạn bè</h2>
       <div id="friendList"></div>
       <div id="friendOutgoing"></div>
     </div>
@@ -1208,7 +1232,7 @@ body.dlg-open{overflow:hidden;}
  <div data-stpanel="xephang" hidden>
   <div class="card need-account" data-need-login>
     <h2>Xếp hạng</h2>
-    <p>Bảng Elo của bạn bè và toàn bộ người chơi. Ván “Tính Elo” giữa hai người đã đăng nhập mới được tính; đủ 5 ván thì có hạng.</p>
+    <p class="hint-text">Đăng nhập để có Elo và xếp hạng.</p>
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div class="card" data-when-login hidden>
@@ -1216,7 +1240,6 @@ body.dlg-open{overflow:hidden;}
       <h2 style="margin:0">Xếp hạng</h2>
       <div class="seg" id="rankScope" role="group" aria-label="Phạm vi xếp hạng"><button type="button" data-scope="friends" aria-pressed="true">Bạn bè</button><button type="button" data-scope="all" aria-pressed="false">Toàn bộ</button></div>
     </div>
-    <p class="hint-text small mt10">Chỉ tính ván bật “Tính Elo” giữa hai người đã đăng nhập. Cần ít nhất 5 ván để có hạng.</p>
     <div id="rankList" aria-live="polite"></div>
   </div>
  </div>
@@ -2870,11 +2893,23 @@ function revealBoard(el){
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
   const tb = shell.nextElementSibling && shell.nextElementSibling.classList.contains('board-toolbar') ? shell.nextElementSibling : null;
   const r=shell.getBoundingClientRect();
-  const top=stickyTop()+4, extra=tb?tb.offsetHeight+6:0;
+  // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
+  const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
   const vh=window.innerHeight||document.documentElement.clientHeight;
   if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
   if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   window.scrollBy({top:r.top-top, behavior:'smooth'});
+}
+function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:600px)').matches); }catch(e){ return false; } }
+// Điện thoại: cuộn xuống thì ẩn thanh trên (nhường chỗ cho bàn cờ), cuộn lên thì hiện lại
+function initAutoHideHeader(){
+  let lastY=window.scrollY||0;
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY||0, d=y-lastY; lastY=y;
+    const dlg=document.getElementById('dlg');
+    if(!isPhone() || y<60 || (dlg && !dlg.hidden)){ document.body.classList.remove('hdr-hide'); return; }
+    if(d>4) document.body.classList.add('hdr-hide'); else if(d<-4) document.body.classList.remove('hdr-hide');
+  }, {passive:true});
 }
 function updateStickyTop(){
   const head=document.querySelector('.app-header');
@@ -2948,6 +2983,7 @@ const ICON_PATHS = {
   plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
   login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
   sync:'<path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M3 21v-5h5"/>',
+  draw:'<circle cx="12" cy="12" r="10"/><path d="M8 10h8"/><path d="M8 14h8"/>',
   note:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>',
 };
 // icon('undo') → <svg> dùng symbol trong sprite (chèn một lần vào đầu body)
@@ -6666,7 +6702,7 @@ const Online = (function(){
       else if(r.rated && r.you!=='spectator') elo='<br><small>Ván này không tính Elo (cần cả hai người đăng nhập và ít nhất 10 nửa nước).</small>';
       statusBanner(el, kind, esc(txt)+elo); return;
     }
-    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng — gửi link mời ở trên cho bạn của bạn.'); return; }
+    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
@@ -6701,7 +6737,7 @@ const Online = (function(){
     if(!waiting && !st.showInvite){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
-    el.innerHTML=`<div><b>Mời bạn vào phòng</b> — gửi link này (Zalo, Messenger…), hoặc đọc mã phòng <b class="ol-bigcode">${st.code}</b></div>
+    el.innerHTML=`<div>Gửi link hoặc mã phòng <b class="ol-bigcode">${st.code}</b> cho bạn</div>
       <div class="btn-row mt10"><input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời">
       <button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</div>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
@@ -6777,14 +6813,16 @@ const Online = (function(){
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
         <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
         <small class="hint-text">${r.result?esc(Game.resultText(r.result)):r.n?`đang đánh · ${Math.ceil(r.n/2)} nước`:'chưa đi'}</small></button>`).join('')}</div>`
-      : '<p class="hint-text">Chưa có phòng nào.</p>';
+      : '';
+    $('#olRecentCard').hidden=!rc.length;
     $$('.ol-item',$('#olRecent')).forEach(b=>b.addEventListener('click',()=>enterRoom(b.dataset.code)));
     const h=history();
     $('#olHistory').innerHTML = h.length ? `<div class="ol-list">${h.map(r=>{ const rs=resultForHuman(r);
         return `<div class="ol-item ol-hist"><span class="badge ${rs.cls}">${rs.txt}</span> <span>với <b>${esc(r.oppName)}</b> · cầm ${colorVN(r.human)} · ${Math.ceil(r.moves.length/2)} nước</span>
         <small class="hint-text">${new Date(r.date).toLocaleDateString('vi-VN')}${r.analysis?' · đã phân tích':''}</small>
         <button type="button" class="btn btn-jade btn-sm" data-review="${esc(r.id)}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích</button></div>`; }).join('')}</div>`
-      : '<p class="hint-text">Ván đấu với bạn bè sẽ được lưu ở đây để xem lại và phân tích.</p>';
+      : '';
+    $('#olHistoryCard').hidden=!h.length;
     $$('[data-review]',$('#olHistory')).forEach(b=>b.addEventListener('click',()=>review(b.dataset.review)));
   }
   function showLobby(){ $('#olLobby').hidden=false; $('#olRoom').hidden=true; renderLobby(); setRoomParam(null); }
@@ -7392,7 +7430,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : '<p class="hint-text">Chưa có bạn nào. Tìm theo tên đăng nhập để kết bạn.</p>';
+      : '<p class="hint-text">Chưa có bạn nào — tìm theo tên đăng nhập ở trên.</p>';
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -7402,17 +7440,17 @@ const Account = (function(){
     const el=$('#olFriendsOnline'); if(!el) return;
     const on=signedIn() && st.friends ? st.friends.friends.filter(f=>f.online) : [];
     el.hidden=!on.length;
-    el.innerHTML = on.length ? `<h3 class="group-h">Bạn bè đang online</h3><div class="friends-row">${on.map(f=>`<button type="button" class="friend-chip" data-invite="${f.id}" title="Mời ${esc(f.displayName)} đấu">${avatar(f)}<span>${esc(f.displayName)}</span><small>Mời đấu</small></button>`).join('')}</div>` : '';
+    el.innerHTML = on.length ? `<h2>Bạn bè đang online</h2><div class="friends-row">${on.map(f=>`<button type="button" class="friend-chip" data-invite="${f.id}" title="Mời ${esc(f.displayName)} đấu">${avatar(f)}<span>${esc(f.displayName)}</span><small>Mời đấu</small></button>`).join('')}</div>` : '';
     $$('[data-invite]',el).forEach(b=>b.addEventListener('click',()=>{ const f=on.find(x=>x.id===+b.dataset.invite); if(f) openInvite(f); }));
   }
   function openInvite(f){
     openDialog(`${dlgHead('Mời '+esc(f.displayName)+' đấu')}
       <fieldset class="setup-field"><legend>Bạn cầm quân</legend><div class="seg-radio">
         <label><input type="radio" name="ivColor" value="red" checked><span>Đỏ</span></label><label><input type="radio" name="ivColor" value="black"><span>Đen</span></label><label><input type="radio" name="ivColor" value="random"><span>Ngẫu nhiên</span></label></div></fieldset>
-      <label class="switch mt16"><input type="checkbox" id="ivRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Ván tính Elo không xin đi lại được.</small></span></label>
-      <p class="hint-text small mt10">${f.online?'Bạn ấy đang online, sẽ thấy lời mời ngay.':'Bạn ấy không online — lời mời nằm ở mục Bạn bè của bạn ấy trong 10 phút.'}</p>
+      <label class="switch mt16"><input type="checkbox" id="ivRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+      <p class="hint-text small mt10">${f.online?'Đang online.':'Không online — lời mời giữ trong 10 phút.'}</p>
       <p class="dlg-msg" role="alert"></p>
-      <button type="button" class="btn btn-primary dlg-main" id="ivSend">Gửi lời mời và vào phòng</button>`, body=>{
+      <button type="button" class="btn btn-primary dlg-main" id="ivSend">Mời và vào phòng</button>`, body=>{
       $('#ivSend').addEventListener('click', async ()=>{
         const color=($('input[name="ivColor"]:checked',body)||{}).value||'red', rated=$('#ivRated').checked;
         $('#ivSend').disabled=true;
@@ -7471,6 +7509,7 @@ function initSettings(){
 }
 initTabs();
 updateStickyTop(); window.addEventListener('resize', updateStickyTop);
+initAutoHideHeader();
 initSettings();
 initUxSettings();
 buildLegend();

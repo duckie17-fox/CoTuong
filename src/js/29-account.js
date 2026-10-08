@@ -523,7 +523,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : '<p class="hint-text">Chưa có bạn nào. Tìm theo tên đăng nhập để kết bạn.</p>';
+      : '<p class="hint-text">Chưa có bạn nào — tìm theo tên đăng nhập ở trên.</p>';
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -533,17 +533,17 @@ const Account = (function(){
     const el=$('#olFriendsOnline'); if(!el) return;
     const on=signedIn() && st.friends ? st.friends.friends.filter(f=>f.online) : [];
     el.hidden=!on.length;
-    el.innerHTML = on.length ? `<h3 class="group-h">Bạn bè đang online</h3><div class="friends-row">${on.map(f=>`<button type="button" class="friend-chip" data-invite="${f.id}" title="Mời ${esc(f.displayName)} đấu">${avatar(f)}<span>${esc(f.displayName)}</span><small>Mời đấu</small></button>`).join('')}</div>` : '';
+    el.innerHTML = on.length ? `<h2>Bạn bè đang online</h2><div class="friends-row">${on.map(f=>`<button type="button" class="friend-chip" data-invite="${f.id}" title="Mời ${esc(f.displayName)} đấu">${avatar(f)}<span>${esc(f.displayName)}</span><small>Mời đấu</small></button>`).join('')}</div>` : '';
     $$('[data-invite]',el).forEach(b=>b.addEventListener('click',()=>{ const f=on.find(x=>x.id===+b.dataset.invite); if(f) openInvite(f); }));
   }
   function openInvite(f){
     openDialog(`${dlgHead('Mời '+esc(f.displayName)+' đấu')}
       <fieldset class="setup-field"><legend>Bạn cầm quân</legend><div class="seg-radio">
         <label><input type="radio" name="ivColor" value="red" checked><span>Đỏ</span></label><label><input type="radio" name="ivColor" value="black"><span>Đen</span></label><label><input type="radio" name="ivColor" value="random"><span>Ngẫu nhiên</span></label></div></fieldset>
-      <label class="switch mt16"><input type="checkbox" id="ivRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><br><small class="hint-text">Ván tính Elo không xin đi lại được.</small></span></label>
-      <p class="hint-text small mt10">${f.online?'Bạn ấy đang online, sẽ thấy lời mời ngay.':'Bạn ấy không online — lời mời nằm ở mục Bạn bè của bạn ấy trong 10 phút.'}</p>
+      <label class="switch mt16"><input type="checkbox" id="ivRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+      <p class="hint-text small mt10">${f.online?'Đang online.':'Không online — lời mời giữ trong 10 phút.'}</p>
       <p class="dlg-msg" role="alert"></p>
-      <button type="button" class="btn btn-primary dlg-main" id="ivSend">Gửi lời mời và vào phòng</button>`, body=>{
+      <button type="button" class="btn btn-primary dlg-main" id="ivSend">Mời và vào phòng</button>`, body=>{
       $('#ivSend').addEventListener('click', async ()=>{
         const color=($('input[name="ivColor"]:checked',body)||{}).value||'red', rated=$('#ivRated').checked;
         $('#ivSend').disabled=true;

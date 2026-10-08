@@ -208,7 +208,7 @@ const Online = (function(){
       else if(r.rated && r.you!=='spectator') elo='<br><small>Ván này không tính Elo (cần cả hai người đăng nhập và ít nhất 10 nửa nước).</small>';
       statusBanner(el, kind, esc(txt)+elo); return;
     }
-    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng — gửi link mời ở trên cho bạn của bạn.'); return; }
+    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
@@ -243,7 +243,7 @@ const Online = (function(){
     if(!waiting && !st.showInvite){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
-    el.innerHTML=`<div><b>Mời bạn vào phòng</b> — gửi link này (Zalo, Messenger…), hoặc đọc mã phòng <b class="ol-bigcode">${st.code}</b></div>
+    el.innerHTML=`<div>Gửi link hoặc mã phòng <b class="ol-bigcode">${st.code}</b> cho bạn</div>
       <div class="btn-row mt10"><input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời">
       <button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</div>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
@@ -319,14 +319,16 @@ const Online = (function(){
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
         <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
         <small class="hint-text">${r.result?esc(Game.resultText(r.result)):r.n?`đang đánh · ${Math.ceil(r.n/2)} nước`:'chưa đi'}</small></button>`).join('')}</div>`
-      : '<p class="hint-text">Chưa có phòng nào.</p>';
+      : '';
+    $('#olRecentCard').hidden=!rc.length;
     $$('.ol-item',$('#olRecent')).forEach(b=>b.addEventListener('click',()=>enterRoom(b.dataset.code)));
     const h=history();
     $('#olHistory').innerHTML = h.length ? `<div class="ol-list">${h.map(r=>{ const rs=resultForHuman(r);
         return `<div class="ol-item ol-hist"><span class="badge ${rs.cls}">${rs.txt}</span> <span>với <b>${esc(r.oppName)}</b> · cầm ${colorVN(r.human)} · ${Math.ceil(r.moves.length/2)} nước</span>
         <small class="hint-text">${new Date(r.date).toLocaleDateString('vi-VN')}${r.analysis?' · đã phân tích':''}</small>
         <button type="button" class="btn btn-jade btn-sm" data-review="${esc(r.id)}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích</button></div>`; }).join('')}</div>`
-      : '<p class="hint-text">Ván đấu với bạn bè sẽ được lưu ở đây để xem lại và phân tích.</p>';
+      : '';
+    $('#olHistoryCard').hidden=!h.length;
     $$('[data-review]',$('#olHistory')).forEach(b=>b.addEventListener('click',()=>review(b.dataset.review)));
   }
   function showLobby(){ $('#olLobby').hidden=false; $('#olRoom').hidden=true; renderLobby(); setRoomParam(null); }

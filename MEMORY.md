@@ -102,3 +102,8 @@
 - Test jsdom tài khoản: `load({setup})` gắn `window.fetch` → `Accounts.handle` (D1 giả), `crypto` = Node webcrypto, `TextEncoder` của Node;
   PBKDF2 hạ còn 1000 vòng trong test. Đóng cửa sổ jsdom ở `test.after` (đóng giữa test làm timer còn chạy → lỗi sau khi test xong).
 - Gotcha lặp lại: đừng `pkill -f` theo tên tệp test — giết luôn shell đang chạy.
+- Người dùng xem bản web github.io (bản main cũ) và tưởng chưa sửa → nhắc: bản web chỉ đổi sau khi merge.
+- **Góp ý vòng 3 (điện thoại khi đánh cờ):** thanh trên tự ẩn khi cuộn xuống trên điện thoại (`initAutoHideHeader`, lớp `body.hdr-hide`);
+  bàn cờ tràn sát mép card (`.card .board-shell{margin-inline:-12px}`); đầu phòng đấu một dòng (nút chỉ icon trên điện thoại);
+  nút ván online dùng chung `.board-toolbar` ngay dưới bàn; máy tính: bàn cờ co theo chiều cao màn hình
+  (`min(580px, (100vh-330px)*0.92)`) để thấy cả bàn + thanh nút. Sảnh Sa trường bỏ đoạn mô tả, ẩn mục rỗng (Phòng gần đây/Ván đã đấu).
