@@ -1,13 +1,12 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-**PR #3 đã merge và deploy xong** (2026-10-08): D1 `cotuong` đã tạo (id 1055ca1a-…), migration 0001 đã chạy,
-Worker `cotuong-online` có binding DB + ROOMS, GitHub Pages đã lên bản mới. Nhánh làm việc đã dựng lại từ main.
+Đã bỏ mục "Máy chủ (nâng cao)" (cbb8749, chưa merge). **Chờ người dùng chọn phương án xếp hạng đấu với máy** (đề xuất trong chat + MEMORY).
 
 ## Next step
-1. Chờ người dùng thử trên bản thật https://duckie17-fox.github.io/CoTuong/: đăng ký, đồng bộ hai máy, kết bạn, ván tính Elo
-   (container không vào được github.io / workers.dev nên không tự kiểm được).
-2. Sửa theo phản hồi; việc mới làm trên nhánh `claude/improvement-plan-xdtg8b` (đã dựng lại từ main).
+1. Người dùng chốt: tên/bậc hạng, Elo chung hay riêng, cách ghép trận (chờ người trước rồi mới ghép máy?).
+2. Viết thêm vào spec (spec v4 hoặc mục mới trong v3) → làm server (ván xếp hạng với máy) + giao diện "Đấu xếp hạng".
+3. Người dùng vẫn cần thử bản thật đã deploy (đăng ký, đồng bộ, Elo).
 
 ## Blocker
-- Không có.
+- Chờ người dùng chọn phương án xếp hạng.

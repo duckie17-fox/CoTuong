@@ -117,3 +117,7 @@
   `migrations apply --remote` tự chấp nhận khi không tương tác ("Using fallback value in non-interactive context: yes").
   Lần deploy sau `d1 list` sẽ tìm thấy DB có sẵn. Container không truy cập được github.io (curl trả 000) — giống workers.dev.
 - Bỏ mục "Máy chủ (nâng cao)" khỏi giao diện (người dùng không hiểu mục đích). Vẫn đổi máy chủ được bằng ?server= trên link (dùng cho test/dev) hoặc xq_online_server cũ.
+- **Đề xuất hạng đấu máy (chờ người dùng chọn):** 8 bậc tên quân cờ Tốt → Sĩ → Tượng → Mã → Pháo → Xe → Tướng → Kỳ vương,
+  mỗi bậc (trừ Kỳ vương) chia III/II/I mỗi 50 điểm; dùng chung Elo (khởi điểm 1200 = Sĩ II). Mỗi cấp máy có Elo cố định ước tính
+  (cấp 1: 900 … cấp 10: 2150), ghép máy cấp gần Elo người chơi nhất (hơi cao hơn). Ván xếp hạng với máy: không gợi ý, không đi lại.
+  Elo giữa các cấp đo bằng self-play chênh quá lớn (80% ≈ +240) nên phải nén lại; hiệu chỉnh dần theo ván thật.
