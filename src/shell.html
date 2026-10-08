@@ -254,10 +254,12 @@
     <div id="reviewChart" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
+        <div id="reviewStep" class="review-step" aria-live="polite"></div>
         <div class="board-toolbar">
-          <button class="btn btn-outline" id="reviewPrev" aria-label="Nước trước">◀</button>
-          <button class="btn btn-primary" id="reviewNextMistake">⚠ Lỗi tiếp</button>
-          <button class="btn btn-outline" id="reviewNext" aria-label="Nước sau">▶</button>
+          <button class="btn btn-outline" id="reviewPrev" aria-label="Nửa nước trước">◀</button>
+          <button class="btn btn-outline" id="reviewPrevMistake">⏮ Lỗi trước</button>
+          <button class="btn btn-primary" id="reviewNextMistake">Lỗi tiếp ⏭</button>
+          <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau">▶</button>
           <span class="tb-extra" id="reviewTools"></span>
         </div>
         <div class="board-shell board-card"><div id="reviewBoard"></div></div>

@@ -541,6 +541,23 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 .fen-box summary{cursor:pointer;font-weight:700;font-size:14px;}
 .fen-box input{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;margin-top:6px;}
 .status-banner code{font-size:11.5px;word-break:break-all;}
+
+/* ---------- Xem lại ván: luồng từng lỗi ---------- */
+.review-step{background:var(--paper-2);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:14px;}
+.step-dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.step-dots .sd{width:14px;height:6px;border-radius:3px;background:color-mix(in srgb, var(--ink) 15%, transparent);}
+.step-dots .sd.done{background:var(--jade);}
+.step-dots .sd.cur{background:var(--accent);}
+.bridge{font-size:13.5px;color:var(--ink-soft);margin:0 0 8px;padding-bottom:8px;border-bottom:1px dashed var(--line);}
+.timeline{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.tl-phase-h{font-weight:800;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.tl-item{appearance:none;display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;cursor:pointer;color:var(--ink);font:inherit;margin-bottom:6px;}
+.tl-item:hover{border-color:var(--gold);}
+.tl-n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;}
+.tl-body{display:flex;flex-direction:column;gap:3px;font-size:14px;}
+.tl-body small{color:var(--ink-soft);font-size:13px;}
+.tl-star{font-size:12px;font-weight:800;color:var(--gold);}
+.think-steps .purpose{display:block;margin-top:6px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb, var(--jade) 10%, transparent);}
 </style>
 </head>
 <body>
@@ -787,10 +804,12 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
     <div id="reviewChart" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
+        <div id="reviewStep" class="review-step" aria-live="polite"></div>
         <div class="board-toolbar">
-          <button class="btn btn-outline" id="reviewPrev" aria-label="Nước trước">◀</button>
-          <button class="btn btn-primary" id="reviewNextMistake">⚠ Lỗi tiếp</button>
-          <button class="btn btn-outline" id="reviewNext" aria-label="Nước sau">▶</button>
+          <button class="btn btn-outline" id="reviewPrev" aria-label="Nửa nước trước">◀</button>
+          <button class="btn btn-outline" id="reviewPrevMistake">⏮ Lỗi trước</button>
+          <button class="btn btn-primary" id="reviewNextMistake">Lỗi tiếp ⏭</button>
+          <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau">▶</button>
           <span class="tb-extra" id="reviewTools"></span>
         </div>
         <div class="board-shell board-card"><div id="reviewBoard"></div></div>
@@ -1939,6 +1958,9 @@ const Coach = (function(){
     return out.sort((a,b)=>VAL[b.type]-VAL[a.type]);
   }
   const listNames=arr=>[...new Set(arr.map(t=>NAME[t]))].join(', ');
+  // Gọi tên quân kèm vị trí để người học tìm được trên bàn: "Tốt cột 7" (cột tính theo bên sở hữu quân)
+  const where=(d,color)=>`${NAME[d.type]} cột ${Notation.fileOf(d.at[1],color)}`;
+  const listWhere=(arr,color)=>[...new Set(arr.map(d=>where(d,color)))].join(', ');
 
   // Lý do một nước đi là tốt (dùng cho gợi ý và "nước tốt hơn")
   function whyGood(board,move){
@@ -1954,31 +1976,65 @@ const Coach = (function(){
     const saved=dangerBefore.filter(d=>!dangerAfter.some(x=>x.type===d.type) || (d.at[0]===move.from[0]&&d.at[1]===move.from[1]&&!dangerAfter.some(x=>x.at[0]===move.to[0]&&x.at[1]===move.to[1])));
     if(saved.length && !cap){
       const self=saved.filter(d=>d.at[0]===move.from[0]&&d.at[1]===move.from[1]), other=saved.filter(d=>!(d.at[0]===move.from[0]&&d.at[1]===move.from[1]));
-      if(self.length) out.push(`đưa ${listNames(self.map(s=>s.type))} khỏi chỗ bị tấn công`);
-      if(other.length) out.push(`bảo vệ/che chắn cho ${listNames(other.map(s=>s.type))} đang bị doạ`);
+      if(self.length) out.push(`đưa ${listWhere(self,me)} khỏi chỗ bị tấn công`);
+      if(other.length) out.push(`bảo vệ/che chắn cho ${listWhere(other,me)} đang bị doạ`);
     }
     // tạo đe doạ mới
     const threatBefore=endangered(board,opp).map(t=>t.at+''), threatAfter=endangered(after,opp).filter(t=>!threatBefore.includes(t.at+''));
-    if(threatAfter.length) out.push(`tạo đe doạ lên ${listNames(threatAfter.map(t=>t.type))} của đối phương`);
+    if(threatAfter.length) out.push(`tạo đe doạ lên ${listWhere(threatAfter,opp)} của đối phương`);
     if(isHome(p,move.from[0],move.from[1])) out.push(p.type==='R' ? 'đưa Xe ra hoạt động (Xe còn ở góc là lãng phí quân mạnh nhất)' : `phát triển ${NAME[p.type]} ra khỏi vị trí xuất phát`);
     if(p.type!=='A'&&p.type!=='E'&&p.type!=='G' && !crossed(move.from[0],me) && crossed(move.to[0],me) && !cap) out.push(`đưa ${NAME[p.type]} qua sông, gây áp lực lên phần sân đối phương`);
     if(p.type==='C' && move.to[1]===4 && move.from[1]!==4) out.push('đặt Pháo vào cột giữa, nhắm thẳng vào cung Tướng');
     if((p.type==='A'||p.type==='E') && !cap && !saved.length) out.push('củng cố thế phòng thủ quanh cung Tướng');
     return out;
   }
+  // Ý đồ của một nước: mỗi mục có MỤC ĐÍCH (nước này nhằm làm gì) và CÁCH NGHĨ (nhìn thấy gì
+  // trên bàn thì nghĩ tới nước này). Xếp theo mức quan trọng; dùng để giải thích "vì sao nên đi".
+  function intent(board,move){
+    const p=board[move.from[0]][move.from[1]], me=p.color, opp=Engine.otherColor(me);
+    // "Mã Đen cột 7": kèm màu vì mỗi bên đánh số cột từ phía mình
+    const where=(d,color)=>`${NAME[d.type]} ${color==='red'?'Đỏ':'Đen'} cột ${Notation.fileOf(d.at[1],color)}`;
+    const listWhere=(arr,color)=>[...new Set(arr.map(d=>where(d,color)))].join(', ');
+    const after=Engine.applyMove(board,move), out=[];
+    const add=(key,goal,think)=>out.push({key,goal,think});
+    if(Engine.generateLegalMoves(after,opp).length===0){
+      add('mate','kết thúc ván: đối phương hết nước đi (chiếu bí)','Khi Tướng đối phương bị dồn, hãy xét các nước CHIẾU trước tiên và đếm xem sau mỗi nước chiếu Tướng còn ô nào để chạy.');
+      return out;
+    }
+    const cap=board[move.to[0]][move.to[1]];
+    if(cap){
+      const victim=where({type:cap.type,at:move.to},opp), defended=defenders(board,move.to[0],move.to[1]).length>0;
+      if(!defended) add('capture-free',`lấy ${victim} miễn phí — quân này không có quân nào bảo vệ`,'Mỗi lượt quét một vòng các quân đối phương: quân nào mình đang nhắm tới mà không được bảo vệ thì ăn được ngay, không phải trả giá.');
+      else if(VAL[cap.type]>VAL[p.type]) add('capture-trade',`đổi có lời: ${NAME[p.type]} ăn ${victim}, dù bị ăn lại vẫn lãi (${NAME[cap.type]} giá trị hơn ${NAME[p.type]})`,'Khi hai bên có thể ăn qua lại, so giá trị: Xe ≈ 9, Pháo ≈ 4,5, Mã ≈ 4, Sĩ/Tượng ≈ 2, Tốt ≈ 1. Đổi quân rẻ lấy quân đắt là có lời.');
+      else add('capture',`ăn ${victim}`,'Trước khi ăn, tự hỏi: quân mình có bị ăn lại không, và nếu bị ăn lại thì phép đổi này có lời không?');
+    }
+    if(Engine.isInCheck(after,opp)) add('check','chiếu Tướng: đối phương buộc phải đối phó ngay nên không kịp thực hiện ý định của họ','Xét các nước chiếu trước: chiếu có ích khi sau đó mình ăn được quân, đẩy Tướng ra chỗ hở, hoặc có nước chiếu tiếp theo.');
+    const dangerBefore=endangered(board,me), dangerAfter=endangered(after,me);
+    const saved=dangerBefore.filter(d=>!dangerAfter.some(x=>x.at+''===d.at+'') && !(d.at[0]===move.from[0]&&d.at[1]===move.from[1] && dangerAfter.some(x=>x.at[0]===move.to[0]&&x.at[1]===move.to[1])));
+    if(saved.length && !cap) add('save',`cứu ${listWhere(saved,me)} đang bị ${listNames(saved.flatMap(d=>d.by))} doạ`,'Câu hỏi đầu tiên mỗi lượt: "Nước vừa rồi của đối phương doạ gì?" Có lời doạ thì xử lý trước — chạy quân, thêm quân bảo vệ hoặc chặn đường tấn công.');
+    const threatBefore=endangered(board,opp).map(t=>t.at+''), threatNew=endangered(after,opp).filter(t=>!threatBefore.includes(t.at+''));
+    if(threatNew.length>=2) add('fork',`bắt đôi: cùng lúc doạ ${listWhere(threatNew,opp)} — đối phương chỉ cứu được một`,'Tìm ô mà từ đó một quân của mình nhắm được HAI mục tiêu không được bảo vệ (hoặc một mục tiêu kèm nước chiếu).');
+    else if(threatNew.length) add('threat',`doạ ${listWhere(threatNew,opp)}: buộc đối phương phải lo phòng thủ thay vì tấn công`,'Khi không có gì phải đỡ, hãy đi nước có mục tiêu cụ thể: doạ một quân yếu để giữ thế chủ động.');
+    if(isHome(p,move.from[0],move.from[1])) add(p.type==='R'?'rook-out':'develop', p.type==='R'?'đưa Xe ra trận: Xe là quân mạnh nhất, nằm ở góc thì không làm được gì':`đưa ${NAME[p.type]} ra khỏi vị trí xuất phát để tham gia trận đấu`,'Ở khai cuộc, mỗi nước nên đưa thêm một quân vào trận (Xe, Mã, Pháo) thay vì đi lại quân đã ra.');
+    if(p.type==='C' && move.to[1]===4 && move.from[1]!==4) add('center-cannon','đặt Pháo vào cột giữa, nhắm thẳng vào cung Tướng','Pháo đầu buộc đối phương phải giữ Tốt đầu và che cung; đây là cách gây sức ép phổ biến nhất.');
+    if(p.type!=='A'&&p.type!=='E'&&p.type!=='G' && !crossed(move.from[0],me) && crossed(move.to[0],me) && !cap) add('cross',`đưa ${NAME[p.type]} qua sông, gây áp lực lên phần sân đối phương`,'Quân qua sông mới doạ được quân và Tướng đối phương; nhưng chỉ nên qua khi quân đó không bị đuổi ngay hoặc có quân bảo vệ.');
+    if((p.type==='A'||p.type==='E') && !cap && !saved.length) add('defense','củng cố thế phòng thủ quanh cung Tướng','Khi đối phương dồn nhiều quân về phía cung mình, Sĩ Tượng đứng đúng chỗ giúp Tướng không bị chiếu bí.');
+    return out;
+  }
   // Lý do một nước đi là dở, so với thế trước đó
-  function whyBad(board,move,reply){
+  // ctx.ply (tuỳ chọn): số nửa nước đã đi — để chỉ nhắc "chậm ra Xe" ở khai cuộc
+  function whyBad(board,move,reply,ctx){
     const p=board[move.from[0]][move.from[1]], me=p.color, opp=Engine.otherColor(me);
     const after=Engine.applyMove(board,move);
     const out=[];
     const dangerBefore=endangered(board,me).map(d=>d.at+'');
     const dangerAfter=endangered(after,me);
     const moved=dangerAfter.find(d=>d.at[0]===move.to[0]&&d.at[1]===move.to[1]);
-    if(moved) out.push({key:'moved-into-attack', text:`${NAME[moved.type]} vừa đi tới ô bị ${listNames(moved.by)} đối phương tấn công${moved.defended?' (có quân bảo vệ nhưng bị quân rẻ hơn đổi lấy)':' mà không có quân nào bảo vệ'}`});
+    if(moved) out.push({key:'moved-into-attack', text:`${where(moved,me)} vừa đi tới ô bị ${listNames(moved.by)} đối phương tấn công${moved.defended?' (có quân bảo vệ nhưng bị quân rẻ hơn đổi lấy)':' mà không có quân nào bảo vệ'}`});
     const newHang=dangerAfter.filter(d=>!(d.at[0]===move.to[0]&&d.at[1]===move.to[1]) && !dangerBefore.includes(d.at+''));
-    if(newHang.length) out.push({key:'uncovered', text:`nước này làm lộ ${listNames(newHang.map(d=>d.type))}: quân đang che chắn hoặc bảo vệ đã rời đi`});
+    if(newHang.length) out.push({key:'uncovered', text:`nước này làm lộ ${listWhere(newHang,me)} (bị ${listNames(newHang.flatMap(d=>d.by))} nhắm tới): quân đang che chắn hoặc bảo vệ đã rời đi`});
     const ignored=endangered(board,me).filter(d=>dangerAfter.some(x=>x.at+''===d.at+'') && !(d.at[0]===move.from[0]&&d.at[1]===move.from[1]));
-    if(ignored.length) out.push({key:'ignored-threat', text:`${listNames(ignored.map(d=>d.type))} đang bị doạ từ trước mà bạn chưa xử lý`});
+    if(ignored.length) out.push({key:'ignored-threat', text:`${listWhere(ignored,me)} đang bị ${listNames(ignored.flatMap(d=>d.by))} doạ từ trước mà bạn chưa xử lý`});
     if((p.type==='A'||p.type==='E') && Engine.findGeneral(board,me)){
       // rời vị trí che Tướng khi đối phương có quân tấn công mạnh
       const oppHeavy=board.flat().filter(q=>q&&q.color===opp&&(q.type==='R'||q.type==='H'||q.type==='C')).length;
@@ -1988,10 +2044,10 @@ const Coach = (function(){
     // phát triển chậm: còn Xe ở góc mà lại đi quân đã ra rồi (chỉ ở đầu ván)
     const undevelopedRook=[];
     for(let r=0;r<10;r++) for(let c=0;c<9;c++){ const q=board[r][c]; if(q&&q.color===me&&q.type==='R'&&isHome(q,r,c)) undevelopedRook.push([r,c]); }
-    if(undevelopedRook.length && !isHome(p,move.from[0],move.from[1]) && p.type!=='R' && !board[move.to[0]][move.to[1]] && countPieces(board)>=26) out.push({key:'slow', text:'còn Xe nằm ở góc mà bạn lại đi một quân đã ra rồi: chậm phát triển'});
+    if(undevelopedRook.length && !isHome(p,move.from[0],move.from[1]) && p.type!=='R' && !board[move.to[0]][move.to[1]] && countPieces(board)>=26 && (!ctx || ctx.ply==null || ctx.ply<24)) out.push({key:'slow', text:'còn Xe nằm ở góc mà bạn lại đi một quân đã ra rồi: chậm phát triển'});
     if(reply){
       const rp=after[reply.from[0]][reply.from[1]], victim=after[reply.to[0]][reply.to[1]];
-      if(victim && victim.color===me && !out.some(o=>o.key==='moved-into-attack'||o.key==='uncovered'||o.key==='ignored-threat')) out.push({key:'tactic', text:`đối phương có đòn ${NAME[rp.type]} ăn ${NAME[victim.type]}`});
+      if(victim && victim.color===me && !out.some(o=>o.key==='moved-into-attack'||o.key==='uncovered'||o.key==='ignored-threat')) out.push({key:'tactic', text:`đối phương có đòn ${Notation.describe(after,reply).short}: ${NAME[rp.type]} ăn ${where({type:victim.type,at:reply.to},me)} của bạn`});
       else if(Engine.isInCheck(Engine.applyMove(after,reply),me) && !out.length) out.push({key:'check', text:`đối phương có nước chiếu ${Notation.describe(after,reply).short} mở ra đòn tấn công`});
     }
     return out;
@@ -2025,10 +2081,10 @@ const Coach = (function(){
     const opp=Engine.otherColor(me);
     if(Engine.isInCheck(board,me)) return 'Tướng đang bị chiếu, nên việc đầu tiên bắt buộc là giải chiếu.';
     const d=endangered(board,me).slice(0,2);
-    if(d.length) return d.map(x=>`${NAME[x.type]} đang bị ${listNames(x.by)} nhắm tới${x.defended?' (có bảo vệ nhưng đối phương đổi bằng quân rẻ hơn thì vẫn lời)':' mà không có quân nào bảo vệ'}`).join('; ')+'.';
+    if(d.length) return d.map(x=>`${where(x,me)} (${me==='red'?'Đỏ':'Đen'}) của bạn đang bị ${listNames(x.by)} đối phương nhắm tới${x.defended?' (có bảo vệ nhưng đối phương đổi bằng quân rẻ hơn thì vẫn lời)':' mà không có quân nào bảo vệ'}`).join('; ')+'.';
     // doạ chiếu: đối phương có nước chiếu nào ăn được quân hoặc chiếu bí?
     const mine=endangered(board,opp);
-    if(mine.length) return `Không có lời doạ trực tiếp. Ngược lại, ${NAME[mine[0].type]} của đối phương đang bị bỏ ngỏ — cơ hội để tấn công!`;
+    if(mine.length) return `Không có lời doạ trực tiếp. Ngược lại, ${where(mine[0],opp)} của đối phương đang bị bỏ ngỏ — cơ hội để tấn công!`;
     return 'Không có lời doạ trực tiếp, nên có thể chủ động: ra quân, chiếm cột trống hoặc tạo đe doạ.';
   }
   // Mô tả nước đi bằng lời thường
@@ -2036,9 +2092,9 @@ const Coach = (function(){
     const why=whyGood(board,move);
     if(why.length) return why.join('; ');
     const p=board[move.from[0]][move.from[1]];
-    return `điều ${NAME[p.type]} sang vị trí khác, chưa tạo ra đe doạ trực tiếp nào`;
+    return `nước chuyển quân thầm lặng: không ăn quân, không chiếu, không cứu quân nào và chưa tạo đe doạ gì`;
   }
-  return {attackers, defenders, endangered, whyGood, whyBad, threatText, plainMove, QUESTIONS, THINKING_STEPS, NAME};
+  return {attackers, defenders, endangered, whyGood, whyBad, intent, threatText, plainMove, QUESTIONS, THINKING_STEPS, NAME};
 })();
 
 /* =========================================================================
@@ -2418,7 +2474,19 @@ function updateStickyTop(){
 function thinkStepsHTML(steps){
   return `<ol class="think-steps">${steps.filter(Boolean).map(st=>`<li class="${st.cls||''}"><span class="ts-ic" aria-hidden="true">${st.ic}</span><div><b class="ts-q">${st.q}</b>${st.html}</div></li>`).join('')}</ol>`;
 }
-function lossWords(loss){ return loss<100?'chênh lệch nhỏ':loss<250?'mất lợi thế đáng kể':loss<600?'thiệt hại lớn (tương đương mất một quân nhỏ)':'thiệt hại rất lớn'; }
+// Quy điểm của máy ra lời thường (thang điểm: Tốt ≈ 30, Sĩ/Tượng ≈ 120, Mã/Pháo ≈ 280, Xe ≈ 600)
+function lossWords(loss){
+  return loss<40 ? 'gần như không thiệt' : loss<100 ? 'thiệt nhỏ, cỡ 1–2 Tốt' : loss<250 ? 'thiệt đáng kể, cỡ vài Tốt hoặc một Sĩ/Tượng'
+    : loss<550 ? 'thiệt lớn, cỡ mất một Mã hoặc Pháo' : 'thiệt rất lớn, cỡ mất một Xe trở lên';
+}
+// Thế cờ theo góc nhìn một bên: v > 0 là bên đó đang hơn. who: tên bên đó ("Bạn"/"Đỏ"), opp: tên bên kia
+function evalWords(v, who, opp){
+  if(v>=1900) return `${who} có đòn thắng`;
+  if(v<=-1900) return `${opp} có đòn thắng`;
+  const a=Math.abs(v), side = v>0 ? who : opp;
+  if(a<40) return 'hai bên ngang nhau';
+  return `${side} ${a<100?'hơn một chút':a<250?'hơn rõ (cỡ vài Tốt)':a<550?'hơn nhiều (cỡ một Mã/Pháo)':'hơn rất nhiều (cỡ một Xe)'}`;
+}
 
 /* =========================================================================
    LEGEND (danh sách 7 loại quân)
@@ -3259,7 +3327,7 @@ function initAIGame(){
 /* =========================================================================
    REVIEW — chấm từng nước, gợi ý nước tốt hơn, rút ra bài học
    ========================================================================= */
-const review = { rec:null, game:null, an:null, idx:-1, widget:null, running:false, token:0, anim:0 };
+const review = { rec:null, game:null, an:null, idx:-1, overview:false, onlyBig:safeLS_get('xq_review_big')==='1', lessons:null, widget:null, running:false, token:0, anim:0 };
 const CLASS_INFO = {
   book:   {label:'Theo sách',            icon:'📖', cls:'book'},
   best:   {label:'Tốt nhất',              icon:'★',  cls:'best'},
@@ -3312,38 +3380,95 @@ function buildAnalysis(rec, g, res){
   const counts={}; for(const c in CLASS_INFO) counts[c]=mine.filter(p=>p.cls===c).length;
   return {plies, finalRed, accuracy:acc, counts};
 }
+// Tên bên trong phân tích: người chơi là "Bạn", bên kia là "Máy"
+const sideName=(color)=> review.rec && color===review.rec.human ? 'Bạn' : 'Máy';
+// Đọc một chuỗi nước (PV) thành lời: ghi rõ bên nào đi và ai ăn quân gì
+function lineText(startBoard, line, max){
+  let b=startBoard; const parts=[], caps=[];
+  for(const mv of (line||[]).slice(0,max||4)){
+    const pc=b[mv.from[0]] && b[mv.from[0]][mv.from[1]]; if(!pc) break;
+    const victim=b[mv.to[0]][mv.to[1]];
+    parts.push(`${sideName(pc.color)} <b>${esc(Notation.describe(b,mv).short)}</b>`);
+    if(victim) caps.push(`${sideName(pc.color)==='Bạn'?'bạn':'máy'} ăn ${VN_NAME[victim.type]}`);
+    b=Engine.applyMove(b,mv);
+  }
+  return {html: parts.join(' → '), caps, end:b, n:parts.length};
+}
+// Giai đoạn ván tại nửa nước k
+function phaseOf(g,k){
+  const b = k===0 ? g.start : g.boards[k-1];
+  let heavy=0; for(const row of b) for(const q of row) if(q && 'RHC'.includes(q.type)) heavy++;
+  return heavy<=6 ? 'Tàn cuộc' : k<20 ? 'Khai cuộc' : 'Trung cuộc';
+}
+// Thế cờ (góc nhìn người chơi) ngay trước nửa nước k; k = số nước → sau nước cuối
+function evalAt(k){
+  const an=review.an, sign = review.rec.human===RED ? 1 : -1;
+  return sign * (k < an.plies.length ? an.plies[k].evalRed : an.finalRed);
+}
+// Mục đích + cách nghĩ của một nước (pv: chuỗi nước máy dự tính, bắt đầu bằng chính nước đó)
+function purposeHTML(board, move, pv){
+  const it=Coach.intent(board,move);
+  if(it.length){
+    const main=it[0], extra=it.slice(1).map(x=>x.goal);
+    return `<span class="purpose">🎯 <b>Mục đích:</b> ${esc(main.goal)}${extra.length?`; đồng thời ${esc(extra.join('; '))}`:''}.<br>🧭 <b>Cách nghĩ:</b> ${esc(main.think)}</span>`;
+  }
+  // Nước thầm lặng: xem nó chuẩn bị cho đòn nào ở nước sau
+  const line=pv||[];
+  if(line.length>=3 && line[0].from+''===move.from+'' && line[0].to+''===move.to+''){
+    const b1=Engine.applyMove(board,line[0]); const b2=b1[line[1].from[0]]&&b1[line[1].from[0]][line[1].from[1]] ? Engine.applyMove(b1,line[1]) : null;
+    const nxt=line[2];
+    if(b2 && b2[nxt.from[0]] && b2[nxt.from[0]][nxt.from[1]]){
+      const fu=Coach.intent(b2,nxt);
+      if(fu.length) return `<span class="purpose">🎯 <b>Mục đích:</b> chuẩn bị — sau khi máy đáp <b>${esc(Notation.describe(b1,line[1]).short)}</b>, bạn có <b>${esc(Notation.describe(b2,nxt).short)}</b> để ${esc(fu[0].goal)}.<br>🧭 <b>Cách nghĩ:</b> Nước thầm lặng tốt thường mở đường cho đòn ở nước sau. Hãy hỏi: “Nếu được đi thêm một nước nữa, mình muốn đi gì? Nước này có tạo điều kiện cho nước đó không?”</span>`;
+    }
+  }
+  const pc=board[move.from[0]][move.from[1]];
+  return `<span class="purpose">🎯 <b>Mục đích:</b> cải thiện vị trí ${VN_NAME[pc.type]}: đưa nó tới chỗ hoạt động tốt hơn, chuẩn bị cho trung cuộc.<br>🧭 <b>Cách nghĩ:</b> Khi không có đòn hay lời doạ nào, hãy tìm quân kém hoạt động nhất của mình và cải thiện nó.</span>`;
+}
 function explainPly(g, p){
   const m=g.moves[p.k], before = p.k===0 ? g.start : g.boards[p.k-1], after=g.boards[p.k];
   const me=m.color, opp=Engine.otherColor(me);
   const bestTxt = p.bestMove ? Notation.describe(before,p.bestMove) : null;
-  const step1={ic:'👀', q:'Trước nước này: đối phương đang doạ gì?', html:esc(Coach.threatText(before,me))};
-  const step2={ic:'🔎', q:'Nước này làm gì?', html:`<b>${esc(m.text.short)}</b> (${esc(m.text.long)}): ${esc(Coach.plainMove(before,m))}.`};
+  const step1={ic:'📍', q:'Tình huống trước nước này', html:esc(Coach.threatText(before,me))};
+  const step2={ic:'🔎', q:'Bạn đã đi', html:`<b>${esc(m.text.short)}</b> (${esc(m.text.long)}): ${esc(Coach.plainMove(before,m))}.`};
   if(p.cls==='book') return thinkStepsHTML([step1, step2, {ic:'📖', q:'Kết quả', cls:'ts-good', html:'Đúng lý thuyết khai cuộc: phát triển quân theo nguyên tắc.'}]);
-  if(p.cls==='best'||p.cls==='good') return thinkStepsHTML([step1, step2, {ic:'✅', q:'Kết quả', cls:'ts-good', html: p.cls==='best'?'Đây là nước tốt nhất (hoặc ngang bằng) mà máy tìm được.':`Nước tốt, chỉ ${lossWords(p.loss)} so với lựa chọn của máy${bestTxt?` (${esc(bestTxt.short)})`:''}.`}]);
+  if(p.cls==='best'||p.cls==='good') return thinkStepsHTML([step1, step2, {ic:'✅', q:'Kết quả', cls:'ts-good', html: (p.cls==='best'?'Đây là nước tốt nhất (hoặc ngang bằng) mà máy tìm được.':`Nước tốt, ${lossWords(p.loss)} so với lựa chọn của máy${bestTxt?` (${esc(bestTxt.short)})`:''}.`)+purposeHTML(before,m,null)}]);
+
+  // Lý do chính trước, các lý do phụ sau
   const bad=[]; let qKey=null;
-  if(p.bestScore>MATE_T && p.played<MATE_T){ bad.push(`bỏ lỡ đòn chiếu bí (${esc(bestTxt.short)} thắng trong ${Math.max(1,Math.ceil((XQSearch.MATE-p.bestScore)/2))} nước)`); qKey='missed-mate'; }
-  if(p.played < -MATE_T){ bad.push(`để đối phương có đường chiếu bí${p.reply?` (bắt đầu bằng ${esc(Notation.describe(after,p.reply).short)})`:''}`); qKey=qKey||'allowed-mate'; }
-  const wb=Coach.whyBad(before,m,p.reply);
+  if(p.bestScore>MATE_T && p.played<MATE_T){ bad.push(`bỏ lỡ đòn chiếu bí: <b>${esc(bestTxt.short)}</b> thắng trong ${Math.max(1,Math.ceil((XQSearch.MATE-p.bestScore)/2))} nước`); qKey='missed-mate'; }
+  if(p.played < -MATE_T){ bad.push(`để máy có đường chiếu bí${p.reply?`, bắt đầu bằng <b>${esc(Notation.describe(after,p.reply).short)}</b>`:''}`); qKey=qKey||'allowed-mate'; }
+  const wb=Coach.whyBad(before,m,p.reply,{ply:p.k});
   wb.forEach(w=>bad.push(esc(w.text)));
   if(wb.length) qKey=qKey||wb[0].key;
   if(wb.some(w=>w.key==='moved-into-attack'||w.key==='uncovered'||w.key==='ignored-threat'||w.key==='tactic')) p.hanging=true;
   if(p.bestMove){
     const cap=before[p.bestMove.to[0]][p.bestMove.to[1]], playedCap=before[m.to[0]][m.to[1]];
-    if(cap && cap.color===opp && PIECE_PTS[cap.type]>=2 && (!playedCap || PIECE_PTS[playedCap.type]<PIECE_PTS[cap.type])){ bad.push(`bỏ lỡ cơ hội ăn ${VN_NAME[cap.type]}`); p.missedCapture=true; qKey=qKey||'missed-capture'; }
+    if(cap && cap.color===opp && PIECE_PTS[cap.type]>=2 && (!playedCap || PIECE_PTS[playedCap.type]<PIECE_PTS[cap.type])){ bad.push(`bỏ lỡ cơ hội ăn ${VN_NAME[cap.type]} cột ${Notation.fileOf(p.bestMove.to[1],opp)}`); p.missedCapture=true; qKey=qKey||'missed-capture'; }
   }
-  const TACTICAL=['moved-into-attack','uncovered','ignored-threat','tactic','check','palace'];
-  const hasTactical = wb.some(w=>TACTICAL.includes(w.key)) || p.missedCapture || p.played< -MATE_T || p.bestScore>MATE_T;
-  const seqOf=(pv)=>{ let b=after; const seq=[]; for(const mv of (pv||[]).slice(0,4)){ const pc=b[mv.from[0]]&&b[mv.from[0]][mv.from[1]]; if(!pc) break; seq.push(Notation.describe(b,mv).short); b=Engine.applyMove(b,mv); } return seq; };
-  if(!hasTactical && p.loss>=100){ const seq=seqOf(p.replyPv); if(seq.length){ bad.unshift(`đối phương có đòn cụ thể: <b>${esc(seq.join(' '))}</b>… (bấm “▶ Đòn đối phương” trên bàn cờ để xem)`); qKey='tactic'; } }
-  if(!bad.length){ const seq=seqOf(p.replyPv); if(seq.length) bad.push(`máy thấy đối phương đáp <b>${esc(seq.join(' '))}</b>… và thế cờ của bạn xấu đi`); }
+  const reply=lineText(after, p.replyPv, 4);
+  if(!bad.length){
+    const bi = p.bestMove ? Coach.intent(before,p.bestMove)[0] : null, mi = Coach.intent(before,m)[0];
+    if(reply.caps.length) bad.push(`sau nước này máy có cách đáp làm bạn thiệt quân (${reply.caps.join(', ')})`);
+    else if(bi && !mi) bad.push(`nước của bạn không có mục tiêu rõ ràng, trong khi lúc này có thể ${bi.goal}`);
+    else if(bi) bad.push(`nước của bạn nhằm ${mi.goal}, nhưng lúc này quan trọng hơn là ${bi.goal}`);
+    else bad.push('nước này không sai về chiến thuật nhưng đặt quân vào chỗ kém hoạt động hơn nước máy đề xuất');
+  }
   qKey=qKey||'positional';
   p.qKey=qKey;
-  const good = p.bestMove ? Coach.whyGood(before,p.bestMove) : [];
+  p.short=bad[0].replace(/<[^>]+>/g,'');
+
   const decisive = p.played< -MATE_T || p.bestScore>MATE_T;
+  const evBefore=evalAt(p.k), evAfter=evalAt(p.k+1);
+  const trend=`Thế cờ: trước nước này <b>${evalWords(evBefore,'bạn','máy')}</b> → sau nước này <b>${evalWords(evAfter,'bạn','máy')}</b>.<br>So với nước nên đi: <b>${decisive?'lỗi quyết định cả ván':lossWords(p.loss)}</b>.`;
+  const why=`<b>${bad[0][0].toUpperCase()+bad[0].slice(1)}.</b>${bad.length>1?` Ngoài ra: ${bad.slice(1).join('; ')}.`:''}<br>${trend}`;
+
+  const best = lineText(before, p.bestPv, 4);
   return thinkStepsHTML([
     step1, step2,
-    {ic:p.cls==='inacc'?'⚠️':'❌', q:'Kết quả: vì sao chưa tốt?', cls:'ts-bad', html:`${bad.length?bad.join('; '):'nước này kém hơn lựa chọn tốt nhất về vị trí'}. <i>(${decisive?'lỗi quyết định cả ván':lossWords(p.loss)})</i>`},
-    bestTxt && {ic:'💡', q:'Nước tốt hơn', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (mũi tên xanh)${good.length?' vì nó '+esc(good.join('; ')):''}.`},
+    {ic:p.cls==='inacc'?'⚠️':'❌', q:'Vì sao chưa tốt?', cls:'ts-bad', html:why},
+    reply.n && {ic:'⚔️', q:'Máy có thể đáp lại', html:`${reply.html}${reply.n>=4?' …':''}${(()=>{ const ri=Coach.intent(after,p.replyPv[0])[0]; return ri?`<br>Ý đồ của máy: ${esc(ri.goal)}.`:''; })()}${reply.caps.length?`<br>Kết quả: ${reply.caps.join(', ')}.`:''} <span class="hint-text small">(bấm “▶ Đòn đối phương” để xem trên bàn)</span>`},
+    bestTxt && {ic:'💡', q:'Nên đi', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh).${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
     {ic:'🧠', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Coach.QUESTIONS[qKey])},
   ]);
 }
@@ -3377,7 +3502,7 @@ function lessonsFrom(rec, g, an){
 
 function openReview(rec){
   if(!rec) return;
-  review.rec=rec; review.game=replayRecord(rec); review.an=null; review.idx=-1; review.token++;
+  review.rec=rec; review.game=replayRecord(rec); review.an=null; review.idx=-1; review.overview=false; review.token++;
   showAICard('review');
   if(!review.widget) review.widget=createBoardWidget($('#reviewBoard'),{label:'Bàn cờ xem lại ván'});
   review.widget.setFlipped(rec.human===BLACK);
@@ -3414,17 +3539,70 @@ function applyStoredAnalysis(rec){
   $('#reviewProgress').hidden=true;
   reviewShowAnalysis();
 }
+/* ---------- Luồng xem lại: Tổng quan → Lỗi 1 → … → Lỗi cuối → Tổng kết ---------- */
+const ERR_ALL=['inacc','mistake','blunder'], ERR_BIG=['mistake','blunder'];
+function reviewErrors(){
+  const set = review.onlyBig ? ERR_BIG : ERR_ALL;
+  return review.an ? review.an.plies.filter(p=>p.color===review.rec.human && set.includes(p.cls)) : [];
+}
+function turningPoint(){ const e=reviewErrors(); return e.length ? e.reduce((a,b)=>b.loss>a.loss?b:a) : null; }
+function moveNo(k){ return `${Math.floor(k/2)+1}${k%2===0?'.':'...'}`; }
+const moveNum=k=>Math.floor(k/2)+1;   // dùng trong câu văn: "nước 12"
 function reviewShowAnalysis(){
   const rec=review.rec, g=review.game, an=review.an;
-  const lessons=lessonsFrom(rec,g,an);
+  review.lessons=lessonsFrom(rec,g,an);   // cũng tính sẵn lời giải thích ngắn cho từng lỗi
   const cnt=Object.entries(CLASS_INFO).filter(([c])=>an.counts[c]).map(([c,i])=>`<span class="cls-chip cls-${i.cls}">${i.icon} ${i.label}: <b>${an.counts[c]}</b></span>`).join('');
   $('#reviewSummary').innerHTML=`<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
-    <div class="acc-side"><div class="cls-chips">${cnt}</div><h3 class="side-h mt10">📌 Bài học rút ra</h3><ul class="lesson-list">${lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>`;
+    <div class="acc-side"><div class="cls-chips">${cnt}</div><h3 class="side-h mt10">📌 Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>`;
+  review.overview=true; review.idx=-1;
   renderEvalChart();
-  // nhảy tới sai lầm lớn nhất của người chơi
-  const worst=an.plies.filter(p=>p.color===rec.human).sort((a,b)=>b.loss-a.loss)[0];
-  review.idx = worst && worst.loss>40 ? worst.k : -1;
   reviewRender();
+}
+function overviewHTML(){
+  const g=review.game, errs=reviewErrors(), tp=turningPoint(), an=review.an;
+  const nInacc=an.plies.filter(p=>p.color===review.rec.human && p.cls==='inacc').length;
+  const filter=`<label class="toggle small"><input type="checkbox" id="rvOnlyBig" ${review.onlyBig?'checked':''}> Chỉ xem sai lầm lớn (bỏ qua ${nInacc} nước “không chính xác”)</label>`;
+  if(!errs.length) return `<p><b>🎉 Không có lỗi đáng kể${review.onlyBig?' (sai lầm lớn)':''}.</b> Bạn có thể bấm từng nước trong biên bản để xem máy nhận xét.</p>${filter}`;
+  const groups={};
+  errs.forEach((p,i)=>{ const ph=phaseOf(g,p.k); (groups[ph]=groups[ph]||[]).push({p,i}); });
+  const items=Object.entries(groups).map(([ph,list])=>`<div class="tl-phase"><div class="tl-phase-h">${ph}</div>${list.map(({p,i})=>{
+      const info=CLASS_INFO[p.cls], m=g.moves[p.k];
+      return `<button type="button" class="tl-item" data-k="${p.k}"><span class="tl-n">${i+1}</span><span class="tl-body"><b>Nước ${moveNum(p.k)}: ${esc(m.text.short)}</b> <span class="cls-chip cls-${info.cls}">${info.icon} ${info.label}</span>${p===tp?' <span class="tl-star">⭐ bước ngoặt</span>':''}<small>${esc(p.short||lossWords(p.loss))}</small></span></button>`; }).join('')}</div>`).join('');
+  const tpLine = tp ? `<p class="hint-text">⭐ <b>Bước ngoặt</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
+  return `<p><b>Ván này có ${errs.length} chỗ bạn có thể đi tốt hơn.</b> Hãy xem lần lượt từ đầu đến cuối: mỗi chỗ có tình huống, vì sao chưa tốt, máy đáp thế nào và nên đi gì.</p>
+    ${tpLine}${filter}<div class="timeline">${items}</div>
+    <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="rvStart">▶ Bắt đầu từ lỗi 1</button></div>`;
+}
+function endHTML(){
+  const rec=review.rec, errs=reviewErrors(), res=review.game.result;
+  const resTxt = res ? Game.resultText(res) : 'Ván chưa kết thúc.';
+  return `<p><b>🏁 Đã xem hết ${errs.length} lỗi.</b> ${esc(resTxt)}</p>
+    <h3 class="side-h">Thói quen cần luyện từ ván này</h3><ul class="lesson-list">${(review.lessons||[]).map(l=>`<li>${l}</li>`).join('')}</ul>
+    <div class="btn-row mt10"><button type="button" class="btn btn-outline" id="rvRestart">↺ Xem lại từ đầu</button></div>`;
+}
+// Đoạn nối giữa hai lỗi: từ lỗi trước tới lỗi này bạn đi thế nào, thế cờ đang ra sao
+function bridgeHTML(i, p){
+  const errs=reviewErrors(), prevK = i>0 ? errs[i-1].k : -1, rec=review.rec, an=review.an;
+  const between=an.plies.filter(q=>q.k>prevK && q.k<p.k && q.color===rec.human);
+  const okN=between.filter(q=>['book','best','good'].includes(q.cls)).length;
+  const from = i>0 ? `Kể từ lỗi trước (nước ${moveNum(prevK)})` : 'Từ đầu ván đến đây';
+  const walk = between.length ? `${from}, bạn đi ${between.length} nước${okN===between.length?', tất cả đều ổn':`, ${okN} nước ổn`}.` : `${from}: ngay nước kế tiếp.`;
+  return `${walk} Thế cờ lúc này: <b>${evalWords(evalAt(p.k),'bạn','máy')}</b>.`;
+}
+function reviewGo(idx){ review.overview=false; review.idx=idx; reviewRender(); revealBoard($('#reviewBoard')); }
+function reviewNextErr(){
+  const errs=reviewErrors();
+  if(review.overview){ if(errs.length) reviewGo(errs[0].k); else reviewGo(-1); return; }
+  if(review.idx===-1) return;
+  const nx=errs.find(p=>p.k>review.idx);
+  reviewGo(nx ? nx.k : -1);
+}
+function reviewPrevErr(){
+  const errs=reviewErrors();
+  if(review.overview) return;
+  const cur = review.idx===-1 ? Infinity : review.idx;
+  const pv=[...errs].reverse().find(p=>p.k<cur);
+  if(pv) reviewGo(pv.k); else { review.overview=true; review.idx=-1; reviewRender(); }
 }
 function renderEvalChart(){
   const an=review.an, rec=review.rec, n=an.plies.length;
@@ -3439,33 +3617,46 @@ function renderEvalChart(){
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${area}" class="area"/><path d="${path}" class="line"/>${dots}
     ${review.idx>=0?`<line class="cursor" x1="${x(review.idx+1)}" x2="${x(review.idx+1)}" y1="0" y2="${H}"/>`:''}</svg>
     <div class="chart-legend"><span>▲ Bạn hơn</span><span>▼ Máy hơn</span></div>`;
-  $$('.dot',$('#reviewChart')).forEach(d=>d.addEventListener('click',()=>{ review.idx=+d.dataset.k; reviewRender(); revealBoard($('#reviewBoard')); }));
+  $$('.dot',$('#reviewChart')).forEach(d=>d.addEventListener('click',()=>reviewGo(+d.dataset.k)));
   $('#reviewChart svg').addEventListener('click',(e)=>{
     if(e.target.classList.contains('dot')) return;
     const r=e.currentTarget.getBoundingClientRect(); const i=Math.round((e.clientX-r.left)/r.width*(vals.length-1))-1;
-    review.idx=Math.max(-1,Math.min(n-1,i)); reviewRender(); revealBoard($('#reviewBoard'));
+    reviewGo(Math.max(-1,Math.min(n-1,i)));
   });
 }
 function reviewRender(){
   review.anim++;
-  const g=review.game, idx=review.idx, an=review.an, rec=review.rec;
+  const g=review.game, an=review.an, rec=review.rec;
+  const ov = review.overview && an;
+  const idx = ov ? -1 : review.idx;
   const board = idx<0 ? g.start : (idx===0 ? g.start : g.boards[idx-1]);   // thế TRƯỚC nước đang xem
   const m = idx>=0 ? g.moves[idx] : null, p = an && idx>=0 ? an.plies[idx] : null;
   const arrows=[];
   if(m) arrows.push({from:m.from,to:m.to,alt:true});
   if(p && p.bestMove && !(p.bestMove.from+''===m.from+''&&p.bestMove.to+''===m.to+'') && !['book','best'].includes(p.cls)) arrows.push({from:p.bestMove.from,to:p.bestMove.to});
-  review.widget.setBoard(idx<0 && g.moves.length ? g.board() : board, {arrows, lastMove: idx<0 ? g.lastMove() : null});
+  review.widget.setBoard(ov ? g.start : idx<0 && g.moves.length ? g.board() : board, {arrows, lastMove: !ov && idx<0 ? g.lastMove() : null});
   const marks={}, badges={};
-  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(['inacc','mistake','blunder'].includes(q.cls)) badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
-  renderMoveLog($('#reviewLog'), g.moves, {active:idx, marks, badges, onPick:(k)=>{ review.idx=k; reviewRender(); revealBoard($('#reviewBoard')); }});
+  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(ERR_ALL.includes(q.cls)) badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
+  renderMoveLog($('#reviewLog'), g.moves, {active:ov?null:idx, marks, badges, onPick:(k)=>reviewGo(k)});
+  // Thanh tiến trình: đang ở đâu trong luồng xem lại
+  const errs=reviewErrors(), ei = idx>=0 ? errs.findIndex(q=>q.k===idx) : -1, tp=turningPoint();
+  const stepEl=$('#reviewStep');
+  if(!an) stepEl.innerHTML='';
+  else if(ov) stepEl.innerHTML=`<b>Tổng quan</b> · ${errs.length} lỗi cần xem, theo thứ tự ván`;
+  else if(idx<0) stepEl.innerHTML=`<b>Tổng kết</b> · đã xem ${errs.length}/${errs.length} lỗi`;
+  else if(ei>=0) stepEl.innerHTML=`<b>Lỗi ${ei+1}/${errs.length}</b> · Nước ${moveNum(idx)} · ${phaseOf(g,idx)}${errs[ei]===tp?' · ⭐ bước ngoặt':''}
+    <div class="step-dots">${errs.map((q,j)=>`<span class="sd ${j<ei?'done':j===ei?'cur':''}"></span>`).join('')}</div>`;
+  else stepEl.innerHTML=`Nước ${moveNum(idx)} · ${phaseOf(g,idx)} <span class="hint-text small">(không nằm trong danh sách lỗi)</span>`;
   const det=$('#reviewDetail');
-  if(idx<0){ $('#reviewTools').innerHTML=''; det.innerHTML = an ? '<p class="hint-text">Thế cờ cuối ván. Chọn một nước trong biên bản hoặc trên biểu đồ để xem phân tích; các nước tô màu là chỗ bạn có thể đi tốt hơn.</p>' : ''; }
+  if(ov){ $('#reviewTools').innerHTML=''; det.innerHTML=overviewHTML(); }
+  else if(idx<0){ $('#reviewTools').innerHTML=''; det.innerHTML = an ? endHTML() : ''; }
   else {
     const who = m.color===rec.human ? 'Bạn' : 'Máy';
     const info = p ? CLASS_INFO[p.cls] : null;
-    det.innerHTML = `<div class="rv-head"><b>${Math.floor(idx/2)+1}${m.color===RED?'.':'...'} ${esc(m.text.short)}</b> <span class="hint-text">(${who} · ${esc(m.text.long)})</span>
+    det.innerHTML = `${ei>=0?`<p class="bridge">${bridgeHTML(ei,p)}</p>`:''}<div class="rv-head"><b>${moveNo(idx)} ${esc(m.text.short)}</b> <span class="hint-text">(${who} · ${esc(m.text.long)})</span>
       ${info && m.color===rec.human?`<span class="cls-chip cls-${info.cls}">${info.icon} ${info.label}</span>`:''}</div>
-      ${p && m.color===rec.human ? `${explainPly(g,p)}<p class="hint-text small">Mũi tên đỏ: nước đã đi${arrows.length>1?' · mũi tên xanh: nước máy đề xuất':''}.</p>` : (an?'<p class="hint-text small">Nước của máy.</p>':'')}`;
+      ${p && m.color===rec.human ? `${explainPly(g,p)}<p class="hint-text small">Mũi tên đỏ: nước đã đi${arrows.length>1?' · mũi tên xanh: nước nên đi':''}.</p>` : (an?`<p class="hint-text small">Nước của máy${p&&p.bestMove?'':''}.</p>`:'')}
+      ${ei>=0?`<div class="btn-row mt10">${ei+1<errs.length?`<button type="button" class="btn btn-primary btn-sm" data-rv="next">Lỗi tiếp theo (${ei+2}/${errs.length}) ⏭</button>`:`<button type="button" class="btn btn-primary btn-sm" data-rv="next">🏁 Xem tổng kết</button>`}</div>`:''}`;
     $('#reviewTools').innerHTML = p && m.color===rec.human && !['book','best','good'].includes(p.cls)
       ? `${p.replyPv&&p.replyPv.length?'<button class="btn btn-outline" id="rvShowReply">▶ Đòn đối phương</button>':''}${p.bestPv&&p.bestPv.length?'<button class="btn btn-outline" id="rvShowBest">▶ Nước tốt hơn</button>':''}` : '';
     const play=(startBoard,line,label)=>{
@@ -3481,21 +3672,34 @@ function reviewRender(){
     const rb=$('#rvShowReply'); if(rb) rb.addEventListener('click',()=>play(g.boards[idx], p.replyPv,'reply'));
     const bb=$('#rvShowBest'); if(bb) bb.addEventListener('click',()=>play(board, p.bestPv,'best'));
   }
+  // nút trong khung chi tiết
+  $$('.tl-item',det).forEach(b=>b.addEventListener('click',()=>reviewGo(+b.dataset.k)));
+  const st=$('#rvStart',det); if(st) st.addEventListener('click',reviewNextErr);
+  const rs=$('#rvRestart',det); if(rs) rs.addEventListener('click',()=>{ review.overview=true; review.idx=-1; reviewRender(); });
+  const nx=det.querySelector('[data-rv="next"]'); if(nx) nx.addEventListener('click',reviewNextErr);
+  const ob=$('#rvOnlyBig',det); if(ob) ob.addEventListener('change',()=>{ review.onlyBig=ob.checked; safeLS_set('xq_review_big',ob.checked?'1':'0'); reviewRender(); });
   if(an) renderEvalChart();
-  $('#reviewPrev').disabled = g.moves.length===0 || idx===0;
-  $('#reviewNext').disabled = idx===-1;
+  const nE=$('#reviewNextMistake'), pE=$('#reviewPrevMistake');
+  if(an){
+    nE.disabled = !ov && idx===-1;
+    nE.textContent = ov ? (errs.length?'▶ Bắt đầu: lỗi 1':'▶ Tổng kết') : 'Lỗi tiếp ⏭';
+    pE.disabled = ov;
+  } else { nE.disabled=true; pE.disabled=true; }
+  $('#reviewPrev').disabled = g.moves.length===0 || (!ov && idx===0) || ov;
+  $('#reviewNext').disabled = !ov && idx===-1;
 }
 function initReview(){
   $('#reviewBack').addEventListener('click',()=>{ review.token++; showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
-  $('#reviewPrev').addEventListener('click',()=>{ const n=review.game.moves.length; review.idx = review.idx===-1 ? n-1 : Math.max(0,review.idx-1); reviewRender(); });
-  $('#reviewNext').addEventListener('click',()=>{ const n=review.game.moves.length; review.idx = review.idx>=n-1 ? -1 : review.idx+1; reviewRender(); });
-  $('#reviewNextMistake').addEventListener('click',()=>{
-    if(!review.an) return;
-    const list=review.an.plies.filter(p=>p.color===review.rec.human && ['inacc','mistake','blunder'].includes(p.cls));
-    if(!list.length) return;
-    const nx=list.find(p=>p.k>review.idx) || list[0];
-    review.idx=nx.k; reviewRender();
-  });
+  // ◀ ▶: từng nửa nước. Tổng quan ↔ nước đầu ↔ … ↔ nước cuối (tổng kết)
+  $('#reviewPrev').addEventListener('click',()=>{ const n=review.game.moves.length;
+    if(review.overview) return;
+    if(review.idx===0){ review.overview=!!review.an; review.idx=-1; reviewRender(); return; }
+    reviewGo(review.idx===-1 ? n-1 : review.idx-1); });
+  $('#reviewNext').addEventListener('click',()=>{ const n=review.game.moves.length;
+    if(review.overview){ reviewGo(n?0:-1); return; }
+    reviewGo(review.idx>=n-1 ? -1 : review.idx+1); });
+  $('#reviewNextMistake').addEventListener('click',reviewNextErr);
+  $('#reviewPrevMistake').addEventListener('click',reviewPrevErr);
 }
 
 /* Tự sinh bởi tools/gen-puzzles.js + tools/make-puzzles.js: thế cờ lấy từ ván máy tự đánh, đã kiểm lại bằng Solver. Không sửa tay. */
@@ -4611,14 +4815,7 @@ const MASTER_GAMES = [{"id":"chu-hoang-1934","file":"game1.txt","year":1934,"eve
    ========================================================================= */
 const ms = { g:null, game:null, pos:0, widget:null, ctl:null, guess:false, side:'both', right:0, total:0, feedback:'' };
 
-function masterEvalText(e){
-  const v=e/100;
-  if(e>=1900) return 'Đỏ đang có đòn thắng';
-  if(e<=-1900) return 'Đen đang có đòn thắng';
-  if(Math.abs(v)<0.4) return 'hai bên cân bằng';
-  const who=v>0?'Đỏ':'Đen', a=Math.abs(v);
-  return `${who} ${a<1.2?'hơn một chút':a<3?'hơn rõ':'hơn nhiều'} (khoảng ${a.toFixed(1).replace('.',',')} Tốt)`;
-}
+function masterEvalText(e){ return evalWords(e,'Đỏ','Đen'); }
 function masterKeyPlies(g){
   const keys=[];
   g.plies.forEach((p,k)=>{
