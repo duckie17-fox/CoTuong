@@ -107,3 +107,8 @@
   bàn cờ tràn sát mép card (`.card .board-shell{margin-inline:-12px}`); đầu phòng đấu một dòng (nút chỉ icon trên điện thoại);
   nút ván online dùng chung `.board-toolbar` ngay dưới bàn; máy tính: bàn cờ co theo chiều cao màn hình
   (`min(580px, (100vh-330px)*0.92)`) để thấy cả bàn + thanh nút. Sảnh Sa trường bỏ đoạn mô tả, ẩn mục rỗng (Phòng gần đây/Ván đã đấu).
+- **Góp ý vòng 4:** bỏ nút **Xoay bàn** (đấu máy + online; bàn tự quay theo màu của mình) và **Mời bạn** (hộp mời tự hiện khi đang chờ đối thủ).
+  Màn ván đấu: thanh người chơi chung `setPlayerBar` (tên, cấp/Elo, quân đã ăn, sáng xanh + "tới lượt"/"đang nghĩ…");
+  đang đánh chỉ có thanh nút chính (đấu máy: Đi lại/Gợi ý/Đầu hàng), xong ván mới hiện Ván mới/Phân tích/Sao chép thế cờ;
+  kết quả theo góc nhìn người chơi ("Bạn thắng!"); đầu hàng online xác nhận 2 bước (bỏ confirm()); giữ màn hình sáng (Wake Lock) khi đang đánh online.
+  Xem lại khai cuộc/ván danh thủ vẫn giữ nút xoay bàn (là màn xem, không phải đánh).

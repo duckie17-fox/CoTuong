@@ -790,6 +790,28 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   .board-caption{margin-top:6px;}
   #aiGameCard > .btn-row h2{font-size:18px;}
 }
+
+/* ---------- Thanh người chơi + đầu màn ván đấu ---------- */
+.ol-player{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px;border-radius:10px;border:1px solid transparent;transition:background .15s,border-color .15s;}
+.ol-player.pb-active{background:color-mix(in srgb, var(--jade) 12%, transparent);border-color:color-mix(in srgb, var(--jade) 45%, transparent);}
+.ol-player .turn-dot{flex:none;}
+.pb-main{display:flex;flex-direction:column;min-width:0;line-height:1.2;}
+.pb-main .ol-pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pb-sub{color:var(--ink-soft);font-size:12px;font-weight:600;}
+.pb-caps{display:flex;flex-wrap:wrap;gap:1px;flex:1;min-width:0;justify-content:flex-end;}
+.cap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:12px;line-height:1;}
+.cap-red{color:var(--b-red-deep);} .cap-black{color:var(--b-black-deep);}
+.ol-player .ol-turn{flex:none;}
+.ol-player .ol-dot{flex:none;}
+.game-head,.ol-room-head{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+.game-title,.ol-room-title{flex:1;min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-start;text-align:left;}
+.game-head .btn,.ol-room-head .btn{flex:none;}
+@media (max-width:600px){
+  .game-head .btn-label{display:none;}
+  .game-head .btn{padding:8px 10px;min-height:40px;}
+  .ol-player{padding:3px 8px;min-height:36px;}
+  .cap{width:18px;height:18px;font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -987,23 +1009,28 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   </div>
 
   <div class="card" id="aiGameCard" hidden>
-    <div class="btn-row" style="justify-content:space-between;">
-      <div><h2 style="margin:0;">Ván đấu với máy</h2><div class="hint-text small" id="aiLevelTag"></div></div>
-      <button class="btn btn-outline" id="aiNewGameBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg>Ván mới</button>
+    <div class="game-head">
+      <button class="btn btn-outline btn-sm" id="aiNewGameBtn" aria-label="Chọn cấp, ván mới" title="Chọn cấp, ván mới"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Chọn cấp</span></button>
+      <div class="game-title"><b>Đấu với máy</b> <span class="hint-text small" id="aiLevelTag"></span></div>
     </div>
     <div class="play-layout mt10">
       <div class="play-board">
+        <div class="ol-player" id="aiTop"></div>
         <div class="board-shell board-card" id="aiBoardCard">
           <div id="aiBoard"></div>
         </div>
-        <div class="board-toolbar">
+        <div class="ol-player" id="aiBottom"></div>
+        <div class="board-toolbar" id="aiActions">
           <button class="btn btn-outline" id="aiUndo"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Đi lại</button>
           <button class="btn btn-outline" id="aiHint"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
-          <button class="btn btn-outline" id="aiFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
           <button class="btn btn-outline" id="aiResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
         </div>
         <div id="aiStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button><button type="button" class="btn btn-outline" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button></div>
+        <div class="btn-row btn-row-center mt10" id="aiAfter" hidden>
+          <button class="btn btn-primary" id="aiAgainBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ván mới</button>
+          <button class="btn btn-jade" id="aiReviewBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
+          <button type="button" class="btn btn-outline" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div>
       </div>
       <div class="play-side side-panel" data-side-default="log">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button><button type="button" class="side-tab" data-side-tab="think">Cách suy nghĩ</button></div>
@@ -1166,7 +1193,6 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
     <div class="btn-row ol-room-head">
       <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
       <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
-      <button type="button" class="btn btn-outline btn-sm" id="olInviteBtn" aria-label="Mời bạn" title="Mời bạn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-link"></use></svg><span class="btn-label">Mời bạn</span></button>
     </div>
     <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
@@ -1177,7 +1203,6 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
         <div class="board-toolbar" id="olActions">
           <button type="button" class="btn btn-outline" id="olDraw"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-draw"></use></svg>Xin hoà</button>
           <button type="button" class="btn btn-outline" id="olTakeback"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Xin đi lại</button>
-          <button type="button" class="btn btn-outline" id="olFlip"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg>Xoay bàn</button>
           <button type="button" class="btn btn-outline" id="olResign"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flag"></use></svg>Đầu hàng</button>
         </div>
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
@@ -2892,7 +2917,10 @@ function revealBoard(el){
   const shell = el.closest ? (el.closest('.board-shell')||el) : el;
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
   const tb = shell.nextElementSibling && shell.nextElementSibling.classList.contains('board-toolbar') ? shell.nextElementSibling : null;
-  const r=shell.getBoundingClientRect();
+  // thanh người chơi phía trên bàn (đấu máy, Sa trường) cũng phải thấy
+  const above = shell.previousElementSibling && shell.previousElementSibling.classList.contains('ol-player') ? shell.previousElementSibling : null;
+  const rs=shell.getBoundingClientRect(), ra=above ? above.getBoundingClientRect() : rs;
+  const r={top:ra.top, bottom:rs.bottom, height:rs.bottom-ra.top};
   // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
   const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
   const vh=window.innerHeight||document.documentElement.clientHeight;
@@ -2992,6 +3020,23 @@ function icon(name, cls){ return `<svg class="ic${cls?' '+cls:''}" aria-hidden="
   const sym=Object.entries(ICON_PATHS).map(([k,p])=>`<symbol id="i-${k}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</symbol>`).join('');
   document.body.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">${sym}</svg>`);
 })();
+
+/* ---------- Thanh người chơi trên/dưới bàn cờ (đấu máy, Sa trường) ---------- */
+const CAPTURE_ORDER = ['R','C','H','E','A','S'];
+// Các quân `color` đã ăn được (loại quân của đối phương), xếp theo giá trị
+function capturedBy(moves, color){
+  return moves.filter(m=>m.color===color && m.captured).map(m=>m.captured).sort((a,b)=>CAPTURE_ORDER.indexOf(a)-CAPTURE_ORDER.indexOf(b));
+}
+// p: {color, name, sub, active, captured:[loại], note, me}
+function playerBarHTML(p){
+  const opp = p.color==='red' ? 'black' : 'red';
+  const caps = (p.captured||[]).map(t=>`<span class="cap cap-${opp}" title="${VN_NAME[t]}">${PIECE_CHAR[opp][t]}</span>`).join('');
+  return `<span class="turn-dot turn-${p.color}"></span>
+    <span class="pb-main"><span class="ol-pname">${esc(p.name)}${p.me?' <small>(bạn)</small>':''}</span>${p.sub?`<small class="pb-sub">${p.sub}</small>`:''}</span>
+    <span class="pb-caps" aria-label="Quân đã ăn">${caps}</span>
+    ${p.note?`<span class="ol-turn">${p.note}</span>`:''}`;
+}
+function setPlayerBar(el, p){ el.innerHTML=playerBarHTML(p); el.classList.toggle('pb-active', !!p.active); }
 /* =========================================================================
    LEGEND (danh sách 7 loại quân)
    ========================================================================= */
@@ -3696,26 +3741,34 @@ function aiRender(){
   const g=aiGame.game, b=g.board(), turn=g.turn();
   aiGame.ctl.render();
   const el=$('#aiStatus');
+  const H=aiGame.humanColor, M=Engine.otherColor(H), over=!!g.result;
+  // thanh người chơi: máy ở trên, bạn ở dưới; sáng lên khi tới lượt
+  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(levelInfo(aiGame.level).name), captured:capturedBy(g.moves,M),
+    active:!over && turn===M, note: !over && aiGame.thinking ? 'đang nghĩ…' : ''});
+  setPlayerBar($('#aiBottom'), {color:H, name:'Bạn', sub:COLOR_VN[H], me:false, captured:capturedBy(g.moves,H),
+    active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
   if(g.result){
-    const human = g.result.winner===aiGame.humanColor, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), Game.resultText(g.result)+' Bấm <b>Phân tích ván</b> để xem mình đi hay/dở ở đâu.');
-  } else if(aiGame.thinking) statusBanner(el,'think','Máy đang suy nghĩ…');
-  else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===aiGame.humanColor ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
-  else el.innerHTML = (turn===aiGame.humanColor ? `<span class="turn-dot turn-${turn}"></span> Đến lượt bạn (${COLOR_VN[turn]})` : `<span class="turn-dot turn-${turn}"></span> Lượt của máy`) + (aiGame.bookNote?`<div class="hint-text small">${esc(aiGame.bookNote)}</div>`:'');
+    const human = g.result.winner===H, draw=!g.result.winner;
+    statusBanner(el, draw?'draw':(human?'over':'fail'), `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
+  } else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===H ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
+  else if(aiGame.hint && aiGame.hintText) statusBanner(el,'think', aiGame.hintText);
+  else el.innerHTML = turn===H && !aiGame.thinking ? `<span class="hint-text small">Đến lượt bạn — chạm quân rồi chạm ô sáng để đi.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
   renderMoveLog($('#aiLog'), g.moves);
   const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
   $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
   $('#aiHint').disabled = !humanTurn;
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
-  $('#aiLevelTag').textContent = `${levelInfo(aiGame.level).name} · Bạn cầm ${COLOR_VN[aiGame.humanColor]}`;
+  $('#aiActions').hidden = over;
+  $('#aiAfter').hidden = !over;
+  $('#aiLevelTag').textContent = '';
 }
 function aiPersist(){
   if(!aiGame.game.moves.length) return;
   upsertHistory(gameToRecord());
 }
 function aiAfterMove(){
-  aiGame.hint=null;
+  aiGame.hint=null; aiGame.hintText='';
   aiPersist();
   aiRender();
   if(!aiGame.game.result && aiGame.game.turn()!==aiGame.humanColor) triggerAIMove();
@@ -3767,6 +3820,7 @@ function aiBeginGame(cfg){
   aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
+  revealBoard($('#aiBoardCard'));
 }
 function showAICard(which){
   $('#aiSetupCard').hidden = which!=='setup';
@@ -3798,17 +3852,18 @@ function initAIGame(){
     const g=aiGame.game; aiGame.token++; aiGame.thinking=false;
     // lùi tới trước nước gần nhất của người chơi
     let n=0; while(g.moves.length && (n===0 || g.turn()!==aiGame.humanColor)){ g.undo(1); n++; if(g.turn()===aiGame.humanColor) break; }
-    aiGame.hint=null; aiGame.ctl.clear(); aiPersist(); aiRender();
+    aiGame.hint=null; aiGame.hintText=''; aiGame.ctl.clear(); aiPersist(); aiRender();
   });
   $('#aiHint').addEventListener('click', async ()=>{
     const g=aiGame.game; $('#aiHint').disabled=true;
-    statusBanner($('#aiStatus'),'think','Đang tìm gợi ý…');
+    statusBanner($('#aiStatus'),'think','Đang tìm gợi ý…'); aiGame.hintText='';
     const r=await AIEngine.think(aiThinkArgs(g,{timeMs:1200, maxDepth:40}));
     if(r&&r.move){
-      aiGame.hint=r.move; aiRender();
       const why=Coach.whyGood(g.board(),r.move), danger=Coach.endangered(g.board(),g.turn());
       const warn = danger.length ? ` Lưu ý: ${Coach.NAME[danger[0].type]} của bạn đang bị doạ.` : '';
-      statusBanner($('#aiStatus'),'think',`Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`);
+      aiGame.hint=r.move;
+      aiGame.hintText=`Gợi ý: <b>${esc(Notation.describe(g.board(),r.move).short)}</b> (mũi tên xanh)${why.length?' vì nó '+esc(why.join('; ')):''}.${esc(warn)}`;
+      aiRender();
     }
   });
   const RESIGN_HTML=$('#aiResign').innerHTML;
@@ -3822,7 +3877,7 @@ function initAIGame(){
     g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();
   });
-  $('#aiFlip').addEventListener('click', ()=> aiGame.widget.setFlipped(!aiGame.widget.isFlipped()));
+  $('#aiAgainBtn').addEventListener('click', ()=>aiBeginGame({humanColor:aiGame.humanColor, level:aiGame.level}));
   $('#aiReviewBtn').addEventListener('click', ()=>{ aiPersist(); openReview(gameToRecord()); });
   initReview();
   renderHistoryList();
@@ -6603,7 +6658,15 @@ const Online = (function(){
       st.retryTimer=setTimeout(()=>{ if(st.code) connect(); }, wait);
     };
   }
+  // Giữ màn hình sáng khi đang đánh (điện thoại hay tự tắt màn hình lúc chờ đối thủ)
+  async function keepAwake(on){
+    try{
+      if(on && !st.wake && navigator.wakeLock && document.visibilityState==='visible'){ st.wake=await navigator.wakeLock.request('screen'); st.wake.addEventListener('release',()=>{ st.wake=null; }); }
+      else if(!on && st.wake){ const w=st.wake; st.wake=null; await w.release(); }
+    }catch(e){ st.wake=null; }
+  }
   function disconnect(){
+    keepAwake(false);
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const ws=st.ws; st.ws=null; st.code=null; st.room=null;
     if(ws) try{ ws.close(1000); }catch(e){}
@@ -6672,13 +6735,14 @@ const Online = (function(){
     const g=st.local||st.game, b=g.board(), turn=g.turn();
     return {lastMove:g.lastMove(), checkSq: !g.result && Engine.isInCheck(b,turn) ? Engine.findGeneral(b,turn) : null};
   }
-  function playerHTML(color){
+  // Thanh người chơi: tên, Elo, quân đã ăn; sáng lên khi tới lượt
+  function renderPlayer(el, color){
     const r=st.room, s=r.seats[color], g=st.local||st.game, isTurn=!r.result && g.turn()===color;
-    const me = r.you===color;
-    if(!s) return `<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`;
-    return `<span class="turn-dot turn-${color}"></span><span class="ol-pname">${esc(s.name)}${me?' <small>(bạn)</small>':''}</span>${s.elo!=null?`<small class="ol-elo">Elo ${s.elo}</small>`:''}
-      <span class="ol-dot ${s.online?'on':''}" title="${s.online?'Đang trong phòng':'Đã rời phòng'}"></span><small class="hint-text">${s.online?'':'mất kết nối'}</small>
-      ${isTurn?'<span class="ol-turn">đang đi</span>':''}`;
+    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`; return; }
+    const sub=[s.elo!=null?`Elo ${s.elo}`:'', s.online?'':'mất kết nối'].filter(Boolean).join(' · ');
+    setPlayerBar(el, {color, name:s.name, me:r.you===color, sub:esc(sub), captured:capturedBy(g.moves,color), active:isTurn && !!r.seats[other(color)],
+      note: isTurn && r.seats[other(color)] ? (r.you===color?'tới lượt':'đang nghĩ…') : ''});
+    el.insertAdjacentHTML('beforeend', `<span class="ol-dot ${s.online?'on':''}" title="${s.online?'Đang trong phòng':'Đã rời phòng'}"></span>`);
   }
   function renderConn(){
     const el=$('#olConn'); if(!el) return;
@@ -6700,13 +6764,15 @@ const Online = (function(){
       let elo='';
       if(r.elo && r.you!=='spectator' && r.elo[r.you]){ const e=r.elo[r.you], d=e.after-e.before; elo=`<br>Elo của bạn: <b>${e.after}</b> (${d>=0?'+':''}${d})`; }
       else if(r.rated && r.you!=='spectator') elo='<br><small>Ván này không tính Elo (cần cả hai người đăng nhập và ít nhất 10 nửa nước).</small>';
-      statusBanner(el, kind, esc(txt)+elo); return;
+      const head = r.you==='spectator' ? '' : `<b>${!res.winner?'Hoà.':res.winner===r.you?'Bạn thắng!':'Bạn thua.'}</b> `;
+      statusBanner(el, kind, head+esc(txt)+elo); return;
     }
     if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
-    statusBanner(el, turn===r.you?(chk?'check':'over'):'think', turn===r.you ? `<span class="turn-dot turn-${turn}"></span> Tới lượt bạn${chk?' — <b>bạn đang bị chiếu!</b>':''}` : `Đối thủ đang nghĩ…${chk?' (bạn đang chiếu)':''}`);
+    if(chk && turn===r.you){ statusBanner(el,'check','Tới lượt bạn — <b>bạn đang bị chiếu!</b>'); return; }
+    el.innerHTML = `<span class="hint-text small">${turn===r.you ? 'Tới lượt bạn — chạm quân rồi chạm ô sáng để đi.' : 'Đối thủ đang nghĩ…'+(chk?' (bạn đang chiếu)':'')}</span>`;
   }
   function renderOffer(){
     const el=$('#olOffer'), r=st.room;
@@ -6734,7 +6800,7 @@ const Online = (function(){
   function renderInvite(){
     const r=st.room, el=$('#olInvite');
     const waiting = r && r.you!=='spectator' && !r.seats[other(r.you)];
-    if(!waiting && !st.showInvite){ el.hidden=true; return; }
+    if(!waiting){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
     el.innerHTML=`<div>Gửi link hoặc mã phòng <b class="ol-bigcode">${st.code}</b> cho bạn</div>
@@ -6753,7 +6819,7 @@ const Online = (function(){
     if(!r){ $('#olKind').hidden=true; $('#olClaim').hidden=true; st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
     const me = r.you==='spectator' ? 'red' : r.you;
     const bottom = st.flipped ? 'black' : 'red';
-    $('#olBottom').innerHTML=playerHTML(bottom); $('#olTop').innerHTML=playerHTML(other(bottom));
+    renderPlayer($('#olBottom'), bottom); renderPlayer($('#olTop'), other(bottom)); keepAwake(!r.result && r.you!=='spectator');
     st.ctl.render();
     renderMoveLog($('#olLog'), (st.local||st.game).moves);
     renderStatus(); renderOffer(); renderChat();
@@ -6846,7 +6912,7 @@ const Online = (function(){
   function enterRoom(code, create){
     if(!myName() && !ensureName()) { showLobby(); return; }
     disconnect();
-    st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.showInvite=false; st.lastMoves=-1; st.chatSeen=0;
+    st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
     $('#olLobby').hidden=true; $('#olRoom').hidden=false;
     setRoomParam(code);
     render(); connect();
@@ -6883,12 +6949,16 @@ const Online = (function(){
     $('#olJoin').addEventListener('click',join);
     $('#olJoinCode').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
     $('#olLeave').addEventListener('click',()=>{ disconnect(); showLobby(); });
-    $('#olInviteBtn').addEventListener('click',()=>{ st.showInvite=!st.showInvite; renderInvite(); });
-    $('#olFlip').addEventListener('click',()=>{ st.flipped=!st.flipped; st.widget.setFlipped(st.flipped); render(); });
     $('#olDraw').addEventListener('click',()=>send({type:'offer', kind:'draw'}));
     $('#olTakeback').addEventListener('click',()=>send({type:'offer', kind:'takeback'}));
     $('#olRematch').addEventListener('click',()=>send({type:'offer', kind:'rematch'}));
-    $('#olResign').addEventListener('click',()=>{ if(confirm('Bạn chắc chắn muốn đầu hàng ván này?')) send({type:'resign'}); });
+    // đầu hàng: xác nhận 2 bước ngay trên nút (confirm() có thể bị chặn trong khung nhúng)
+    const RESIGN_HTML=$('#olResign').innerHTML;
+    $('#olResign').addEventListener('click',()=>{
+      const b=$('#olResign');
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; },3000); return; }
+      delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; send({type:'resign'});
+    });
     $('#olReview').addEventListener('click',()=>{ const r=st.room; if(r) review(`ol-${r.code}-${r.game}`); });
     $('#olChips').innerHTML=ONLINE_QUICK.map(q=>`<button type="button" class="ol-chip">${esc(q)}</button>`).join('');
     $$('.ol-chip').forEach(b=>b.addEventListener('click',()=>send({type:'chat', text:b.textContent})));
@@ -6898,6 +6968,7 @@ const Online = (function(){
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
     document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }

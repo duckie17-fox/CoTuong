@@ -72,7 +72,10 @@ function revealBoard(el){
   const shell = el.closest ? (el.closest('.board-shell')||el) : el;
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
   const tb = shell.nextElementSibling && shell.nextElementSibling.classList.contains('board-toolbar') ? shell.nextElementSibling : null;
-  const r=shell.getBoundingClientRect();
+  // thanh người chơi phía trên bàn (đấu máy, Sa trường) cũng phải thấy
+  const above = shell.previousElementSibling && shell.previousElementSibling.classList.contains('ol-player') ? shell.previousElementSibling : null;
+  const rs=shell.getBoundingClientRect(), ra=above ? above.getBoundingClientRect() : rs;
+  const r={top:ra.top, bottom:rs.bottom, height:rs.bottom-ra.top};
   // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
   const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
   const vh=window.innerHeight||document.documentElement.clientHeight;
@@ -172,3 +175,20 @@ function icon(name, cls){ return `<svg class="ic${cls?' '+cls:''}" aria-hidden="
   const sym=Object.entries(ICON_PATHS).map(([k,p])=>`<symbol id="i-${k}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</symbol>`).join('');
   document.body.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">${sym}</svg>`);
 })();
+
+/* ---------- Thanh người chơi trên/dưới bàn cờ (đấu máy, Sa trường) ---------- */
+const CAPTURE_ORDER = ['R','C','H','E','A','S'];
+// Các quân `color` đã ăn được (loại quân của đối phương), xếp theo giá trị
+function capturedBy(moves, color){
+  return moves.filter(m=>m.color===color && m.captured).map(m=>m.captured).sort((a,b)=>CAPTURE_ORDER.indexOf(a)-CAPTURE_ORDER.indexOf(b));
+}
+// p: {color, name, sub, active, captured:[loại], note, me}
+function playerBarHTML(p){
+  const opp = p.color==='red' ? 'black' : 'red';
+  const caps = (p.captured||[]).map(t=>`<span class="cap cap-${opp}" title="${VN_NAME[t]}">${PIECE_CHAR[opp][t]}</span>`).join('');
+  return `<span class="turn-dot turn-${p.color}"></span>
+    <span class="pb-main"><span class="ol-pname">${esc(p.name)}${p.me?' <small>(bạn)</small>':''}</span>${p.sub?`<small class="pb-sub">${p.sub}</small>`:''}</span>
+    <span class="pb-caps" aria-label="Quân đã ăn">${caps}</span>
+    ${p.note?`<span class="ol-turn">${p.note}</span>`:''}`;
+}
+function setPlayerBar(el, p){ el.innerHTML=playerBarHTML(p); el.classList.toggle('pb-active', !!p.active); }

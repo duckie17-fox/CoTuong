@@ -101,7 +101,7 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     assert.equal(await B.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'tràn ngang trên điện thoại');
 
     // Bình đầu hàng
-    await B.click('#olResign');
+    await B.click('#olResign'); await B.click('#olResign');   // xác nhận 2 bước
     await A.waitForFunction(() => Online.state.room.result);
     assert.match(await text(A, '#olStatus'), /Đỏ thắng/);
     await A.waitForSelector('#olAfter:not([hidden])');
@@ -182,7 +182,7 @@ test('tài khoản trên trình duyệt thật: đăng ký, kết bạn, mời �
       await clickSq(p, red ? 6 : 3, c); await clickSq(p, red ? 5 : 4, c);
       await A.waitForFunction(n => document.querySelectorAll('#olLog .log-cell[data-ply]').length === n, i + 1);
     }
-    await B.click('#olResign');
+    await B.click('#olResign'); await B.click('#olResign');   // xác nhận 2 bước
     await A.waitForFunction(() => /Elo của bạn: 1220 \(\+20\)/.test(document.querySelector('#olStatus').textContent));
     await B.waitForFunction(() => /Elo của bạn: 1180 \(-20\)/.test(document.querySelector('#olStatus').textContent));
     // trang Tôi cập nhật Elo

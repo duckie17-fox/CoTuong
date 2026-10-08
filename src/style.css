@@ -781,3 +781,25 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   .board-caption{margin-top:6px;}
   #aiGameCard > .btn-row h2{font-size:18px;}
 }
+
+/* ---------- Thanh người chơi + đầu màn ván đấu ---------- */
+.ol-player{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px;border-radius:10px;border:1px solid transparent;transition:background .15s,border-color .15s;}
+.ol-player.pb-active{background:color-mix(in srgb, var(--jade) 12%, transparent);border-color:color-mix(in srgb, var(--jade) 45%, transparent);}
+.ol-player .turn-dot{flex:none;}
+.pb-main{display:flex;flex-direction:column;min-width:0;line-height:1.2;}
+.pb-main .ol-pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pb-sub{color:var(--ink-soft);font-size:12px;font-weight:600;}
+.pb-caps{display:flex;flex-wrap:wrap;gap:1px;flex:1;min-width:0;justify-content:flex-end;}
+.cap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:12px;line-height:1;}
+.cap-red{color:var(--b-red-deep);} .cap-black{color:var(--b-black-deep);}
+.ol-player .ol-turn{flex:none;}
+.ol-player .ol-dot{flex:none;}
+.game-head,.ol-room-head{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+.game-title,.ol-room-title{flex:1;min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-start;text-align:left;}
+.game-head .btn,.ol-room-head .btn{flex:none;}
+@media (max-width:600px){
+  .game-head .btn-label{display:none;}
+  .game-head .btn{padding:8px 10px;min-height:40px;}
+  .ol-player{padding:3px 8px;min-height:36px;}
+  .cap{width:18px;height:18px;font-size:11px;}
+}

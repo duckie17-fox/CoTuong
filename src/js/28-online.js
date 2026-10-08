@@ -109,7 +109,15 @@ const Online = (function(){
       st.retryTimer=setTimeout(()=>{ if(st.code) connect(); }, wait);
     };
   }
+  // Giữ màn hình sáng khi đang đánh (điện thoại hay tự tắt màn hình lúc chờ đối thủ)
+  async function keepAwake(on){
+    try{
+      if(on && !st.wake && navigator.wakeLock && document.visibilityState==='visible'){ st.wake=await navigator.wakeLock.request('screen'); st.wake.addEventListener('release',()=>{ st.wake=null; }); }
+      else if(!on && st.wake){ const w=st.wake; st.wake=null; await w.release(); }
+    }catch(e){ st.wake=null; }
+  }
   function disconnect(){
+    keepAwake(false);
     clearTimeout(st.retryTimer); clearInterval(st.ping);
     const ws=st.ws; st.ws=null; st.code=null; st.room=null;
     if(ws) try{ ws.close(1000); }catch(e){}
@@ -178,13 +186,14 @@ const Online = (function(){
     const g=st.local||st.game, b=g.board(), turn=g.turn();
     return {lastMove:g.lastMove(), checkSq: !g.result && Engine.isInCheck(b,turn) ? Engine.findGeneral(b,turn) : null};
   }
-  function playerHTML(color){
+  // Thanh người chơi: tên, Elo, quân đã ăn; sáng lên khi tới lượt
+  function renderPlayer(el, color){
     const r=st.room, s=r.seats[color], g=st.local||st.game, isTurn=!r.result && g.turn()===color;
-    const me = r.you===color;
-    if(!s) return `<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`;
-    return `<span class="turn-dot turn-${color}"></span><span class="ol-pname">${esc(s.name)}${me?' <small>(bạn)</small>':''}</span>${s.elo!=null?`<small class="ol-elo">Elo ${s.elo}</small>`:''}
-      <span class="ol-dot ${s.online?'on':''}" title="${s.online?'Đang trong phòng':'Đã rời phòng'}"></span><small class="hint-text">${s.online?'':'mất kết nối'}</small>
-      ${isTurn?'<span class="ol-turn">đang đi</span>':''}`;
+    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`; return; }
+    const sub=[s.elo!=null?`Elo ${s.elo}`:'', s.online?'':'mất kết nối'].filter(Boolean).join(' · ');
+    setPlayerBar(el, {color, name:s.name, me:r.you===color, sub:esc(sub), captured:capturedBy(g.moves,color), active:isTurn && !!r.seats[other(color)],
+      note: isTurn && r.seats[other(color)] ? (r.you===color?'tới lượt':'đang nghĩ…') : ''});
+    el.insertAdjacentHTML('beforeend', `<span class="ol-dot ${s.online?'on':''}" title="${s.online?'Đang trong phòng':'Đã rời phòng'}"></span>`);
   }
   function renderConn(){
     const el=$('#olConn'); if(!el) return;
@@ -206,13 +215,15 @@ const Online = (function(){
       let elo='';
       if(r.elo && r.you!=='spectator' && r.elo[r.you]){ const e=r.elo[r.you], d=e.after-e.before; elo=`<br>Elo của bạn: <b>${e.after}</b> (${d>=0?'+':''}${d})`; }
       else if(r.rated && r.you!=='spectator') elo='<br><small>Ván này không tính Elo (cần cả hai người đăng nhập và ít nhất 10 nửa nước).</small>';
-      statusBanner(el, kind, esc(txt)+elo); return;
+      const head = r.you==='spectator' ? '' : `<b>${!res.winner?'Hoà.':res.winner===r.you?'Bạn thắng!':'Bạn thua.'}</b> `;
+      statusBanner(el, kind, head+esc(txt)+elo); return;
     }
     if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
-    statusBanner(el, turn===r.you?(chk?'check':'over'):'think', turn===r.you ? `<span class="turn-dot turn-${turn}"></span> Tới lượt bạn${chk?' — <b>bạn đang bị chiếu!</b>':''}` : `Đối thủ đang nghĩ…${chk?' (bạn đang chiếu)':''}`);
+    if(chk && turn===r.you){ statusBanner(el,'check','Tới lượt bạn — <b>bạn đang bị chiếu!</b>'); return; }
+    el.innerHTML = `<span class="hint-text small">${turn===r.you ? 'Tới lượt bạn — chạm quân rồi chạm ô sáng để đi.' : 'Đối thủ đang nghĩ…'+(chk?' (bạn đang chiếu)':'')}</span>`;
   }
   function renderOffer(){
     const el=$('#olOffer'), r=st.room;
@@ -240,7 +251,7 @@ const Online = (function(){
   function renderInvite(){
     const r=st.room, el=$('#olInvite');
     const waiting = r && r.you!=='spectator' && !r.seats[other(r.you)];
-    if(!waiting && !st.showInvite){ el.hidden=true; return; }
+    if(!waiting){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
     el.innerHTML=`<div>Gửi link hoặc mã phòng <b class="ol-bigcode">${st.code}</b> cho bạn</div>
@@ -259,7 +270,7 @@ const Online = (function(){
     if(!r){ $('#olKind').hidden=true; $('#olClaim').hidden=true; st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
     const me = r.you==='spectator' ? 'red' : r.you;
     const bottom = st.flipped ? 'black' : 'red';
-    $('#olBottom').innerHTML=playerHTML(bottom); $('#olTop').innerHTML=playerHTML(other(bottom));
+    renderPlayer($('#olBottom'), bottom); renderPlayer($('#olTop'), other(bottom)); keepAwake(!r.result && r.you!=='spectator');
     st.ctl.render();
     renderMoveLog($('#olLog'), (st.local||st.game).moves);
     renderStatus(); renderOffer(); renderChat();
@@ -352,7 +363,7 @@ const Online = (function(){
   function enterRoom(code, create){
     if(!myName() && !ensureName()) { showLobby(); return; }
     disconnect();
-    st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.showInvite=false; st.lastMoves=-1; st.chatSeen=0;
+    st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
     $('#olLobby').hidden=true; $('#olRoom').hidden=false;
     setRoomParam(code);
     render(); connect();
@@ -389,12 +400,16 @@ const Online = (function(){
     $('#olJoin').addEventListener('click',join);
     $('#olJoinCode').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
     $('#olLeave').addEventListener('click',()=>{ disconnect(); showLobby(); });
-    $('#olInviteBtn').addEventListener('click',()=>{ st.showInvite=!st.showInvite; renderInvite(); });
-    $('#olFlip').addEventListener('click',()=>{ st.flipped=!st.flipped; st.widget.setFlipped(st.flipped); render(); });
     $('#olDraw').addEventListener('click',()=>send({type:'offer', kind:'draw'}));
     $('#olTakeback').addEventListener('click',()=>send({type:'offer', kind:'takeback'}));
     $('#olRematch').addEventListener('click',()=>send({type:'offer', kind:'rematch'}));
-    $('#olResign').addEventListener('click',()=>{ if(confirm('Bạn chắc chắn muốn đầu hàng ván này?')) send({type:'resign'}); });
+    // đầu hàng: xác nhận 2 bước ngay trên nút (confirm() có thể bị chặn trong khung nhúng)
+    const RESIGN_HTML=$('#olResign').innerHTML;
+    $('#olResign').addEventListener('click',()=>{
+      const b=$('#olResign');
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; },3000); return; }
+      delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; send({type:'resign'});
+    });
     $('#olReview').addEventListener('click',()=>{ const r=st.room; if(r) review(`ol-${r.code}-${r.game}`); });
     $('#olChips').innerHTML=ONLINE_QUICK.map(q=>`<button type="button" class="ol-chip">${esc(q)}</button>`).join('');
     $$('.ol-chip').forEach(b=>b.addEventListener('click',()=>send({type:'chat', text:b.textContent})));
@@ -404,6 +419,7 @@ const Online = (function(){
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
     document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }
