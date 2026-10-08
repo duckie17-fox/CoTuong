@@ -9,7 +9,7 @@
 ## 1. Mục tiêu và không làm
 
 **Mục tiêu**
-1. Dùng thoải mái bằng một tay trên điện thoại (390px) và tận dụng màn rộng trên máy tính (1440px).
+1. Một kiểu điều hướng và bố cục chung cho điện thoại (390px) và máy tính (1440px); nội dung tự xếp lại theo độ rộng.
 2. Một tài khoản dùng trên nhiều máy: tiến độ học, bài tập, lịch sử ván đi theo tài khoản.
 3. Đấu với bạn bè có danh tính, kết bạn, mời đấu trực tiếp, xếp hạng Elo.
 4. Không bắt buộc đăng nhập: chưa có tài khoản vẫn học, giải bài, đấu máy, đấu với bạn bằng link như hiện tại.
@@ -23,56 +23,64 @@
 
 ## 2. Cấu trúc điều hướng mới
 
-Giữ hai khu **Kỳ viện** (học, luyện, đấu máy) và **Sa trường** (đấu với người), thêm **Tôi** (tài khoản).
+**Ba phần chính: 🏯 Kỳ viện · ⚔️ Sa trường · 👤 Tôi.** Điện thoại và máy tính dùng **chung một kiểu điều hướng**,
+chỉ khác độ rộng (nội dung tự xếp lại), không đổi vị trí hay cách dùng.
 
-| Mục | Nội dung | Thuộc |
+| Phần | Thẻ con | Nội dung |
 |---|---|---|
-| 📖 Học | 3 thẻ con: Luật · Khai cuộc · Chiến thuật (gồm Sát cục, Tàn cuộc) | Kỳ viện |
-| 🧩 Bài tập | Bài hôm nay, ôn bài sai, danh sách bài theo chủ đề | Kỳ viện |
-| 🤖 Đấu máy | Chọn cấp → ván → phân tích ván | Kỳ viện |
-| ⚔️ Sa trường | 3 thẻ con: Phòng đấu · Bạn bè · Xếp hạng | Sa trường |
-| 👤 Tôi | Hồ sơ, Elo, thống kê, đồng bộ, cài đặt (âm thanh, kiểu quân), đăng xuất | — |
+| 🏯 Kỳ viện | Học luật · Khai cuộc · Chiến thuật · Bài tập · Đấu máy | Học, luyện, đấu với máy, phân tích ván (Chiến thuật gồm Sát cục, Tàn cuộc) |
+| ⚔️ Sa trường | Phòng đấu · Bạn bè · Xếp hạng | Đấu với người, kết bạn, mời đấu, Elo |
+| 👤 Tôi | (không có thẻ con) | Hồ sơ, Elo, thống kê, đồng bộ, cài đặt, tài khoản |
 
-- **Điện thoại (< 768px):** thanh điều hướng dưới cùng 5 mục (biểu tượng + chữ), cố định. Thanh trên cùng gọn:
-  tên mục đang mở, nút ⚙️ cài đặt nhanh (nếu cần), ảnh đại diện / nút "Đăng nhập".
-- **Máy tính (≥ 1024px):** thanh bên trái 240px: logo, nhóm **KỲ VIỆN** (Học, Bài tập, Đấu máy), nhóm **SA TRƯỜNG**
-  (Phòng đấu, Bạn bè, Xếp hạng), cuối thanh là thẻ tài khoản (tên, Elo, trạng thái đồng bộ). Nội dung rộng tối đa 1100px.
-- **Máy tính bảng (768–1023px):** thanh bên thu gọn chỉ còn biểu tượng (72px).
-- Màn đang chơi (bàn cờ) trên điện thoại: bàn cờ chiếm hết chiều ngang, các nút thao tác thành **thanh công cụ dưới bàn**,
-  biên bản và chat nằm trong **ngăn kéo vuốt lên** (bottom sheet) thay vì xếp dài phía dưới.
+**Quy ước chung (mọi màn hình, mọi kích thước):**
+1. **Thanh trên cùng** (cố định khi cuộn): logo 象 + tên app · ba nút phần **Kỳ viện / Sa trường / Tôi** · biểu tượng đồng bộ.
+   Nút "Tôi" là avatar chữ cái khi đã đăng nhập, chữ "Đăng nhập" khi chưa.
+   Điện thoại: ẩn tên app, ba nút phần chia đều chiều ngang (biểu tượng + chữ).
+2. **Hàng thẻ con** ngay dưới thanh trên (cuộn ngang được nếu không đủ chỗ), gạch chân thẻ đang mở.
+3. **Vùng nội dung** rộng tối đa 1100px, căn giữa; lề 16px (điện thoại) / 24px (máy tính).
+4. **Màn có bàn cờ** dùng một bố cục: bàn cờ + **bảng phụ có thẻ** (Biên bản · Giải thích · Chat tuỳ màn).
+   Rộng ≥ 900px: bảng phụ nằm bên phải bàn cờ (360px). Hẹp hơn: bảng phụ nằm ngay dưới bàn cờ — cùng thành phần, chỉ xếp lại.
+   Thanh công cụ của ván (Đi lại, Gợi ý, Lật, Đầu hàng…) luôn nằm **ngay dưới bàn cờ**.
+5. Danh sách dạng **lưới thẻ** tự giãn: 1 cột (hẹp) → 2–3 cột (rộng).
+6. Hộp thoại (đăng nhập, xác nhận…) luôn ở **giữa màn**, rộng tối đa 440px, trên điện thoại chiếm gần hết chiều ngang.
 
 ```plantuml
 @startuml
-[*] --> Shell
-state Shell {
-  [*] --> Hoc
-  Hoc --> BaiTap
+[*] --> KyVien
+state "Kỳ viện" as KyVien {
+  [*] --> HocLuat
+  HocLuat --> KhaiCuoc
+  KhaiCuoc --> ChienThuat
+  ChienThuat --> BaiTap
   BaiTap --> DauMay
-  DauMay --> SaTruong
-  SaTruong --> Toi
-  state Hoc { [*] --> Luat
-    Luat --> KhaiCuoc
-    KhaiCuoc --> ChienThuat }
   state DauMay { [*] --> ChonCap
     ChonCap --> VanDau
     VanDau --> PhanTich }
-  state SaTruong { [*] --> PhongDau
-    PhongDau --> BanBe
-    BanBe --> XepHang
-    PhongDau --> TrongPhong : tạo / vào phòng
-    BanBe --> TrongPhong : mời đấu được nhận
-    TrongPhong --> PhanTich : ván xong → Phân tích }
-  state Toi { [*] --> HoSo
-    HoSo --> DoiMatKhau
-    HoSo --> XoaTaiKhoan }
 }
-Shell --> DangNhap : bấm "Đăng nhập" / hành động cần tài khoản
+state "Sa trường" as SaTruong {
+  [*] --> PhongDau
+  PhongDau --> BanBe
+  BanBe --> XepHang
+  PhongDau --> TrongPhong : tạo / vào phòng
+  BanBe --> TrongPhong : mời đấu được nhận
+}
+state "Tôi" as Toi {
+  [*] --> HoSo
+  HoSo --> DoiMatKhau
+  HoSo --> XoaTaiKhoan
+}
+KyVien --> SaTruong
+SaTruong --> Toi
+TrongPhong --> PhanTich : ván xong → Phân tích
+KyVien --> DangNhap : bấm "Đăng nhập" / hành động cần tài khoản
+SaTruong --> DangNhap
+Toi --> DangNhap
 DangNhap --> DangKy
 DangKy --> MaKhoiPhuc : đăng ký thành công
-MaKhoiPhuc --> Shell : đã lưu mã
+MaKhoiPhuc --> HoSo : đã lưu mã
 DangNhap --> QuenMatKhau
 QuenMatKhau --> DangNhap : đặt lại bằng mã khôi phục
-DangNhap --> Shell : đăng nhập thành công → gộp tiến độ
+DangNhap --> HoSo : đăng nhập thành công → gộp tiến độ
 @enduml
 ```
 
@@ -80,18 +88,17 @@ DangNhap --> Shell : đăng nhập thành công → gộp tiến độ
 
 ## 3. Màn hình
 
-### 3.1 Khung app (Shell)
-- Hiển thị theo mục 2. Mục đang mở được tô màu nhấn (đỏ son `--accent`), có nhãn chữ, không chỉ biểu tượng.
+### 3.1 Khung app
+- Theo quy ước ở mục 2. Phần đang mở tô màu nhấn (đỏ son `--accent`), luôn có chữ kèm biểu tượng.
 - Huy hiệu số trên ⚔️ Sa trường khi có **lời mời đấu** hoặc **lời mời kết bạn** chưa xem.
-- Biểu tượng đồng bộ cạnh ảnh đại diện: ✓ đã đồng bộ · ⟳ đang đồng bộ · ⚠ lỗi (bấm để thử lại).
+- Biểu tượng đồng bộ ở thanh trên: ✓ đã đồng bộ · ⟳ đang đồng bộ · ⚠ lỗi (bấm để thử lại). Ẩn khi chưa đăng nhập.
 - Giữ bộ màu hiện tại (giấy dó / gỗ / đỏ son / ngọc), có chế độ tối; font Be Vietnam Pro + Noto Serif.
 
-### 3.2 Học, Bài tập, Đấu máy (Kỳ viện)
-Giữ nguyên nội dung và chức năng hiện có, chỉ bố trí lại:
-- Danh sách (bài học, thế khai cuộc, bài tập, cấp máy) thành **lưới thẻ**: 1 cột trên điện thoại, 2–3 cột trên máy tính.
-- Màn có bàn cờ dùng **một bố cục chung**: máy tính = bàn cờ bên trái (tối đa 560px) + cột phải 360px (biên bản / giải thích);
-  điện thoại = bàn cờ trên, thanh công cụ ngay dưới bàn, phần còn lại trong ngăn kéo vuốt lên.
-- Phân tích ván: biểu đồ thế cờ + dòng thời gian lỗi giữ như hiện tại; trên điện thoại phần giải thích từng lỗi nằm trong ngăn kéo.
+### 3.2 Kỳ viện
+Giữ nguyên nội dung và chức năng hiện có, chỉ bố trí lại theo quy ước chung:
+- Danh sách (bài học, thế khai cuộc, bài tập, cấp máy) thành lưới thẻ.
+- Màn có bàn cờ: bàn cờ + thanh công cụ ngay dưới + bảng phụ có thẻ (Biên bản · Giải thích / Gợi ý).
+- Phân tích ván: biểu đồ thế cờ + dòng thời gian lỗi; giải thích từng lỗi nằm trong bảng phụ, thẻ "Giải thích".
 
 ### 3.3 Sa trường — Phòng đấu
 | Thành phần | Kiểu | Quy tắc |
@@ -102,7 +109,7 @@ Giữ nguyên nội dung và chức năng hiện có, chỉ bố trí lại:
 | Bạn bè đang online | Danh sách ngang (avatar) | Chỉ hiện khi đã đăng nhập; bấm → mời đấu |
 | Phòng gần đây | Danh sách | Như hiện tại |
 
-**Trong phòng** giữ chức năng hiện có, thêm:
+**Trong phòng** giữ chức năng hiện có (bảng phụ có thẻ Biên bản · Chat), thêm:
 - Tên + Elo của hai người (nếu đăng nhập), nhãn "Tính Elo" / "Giao hữu".
 - Ván tính Elo: **không có xin đi lại**; xin hoà, đầu hàng vẫn có.
 - Đối thủ mất kết nối liên tục **5 phút** trong ván tính Elo → hiện nút "Xử thắng" cho người còn lại.
@@ -126,7 +133,7 @@ Không online thì lời mời nằm ở mục Bạn bè đến khi hết hạn.
 - Chỉ xếp hạng người đã chơi ≥ 5 ván tính Elo (dưới 5 ván ghi "Chưa xếp hạng · còn N ván").
 
 ### 3.6 Đăng ký / Đăng nhập / Quên mật khẩu
-Máy tính: hộp thoại giữa màn (440px). Điện thoại: màn toàn trang.
+Hộp thoại giữa màn (rộng tối đa 440px) trên mọi kích thước.
 
 **Đăng ký**
 | Trường | Kiểu | Bắt buộc | Quy tắc / lỗi |
@@ -238,7 +245,7 @@ Trạng thái online + chuyển lời mời: một Durable Object "Sảnh" giữ
 
 1. **Duyệt spec này** → tạo **Design Instruction** (tiếng Anh) để dán vào Claude in Figma.
 2. Server: tài khoản, phiên, đồng bộ, bạn bè, lời mời, Elo (D1 + Durable Object) — làm song song với thiết kế.
-3. Giao diện mới theo bản thiết kế đã duyệt: khung app, Tôi, Đăng nhập/Đăng ký, Bạn bè, Xếp hạng; bố trí lại các màn cũ.
+3. Giao diện mới theo bản thiết kế đã duyệt: khung app 3 phần, Tôi, Đăng nhập/Đăng ký, Bạn bè, Xếp hạng; bố trí lại các màn cũ.
 4. Test (đơn vị, giao diện, e2e hai trình duyệt) → PR → deploy.
 
 **Bạn cần làm thêm khi tới bước 2:** không cần tạo gì mới — mình thêm D1 vào cấu hình, token Cloudflare hiện tại cần thêm quyền
