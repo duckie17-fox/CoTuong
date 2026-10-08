@@ -21,7 +21,6 @@
       <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
       <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
-    <button type="button" class="sync-ic" id="syncIcon" hidden aria-label="Đồng bộ tiến độ" title="Đồng bộ tiến độ"></button>
   </div>
   <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
@@ -406,7 +405,6 @@
         <div id="olStatus" class="board-caption" aria-live="polite"></div>
         <div id="olToast" class="ol-toast" aria-live="polite" hidden></div>
         <div id="olOffer" aria-live="assertive"></div>
-        <div id="olClaim" class="ol-offer" hidden></div>
         <div class="btn-row btn-row-center mt10" id="olAfter" hidden>
           <button type="button" class="btn btn-primary btn-sm" id="olRematch"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Đấu ván nữa (đổi màu)</button>
           <button type="button" class="btn btn-primary btn-sm" id="olNextMatch" hidden><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Tìm trận mới</button>
@@ -496,11 +494,6 @@
       </div>
     </div>
     <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
-    <div class="card">
-      <h2>Đồng bộ</h2>
-      <p class="hint-text" id="meSyncText"></p>
-      <button type="button" class="btn btn-outline btn-sm" id="meSyncNow"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Đồng bộ ngay</button>
-    </div>
   </div>
   <div class="me-grid">
     <div class="card" id="settingsPanel">
@@ -517,7 +510,7 @@
       </div>
       <p class="hint-text small mt10">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
     </div>
-    <div class="card">
+    <div class="card" id="meTransfer">
       <h2>Chuyển tiến độ sang máy khác</h2>
       <p class="hint-text small" id="progressSummary"></p>
       <div class="btn-row">

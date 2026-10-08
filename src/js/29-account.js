@@ -319,6 +319,7 @@ const Account = (function(){
   function renderMe(){
     const u=st.user;
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
+    $('#meTransfer').hidden=!!u;   // đã có tài khoản thì tiến độ tự đồng bộ, không cần chép mã
     $('#meAuthBtns').hidden=!available();
     const ns=$('#meNoServer'); ns.hidden=available();
     ns.innerHTML = isArtifact() ? `Đăng nhập dùng được ở bản web: <a href="${ONLINE_WEB_URL}" target="_blank" rel="noopener">${ONLINE_WEB_URL}</a>` : 'Chưa kết nối được máy chủ tài khoản nên chưa đăng nhập được.';
@@ -355,8 +356,6 @@ const Account = (function(){
   function initMe(){
     $$('[data-open-login]').forEach(b=>b.addEventListener('click',()=>openLogin()));
     $$('[data-open-register]').forEach(b=>b.addEventListener('click',()=>openRegister()));
-    $('#syncIcon').addEventListener('click',()=>sync());
-    $('#meSyncNow').addEventListener('click',()=>sync());
     $('#meRename').addEventListener('click',()=>{ $('#meRenameForm').hidden=false; $('#meRename').hidden=true; const i=$('#meRenameInput'); i.value=st.user.displayName; i.focus(); i.select(); });
     $('#meRenameCancel').addEventListener('click',()=>{ $('#meRenameForm').hidden=true; $('#meRename').hidden=false; });
     $('#meRenameForm').addEventListener('submit', async e=>{
@@ -456,7 +455,7 @@ const Account = (function(){
   function startInbox(){
     clearInterval(st.inboxTimer);
     if(!signedIn()) return;
-    pollInbox();
+    pollInbox(); loadFriends();
     st.inboxTimer=setInterval(()=>{ if(!document.hidden) pollInbox(); }, 20000);
   }
   async function pollInbox(){
@@ -563,6 +562,40 @@ const Account = (function(){
     });
   }
 
+
+  /* ---------- kết bạn nhanh (từ phòng đấu, bảng xếp hạng) ---------- */
+  const friendSent=new Set();
+  function relationOf(username){
+    if(friendSent.has(username)) return 'sent';
+    const f=st.friends; if(!f) return 'none';
+    if(f.friends.some(x=>x.username===username)) return 'friend';
+    if(f.outgoing.some(x=>x.username===username)) return 'sent';
+    if(f.incoming.some(x=>x.username===username)) return 'received';
+    return 'none';
+  }
+  // Nút kết bạn nhỏ cho một người chơi (rỗng nếu là chính mình / đã là bạn)
+  function friendButtonHTML(username, compact){
+    if(!signedIn() || !username || (st.user && username===st.user.username)) return '';
+    const rel=relationOf(username);
+    if(rel==='friend') return '';
+    if(rel==='sent') return `<span class="add-friend-done" title="Đã gửi lời mời kết bạn">${I('check')}${compact?'':'Đã mời'}</span>`;
+    const label = rel==='received' ? 'Đồng ý kết bạn' : 'Kết bạn';
+    return `<button type="button" class="btn btn-outline btn-sm add-friend${compact?' compact':''}" data-addfriend="${esc(username)}" title="${label}" aria-label="${label}">${I('plus')}${compact?'':label}</button>`;
+  }
+  async function addFriend(username){
+    try{
+      const r=await call('POST','/api/friends',{username});
+      friendSent.add(username);
+      toastMsg(r.relation==='friend' ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời kết bạn.');
+      await loadFriends();
+    }catch(e){ toastMsg(e.message); }
+    document.dispatchEvent(new CustomEvent('friendschange'));
+  }
+  document.addEventListener('click',e=>{
+    const b=e.target.closest && e.target.closest('[data-addfriend]'); if(!b) return;
+    b.disabled=true; addFriend(b.dataset.addfriend);
+  });
+
   /* ---------- xếp hạng ---------- */
   async function loadRank(){
     if(!signedIn()) return;
@@ -571,7 +604,7 @@ const Account = (function(){
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
       <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
-      <span class="rank-elo"><span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}</span></div>`;
+      ${x.me?'':friendButtonHTML(x.username, true)}<span class="rank-elo"><span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}</span></div>`;
     el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
   }
@@ -582,6 +615,7 @@ const Account = (function(){
     initMe();
     $('#friendSearch').addEventListener('input',()=>{ clearTimeout(st.searchTimer); st.searchTimer=setTimeout(search, 300); });
     $$('#rankScope button').forEach(b=>b.addEventListener('click',()=>{ st.rankScope=b.dataset.scope; loadRank(); }));
+    document.addEventListener('friendschange',()=>{ if(!$('[data-stpanel="xephang"]').hidden) loadRank(); });
     document.addEventListener('zoneshown',e=>{
       if(e.detail!=='satruong' || !signedIn()) return;
       if(currentStab==='banbe' || currentStab==='phong') loadFriends();
@@ -591,6 +625,6 @@ const Account = (function(){
     render();
     if(token() && available()){ refreshMe().then(()=>{ if(signedIn()){ sync(); startInbox(); } }); }
   }
-  return {init, sync, signedIn, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
+  return {init, sync, signedIn, friendButtonHTML, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
 })();
 function initAccount(){ Account.init(); }

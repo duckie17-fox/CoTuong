@@ -79,7 +79,6 @@ test('đăng ký trên giao diện: kiểm tra ô nhập, hiện mã khôi phụ
   assert.equal(doc.getElementById('meName').textContent, 'An');
   assert.equal(doc.getElementById('meLabel').textContent, 'Tôi');
   assert.equal(doc.getElementById('meAvatar').textContent, 'AN');
-  assert.equal(doc.getElementById('syncIcon').hidden, false);
   // tiến độ trên máy đã lên máy chủ
   const tok = win.localStorage.getItem('xq_auth');
   await until(async () => true);
@@ -248,4 +247,23 @@ test('bắt buộc đăng nhập: chưa đăng nhập thì che app; đăng nhậ
   const art = load({ fresh: true, setup(w) { w.claude = { use: () => Promise.resolve(null) }; } });
   OPEN.push(art.window);
   assert.equal(art.document.getElementById('authGate').hidden, true, 'Artifact không kết nối được máy chủ: không bắt đăng nhập');
+});
+
+test('kết bạn nhanh từ bảng xếp hạng: bấm + là gửi lời mời, nút đổi thành đã mời', async () => {
+  const be = backend();
+  const other = await be.call('POST', '/api/register', { username: 'cao_thu', displayName: 'Cao Thủ', passHash: ph('cao_thu', 'matkhau123') });
+  await be.env.DB.prepare('UPDATE users SET rated_games=6, elo=1500 WHERE username=?').bind('cao_thu').run();
+  const { document: doc, window: win } = device(be);
+  await registerViaUI(doc, 'hoc_tro', 'Học Trò');
+  await until(() => doc.getElementById('authGate').hidden);
+  doc.querySelector('.zone-btn[data-zone="satruong"]').click();
+  doc.querySelector('.st-btn[data-stab="xephang"]').click();
+  doc.querySelector('#rankScope [data-scope="all"]').click();
+  await until(() => doc.querySelector('#rankList [data-addfriend="cao_thu"]'));
+  doc.querySelector('#rankList [data-addfriend="cao_thu"]').click();
+  await until(() => doc.querySelector('#rankList .add-friend-done'));
+  const fr = await be.call('GET', '/api/friends', null, other.token);
+  assert.deepEqual(fr.incoming.map(u => u.username), ['hoc_tro']);
+  assert.equal(doc.querySelector('#rankList [data-addfriend="hoc_tro"]'), null, 'không có nút kết bạn với chính mình');
+  void win;
 });

@@ -5,11 +5,11 @@
    Người chơi nhận diện bằng "token" bí mật do trình duyệt tạo và giữ —
    mở lại trang hoặc rớt mạng thì vào lại đúng ghế. Không gửi token cho ai khác.
    Người đã đăng nhập (conn.user, do adapter xác thực) thì ghế gắn với tài khoản: vào từ máy khác vẫn đúng ghế.
-   Phòng "Tính Elo": không cho xin đi lại; đối thủ rời ván ≥ 5 phút thì được xử thắng.
+   Phòng "Tính Elo": không cho xin đi lại. Ván không giới hạn thời gian (đối thủ rời đi thì chờ họ quay lại).
    Ván xong → st.report để adapter ghi vào D1 (Accounts.recordGame) rồi gọi setElo().
    ========================================================================= */
 const RoomCore = (function(){
-  const NAME_MAX=24, TEXT_MAX=200, CHAT_MAX=60, MOVES_MAX=600, ABANDON_MS=5*60000;
+  const NAME_MAX=24, TEXT_MAX=200, CHAT_MAX=60, MOVES_MAX=600;
   const SEATS=['red','black'];
   const other = s => s==='red' ? 'black' : 'red';
   const cleanName = s => String(s||'').replace(/[\u0000-\u001f\u007f<>]/g,'').trim().slice(0,NAME_MAX) || 'Kỳ thủ';
@@ -53,7 +53,7 @@ const RoomCore = (function(){
       if(conn.uid) for(const x of SEATS) if(this.st.seats[x] && this.st.seats[x].uid===conn.uid) return x;
       return null;
     }
-    // Adapter báo khi ghế không còn kết nối nào (để tính "rời ván 5 phút")
+    // Adapter báo khi ghế không còn kết nối nào
     markLeft(seat, now){ if(this.st && seat && !this.st.left[seat]){ this.st.left[seat]=now; return true; } return false; }
     markBack(seat){ if(this.st && seat && this.st.left[seat]){ delete this.st.left[seat]; return true; } return false; }
     // Kết quả Elo sau khi adapter ghi ván (r = Accounts.recordGame)
@@ -103,7 +103,6 @@ const RoomCore = (function(){
       return {changed:false};   // phòng đủ người → vào xem
     }
 
-    // ctx: {now, online:{red,black}} — dùng cho "xử thắng" khi đối thủ rời ván
     handle(msg, conn, ctx){
       const st=this.st, g=this.g, seat=this.seatFor(conn);
       if(!st) return {error:'not_found'};
@@ -158,13 +157,6 @@ const RoomCore = (function(){
         st.result={winner:other(seat), reason:'resign'}; st.offer=null; this.finish();
         return {changed:true};
       }
-      if(t==='claim'){
-        const o=other(seat), now=(ctx&&ctx.now)||Date.now(), online=(ctx&&ctx.online)||{};
-        if(!st.rated || st.result || !st.seats[o] || !st.moves.length) return {error:'bad_claim'};
-        if(online[o] || !st.left[o] || now-st.left[o]<ABANDON_MS) return {error:'too_early'};
-        st.result={winner:seat, reason:'abandon'}; st.offer=null; this.finish();
-        return {changed:true};
-      }
       return {error:'unknown'};
     }
     accept(seat){
@@ -198,12 +190,11 @@ const RoomCore = (function(){
       const seat=s=>{ const x=st.seats[s]; if(!x) return null;
         const v={name:x.name, online:!!online[s]};
         if(x.username){ v.username=x.username; v.elo=x.elo; }
-        if(!online[s] && st.left && st.left[s]) v.awaySince=st.left[s];
         return v; };
       return {type:'state', code:st.code, you: you||'spectator', seats:{red:seat('red'), black:seat('black')}, game:st.game,
         moves:st.moves, result:st.result, offer: st.offer ? {kind:st.offer.kind, by:st.offer.by} : null, chat:st.chat, spectators:online.spectators||0,
-        rated:!!st.rated, elo:st.elo||null, abandonMs:ABANDON_MS, serverNow:Date.now()};
+        rated:!!st.rated, elo:st.elo||null};
     }
   }
-  return {Room, fresh, NAME_MAX, TEXT_MAX, ABANDON_MS};
+  return {Room, fresh, NAME_MAX, TEXT_MAX};
 })();
