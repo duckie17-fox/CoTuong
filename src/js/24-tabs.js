@@ -3,6 +3,7 @@
    ========================================================================= */
 const TAB_KEYS = $$('.tab-btn').map(b=>b.dataset.tab);
 function showTab(key, focus){
+  setZoneUI('kyvien');
   TAB_KEYS.forEach(k=>{
     const panel=$(`section[data-panel="${k}"]`), btn=$(`.tab-btn[data-tab="${k}"]`);
     const on = k===key;
@@ -35,3 +36,23 @@ function initTabs(){
   });
 }
 
+/* ---------- Hai khu: Kỳ viện (học, đấu máy, phân tích) và Sa trường (đấu với bạn bè) ---------- */
+let currentZone='kyvien';
+function setZoneUI(z){
+  if(z===currentZone && document.body.dataset.zone===z) return;
+  currentZone=z; document.body.dataset.zone=z;
+  $$('.zone-btn').forEach(b=>b.setAttribute('aria-pressed', b.dataset.zone===z?'true':'false'));
+  $('.tabs').hidden = z!=='kyvien';
+  const sa=$('section[data-zone-panel="satruong"]'); if(sa) sa.hidden = z!=='satruong';
+  if(z!=='kyvien') TAB_KEYS.forEach(k=>{ $(`section[data-panel="${k}"]`).hidden=true; });
+  safeLS_set('xq_zone', z);
+  updateStickyTop();
+}
+function showZone(z){
+  if(z==='kyvien'){ showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc'); return; }
+  setZoneUI(z);
+  document.dispatchEvent(new CustomEvent('zoneshown',{detail:z}));
+}
+function initZones(){
+  $$('.zone-btn').forEach(b=>b.addEventListener('click',()=>{ showZone(b.dataset.zone); }));
+}

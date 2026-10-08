@@ -88,5 +88,17 @@ function updateStickyTop(){
 function thinkStepsHTML(steps){
   return `<ol class="think-steps">${steps.filter(Boolean).map(st=>`<li class="${st.cls||''}"><span class="ts-ic" aria-hidden="true">${st.ic}</span><div><b class="ts-q">${st.q}</b>${st.html}</div></li>`).join('')}</ol>`;
 }
-function lossWords(loss){ return loss<100?'chênh lệch nhỏ':loss<250?'mất lợi thế đáng kể':loss<600?'thiệt hại lớn (tương đương mất một quân nhỏ)':'thiệt hại rất lớn'; }
+// Quy điểm của máy ra lời thường (thang điểm: Tốt ≈ 30, Sĩ/Tượng ≈ 120, Mã/Pháo ≈ 280, Xe ≈ 600)
+function lossWords(loss){
+  return loss<40 ? 'gần như không thiệt' : loss<100 ? 'thiệt nhỏ, cỡ 1–2 Tốt' : loss<250 ? 'thiệt đáng kể, cỡ vài Tốt hoặc một Sĩ/Tượng'
+    : loss<550 ? 'thiệt lớn, cỡ mất một Mã hoặc Pháo' : 'thiệt rất lớn, cỡ mất một Xe trở lên';
+}
+// Thế cờ theo góc nhìn một bên: v > 0 là bên đó đang hơn. who: tên bên đó ("Bạn"/"Đỏ"), opp: tên bên kia
+function evalWords(v, who, opp){
+  if(v>=1900) return `${who} có đòn thắng`;
+  if(v<=-1900) return `${opp} có đòn thắng`;
+  const a=Math.abs(v), side = v>0 ? who : opp;
+  if(a<40) return 'hai bên ngang nhau';
+  return `${side} ${a<100?'hơn một chút':a<250?'hơn rõ (cỡ vài Tốt)':a<550?'hơn nhiều (cỡ một Mã/Pháo)':'hơn rất nhiều (cỡ một Xe)'}`;
+}
 

@@ -12,7 +12,8 @@
   },
   "devDependencies": {
     "jsdom": "^24.1.0",
-    "playwright-core": "^1.63.0"
+    "playwright-core": "^1.63.0",
+    "ws": "^8.22.0"
   },
   "engines": {
     "node": ">=18"

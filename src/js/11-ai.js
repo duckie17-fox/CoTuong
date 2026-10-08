@@ -32,7 +32,7 @@ const AIEngine = (function(){
       const out=[];
       for(let i=0;i<args.positions.length;i++){
         const p=args.positions[i];
-        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks}));
+        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks,rootScores:true}));
         if(onProgress) onProgress(i+1);
         await sleep(0);
       }

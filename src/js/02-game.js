@@ -122,6 +122,7 @@ const Game = (function(){
     'sixty-moves':'60 nước liên tiếp không ăn quân',
     'no-material':'cả hai bên không còn quân tấn công',
     'resign':'đầu hàng',
+    'agreed':'hai bên đồng ý hoà',
   };
   function resultText(res){
     if(!res) return '';

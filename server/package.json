@@ -1,0 +1,13 @@
+{
+  "name": "cotuong-online-server",
+  "private": true,
+  "description": "Server Sa trường (Cloudflare Worker + Durable Object).",
+  "scripts": {
+    "build": "node ../tools/build-server.js",
+    "dev": "node ../tools/build-server.js && wrangler dev",
+    "deploy": "node ../tools/build-server.js && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.40.0"
+  }
+}

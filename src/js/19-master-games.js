@@ -4,14 +4,7 @@
    ========================================================================= */
 const ms = { g:null, game:null, pos:0, widget:null, ctl:null, guess:false, side:'both', right:0, total:0, feedback:'' };
 
-function masterEvalText(e){
-  const v=e/100;
-  if(e>=1900) return 'Đỏ đang có đòn thắng';
-  if(e<=-1900) return 'Đen đang có đòn thắng';
-  if(Math.abs(v)<0.4) return 'hai bên cân bằng';
-  const who=v>0?'Đỏ':'Đen', a=Math.abs(v);
-  return `${who} ${a<1.2?'hơn một chút':a<3?'hơn rõ':'hơn nhiều'} (khoảng ${a.toFixed(1).replace('.',',')} Tốt)`;
-}
+function masterEvalText(e){ return evalWords(e,'Đỏ','Đen'); }
 function masterKeyPlies(g){
   const keys=[];
   g.plies.forEach((p,k)=>{
