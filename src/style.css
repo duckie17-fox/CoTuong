@@ -803,3 +803,4 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
   .ol-player{padding:3px 8px;min-height:36px;}
   .cap{width:18px;height:18px;font-size:11px;}
 }
+.level-opt .lv-tier{color:var(--jade);font-weight:600;}

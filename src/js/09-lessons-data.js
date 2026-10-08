@@ -291,21 +291,21 @@ const LESSONS = [
       '<b>Trung Quốc</b> (Hiệp hội Cờ tướng Trung Quốc) có khoảng 20 bậc, từ thấp lên cao: <b>Kỳ sĩ</b> cấp 16 → cấp 1 (棋士, dành cho người chơi nghiệp dư), <b>Đại sư địa phương</b> (地方大师, trình độ tuyển thủ thành phố/tỉnh), <b>Kỳ hiệp đại sư</b> (棋协大师, cỡ vô địch tỉnh), <b>Đại sư quốc gia</b> (国家大师, ranh giới giữa nghiệp dư và chuyên nghiệp) và cao nhất là <b>Đặc cấp đại sư</b> (特级大师).',
       '<b>Quốc tế</b> (Liên đoàn Cờ tướng Thế giới, WXF) phong các danh hiệu: <b>Kiện tướng Liên đoàn</b>, <b>Kiện tướng quốc tế</b> và <b>Đại kiện tướng quốc tế</b>.',
       '<b>Việt Nam:</b> vận động viên được phong đẳng cấp (như Kiện tướng quốc gia) dựa trên thành tích tại các giải quốc gia; ở quốc tế thì nhận danh hiệu của WXF.',
-      '<b>Cấp độ của máy</b> trong tab Đấu với máy được đặt tên theo thang của Trung Quốc để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>: sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, không phải đo bằng thi đấu thật.'
+      '<b>Cấp độ của máy</b> trong mục Đấu với máy có 10 cấp, đặt tên dễ hiểu (Mới tập → Đại kiện tướng) và ghi bậc hạng tương đương ở Đấu xếp hạng. Sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, chưa đo bằng thi đấu với người thật.'
     ],
     table:{
-      head:['Cấp độ máy','Hình dung (ước lượng, chưa đo với người thật)','Đo bằng máy tự đấu'],
+      head:['Cấp độ máy','Hình dung','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–15)','—'],
-        ['2 · Kỳ sĩ cấp 14–12','Mới chơi vài tháng','thắng cấp 1: ~83%'],
-        ['3 · Kỳ sĩ cấp 11–9','Chơi cờ phong trào','thắng cấp 2: ~84%'],
-        ['4 · Kỳ sĩ cấp 8–7','Phong trào khá','thắng cấp 3: ~75%'],
-        ['5 · Kỳ sĩ cấp 6–5','Giải cấp phường/xã','thắng cấp 4: ~84%'],
-        ['6 · Kỳ sĩ cấp 4–3','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
-        ['7 · Kỳ sĩ cấp 2','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
-        ['8 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
-        ['9 · Ứng viên đại sư','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
-        ['10 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
+        ['1 · Mới tập','Vừa biết luật','—'],
+        ['2 · Làm quen','Mới chơi vài tháng','thắng cấp 1: ~83%'],
+        ['3 · Biết chơi','Chơi cờ phong trào','thắng cấp 2: ~84%'],
+        ['4 · Khá','Phong trào khá','thắng cấp 3: ~75%'],
+        ['5 · Vững vàng','Giải cấp phường/xã','thắng cấp 4: ~84%'],
+        ['6 · Giỏi','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
+        ['7 · Rất giỏi','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
+        ['8 · Cao thủ','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
+        ['9 · Kiện tướng','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
+        ['10 · Đại kiện tướng','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
       ]
     },
     sources:[

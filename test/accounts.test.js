@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const crypto = require('crypto');
 const { loadRoomCore } = require('../tools/build-server');
 const { createD1 } = require('../tools/d1-shim');
-const { Accounts, RoomCore } = loadRoomCore();
+const { Accounts, RoomCore, Ranked } = loadRoomCore();
 
 // "Mật khẩu đã băm ở trình duyệt": ở đây chỉ cần chuỗi hex 64 ký tự
 const ph = pw => crypto.createHash('sha256').update('pw:' + pw).digest('hex');
@@ -318,4 +318,79 @@ test('CORS và lỗi: OPTIONS trả 204, đường dẫn lạ 404, không có DB
   assert.equal(await Accounts.handle(new Request('https://x.test/room/ABC'), s.env), null);
   assert.equal((await Accounts.handle(new Request('https://x.test/api/me'), {})).status, 503);
   assert.equal((await s.call('POST', '/api/login', null)).status, 401);
+});
+
+test('đấu xếp hạng: ghép hai người Elo gần nhau; quá chênh thì không ghép; hết giờ thì ghép máy', async () => {
+  const s = server();
+  const a = await s.register('xh_an'), b = await s.register('xh_binh'), c = await s.register('xh_chi');
+  await s.env.DB.prepare('UPDATE users SET elo=1700 WHERE username=?').bind('xh_chi').run();
+  assert.equal((await s.call('POST', '/api/match/join', null, a.token)).body.status, 'waiting');
+  assert.equal((await s.call('POST', '/api/match/join', null, c.token)).body.status, 'waiting', 'chênh 500 Elo: không ghép');
+  const mb = (await s.call('POST', '/api/match/join', null, b.token)).body;
+  assert.equal(mb.status, 'matched');
+  const ma = (await s.call('POST', '/api/match/join', null, a.token)).body;
+  assert.equal(ma.status, 'matched'); assert.equal(ma.roomCode, mb.roomCode); assert.notEqual(ma.color, mb.color);
+  // người chờ quá 15 giây không còn trong hàng
+  s.tick(20000);
+  const d = await s.register('xh_dung');
+  assert.equal((await s.call('POST', '/api/match/join', null, d.token)).body.status, 'waiting');
+  // hết giờ chờ → máy cấp gần Elo, nick giống người
+  const bot = (await s.call('POST', '/api/match/bot', null, d.token)).body;
+  assert.equal(bot.status, 'bot');
+  assert.equal(bot.game.level, Ranked.botLevelFor(1200));
+  assert.ok(Math.abs(bot.game.botElo - Ranked.BOT_LEVELS[bot.game.level - 1].elo) <= 30);
+  assert.ok(bot.game.botName.length >= 3 && !/máy|bot/i.test(bot.game.botName));
+  // gọi lại khi đang có ván dở → trả lại đúng ván đó
+  assert.equal((await s.call('POST', '/api/match/bot', null, d.token)).body.game.id, bot.game.id);
+});
+
+test('ván xếp hạng với máy: kiểm tra nước đi và kết quả, cộng/trừ Elo, bỏ ván 2 giờ = thua', async () => {
+  const s = server();
+  const a = await s.register('bot_an');
+  const start = async () => (await s.call('POST', '/api/match/bot', null, a.token)).body.game;
+  // nước đi sai luật → từ chối
+  let g = await start();
+  assert.equal((await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: [[9, 0, 5, 0]], reason: 'resign', winner: g.color }, a.token)).body.error, 'bad_game');
+  // tự nhận "máy đầu hàng" khi không hơn quân → từ chối
+  const SEQ = [0, 2, 4, 6, 8].flatMap(c => [[6, c, 5, c], [3, c, 4, c]]);
+  assert.equal((await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: SEQ, reason: 'resign', winner: g.color }, a.token)).body.error, 'bad_result');
+  // mình đầu hàng → thua, bị trừ Elo
+  const other = g.color === 'red' ? 'black' : 'red';
+  const lose = (await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: SEQ.slice(0, 4), reason: 'resign', winner: other }, a.token)).body;
+  assert.equal(lose.result, 'loss'); assert.ok(lose.elo.delta < 0);
+  assert.equal(lose.user.losses, 1); assert.equal(lose.user.ratedGames, 1);
+  // nộp lại không tính hai lần
+  assert.equal((await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: SEQ, reason: 'resign', winner: other }, a.token)).body.already, true);
+  // chiếu bí thật (Pháo + Pháo) → thắng, được cộng Elo
+  g = await start();
+  const eloBefore = (await s.call('GET', '/api/me', null, a.token)).body.user.elo;
+  await s.env.DB.prepare('UPDATE bot_games SET color=? WHERE id=?').bind('red', g.id).run();
+  const MATE = [[7, 1, 7, 4], [2, 1, 2, 6], [7, 4, 3, 4], [0, 8, 1, 8], [7, 7, 5, 7], [2, 6, 6, 6], [5, 7, 5, 4]];   // Đỏ chiếu bí sau 7 nửa nước
+  const win = (await s.call('POST', `/api/match/bot/${g.id}/finish`, { moves: MATE, reason: 'checkmate', winner: 'red' }, a.token)).body;
+  assert.equal(win.result, 'win', JSON.stringify(win));
+  assert.ok(win.user.elo > eloBefore);
+  assert.equal(win.user.wins, 1);
+  // bỏ ván quá 2 giờ → tự tính thua khi hỏi hộp thư
+  g = await start();
+  const before = (await s.call('GET', '/api/me', null, a.token)).body.user;
+  s.tick(2 * 3600000 + 1000);
+  const inbox = (await s.call('GET', '/api/inbox', null, a.token)).body;
+  assert.ok(inbox.user.elo < before.elo);
+  assert.equal(inbox.user.losses, before.losses + 1);
+  const games = (await s.call('GET', '/api/games', null, a.token)).body.games;
+  assert.ok(games.some(x => x.reason === 'abandon'));
+});
+
+test('bậc hạng và cấp máy', () => {
+  assert.equal(Ranked.tierOf(1200).label, 'Vàng II');
+  assert.equal(Ranked.tierOf(850).label, 'Đồng III');
+  assert.equal(Ranked.tierOf(1000).label, 'Bạc III');
+  assert.equal(Ranked.tierOf(1599).label, 'Kim Cương I');
+  assert.equal(Ranked.tierOf(2500).label, 'Thách Đấu');
+  assert.equal(Ranked.BOT_LEVELS.length, 20);
+  assert.equal(Ranked.botLevelFor(600), 1);
+  assert.equal(Ranked.botLevelFor(1200), 7);   // 700+6·85 = 1210
+  assert.equal(Ranked.botLevelFor(3000), 20);
+  const names = new Set(Array.from({ length: 200 }, (_, i) => Ranked.botNick(i * 7919 + 1)));
+  assert.ok(names.size > 150, 'nick đa dạng');
 });

@@ -121,3 +121,10 @@
   mỗi bậc (trừ Kỳ vương) chia III/II/I mỗi 50 điểm; dùng chung Elo (khởi điểm 1200 = Sĩ II). Mỗi cấp máy có Elo cố định ước tính
   (cấp 1: 900 … cấp 10: 2150), ghép máy cấp gần Elo người chơi nhất (hơi cao hơn). Ván xếp hạng với máy: không gợi ý, không đi lại.
   Elo giữa các cấp đo bằng self-play chênh quá lớn (80% ≈ +240) nên phải nén lại; hiệu chỉnh dần theo ván thật.
+
+## 2026-10-08 — Đấu xếp hạng (spec v4, docs/spec-v4-dau-xep-hang.md)
+- Người dùng chốt: Elo chung; chờ người 5–10s (chọn 8s) rồi ghép máy; máy mang nick giống người thật kiểu game thủ Việt;
+  thêm nhiều cấp máy (20 cấp xếp hạng); đổi tên bậc → mình chọn bậc kiểu game Việt (Đồng → Thách Đấu), người dùng có thể đổi.
+- Thiết kế: hàng chờ ghép trận trong D1 (`match_queue`, hỏi định kỳ), không dùng Durable Object; ván với máy chạy trên trình duyệt
+  (dựng "phòng ảo" cùng dạng state với phòng online để dùng chung giao diện), máy chủ kiểm lại nước đi + kết quả khi nộp (`bot_games`).
+- Tên cấp phòng tập đổi thành: Mới tập, Làm quen, Biết chơi, Khá, Vững vàng, Giỏi, Rất giỏi, Cao thủ, Kiện tướng, Đại kiện tướng (người dùng thấy tên thang Trung Quốc khó hiểu); mỗi cấp có elo ước tính để hiện "Ngang bậc …".

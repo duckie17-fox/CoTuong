@@ -86,7 +86,7 @@ const RoomCore = (function(){
         return {changed:true};
       }
       let seat=this.seatFor(conn);
-      if(!seat && msg.create) return {error:'exists', close:true};
+      if(!seat && msg.create && !msg.create.match) return {error:'exists', close:true};   // phòng ghép trận: người thứ hai vào ghế còn lại
       if(seat){
         const cur=this.st.seats[seat];
         let changed=this.markBack(seat);

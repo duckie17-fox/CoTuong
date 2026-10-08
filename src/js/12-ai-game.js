@@ -84,7 +84,7 @@ function aiRender(){
   const el=$('#aiStatus');
   const H=aiGame.humanColor, M=Engine.otherColor(H), over=!!g.result;
   // thanh người chơi: máy ở trên, bạn ở dưới; sáng lên khi tới lượt
-  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(levelInfo(aiGame.level).name), captured:capturedBy(g.moves,M),
+  setPlayerBar($('#aiTop'), {color:M, name:'Máy', sub:esc(`Cấp ${aiGame.level} · ${levelInfo(aiGame.level).name}`), captured:capturedBy(g.moves,M),
     active:!over && turn===M, note: !over && aiGame.thinking ? 'đang nghĩ…' : ''});
   setPlayerBar($('#aiBottom'), {color:H, name:'Bạn', sub:COLOR_VN[H], me:false, captured:capturedBy(g.moves,H),
     active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
@@ -172,7 +172,7 @@ function showAICard(which){
 function renderLevelPicker(){
   const saved=savedAiLevel();
   $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
-    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small></span></label>`).join('');
+    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small><small class="lv-tier">Ngang bậc <b>${esc(Ranked.tierOf(l.elo).label)}</b></small></span></label>`).join('');
 }
 function initAIGame(){
   renderLevelPicker();

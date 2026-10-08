@@ -42,6 +42,9 @@ const Accounts = (function(){
     not_friends:'Hai bạn chưa kết bạn',
     self:'Không thể làm việc này với chính mình',
     too_large:'Dữ liệu quá lớn',
+    bot_daily:'Hôm nay bạn đã đánh đủ số ván xếp hạng, mai quay lại nhé!',
+    bad_game:'Ván cờ không hợp lệ',
+    bad_result:'Kết quả ván không hợp lệ',
     bad_request:'Yêu cầu không hợp lệ',
   };
 
@@ -320,6 +323,8 @@ const Accounts = (function(){
       db.prepare('DELETE FROM progress WHERE user_id=?').bind(u.id),
       db.prepare('DELETE FROM friends WHERE user_a=? OR user_b=?').bind(u.id, u.id),
       db.prepare('DELETE FROM invites WHERE from_user=? OR to_user=?').bind(u.id, u.id),
+      db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id),
+      db.prepare('DELETE FROM bot_games WHERE user_id=?').bind(u.id),
       db.prepare('DELETE FROM users WHERE id=?').bind(u.id),
     ]);
     return json(200, {ok:true});
@@ -417,6 +422,7 @@ const Accounts = (function(){
   route('GET','/api/inbox', async c=>{
     const u=await requireUser(c), db=c.db, now=c.now;
     await db.prepare('DELETE FROM invites WHERE expires_at<?').bind(now-DAY).run();
+    if(await expireBotGames(db, u, now)) Object.assign(u, await userBy(db,'id',u.id));
     const inv=await db.prepare(`SELECT i.*, u.display_name, u.username, u.elo FROM invites i JOIN users u ON u.id=i.from_user
       WHERE i.to_user=? AND i.status='pending' AND i.expires_at>? ORDER BY i.created_at DESC`).bind(u.id, now).all();
     const sent=await db.prepare(`SELECT i.*, u.display_name, u.username FROM invites i JOIN users u ON u.id=i.to_user
@@ -446,6 +452,127 @@ const Accounts = (function(){
     }
     return json(200, {scope, list, me, minGames:RANKED_MIN});
   });
+
+  /* ---------- đấu xếp hạng (spec v4): ghép trận, máy thế chỗ khi vắng người ---------- */
+  const QUEUE_STALE_MS=15000, BOT_STALE_MS=2*HOUR, BOT_DAILY_MAX=30;
+  const PIECE_VAL={R:9, H:4, C:4.5, E:2, A:2, S:1, G:0};
+  // Chênh lệch quân (bên `color` trừ bên kia) — tốt qua sông tính 2
+  function materialDiff(board, color){
+    let d=0;
+    for(let r=0;r<10;r++) for(let c=0;c<9;c++){
+      const p=board[r][c]; if(!p) continue;
+      let v=PIECE_VAL[p.type]||0;
+      if(p.type==='S' && (p.color==='red' ? r<=4 : r>=5)) v=2;
+      d += p.color===color ? v : -v;
+    }
+    return d;
+  }
+  // Cập nhật Elo người chơi sau ván với máy (máy không đổi Elo)
+  async function settleBot(db, bg, u, score, moves, reason, now){
+    const k=kFactor(u.rated_games), d=eloChange(u.elo, bg.bot_elo, score, k), after=u.elo+d;
+    const col = score===1 ? 'wins=wins+1' : score===0 ? 'losses=losses+1' : 'draws=draws+1';
+    const botColor = bg.color==='red' ? 'black' : 'red';
+    const winner = score===1 ? bg.color : score===0 ? botColor : 'draw';
+    const meName=u.display_name;
+    await db.batch([
+      db.prepare(`UPDATE users SET elo=?, peak_elo=MAX(peak_elo,?), rated_games=rated_games+1, ${col} WHERE id=?`).bind(after, after, u.id),
+      db.prepare('UPDATE bot_games SET finished_at=?, result=?, reason=?, elo_before=?, elo_after=? WHERE id=?').bind(now, winner, reason, u.elo, after, bg.id),
+      db.prepare(`INSERT OR IGNORE INTO games (room_code,game_no,red_user,black_user,red_name,black_name,moves,result,reason,rated,
+          elo_red_before,elo_red_after,elo_black_before,elo_black_after,ended_at) VALUES (?,?,?,?,?,?,?,?,?,1,?,?,?,?,?)`)
+        .bind('BOT'+bg.id, 1, bg.color==='red'?u.id:null, bg.color==='black'?u.id:null,
+          bg.color==='red'?meName:bg.bot_name, bg.color==='black'?meName:bg.bot_name, JSON.stringify(moves||[]), winner, reason,
+          bg.color==='red'?u.elo:bg.bot_elo, bg.color==='red'?after:bg.bot_elo, bg.color==='black'?u.elo:bg.bot_elo, bg.color==='black'?after:bg.bot_elo, now),
+    ]);
+    return {before:u.elo, after, delta:d};
+  }
+  // Ván với máy bỏ dở quá 2 giờ = thua (trừ điểm khi bỏ ván)
+  async function expireBotGames(db, u, now){
+    const {results}=await db.prepare('SELECT * FROM bot_games WHERE user_id=? AND finished_at IS NULL AND created_at<?').bind(u.id, now-BOT_STALE_MS).all();
+    for(const bg of results){
+      const fresh=await userBy(db,'id',u.id);
+      await settleBot(db, bg, fresh, 0, [], 'abandon', now);
+    }
+    return results.length;
+  }
+  const queueView = q => q && q.room_code ? {status:'matched', roomCode:q.room_code, color:q.color} : {status:'waiting'};
+  // Vào hàng chờ / hỏi tình trạng: ghép với người đang chờ có Elo chênh ≤ 200
+  route('POST','/api/match/join', async c=>{
+    const u=await requireUser(c), db=c.db, now=c.now;
+    await db.prepare('DELETE FROM match_queue WHERE room_code IS NULL AND seen_at<?').bind(now-QUEUE_STALE_MS).run();
+    let me=await db.prepare('SELECT * FROM match_queue WHERE user_id=?').bind(u.id).first();
+    if(me && me.room_code){ await db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run(); return json(200, queueView(me)); }
+    if(me) await db.prepare('UPDATE match_queue SET seen_at=?, elo=? WHERE user_id=?').bind(now, u.elo, u.id).run();
+    else await db.prepare('INSERT INTO match_queue (user_id,elo,joined_at,seen_at) VALUES (?,?,?,?)').bind(u.id, u.elo, now, now).run();
+    const cand=await db.prepare(`SELECT * FROM match_queue WHERE user_id<>? AND room_code IS NULL AND seen_at>=? AND ABS(elo-?)<=?
+      ORDER BY ABS(elo-?), joined_at LIMIT 1`).bind(u.id, now-QUEUE_STALE_MS, u.elo, Ranked.ELO_RANGE, u.elo).first();
+    if(cand){
+      const code=roomCode(), mine=Math.random()<0.5 ? 'red' : 'black', theirs = mine==='red' ? 'black' : 'red';
+      const r=await db.prepare('UPDATE match_queue SET room_code=?, color=? WHERE user_id=? AND room_code IS NULL').bind(code, theirs, cand.user_id).run();
+      if(r.meta.changes===1){
+        await db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run();
+        return json(200, {status:'matched', roomCode:code, color:mine});
+      }
+    }
+    return json(200, {status:'waiting'});
+  });
+  route('POST','/api/match/cancel', async c=>{
+    const u=await requireUser(c);
+    const me=await c.db.prepare('SELECT * FROM match_queue WHERE user_id=?').bind(u.id).first();
+    await c.db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run();
+    return json(200, me && me.room_code ? queueView(me) : {status:'cancelled'});
+  });
+  // Hết thời gian chờ: ghép máy (trừ khi vừa kịp được ghép với người)
+  route('POST','/api/match/bot', async c=>{
+    const u=await requireUser(c), db=c.db, now=c.now;
+    const me=await db.prepare('SELECT * FROM match_queue WHERE user_id=?').bind(u.id).first();
+    await db.prepare('DELETE FROM match_queue WHERE user_id=?').bind(u.id).run();
+    if(me && me.room_code) return json(200, queueView(me));
+    await expireBotGames(db, u, now);
+    const open=await db.prepare('SELECT * FROM bot_games WHERE user_id=? AND finished_at IS NULL ORDER BY id DESC LIMIT 1').bind(u.id).first();
+    if(open) return json(200, {status:'bot', game:botView(open)});
+    const n=await db.prepare('SELECT COUNT(*) AS n FROM bot_games WHERE user_id=? AND created_at>?').bind(u.id, now-DAY).first('n');
+    if((n||0)>=BOT_DAILY_MAX) throw new ApiError(429,'bot_daily');
+    const fresh=await userBy(db,'id',u.id);
+    const level=Ranked.botLevelFor(fresh.elo), L=Ranked.BOT_LEVELS[level-1];
+    const seed=rand(4).reduce((a,b)=>a*256+b,0);
+    const name=Ranked.botNick(seed), botElo=L.elo+Math.round((rand(1)[0]/255-0.5)*60), color=rand(1)[0]<128 ? 'red' : 'black';
+    const r=await db.prepare('INSERT INTO bot_games (user_id,level,bot_name,bot_elo,color,created_at) VALUES (?,?,?,?,?,?)').bind(u.id, level, name, botElo, color, now).run();
+    return json(201, {status:'bot', game:botView(await db.prepare('SELECT * FROM bot_games WHERE id=?').bind(r.meta.last_row_id).first())});
+  });
+  function botView(bg){ return {id:bg.id, level:bg.level, botName:bg.bot_name, botElo:bg.bot_elo, color:bg.color, createdAt:bg.created_at}; }
+  // Nộp kết quả ván với máy: phát lại nước đi để kiểm tra, rồi tính Elo
+  route('POST','/api/match/bot/:id/finish', async c=>{
+    const u=await requireUser(c), b=await body(c.req), db=c.db, now=c.now;
+    const bg=await db.prepare('SELECT * FROM bot_games WHERE id=? AND user_id=?').bind(+c.params.id, u.id).first();
+    if(!bg) throw new ApiError(404,'not_found');
+    if(bg.finished_at) return json(200, {result:bg.result, elo:{before:bg.elo_before, after:bg.elo_after, delta:bg.elo_after-bg.elo_before}, already:true});
+    const moves=Array.isArray(b.moves) ? b.moves : null;
+    if(!moves || moves.length>600) throw new ApiError(400,'bad_request');
+    const g=Game.create();
+    for(const m of moves){
+      if(!Array.isArray(m) || m.length!==4 || g.result) throw new ApiError(400,'bad_game');
+      const ok=g.legalMoves().some(x=>x.from[0]===m[0]&&x.from[1]===m[1]&&x.to[0]===m[2]&&x.to[1]===m[3]);
+      if(!ok) throw new ApiError(400,'bad_game');
+      g.play({from:[m[0],m[1]], to:[m[2],m[3]]});
+    }
+    const me=bg.color, bot = me==='red' ? 'black' : 'red', reason=String(b.reason||'');
+    let score;
+    if(g.result){                                   // kết quả tự nhiên phải khớp phát lại
+      score = !g.result.winner ? 0.5 : g.result.winner===me ? 1 : 0;
+    } else if(reason==='resign' && b.winner===bot){ score=0; }          // mình đầu hàng
+    else if(reason==='resign' && b.winner===me){                         // máy đầu hàng: chỉ nhận khi mình hơn rõ
+      if(materialDiff(g.board(), me)<6) throw new ApiError(400,'bad_result');
+      score=1;
+    } else if(reason==='agreed' && !b.winner){                           // hoà thoả thuận
+      if(moves.length<60 || Math.abs(materialDiff(g.board(), me))>2) throw new ApiError(400,'bad_result');
+      score=0.5;
+    } else throw new ApiError(400,'bad_result');
+    if(score===1 && !g.result && moves.length<MIN_RATED_PLIES) throw new ApiError(400,'bad_result');   // máy đầu hàng quá sớm: không nhận
+    const fresh=await userBy(db,'id',u.id);
+    const elo=await settleBot(db, bg, fresh, score, moves, g.result ? g.result.reason : reason, now);
+    return json(200, {result: score===1?'win':score===0?'loss':'draw', elo, user:profile(await userBy(db,'id',u.id))});
+  });
+
   route('GET','/api/games', async c=>{
     const u=await requireUser(c);
     const {results}=await c.db.prepare('SELECT * FROM games WHERE red_user=? OR black_user=? ORDER BY ended_at DESC LIMIT 50').bind(u.id, u.id).all();
