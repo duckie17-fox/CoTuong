@@ -10,6 +10,7 @@ function initSettings(){
 initTabs();
 updateStickyTop(); window.addEventListener('resize', updateStickyTop);
 initSettings();
+initUxSettings();
 buildLegend();
 initOpenings();
 initMasters();
@@ -18,5 +19,6 @@ initAIGame();
 AIEngine.init();
 initTactics();
 initPuzzles();
+initLearn();
 showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
 

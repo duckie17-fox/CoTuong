@@ -108,6 +108,9 @@ function createBoardWidget(container, opts){
   const arrowsG = svgEl('g',{class:'xq-arrows'});
   svg.appendChild(overlayG); svg.appendChild(piecesG); svg.appendChild(arrowsG);
   container.appendChild(svg);
+  // Thông báo cho trình đọc màn hình khi di chuyển con trỏ bàn phím
+  const live = document.createElement('span'); live.className='sr-only'; live.setAttribute('aria-live','polite');
+  container.appendChild(live);
 
   // toạ độ bàn (r,c) -> toạ độ màn hình, có tính lật bàn
   function ptxy(r,c){ return flipped ? P(9-r,8-c) : P(r,c); }
@@ -150,6 +153,7 @@ function createBoardWidget(container, opts){
     opts.onSquareClick(r,c);
   });
 
+  let pieceEls={};
   function drawPiece(p,r,c){
     const {x,y}=ptxy(r,c);
     const g = svgEl('g',{class:`xq-piece xq-${p.color}`,transform:`translate(${x},${y})`});
@@ -163,6 +167,7 @@ function createBoardWidget(container, opts){
     const title = svgEl('title',{}); title.textContent = `${VN_NAME[p.type]} ${p.color==='red'?'Đỏ':'Đen'}`;
     g.appendChild(title);
     piecesG.appendChild(g);
+    pieceEls[r*9+c]=g;
   }
 
   function drawArrow(a){
@@ -173,9 +178,18 @@ function createBoardWidget(container, opts){
       'marker-end':`url(#${uid}-${a.alt?'arrowAlt':'arrow'})`}));
   }
 
+  const ANIM_MS=200; let anim=null;
+  const sameMv=(a,b)=>a&&b&&a.from[0]===b.from[0]&&a.from[1]===b.from[1]&&a.to[0]===b.to[0]&&a.to[1]===b.to[1];
+  // Nước vừa đi có phải là bước TIẾN mới từ bàn đang hiển thị không (để chạy hiệu ứng + âm thanh)?
+  function freshMove(prev, prevMeta, board, lm){
+    if(!lm || !prev || sameMv(prevMeta&&prevMeta.lastMove, lm)) return false;
+    const a=prev[lm.from[0]][lm.from[1]], b=board[lm.to[0]][lm.to[1]];
+    return !!(a && b && a.type===b.type && a.color===b.color && !board[lm.from[0]][lm.from[1]]);
+  }
   function setBoard(board, meta){
+    const prevBoard=lastBoard, prevMeta=lastMeta;
     lastBoard = board; lastMeta = meta = meta || {};
-    piecesG.innerHTML=''; overlayG.innerHTML=''; arrowsG.innerHTML='';
+    piecesG.innerHTML=''; overlayG.innerHTML=''; arrowsG.innerHTML=''; pieceEls={};
     if(meta.lastMove){
       for(const sq of [meta.lastMove.from, meta.lastMove.to]){
         const {x,y}=ptxy(sq[0],sq[1]);
@@ -203,6 +217,67 @@ function createBoardWidget(container, opts){
       overlayG.appendChild(svgEl('circle',{cx:x,cy:y,r:PIECE_R+9,class:'xq-check-ring'}));
     }
     if(meta.arrows) meta.arrows.forEach(drawArrow);
+    if(cursor && kbd && document.activeElement===svg){
+      const {x,y}=P(cursor[0],cursor[1]);
+      overlayG.appendChild(svgEl('circle',{cx:x,cy:y,r:PIECE_R+3,class:'xq-cursor'}));
+    }
+    const lm=meta.lastMove, fresh=!meta.silent && freshMove(prevBoard, prevMeta, board, lm);
+    if(fresh) anim={mv:lm, t0:Date.now()};
+    // Chạy (hoặc chạy tiếp nếu bàn vừa bị vẽ lại giữa chừng) hiệu ứng quân trượt tới ô mới
+    if(anim && sameMv(anim.mv,lm) && Date.now()-anim.t0<ANIM_MS){
+      const g=pieceEls[lm.to[0]*9+lm.to[1]];
+      if(g && g.animate && !prefersReducedMotion()){
+        const s=ptxy(lm.from[0],lm.from[1]), t=ptxy(lm.to[0],lm.to[1]);
+        piecesG.appendChild(g); // quân đang đi nằm trên cùng
+        try{ const a=g.animate([{transform:`translate(${s.x}px,${s.y}px)`},{transform:`translate(${t.x}px,${t.y}px)`}],{duration:ANIM_MS,easing:'cubic-bezier(.2,.7,.3,1)'}); a.currentTime=Date.now()-anim.t0; }catch(e){}
+      }
+    } else anim=null;
+    if(fresh){
+      if(typeof Sound!=='undefined'){
+        const over = meta.checkSq && Engine.generateLegalMoves(board, board[meta.checkSq[0]][meta.checkSq[1]].color).length===0;
+        Sound.play(over?'end': meta.checkSq?'check' : prevBoard[lm.to[0]][lm.to[1]]?'capture':'move');
+      }
+    }
+  }
+
+  // ---------- Bàn phím: Tab vào bàn, mũi tên di chuyển, Enter/Space để bấm ô ----------
+  let cursor=null; // toạ độ MÀN HÌNH [hàng, cột]
+  // Chỉ hiện con trỏ khi đang dùng bàn phím. Không vẽ lại bàn khi nhận focus bằng chuột:
+  // thay phần tử ngay giữa lúc nhấn/thả chuột sẽ làm trình duyệt bỏ sự kiện click.
+  let kbd=false;
+  const focusVisible=()=>{ try{ return svg.matches(':focus-visible'); }catch(e){ return false; } };
+  const redraw=()=>{ if(lastBoard) setBoard(lastBoard,Object.assign({},lastMeta,{silent:true})); };
+  const toBoard=(sr,sc)=> flipped ? [9-sr,8-sc] : [sr,sc];
+  function announce(){
+    if(!cursor || !lastBoard) return;
+    const [r,c]=toBoard(cursor[0],cursor[1]), p=lastBoard[r][c];
+    const bottom = flipped ? Engine.BLACK : Engine.RED;
+    const rowFromBottom = 10-cursor[0];
+    live.textContent = `Cột ${Notation.fileOf(c,bottom)}, hàng ${rowFromBottom}: ${p?VN_NAME[p.type]+' '+(p.color==='red'?'Đỏ':'Đen'):'trống'}`;
+  }
+  if(opts.onSquareClick){
+    svg.setAttribute('tabindex','0');
+    svg.setAttribute('role','application');
+    svg.setAttribute('aria-roledescription','bàn cờ');
+    const startKbd=()=>{
+      if(!cursor){ const sel=lastMeta&&lastMeta.selected; cursor = sel ? (flipped?[9-sel[0],8-sel[1]]:sel.slice()) : [7,4]; }
+      if(!kbd){ kbd=true; redraw(); }
+    };
+    svg.addEventListener('focus',()=>{ if(focusVisible()){ startKbd(); announce(); } });
+    svg.addEventListener('blur',()=>{ if(kbd){ kbd=false; redraw(); } });
+    svg.addEventListener('pointerdown',()=>{ if(kbd){ kbd=false; } });
+    svg.addEventListener('keydown',(e)=>{
+      const D={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];
+      if(D || e.key==='Enter' || e.key===' ') startKbd();
+      if(D){
+        e.preventDefault();
+        cursor=[Math.max(0,Math.min(9,cursor[0]+D[0])), Math.max(0,Math.min(8,cursor[1]+D[1]))];
+        redraw(); announce();
+      } else if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        const [r,c]=toBoard(cursor[0],cursor[1]); opts.onSquareClick(r,c); announce();
+      }
+    });
   }
   function rerender(){ drawStatic(); if(lastBoard) setBoard(lastBoard,lastMeta); }
   function setFlipped(f){ f=!!f; if(f===flipped) return; flipped=f; rerender(); }

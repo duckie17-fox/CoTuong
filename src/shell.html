@@ -23,6 +23,30 @@
       <button type="button" data-style="han" title="Quân chữ Hán truyền thống">帥 Hán</button>
       <button type="button" data-style="vn" title="Quân ghi tên tiếng Việt">Việt</button>
     </div>
+    <details class="settings-menu" id="settingsPanel">
+      <summary aria-label="Cài đặt và tiến độ" title="Cài đặt và tiến độ">⚙️</summary>
+      <div class="settings-pop">
+        <div class="settings-row"><span>Âm thanh nước đi</span>
+          <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
+            <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
+          </div>
+        </div>
+        <p class="hint-text small">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+        <h4>Tiến độ học</h4>
+        <p class="hint-text small" id="progressSummary"></p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline btn-sm" id="progressCopy">📋 Sao chép mã</button>
+          <button type="button" class="btn btn-outline btn-sm" id="progressDownload">⬇ Tải tệp</button>
+        </div>
+        <label class="hint-text small" for="progressText">Chuyển sang máy khác: dán mã (hoặc chọn tệp) rồi bấm Nhập.</label>
+        <textarea id="progressText" rows="3" spellcheck="false" placeholder='{"app":"co-tuong-nhap-mon",…}'></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary btn-sm" id="progressImport">⬆ Nhập</button>
+          <label class="btn btn-outline btn-sm file-btn">📂 Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
+        </div>
+        <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+      </div>
+    </details>
   </div>
   <nav class="tabs" role="tablist" aria-label="Chọn phần học">
     <button class="tab-btn" data-tab="hoc" role="tab">📖 Học luật</button>
@@ -35,6 +59,10 @@
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
+  <div class="card" id="progressCard">
+    <h2>📈 Tiến độ của bạn</h2>
+    <div id="progressDash"></div>
+  </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
     <p class="serif">Cờ tướng chơi trên bàn 9 cột × 10 hàng. Quân cờ <b>đứng trên giao điểm của các đường kẻ</b>, không phải trong ô như cờ vua. Ở giữa bàn cờ có một khoảng trống gọi là <b>sông</b> (chia bàn cờ thành lãnh thổ Đỏ và Đen). Mỗi bên có một cung nhỏ 3×3 ở giữa hàng cuối gọi là <b>cung</b> (vẽ hình chữ X) — nơi Tướng và Sĩ phải luôn ở trong đó.</p>
@@ -95,6 +123,10 @@
           <button class="btn btn-outline" id="masterFlip" aria-label="Lật bàn">⇅</button>
         </div>
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn">♟ Đấu với máy từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn">📋 FEN</button>
+        </div>
         <div id="masterDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -172,7 +204,13 @@
         <label><input type="radio" name="aiColor" value="black"><span>Đen</span></label>
       </div>
     </fieldset>
+    <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn">▶ Bắt đầu ván mới</button>
+    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ (FEN)</summary>
+      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
+      <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
+      <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn">▶ Bắt đầu từ FEN</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
+    </details>
     <h3 class="group-h mt16">🗂 Lịch sử ván</h3>
     <div id="aiHistory"></div>
   </div>
@@ -194,7 +232,7 @@
           <div id="aiBoard"></div>
         </div>
         <div id="aiStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button></div>
+        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button><button type="button" class="btn btn-outline" id="aiFenBtn">📋 FEN</button></div>
       </div>
       <div class="play-side">
         <h3 class="side-h">Biên bản</h3>
@@ -223,6 +261,10 @@
           <span class="tb-extra" id="reviewTools"></span>
         </div>
         <div class="board-shell board-card"><div id="reviewBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem">♟ Thử lại từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn">📋 FEN</button>
+        </div>
         <div id="reviewDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -271,6 +313,7 @@
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
     <p>Chọn một thế cờ và tìm nước đi đúng. Đến lượt bạn, hãy suy nghĩ kỹ trước khi đi! Bài nào có nhiều cách giải đúng thì cách nào cũng được tính.</p>
+    <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
     <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn">🎲 Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
@@ -292,6 +335,10 @@
       <div id="puzzleBoard"></div>
     </div>
     <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
+    <div class="btn-row btn-row-center mt10">
+      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn">♟ Đấu với máy từ thế này</button>
+      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn">📋 FEN</button>
+    </div>
     <div id="puzzleExplain" class="explain-box mt10" hidden></div>
   </div>
 </section>

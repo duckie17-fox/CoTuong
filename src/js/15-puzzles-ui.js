@@ -10,12 +10,14 @@ function markPuzzleSolved(id){
   if(!done.includes(id)){ done.push(id); safeLS_set('xq_puzzles_solved', JSON.stringify(done)); }
 }
 function puzzleList(){
+  if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
   return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff));
 }
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+  const due=Learn.due().length;
+  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','🔁 Cần ôn',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
     <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
@@ -37,6 +39,7 @@ function renderPuzzleGrid(){
 }
 function openPuzzle(id){
   pz.active = PUZZLES.find(p=>p.id===id);
+  pz.recorded=false; pz.usedHint=false;   // kết quả lần mở bài này (để ôn bài sai)
   $('#puzzleListCard').hidden = true;
   $('#puzzleDetailCard').hidden = false;
   $('#puzzleTitle').textContent = pz.active.title;
@@ -106,17 +109,25 @@ function puzzleExplainText(){
   const g=pz.targetGain!=null?Math.round(pz.targetGain):null;
   return `Vì sao đúng: nước này ${why.join('; ')||'tạo đòn'}${g!=null?`. Sau khi đối phương đáp tốt nhất, bạn vẫn lãi khoảng ${g} điểm quân`:''}. ${p.type==='fork'?'Bắt đôi hiệu quả vì đối phương chỉ cứu được một quân mỗi lượt.':Coach.QUESTIONS['missed-capture']}`;
 }
+// Ghi kết quả lần đầu của mỗi lần mở bài (đúng ngay / đúng nhờ gợi ý / sai) cho lịch ôn tập
+function puzzleRecord(outcome){
+  if(pz.recorded) return; pz.recorded=true;
+  Learn.record(pz.active.id, outcome);
+}
 function puzzleSuccess(){
   pz.locked=true;
   markPuzzleSolved(pz.active.id);
+  puzzleRecord(pz.peeked?'fail':pz.usedHint?'help':'ok');
+  const daily = !pz.peeked && Learn.markDailyDone(pz.active.id);
   if(pz.random && !pz.peeked){ pz.streak=(pz.streak||0)+1; }
-  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:''));
+  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` 🌅 Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
   pz.ctl.render();
 }
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
+  puzzleRecord('fail');
   statusBanner($('#puzzleStatus'),'fail',msg||'✘ Chưa đúng. Thử lại nhé!');
   pz.ctl.render();
   const token = pz.token = {};
@@ -213,10 +224,10 @@ function initPuzzles(){
   $('#puzzleRandomBtn').addEventListener('click',()=>{ pz.random=true; pz.streak=0; const p=puzzlePickRandom(); if(p) openPuzzle(p.id); });
   $('#puzzleBackBtn').addEventListener('click', ()=>{ pz.random=false; $('#puzzleListCard').hidden=false; $('#puzzleDetailCard').hidden=true; renderPuzzleGrid(); });
   $('#puzzleRetryBtn').addEventListener('click', puzzleResetBoard);
-  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
+  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.usedHint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
   $('#puzzleNextBtn').addEventListener('click', puzzleNext);
   $('#puzzleAnswerBtn').addEventListener('click', ()=>{
-    puzzleResetBoard(); pz.peeked=true; revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
+    puzzleResetBoard(); pz.peeked=true; puzzleRecord('fail'); revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
     const p=pz.active, sol=p.solution;
     const d=Notation.describe(p.board,sol);
     pz.locked=true; pz.arrows=[{from:sol.from,to:sol.to}];

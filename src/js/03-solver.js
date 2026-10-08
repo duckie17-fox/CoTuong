@@ -82,14 +82,16 @@ const Solver = (function(){
   function material(board,color){
     let s=0; for(const row of board) for(const p of row) if(p) s+=(p.color===color?1:-1)*VAL[p.type]; return s;
   }
-  function materialSearch(board,color,depth,alpha,beta){
+  // Bản chạy nhanh nằm trong XQSearch (cùng kết quả); bản dưới giữ làm tham chiếu cho test.
+  function materialSearch(board,color,depth){ return XQSearch.materialSearch(board,color,depth); }
+  function materialSearchRef(board,color,depth,alpha,beta){
     if(alpha===undefined){ alpha=-Infinity; beta=Infinity; }
     const moves=Engine.generateLegalMoves(board,color);
     if(moves.length===0) return -1000-depth;
     if(depth===0) return material(board,color);
     let best=-Infinity;
     for(const m of moves){
-      const s=-materialSearch(Engine.applyMove(board,m),Engine.otherColor(color),depth-1,-beta,-alpha);
+      const s=-materialSearchRef(Engine.applyMove(board,m),Engine.otherColor(color),depth-1,-beta,-alpha);
       if(s>best) best=s; if(best>alpha) alpha=best; if(alpha>=beta) break;
     }
     return best;
@@ -143,6 +145,6 @@ const Solver = (function(){
     const first=Notation.describe(board,move).short;
     return `Nước đầu ${first}${Engine.isInCheck(after,opp)?' (chiếu)':' (nước êm, không chiếu)'}. Đối phương có ${uniq.length} cách đáp và cách nào cũng bị chiếu bí: `+uniq.slice(0,6).join('; ')+(uniq.length>6?'; …':'')+'.';
   }
-  return {findMate, bestDefense, mateLine, materialSearch, material, explainMate, explainMate2, MATE};
+  return {findMate, bestDefense, mateLine, materialSearch, materialSearchRef, material, explainMate, explainMate2, MATE};
 })();
 

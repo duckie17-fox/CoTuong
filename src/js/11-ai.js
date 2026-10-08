@@ -2,6 +2,8 @@
    AI — chạy XQSearch trong Web Worker (tạo từ Blob) để giao diện không bị đơ.
    Nếu trình duyệt/trang chặn Worker, tự chuyển sang chạy trên luồng chính.
    ========================================================================= */
+// Mã nguồn Web Worker: build (tools/build.js) tự sinh từ 04-xqsearch.js + worker-shim.js
+/*@@WORKER@@*/
 const AIEngine = (function(){
   let worker=null, mode='main', seq=0;
   const pending=new Map();
@@ -30,7 +32,7 @@ const AIEngine = (function(){
       const out=[];
       for(let i=0;i<args.positions.length;i++){
         const p=args.positions[i];
-        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys}));
+        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks}));
         if(onProgress) onProgress(i+1);
         await sleep(0);
       }

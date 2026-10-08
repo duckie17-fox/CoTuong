@@ -502,6 +502,45 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 #puzzleExplain{font-family:inherit;}
 #puzzleExplain .think-steps li{background:var(--card);}
 
+
+/* ---------- Cài đặt & tiến độ ---------- */
+.settings-menu{position:relative;flex:none;}
+.settings-menu summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:18px;}
+.settings-menu summary::-webkit-details-marker{display:none;}
+.settings-menu summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.settings-menu[open] summary{background:var(--paper-2);}
+.settings-pop{position:absolute;right:0;top:48px;z-index:50;width:min(340px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px var(--shadow);display:flex;flex-direction:column;gap:8px;}
+.settings-pop h4{margin:6px 0 0;font-size:14px;}
+.settings-pop p{margin:0;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;}
+.settings-pop textarea{width:100%;font:12px ui-monospace,Menlo,monospace;color:var(--ink);background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;resize:vertical;}
+.file-btn{position:relative;overflow:hidden;}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.msg-good{color:var(--jade);} .msg-bad{color:var(--accent);}
+
+/* ---------- Bàn cờ: bàn phím ---------- */
+.xq-board-svg:focus{outline:none;}
+.xq-board-svg:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:14px;}
+.xq-cursor{fill:none;stroke:var(--gold);stroke-width:3.5;stroke-dasharray:6 4;}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ---------- Học tập: tiến độ, bài hôm nay, gợi ý ---------- */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.dash-tile{background:var(--paper-2);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.dash-tile b{font-size:20px;}
+.dash-tile span{font-size:12.5px;color:var(--ink-soft);}
+.pbar{display:block;height:6px;border-radius:4px;background:color-mix(in srgb, var(--ink) 10%, transparent);overflow:hidden;flex:1;min-width:60px;}
+.pbar span{display:block;height:100%;background:var(--jade);}
+.dash-more{margin-top:10px;}
+.dash-more summary{cursor:pointer;font-weight:700;font-size:13.5px;}
+.dash-topics{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;}
+.dash-topics li{display:grid;grid-template-columns:minmax(0,150px) 1fr 52px;align-items:center;gap:8px;font-size:13px;}
+.dash-topics small{text-align:right;color:var(--ink-soft);}
+.daily-card .daily-inner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:color-mix(in srgb, var(--gold) 14%, transparent);border-radius:12px;padding:10px 12px;margin:8px 0;}
+.suggest-box{background:color-mix(in srgb, var(--jade) 14%, transparent);border-radius:10px;padding:8px 12px;margin-top:10px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.fen-box summary{cursor:pointer;font-weight:700;font-size:14px;}
+.fen-box input{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;margin-top:6px;}
+.status-banner code{font-size:11.5px;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -517,6 +556,30 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
       <button type="button" data-style="han" title="Quân chữ Hán truyền thống">帥 Hán</button>
       <button type="button" data-style="vn" title="Quân ghi tên tiếng Việt">Việt</button>
     </div>
+    <details class="settings-menu" id="settingsPanel">
+      <summary aria-label="Cài đặt và tiến độ" title="Cài đặt và tiến độ">⚙️</summary>
+      <div class="settings-pop">
+        <div class="settings-row"><span>Âm thanh nước đi</span>
+          <div class="seg" id="soundToggle" role="group" aria-label="Âm thanh nước đi">
+            <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
+          </div>
+        </div>
+        <p class="hint-text small">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+        <h4>Tiến độ học</h4>
+        <p class="hint-text small" id="progressSummary"></p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline btn-sm" id="progressCopy">📋 Sao chép mã</button>
+          <button type="button" class="btn btn-outline btn-sm" id="progressDownload">⬇ Tải tệp</button>
+        </div>
+        <label class="hint-text small" for="progressText">Chuyển sang máy khác: dán mã (hoặc chọn tệp) rồi bấm Nhập.</label>
+        <textarea id="progressText" rows="3" spellcheck="false" placeholder='{"app":"co-tuong-nhap-mon",…}'></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary btn-sm" id="progressImport">⬆ Nhập</button>
+          <label class="btn btn-outline btn-sm file-btn">📂 Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
+        </div>
+        <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+      </div>
+    </details>
   </div>
   <nav class="tabs" role="tablist" aria-label="Chọn phần học">
     <button class="tab-btn" data-tab="hoc" role="tab">📖 Học luật</button>
@@ -529,6 +592,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
+  <div class="card" id="progressCard">
+    <h2>📈 Tiến độ của bạn</h2>
+    <div id="progressDash"></div>
+  </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
     <p class="serif">Cờ tướng chơi trên bàn 9 cột × 10 hàng. Quân cờ <b>đứng trên giao điểm của các đường kẻ</b>, không phải trong ô như cờ vua. Ở giữa bàn cờ có một khoảng trống gọi là <b>sông</b> (chia bàn cờ thành lãnh thổ Đỏ và Đen). Mỗi bên có một cung nhỏ 3×3 ở giữa hàng cuối gọi là <b>cung</b> (vẽ hình chữ X) — nơi Tướng và Sĩ phải luôn ở trong đó.</p>
@@ -589,6 +656,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <button class="btn btn-outline" id="masterFlip" aria-label="Lật bàn">⇅</button>
         </div>
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn">♟ Đấu với máy từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn">📋 FEN</button>
+        </div>
         <div id="masterDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -666,7 +737,13 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
         <label><input type="radio" name="aiColor" value="black"><span>Đen</span></label>
       </div>
     </fieldset>
+    <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn">▶ Bắt đầu ván mới</button>
+    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ (FEN)</summary>
+      <p class="hint-text small">Dán chuỗi FEN (chuẩn UCCI/WXF, vd. sao chép từ nút 📋 FEN ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
+      <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
+      <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn">▶ Bắt đầu từ FEN</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
+    </details>
     <h3 class="group-h mt16">🗂 Lịch sử ván</h3>
     <div id="aiHistory"></div>
   </div>
@@ -688,7 +765,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <div id="aiBoard"></div>
         </div>
         <div id="aiStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button></div>
+        <div class="btn-row btn-row-center mt10"><button class="btn btn-jade" id="aiReviewBtn">📊 Phân tích ván</button><button type="button" class="btn btn-outline" id="aiFenBtn">📋 FEN</button></div>
       </div>
       <div class="play-side">
         <h3 class="side-h">Biên bản</h3>
@@ -717,6 +794,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
           <span class="tb-extra" id="reviewTools"></span>
         </div>
         <div class="board-shell board-card"><div id="reviewBoard"></div></div>
+        <div class="btn-row btn-row-center mt10">
+          <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem">♟ Thử lại từ thế này</button>
+          <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn">📋 FEN</button>
+        </div>
         <div id="reviewDetail" class="review-detail" aria-live="polite"></div>
       </div>
       <div class="play-side">
@@ -765,6 +846,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
     <p>Chọn một thế cờ và tìm nước đi đúng. Đến lượt bạn, hãy suy nghĩ kỹ trước khi đi! Bài nào có nhiều cách giải đúng thì cách nào cũng được tính.</p>
+    <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
     <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn">🎲 Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
@@ -786,6 +868,10 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
       <div id="puzzleBoard"></div>
     </div>
     <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
+    <div class="btn-row btn-row-center mt10">
+      <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn">♟ Đấu với máy từ thế này</button>
+      <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn">📋 FEN</button>
+    </div>
     <div id="puzzleExplain" class="explain-box mt10" hidden></div>
   </div>
 </section>
@@ -1257,14 +1343,16 @@ const Solver = (function(){
   function material(board,color){
     let s=0; for(const row of board) for(const p of row) if(p) s+=(p.color===color?1:-1)*VAL[p.type]; return s;
   }
-  function materialSearch(board,color,depth,alpha,beta){
+  // Bản chạy nhanh nằm trong XQSearch (cùng kết quả); bản dưới giữ làm tham chiếu cho test.
+  function materialSearch(board,color,depth){ return XQSearch.materialSearch(board,color,depth); }
+  function materialSearchRef(board,color,depth,alpha,beta){
     if(alpha===undefined){ alpha=-Infinity; beta=Infinity; }
     const moves=Engine.generateLegalMoves(board,color);
     if(moves.length===0) return -1000-depth;
     if(depth===0) return material(board,color);
     let best=-Infinity;
     for(const m of moves){
-      const s=-materialSearch(Engine.applyMove(board,m),Engine.otherColor(color),depth-1,-beta,-alpha);
+      const s=-materialSearchRef(Engine.applyMove(board,m),Engine.otherColor(color),depth-1,-beta,-alpha);
       if(s>best) best=s; if(best>alpha) alpha=best; if(alpha>=beta) break;
     }
     return best;
@@ -1318,7 +1406,7 @@ const Solver = (function(){
     const first=Notation.describe(board,move).short;
     return `Nước đầu ${first}${Engine.isInCheck(after,opp)?' (chiếu)':' (nước êm, không chiếu)'}. Đối phương có ${uniq.length} cách đáp và cách nào cũng bị chiếu bí: `+uniq.slice(0,6).join('; ')+(uniq.length>6?'; …':'')+'.';
   }
-  return {findMate, bestDefense, mateLine, materialSearch, material, explainMate, explainMate2, MATE};
+  return {findMate, bestDefense, mateLine, materialSearch, materialSearchRef, material, explainMate, explainMate2, MATE};
 })();
 
 /* =========================================================================
@@ -1385,6 +1473,8 @@ const XQSearch = (function(){
     this.b=new Int8Array(90); this.side=1; this.kpos=[0,0]; // kpos[0]=đỏ, [1]=đen
     this.hl=0; this.hh=0; this.score=0; // score: điểm tĩnh góc nhìn Đỏ
     this.hist=[]; // băm các thế đã qua (để phát hiện lặp)
+    this.chk=[];  // chk[k] = 1 nếu bên đi ở thế thứ k (cặp hist thứ k) đang bị chiếu
+    this.curChk=0; // thế hiện tại có đang bị chiếu không (người gọi make() gán trước)
   }
   Pos.prototype.load=function(board2d, turn){
     this.b.fill(0); this.hl=0; this.hh=0; this.score=0;
@@ -1401,7 +1491,7 @@ const XQSearch = (function(){
   // Nước đi mã hoá: from*128 + to ; bắt quân lưu riêng khi make
   Pos.prototype.make=function(mv){
     const f=mv>>7, t=mv&127, b=this.b, pc=b[f], cap=b[t];
-    this.hist.push(this.hl, this.hh);
+    this.hist.push(this.hl, this.hh); this.chk.push(this.curChk);
     if(cap){ this.hl^=ZL[cap+7][t]; this.hh^=ZH[cap+7][t]; this.score -= cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t]; }
     this.hl^=ZL[pc+7][f]^ZL[pc+7][t]; this.hh^=ZH[pc+7][f]^ZH[pc+7][t];
     this.score += pc>0 ? (PSQ[pc+7][t]-PSQ[pc+7][f]) : -(PSQ[pc+7][t]-PSQ[pc+7][f]);
@@ -1415,12 +1505,12 @@ const XQSearch = (function(){
     b[f]=pc; b[t]=cap;
     if(pc===K) this.kpos[0]=f; else if(pc===-K) this.kpos[1]=f;
     this.side=-this.side;
-    this.hh=this.hist.pop(); this.hl=this.hist.pop();
+    this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop();
     this.score += pc>0 ? -(PSQ[pc+7][t]-PSQ[pc+7][f]) : (PSQ[pc+7][t]-PSQ[pc+7][f]);
     if(cap) this.score += cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t];
   };
-  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };
-  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); };
+  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.chk.push(0); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };
+  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop(); };
 
   // Ô sq có bị bên `by` (1/-1) tấn công không
   Pos.prototype.attacked=function(sq,by){
@@ -1484,7 +1574,55 @@ const XQSearch = (function(){
     for(let i=0;i<n;i++){ const cap=this.make(buf[i]); if(this.legalAfterMake()) res.push(buf[i]); this.unmake(buf[i],cap); }
     return res;
   };
-  Pos.prototype.evaluate=function(){ return this.side>0 ? this.score : -this.score; };
+  // Đánh giá = vật chất + bảng vị trí (cộng dồn khi make/unmake) + các yếu tố tính tại chỗ:
+  //  · an toàn Tướng: thiếu Sĩ/Tượng bị phạt, tỉ lệ với lực tấn công của đối phương đã áp sát
+  //  · Pháo mạnh khi còn nhiều quân (nhiều ngòi), Mã mạnh hơn khi bàn thưa
+  //  · độ cơ động của Xe (số ô đi được) và Mã (số hướng không bị cản chân)
+  //  · "Pháo đầu trống": Pháo đối phương nhắm thẳng Tướng trên cột không có quân chắn
+  Pos.prototype.evaluate=function(){ const s=this.score+evalExtra(this); return this.side>0 ? s : -s; };
+  function evalExtra(pos){
+    const b=pos.b;
+    let rA=0,rE=0,bA=0,bE=0, threatR=0, threatB=0, heavy=0, s=0;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, r=(sq/9)|0;
+      if(t===R||t===H||t===C) heavy++;
+      if(p>0){
+        if(t===A) rA++; else if(t===E) rE++;
+        else if(t===R) threatB+=3; else if(t===C) threatB+=2;
+        else if(t===H) threatB+= r<=4?3:1; else if(t===P && r<=4) threatB+=1;
+      } else {
+        if(t===A) bA++; else if(t===E) bE++;
+        else if(t===R) threatR+=3; else if(t===C) threatR+=2;
+        else if(t===H) threatR+= r>=5?3:1; else if(t===P && r>=5) threatR+=1;
+      }
+    }
+    // An toàn Tướng (góc nhìn Đỏ: trừ khi Đỏ yếu)
+    s -= ((2-rA)*16 + (2-rE)*10) * Math.min(threatR,14) / 10;
+    s += ((2-bA)*16 + (2-bE)*10) * Math.min(threatB,14) / 10;
+    // Pháo / Mã theo giai đoạn ván (heavy: số Xe+Mã+Pháo còn lại, tối đa 12)
+    const phase=heavy-6;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, sg=p>0?1:-1, r=(sq/9)|0, c=sq%9;
+      if(t===C) s += sg*phase*3;
+      else if(t===H){
+        s -= sg*phase*3;
+        let mob=0; for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; const q=b[rr*9+cc]; if(!q || (q>0)!==(p>0)) mob++; }
+        s += sg*(mob-4)*4;
+      } else if(t===R){
+        let mob=0;
+        for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(p>0)) mob++; break; } mob++; rr+=dr; cc+=dc; } }
+        s += sg*(mob-8)*2;
+      }
+    }
+    // Pháo đầu trống: Pháo đối phương cùng cột với Tướng, giữa không có quân nào
+    for(const side of [1,-1]){
+      const k=pos.kpos[side>0?0:1], kr=(k/9)|0, kc=k%9, dir= side>0?-1:1;
+      for(let rr=kr+dir; rr>=0 && rr<=9; rr+=dir){ const q=b[rr*9+kc]; if(!q) continue; if(q===-side*C) s -= side*45; break; }
+    }
+    return s|0;
+  }
 
   // ---------- Bảng băm ----------
   const TT_BITS=18, TT_SIZE=1<<TT_BITS, TT_MASK=TT_SIZE-1;
@@ -1498,11 +1636,30 @@ const XQSearch = (function(){
   const moveBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160)), scoreBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160));
   function timeUp(){ if((nodes&1023)===0 && Date.now()>stopAt) stopped=true; return stopped; }
 
-  function isRepetition(pos,ply){
-    // lặp trong đường tìm kiếm (cùng bên đi) hoặc trùng thế đã có trong ván
-    const h=pos.hist, L=h.length;
-    for(let i=L-4;i>=0 && i>=L-2*ply;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh) return true; }
-    return gameHist.has(pos.hl+':'+pos.hh);
+  // Điểm khi thế hiện tại lặp lại một thế đã gặp (trong đường tìm kiếm hoặc trong ván), theo
+  // đúng luật của Game: trong chu kỳ lặp, nếu chỉ MỘT bên chiếu ở mọi nước thì bên đó thua
+  // (cấm chiếu mãi); còn lại tính hoà. Trả về null nếu không lặp. Điểm theo góc nhìn bên đang đi.
+  const RULE_WIN=20000;
+  function repetitionScore(pos,ply,inChk){
+    const h=pos.hist, L=h.length, lim=Math.max(0,L-2*ply);
+    let j=-1;
+    for(let i=L-4;i>=lim;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }
+    if(j<0){
+      if(!gameHist.has(pos.hl+':'+pos.hh)) return null;
+      for(let i=lim-((L-lim)%4===0?4:2);i>=0;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }
+      if(j<0) return 0;
+    }
+    // Thế P_k (k = chỉ số cặp hist), P_n là thế hiện tại. Nước dẫn vào P_k là nước chiếu
+    // nếu bên đi ở P_k bị chiếu. Bên A = bên vừa đi (dẫn vào P_n, P_n-2, …), bên B = bên đang đi.
+    const n=L>>1, pj=j>>1;
+    let aAll=true, bAll=true;
+    for(let k=n;k>pj;k--){
+      const c = k===n ? inChk : pos.chk[k];
+      if(((n-k)&1)===0){ if(!c) aAll=false; } else { if(!c) bAll=false; }
+    }
+    if(aAll && !bAll) return RULE_WIN;     // đối phương chiếu mãi → bên đang đi thắng
+    if(bAll && !aAll) return -RULE_WIN;    // bên đang đi chiếu mãi → thua
+    return 0;
   }
 
   function orderMoves(pos,moves,scores,n,ttMv,ply){
@@ -1538,6 +1695,7 @@ const XQSearch = (function(){
     let legal=0, best = inChk ? -MATE+ply : alpha;
     for(let i=0;i<n;i++){
       pickNext(moves,scores,n,i);
+      pos.curChk=inChk?1:0;
       const mv=moves[i], cap=pos.make(mv);
       if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
       legal++;
@@ -1552,8 +1710,8 @@ const XQSearch = (function(){
   }
 
   function search(pos,depth,alpha,beta,ply,allowNull){
-    if(ply>0 && isRepetition(pos,ply)) return 0;
     const inChk=pos.inCheck(pos.side);
+    if(ply>0){ const rs=repetitionScore(pos,ply,inChk); if(rs!==null) return rs; }
     if(inChk) depth++;                         // gia hạn khi bị chiếu
     if(depth<=0) return quiesce(pos,alpha,beta,ply,0);
     nodes++; if(timeUp()) return 0;
@@ -1588,6 +1746,7 @@ const XQSearch = (function(){
     let best=-INF, bestMv=0, legal=0, origAlpha=alpha;
     for(let i=0;i<n;i++){
       pickNext(moves,scores,n,i);
+      pos.curChk=inChk?1:0;
       const mv=moves[i], cap=pos.make(mv);
       if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
       legal++;
@@ -1631,15 +1790,26 @@ const XQSearch = (function(){
   const toMove=mv=>({from:[(mv>>7)/9|0,(mv>>7)%9], to:[(mv&127)/9|0,(mv&127)%9]});
   const encode=m=>((m.from[0]*9+m.from[1])<<7)|(m.to[0]*9+m.to[1]);
 
-  // opts: {board, turn, timeMs, maxDepth, history:[key...], noise, blunder, rng}
+  // opts: {board, turn, timeMs, maxDepth, historyKeys:[key...], historyChecks:[bool...],
+  //        excludeMoves:[{from,to}...], noise, blunder, rng, rootScores}
+  //  - historyKeys: khoá các thế đã qua trong ván (không gồm thế hiện tại), theo thứ tự
+  //  - historyChecks[i]: bên đi ở thế historyKeys[i] có đang bị chiếu không (để xét luật chiếu mãi)
+  //  - excludeMoves: nước không được chọn ở gốc (vd. nước mà luật ván xử thua ngay)
   function think(opts){
     const pos=new Pos(); pos.load(opts.board, opts.turn);
-    gameHist = new Set(opts.historyKeys||[]);
+    const hk=opts.historyKeys||[], hc=opts.historyChecks||[];
+    gameHist = new Set(hk);
+    for(let i=0;i<hk.length;i++){ const [l,h]=String(hk[i]).split(':').map(Number); pos.hist.push(l|0,h|0); pos.chk.push(hc[i]?1:0); }
+    pos.curChk = pos.inCheck(pos.side)?1:0;
     killers=[]; history.fill(0); nodes=0; stopped=false;
     const t0=Date.now(); stopAt = t0 + (opts.timeMs||1000);
     const maxDepth = opts.maxDepth||40;
-    const rootMoves=pos.legalMoves();
+    let rootMoves=pos.legalMoves();
     if(!rootMoves.length) return {move:null, score:-MATE, depth:0, pv:[], nodes:0};
+    if(opts.excludeMoves && opts.excludeMoves.length){
+      const ex=new Set(opts.excludeMoves.map(encode)), kept=rootMoves.filter(m=>!ex.has(m));
+      if(kept.length) rootMoves=kept;
+    }
     let bestMv=rootMoves[0], bestScore=0, doneDepth=0, pv=[];
     const rng = opts.rng || Math.random;
     // Cấp thấp: đôi khi đi nước ngẫu nhiên (mô phỏng người mới hay sơ suất)
@@ -1648,13 +1818,14 @@ const XQSearch = (function(){
       return {move:toMove(m), score:0, depth:0, pv:[], nodes:0, random:true};
     }
     // Điểm từng nước ở gốc (để thêm nhiễu cho cấp thấp)
-    const rootScores=new Map(); let lastFull=null;
+    const rootScores=new Map(); let lastFull=null; const rootChk=pos.curChk;
     for(let d=1; d<=maxDepth; d++){
       let alpha=-INF, beta=INF, iterBest=0, iterScore=-INF;
       // sắp xếp nước gốc: nước tốt nhất lần trước lên đầu
       rootMoves.sort((a,b)=>(b===bestMv)-(a===bestMv) || (rootScores.get(b)||-INF)-(rootScores.get(a)||-INF));
       let first=true;
       for(const mv of rootMoves){
+        pos.curChk=rootChk;
         const cap=pos.make(mv);
         let v;
         if(opts.noise) v=-search(pos,d-1,-INF,INF,1,true);     // cần điểm chính xác cho mọi nước để chọn ngẫu nhiên
@@ -1683,9 +1854,38 @@ const XQSearch = (function(){
       if(cands.length>1){ const m=cands[Math.floor(rng()*cands.length)]; bestMv=m; bestScore=sc.get(m); }
     }
     pv=[bestMv];
-    { const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }
-    return {move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};
+    { pos.curChk=rootChk; const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }
+    const res={move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};
+    if(opts.rootScores){ const sc=lastFull||rootScores; res.rootScores=rootMoves.filter(m=>sc.has(m)).map(m=>({move:toMove(m), score:sc.get(m)})); }
+    return res;
   }
+
+  // Tìm kiếm thuần vật chất (minimax đầy đủ, alpha-beta) — cùng kết quả với bản dùng mảng 2 chiều
+  // trước đây nhưng nhanh hơn nhiều nhờ bàn cờ 1 chiều + make/unmake. Điểm theo góc nhìn `turn`:
+  // hết nước đi = -1000-depth; ở lá = chênh lệch vật chất (Xe 9, Pháo 4,5, Mã 4, Sĩ/Tượng 2, Tốt 1).
+  const MVAL=[0,0,2,2,4,9,4.5,1];
+  const matBufs=Array.from({length:16},()=>new Int32Array(160));
+  function matMaterial(pos){ let s=0; const b=pos.b; for(let i=0;i<90;i++){ const p=b[i]; if(p) s += (p>0)===(pos.side>0) ? MVAL[p>0?p:-p] : -MVAL[p>0?p:-p]; } return s; }
+  function matSearch(pos,depth,alpha,beta){
+    const buf=matBufs[depth], n=pos.gen(buf,false), b=pos.b;
+    if(depth===0){
+      for(let i=0;i<n;i++){ const cap=pos.make(buf[i]), ok=pos.legalAfterMake(); pos.unmake(buf[i],cap); if(ok) return matMaterial(pos); }
+      return -1000;
+    }
+    // ăn quân trước để cắt tỉa sớm (không đổi kết quả)
+    let k=0; for(let i=0;i<n;i++) if(b[buf[i]&127]){ const t=buf[k]; buf[k]=buf[i]; buf[i]=t; k++; }
+    let best=-Infinity, legal=0;
+    for(let i=0;i<n;i++){
+      const mv=buf[i], cap=pos.make(mv);
+      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
+      legal++;
+      const s=-matSearch(pos,depth-1,-beta,-alpha);
+      pos.unmake(mv,cap);
+      if(s>best) best=s; if(best>alpha) alpha=best; if(alpha>=beta) break;
+    }
+    return legal ? best : -1000-depth;
+  }
+  function materialSearch(board,turn,depth){ const p=new Pos(); p.load(board,turn); return matSearch(p,depth,-Infinity,Infinity); }
 
   // Khoá thế cờ tương thích với Game.key để truyền lịch sử ván vào worker
   function keyOf(board,turn){ const p=new Pos(); p.load(board,turn); return p.hl+':'+p.hh; }
@@ -1696,7 +1896,7 @@ const XQSearch = (function(){
   }
   function legalMoves(board,turn){ const p=new Pos(); p.load(board,turn); return p.legalMoves().map(toMove); }
   function evaluate(board,turn){ const p=new Pos(); p.load(board,turn); return p.evaluate(); }
-  return {think, keyOf, perft, legalMoves, evaluate, ttClear, MATE, encode};
+  return {think, keyOf, perft, legalMoves, evaluate, materialSearch, ttClear, MATE, RULE_WIN, encode};
 })();
 
 /* =========================================================================
@@ -1841,7 +2041,6 @@ const Coach = (function(){
   return {attackers, defenders, endangered, whyGood, whyBad, threatText, plainMove, QUESTIONS, THINKING_STEPS, NAME};
 })();
 
-const XQ_WORKER_SRC = "/* =========================================================================\n   XQSearch \u2014 engine t\u00ecm ki\u1ebfm c\u1ee7a m\u00e1y (t\u1ef1 ch\u1ee9a, ch\u1ea1y \u0111\u01b0\u1ee3c trong Web Worker)\n   - B\u00e0n c\u1edd 1 chi\u1ec1u Int8Array(90), \u00f4 = h\u00e0ng*9 + c\u1ed9t (h\u00e0ng 0 = ph\u00eda \u0110en)\n   - Qu\u00e2n: T\u01b0\u1edbng 1, S\u0129 2, T\u01b0\u1ee3ng 3, M\u00e3 4, Xe 5, Ph\u00e1o 6, T\u1ed1t 7; \u0110\u1ecf d\u01b0\u01a1ng, \u0110en \u00e2m\n   - Negamax alpha-beta (PVS), iterative deepening theo th\u1eddi gian, quiescence,\n     b\u1ea3ng b\u0103m Zobrist, killer + history, null-move, LMR, gia h\u1ea1n khi b\u1ecb chi\u1ebfu.\n   - \u0110\u00e1nh gi\u00e1: v\u1eadt ch\u1ea5t + b\u1ea3ng \u0111i\u1ec3m v\u1ecb tr\u00ed (PST).\n   ========================================================================= */\nconst XQSearch = (function(){\n  const K=1,A=2,E=3,H=4,R=5,C=6,P=7;\n  const TYPE_OF={G:K,A:A,E:E,H:H,R:R,C:C,S:P};\n  const LETTER=[null,'G','A','E','H','R','C','S'];\n  const MATE=30000, INF=32000;\n  const VAL=[0,0,120,120,270,600,285,30];\n\n  // ---------- B\u1ea3ng \u0111i\u1ec3m v\u1ecb tr\u00ed (g\u00f3c nh\u00ecn \u0110\u1ecf; h\u00e0ng 0 = h\u00e0ng cu\u1ed1i c\u1ee7a \u0110en) ----------\n  const PST={};\n  PST[P]=[\n    [0,3,6,9,12,9,6,3,0],[18,36,56,80,120,80,56,36,18],[14,26,42,60,80,60,42,26,14],\n    [10,20,30,34,40,34,30,20,10],[6,12,18,18,20,18,18,12,6],[2,0,8,0,8,0,8,0,2],\n    [0,0,-2,0,4,0,-2,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0]];\n  PST[H]=[\n    [4,8,16,12,4,12,16,8,4],[4,10,28,16,8,16,28,10,4],[12,14,16,20,18,20,16,14,12],\n    [8,24,18,24,20,24,18,24,8],[6,16,14,18,16,18,14,16,6],[4,12,16,14,12,14,16,12,4],\n    [2,6,8,6,10,6,8,6,2],[4,2,8,8,4,8,8,2,4],[0,2,4,4,-2,4,4,2,0],[0,-4,0,0,0,0,0,-4,0]];\n  PST[R]=[\n    [14,14,12,18,16,18,12,14,14],[16,20,18,24,26,24,18,20,16],[12,12,12,18,18,18,12,12,12],\n    [12,18,16,22,22,22,16,18,12],[12,14,12,18,18,18,12,14,12],[12,16,14,20,20,20,14,16,12],\n    [6,10,8,14,14,14,8,10,6],[4,8,6,14,12,14,6,8,4],[8,4,8,16,8,16,8,4,8],[-2,10,6,14,12,14,6,10,-2]];\n  PST[C]=[\n    [6,4,0,-10,-12,-10,0,4,6],[2,2,0,-4,-14,-4,0,2,2],[2,2,0,-10,-8,-10,0,2,2],\n    [0,0,-2,4,10,4,-2,0,0],[0,0,0,2,8,2,0,0,0],[-2,0,4,2,6,2,4,0,-2],\n    [0,0,0,2,4,2,0,0,0],[4,0,8,6,10,6,8,0,4],[0,2,4,6,6,6,4,2,0],[0,0,2,6,6,6,2,0,0]];\n  const zero=()=>Array.from({length:10},()=>Array(9).fill(0));\n  PST[A]=zero(); PST[A][8][4]=3;\n  PST[E]=zero(); PST[E][7][4]=3; PST[E][7][0]=-2; PST[E][7][8]=-2; PST[E][5][2]=-1; PST[E][5][6]=-1;\n  PST[K]=zero(); PST[K][8][4]=-8; PST[K][7][4]=-15; PST[K][9][3]=-2; PST[K][9][5]=-2; PST[K][8][3]=-10; PST[K][8][5]=-10; PST[K][7][3]=-18; PST[K][7][5]=-18;\n  // b\u1ea3ng ph\u1eb3ng: PSQ[piece+7][sq] = gi\u00e1 tr\u1ecb (g\u00f3c nh\u00ecn c\u1ee7a ch\u00ednh qu\u00e2n \u0111\u00f3) + v\u1eadt ch\u1ea5t\n  const PSQ=[];\n  for(let pc=-7;pc<=7;pc++){\n    const t=Math.abs(pc), arr=new Int16Array(90);\n    if(pc!==0) for(let sq=0;sq<90;sq++){ const r=(sq/9)|0, c=sq%9; const rr = pc>0 ? r : 9-r; arr[sq]=VAL[t]+PST[t][rr][c]; }\n    PSQ[pc+7]=arr;\n  }\n\n  // ---------- Zobrist ----------\n  let seed=0x9E3779B1;\n  function rnd32(){ seed^=seed<<13; seed^=seed>>>17; seed^=seed<<5; return seed|0; }\n  const ZL=[], ZH=[];\n  for(let pc=0;pc<15;pc++){ ZL.push(new Int32Array(90)); ZH.push(new Int32Array(90)); for(let s=0;s<90;s++){ ZL[pc][s]=rnd32(); ZH[pc][s]=rnd32(); } }\n  const ZSIDE_L=rnd32(), ZSIDE_H=rnd32();\n\n  // ---------- H\u00ecnh h\u1ecdc ----------\n  const inPal=(sq,side)=>{ const r=(sq/9)|0, c=sq%9; if(c<3||c>5) return false; return side>0 ? r>=7 : r<=2; };\n  const ownHalf=(sq,side)=>{ const r=(sq/9)|0; return side>0 ? r>=5 : r<=4; };\n  const ORTH=[[-1,0],[1,0],[0,-1],[0,1]], DIAG=[[-1,-1],[-1,1],[1,-1],[1,1]];\n  const HORSE=[[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],[-1,-2,0,-1],[1,-2,0,-1],[-1,2,0,1],[1,2,0,1]];\n  const ok=(r,c)=>r>=0&&r<=9&&c>=0&&c<=8;\n\n  // ---------- Tr\u1ea1ng th\u00e1i t\u00ecm ki\u1ebfm ----------\n  function Pos(){\n    this.b=new Int8Array(90); this.side=1; this.kpos=[0,0]; // kpos[0]=\u0111\u1ecf, [1]=\u0111en\n    this.hl=0; this.hh=0; this.score=0; // score: \u0111i\u1ec3m t\u0129nh g\u00f3c nh\u00ecn \u0110\u1ecf\n    this.hist=[]; // b\u0103m c\u00e1c th\u1ebf \u0111\u00e3 qua (\u0111\u1ec3 ph\u00e1t hi\u1ec7n l\u1eb7p)\n  }\n  Pos.prototype.load=function(board2d, turn){\n    this.b.fill(0); this.hl=0; this.hh=0; this.score=0;\n    for(let r=0;r<10;r++) for(let c=0;c<9;c++){\n      const p=board2d[r][c]; if(!p) continue;\n      const pc=TYPE_OF[p.type]*(p.color==='red'?1:-1), sq=r*9+c;\n      this.b[sq]=pc; this.hl^=ZL[pc+7][sq]; this.hh^=ZH[pc+7][sq];\n      this.score += pc>0 ? PSQ[pc+7][sq] : -PSQ[pc+7][sq];\n      if(pc===K) this.kpos[0]=sq; if(pc===-K) this.kpos[1]=sq;\n    }\n    this.side = turn==='red'?1:-1;\n    if(this.side<0){ this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; }\n  };\n  // N\u01b0\u1edbc \u0111i m\u00e3 ho\u00e1: from*128 + to ; b\u1eaft qu\u00e2n l\u01b0u ri\u00eang khi make\n  Pos.prototype.make=function(mv){\n    const f=mv>>7, t=mv&127, b=this.b, pc=b[f], cap=b[t];\n    this.hist.push(this.hl, this.hh);\n    if(cap){ this.hl^=ZL[cap+7][t]; this.hh^=ZH[cap+7][t]; this.score -= cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t]; }\n    this.hl^=ZL[pc+7][f]^ZL[pc+7][t]; this.hh^=ZH[pc+7][f]^ZH[pc+7][t];\n    this.score += pc>0 ? (PSQ[pc+7][t]-PSQ[pc+7][f]) : -(PSQ[pc+7][t]-PSQ[pc+7][f]);\n    b[t]=pc; b[f]=0;\n    if(pc===K) this.kpos[0]=t; else if(pc===-K) this.kpos[1]=t;\n    this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H;\n    return cap;\n  };\n  Pos.prototype.unmake=function(mv,cap){\n    const f=mv>>7, t=mv&127, b=this.b, pc=b[t];\n    b[f]=pc; b[t]=cap;\n    if(pc===K) this.kpos[0]=f; else if(pc===-K) this.kpos[1]=f;\n    this.side=-this.side;\n    this.hh=this.hist.pop(); this.hl=this.hist.pop();\n    this.score += pc>0 ? -(PSQ[pc+7][t]-PSQ[pc+7][f]) : (PSQ[pc+7][t]-PSQ[pc+7][f]);\n    if(cap) this.score += cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t];\n  };\n  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };\n  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); };\n\n  // \u00d4 sq c\u00f3 b\u1ecb b\u00ean `by` (1/-1) t\u1ea5n c\u00f4ng kh\u00f4ng\n  Pos.prototype.attacked=function(sq,by){\n    const b=this.b, r=(sq/9)|0, c=sq%9;\n    // Xe, Ph\u00e1o, T\u01b0\u1edbng (l\u1ed9 m\u1eb7t) theo 4 h\u01b0\u1edbng\n    for(const [dr,dc] of ORTH){\n      let rr=r+dr, cc=c+dc, screen=false;\n      while(ok(rr,cc)){\n        const p=b[rr*9+cc];\n        if(p){\n          if(!screen){\n            if(p===R*by) return true;\n            if(dr!==0 && p===K*by) return true;           // hai T\u01b0\u1edbng \u0111\u1ed1i m\u1eb7t\n            screen=true;\n          } else { if(p===C*by) return true; break; }\n        }\n        rr+=dr; cc+=dc;\n      }\n    }\n    // M\u00e3 (ch\u00e2n M\u00e3 l\u00e0 \u00f4 ch\u00e9o s\u00e1t \u00f4 b\u1ecb t\u1ea5n c\u00f4ng)\n    for(const [dr,dc,lr,lc] of HORSE){\n      const hr=r-dr, hc=c-dc; if(!ok(hr,hc)) continue;\n      if(b[hr*9+hc]!==H*by) continue;\n      if(b[(hr+lr)*9+(hc+lc)]===0) return true;\n    }\n    // T\u1ed1t\n    const fr = r + (by>0?1:-1);   // T\u1ed1t \u0111\u1ecf \u0111\u1ee9ng h\u00e0ng d\u01b0\u1edbi (r+1) t\u1ea5n c\u00f4ng l\u00ean\n    if(ok(fr,c) && b[fr*9+c]===P*by) return true;\n    for(const dc of [-1,1]){\n      const cc=c+dc; if(!ok(r,cc)) continue;\n      if(b[r*9+cc]===P*by && !ownHalf(r*9+cc,by)) return true;\n    }\n    return false;\n  };\n  Pos.prototype.inCheck=function(side){ return this.attacked(this.kpos[side>0?0:1], -side); };\n\n  // Sinh n\u01b0\u1edbc gi\u1ea3 h\u1ee3p l\u1ec7 (ch\u01b0a l\u1ecdc t\u1ef1 chi\u1ebfu). capsOnly: ch\u1ec9 n\u01b0\u1edbc \u0103n qu\u00e2n\n  Pos.prototype.gen=function(out,capsOnly){\n    const b=this.b, s=this.side;\n    let n=0;\n    const push=(f,t)=>{ const q=b[t]; if(q && (q>0)===(s>0)) return; if(capsOnly && !q) return; out[n++]=(f<<7)|t; };\n    for(let sq=0;sq<90;sq++){\n      const pc=b[sq]; if(!pc || (pc>0)!==(s>0)) continue;\n      const t=Math.abs(pc), r=(sq/9)|0, c=sq%9;\n      switch(t){\n        case K: for(const [dr,dc] of ORTH){ const rr=r+dr, cc=c+dc; if(ok(rr,cc)&&inPal(rr*9+cc,s)) push(sq,rr*9+cc); } break;\n        case A: for(const [dr,dc] of DIAG){ const rr=r+dr, cc=c+dc; if(ok(rr,cc)&&inPal(rr*9+cc,s)) push(sq,rr*9+cc); } break;\n        case E: for(const [dr,dc] of DIAG){ const rr=r+2*dr, cc=c+2*dc; if(!ok(rr,cc)||!ownHalf(rr*9+cc,s)) continue; if(b[(r+dr)*9+c+dc]) continue; push(sq,rr*9+cc); } break;\n        case H: for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; push(sq,rr*9+cc); } break;\n        case R: for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(s>0)) out[n++]=(sq<<7)|(rr*9+cc); break; } if(!capsOnly) out[n++]=(sq<<7)|(rr*9+cc); rr+=dr; cc+=dc; } } break;\n        case C: for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc, scr=false; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(!scr){ if(q) scr=true; else if(!capsOnly) out[n++]=(sq<<7)|(rr*9+cc); } else if(q){ if((q>0)!==(s>0)) out[n++]=(sq<<7)|(rr*9+cc); break; } rr+=dr; cc+=dc; } } break;\n        case P: { const fr=r-(s>0?1:-1); if(ok(fr,c)) push(sq,fr*9+c); if(!ownHalf(sq,s)){ if(c>0) push(sq,sq-1); if(c<8) push(sq,sq+1); } } break;\n      }\n    }\n    return n;\n  };\n  // N\u01b0\u1edbc v\u1eeba \u0111i c\u00f3 h\u1ee3p l\u1ec7 kh\u00f4ng (kh\u00f4ng \u0111\u1ec3 T\u01b0\u1edbng m\u00ecnh b\u1ecb chi\u1ebfu / \u0111\u1ed1i m\u1eb7t)\n  Pos.prototype.legalAfterMake=function(){ return !this.attacked(this.kpos[this.side>0?1:0], this.side); };\n  Pos.prototype.legalMoves=function(){\n    const buf=new Int32Array(160), n=this.gen(buf,false), res=[];\n    for(let i=0;i<n;i++){ const cap=this.make(buf[i]); if(this.legalAfterMake()) res.push(buf[i]); this.unmake(buf[i],cap); }\n    return res;\n  };\n  Pos.prototype.evaluate=function(){ return this.side>0 ? this.score : -this.score; };\n\n  // ---------- B\u1ea3ng b\u0103m ----------\n  const TT_BITS=18, TT_SIZE=1<<TT_BITS, TT_MASK=TT_SIZE-1;\n  const ttKey=new Int32Array(TT_SIZE), ttMove=new Int32Array(TT_SIZE), ttScore=new Int32Array(TT_SIZE);\n  const ttDepth=new Int8Array(TT_SIZE), ttFlag=new Int8Array(TT_SIZE);\n  function ttClear(){ ttKey.fill(0); ttDepth.fill(0); ttFlag.fill(0); ttMove.fill(0); }\n\n  // ---------- T\u00ecm ki\u1ebfm ----------\n  const MAXPLY=64;\n  let killers=[], history=new Int32Array(90*128), nodes=0, stopAt=0, stopped=false, gameHist=new Set();\n  const moveBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160)), scoreBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160));\n  function timeUp(){ if((nodes&1023)===0 && Date.now()>stopAt) stopped=true; return stopped; }\n\n  function isRepetition(pos,ply){\n    // l\u1eb7p trong \u0111\u01b0\u1eddng t\u00ecm ki\u1ebfm (c\u00f9ng b\u00ean \u0111i) ho\u1eb7c tr\u00f9ng th\u1ebf \u0111\u00e3 c\u00f3 trong v\u00e1n\n    const h=pos.hist, L=h.length;\n    for(let i=L-4;i>=0 && i>=L-2*ply;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh) return true; }\n    return gameHist.has(pos.hl+':'+pos.hh);\n  }\n\n  function orderMoves(pos,moves,scores,n,ttMv,ply){\n    const b=pos.b;\n    for(let i=0;i<n;i++){\n      const mv=moves[i], t=mv&127, cap=b[t];\n      let s;\n      if(mv===ttMv) s=1e7;\n      else if(cap) s=1e6 + VAL[Math.abs(cap)]*10 - VAL[Math.abs(b[mv>>7])]/10;\n      else if(killers[ply] && (killers[ply][0]===mv)) s=9e5;\n      else if(killers[ply] && (killers[ply][1]===mv)) s=8e5;\n      else s=history[(mv>>7)*128+t];\n      scores[i]=s;\n    }\n  }\n  function pickNext(moves,scores,n,i){\n    let bi=i; for(let j=i+1;j<n;j++) if(scores[j]>scores[bi]) bi=j;\n    if(bi!==i){ let t=moves[i]; moves[i]=moves[bi]; moves[bi]=t; t=scores[i]; scores[i]=scores[bi]; scores[bi]=t; }\n  }\n\n  function quiesce(pos,alpha,beta,ply,qd){\n    nodes++; if(timeUp()) return 0;\n    const inChk=pos.inCheck(pos.side);\n    if(!inChk){\n      const stand=pos.evaluate();\n      if(stand>=beta) return stand;\n      if(stand>alpha) alpha=stand;\n      if(qd>6) return stand;\n    } else if(qd>8) return pos.evaluate();\n    const moves=moveBufs[ply], scores=scoreBufs[ply];\n    const n=pos.gen(moves, !inChk);\n    orderMoves(pos,moves,scores,n,0,ply);\n    let legal=0, best = inChk ? -MATE+ply : alpha;\n    for(let i=0;i<n;i++){\n      pickNext(moves,scores,n,i);\n      const mv=moves[i], cap=pos.make(mv);\n      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }\n      legal++;\n      const v=-quiesce(pos,-beta,-alpha,ply+1,qd+1);\n      pos.unmake(mv,cap);\n      if(stopped) return 0;\n      if(v>best) best=v;\n      if(v>alpha){ alpha=v; if(alpha>=beta) break; }\n    }\n    if(inChk && legal===0) return -MATE+ply;\n    return inChk ? best : alpha;\n  }\n\n  function search(pos,depth,alpha,beta,ply,allowNull){\n    if(ply>0 && isRepetition(pos,ply)) return 0;\n    const inChk=pos.inCheck(pos.side);\n    if(inChk) depth++;                         // gia h\u1ea1n khi b\u1ecb chi\u1ebfu\n    if(depth<=0) return quiesce(pos,alpha,beta,ply,0);\n    nodes++; if(timeUp()) return 0;\n    if(ply>=MAXPLY) return pos.evaluate();\n    // kho\u1ea3ng c\u00e1ch chi\u1ebfu b\u00ed\n    alpha=Math.max(alpha,-MATE+ply); beta=Math.min(beta,MATE-ply-1); if(alpha>=beta) return alpha;\n\n    const idx=pos.hl & TT_MASK; let ttMv=0;\n    if(ttKey[idx]===pos.hh && ttFlag[idx]){\n      ttMv=ttMove[idx];\n      if(ttDepth[idx]>=depth && ply>0){\n        let s=ttScore[idx]; if(s>MATE-200) s-=ply; else if(s<-MATE+200) s+=ply;\n        const f=ttFlag[idx];\n        if(f===1) return s; if(f===2 && s>=beta) return s; if(f===3 && s<=alpha) return s;\n      }\n    }\n    const pv = beta-alpha>1;\n    // Null-move\n    if(allowNull && !pv && !inChk && depth>=3 && pos.evaluate()>=beta){\n      let big=0; for(let sq=0;sq<90;sq++){ const p=pos.b[sq]; if(p && (p>0)===(pos.side>0) && (Math.abs(p)===R||Math.abs(p)===H||Math.abs(p)===C)) big++; }\n      if(big>=2){\n        pos.nullMove();\n        const v=-search(pos,depth-3,-beta,-beta+1,ply+1,false);\n        pos.unNull();\n        if(stopped) return 0;\n        if(v>=beta) return v;\n      }\n    }\n    const moves=moveBufs[ply], scores=scoreBufs[ply];\n    const n=pos.gen(moves,false);\n    orderMoves(pos,moves,scores,n,ttMv,ply);\n    let best=-INF, bestMv=0, legal=0, origAlpha=alpha;\n    for(let i=0;i<n;i++){\n      pickNext(moves,scores,n,i);\n      const mv=moves[i], cap=pos.make(mv);\n      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }\n      legal++;\n      let v;\n      const givesCheck = pos.inCheck(pos.side);\n      if(legal===1) v=-search(pos,depth-1,-beta,-alpha,ply+1,true);\n      else {\n        let red = (depth>=3 && legal>4 && !cap && !inChk && !givesCheck) ? 1 : 0;\n        v=-search(pos,depth-1-red,-alpha-1,-alpha,ply+1,true);\n        if(v>alpha && (red || v<beta)) v=-search(pos,depth-1,-beta,-alpha,ply+1,true);\n      }\n      pos.unmake(mv,cap);\n      if(stopped) return 0;\n      if(v>best){ best=v; bestMv=mv; }\n      if(v>alpha){\n        alpha=v;\n        if(alpha>=beta){\n          if(!cap){ if(!killers[ply]) killers[ply]=[0,0]; if(killers[ply][0]!==mv){ killers[ply][1]=killers[ply][0]; killers[ply][0]=mv; } history[(mv>>7)*128+(mv&127)]+=depth*depth; }\n          break;\n        }\n      }\n    }\n    if(legal===0) return -MATE+ply;           // h\u1ebft n\u01b0\u1edbc = thua (lu\u1eadt c\u1edd t\u01b0\u1edbng)\n    let st=best; if(st>MATE-200) st+=ply; else if(st<-MATE+200) st-=ply;\n    ttKey[idx]=pos.hh; ttMove[idx]=bestMv; ttScore[idx]=st; ttDepth[idx]=depth;\n    ttFlag[idx]= best>=beta ? 2 : (best>origAlpha ? 1 : 3);\n    return best;\n  }\n\n  function extractPV(pos,maxLen){\n    const pv=[], undo=[];\n    for(let i=0;i<maxLen;i++){\n      const idx=pos.hl&TT_MASK; if(ttKey[idx]!==pos.hh||!ttFlag[idx]) break;\n      const mv=ttMove[idx]; if(!mv) break;\n      if(!pos.legalMoves().includes(mv)) break;\n      pv.push(mv); undo.push([mv,pos.make(mv)]);\n    }\n    for(let i=undo.length-1;i>=0;i--) pos.unmake(undo[i][0],undo[i][1]);\n    return pv;\n  }\n  const toMove=mv=>({from:[(mv>>7)/9|0,(mv>>7)%9], to:[(mv&127)/9|0,(mv&127)%9]});\n  const encode=m=>((m.from[0]*9+m.from[1])<<7)|(m.to[0]*9+m.to[1]);\n\n  // opts: {board, turn, timeMs, maxDepth, history:[key...], noise, blunder, rng}\n  function think(opts){\n    const pos=new Pos(); pos.load(opts.board, opts.turn);\n    gameHist = new Set(opts.historyKeys||[]);\n    killers=[]; history.fill(0); nodes=0; stopped=false;\n    const t0=Date.now(); stopAt = t0 + (opts.timeMs||1000);\n    const maxDepth = opts.maxDepth||40;\n    const rootMoves=pos.legalMoves();\n    if(!rootMoves.length) return {move:null, score:-MATE, depth:0, pv:[], nodes:0};\n    let bestMv=rootMoves[0], bestScore=0, doneDepth=0, pv=[];\n    const rng = opts.rng || Math.random;\n    // C\u1ea5p th\u1ea5p: \u0111\u00f4i khi \u0111i n\u01b0\u1edbc ng\u1eabu nhi\u00ean (m\u00f4 ph\u1ecfng ng\u01b0\u1eddi m\u1edbi hay s\u01a1 su\u1ea5t)\n    if(opts.blunder && rng()<opts.blunder){\n      const m=rootMoves[Math.floor(rng()*rootMoves.length)];\n      return {move:toMove(m), score:0, depth:0, pv:[], nodes:0, random:true};\n    }\n    // \u0110i\u1ec3m t\u1eebng n\u01b0\u1edbc \u1edf g\u1ed1c (\u0111\u1ec3 th\u00eam nhi\u1ec5u cho c\u1ea5p th\u1ea5p)\n    const rootScores=new Map(); let lastFull=null;\n    for(let d=1; d<=maxDepth; d++){\n      let alpha=-INF, beta=INF, iterBest=0, iterScore=-INF;\n      // s\u1eafp x\u1ebfp n\u01b0\u1edbc g\u1ed1c: n\u01b0\u1edbc t\u1ed1t nh\u1ea5t l\u1ea7n tr\u01b0\u1edbc l\u00ean \u0111\u1ea7u\n      rootMoves.sort((a,b)=>(b===bestMv)-(a===bestMv) || (rootScores.get(b)||-INF)-(rootScores.get(a)||-INF));\n      let first=true;\n      for(const mv of rootMoves){\n        const cap=pos.make(mv);\n        let v;\n        if(opts.noise) v=-search(pos,d-1,-INF,INF,1,true);     // c\u1ea7n \u0111i\u1ec3m ch\u00ednh x\u00e1c cho m\u1ecdi n\u01b0\u1edbc \u0111\u1ec3 ch\u1ecdn ng\u1eabu nhi\u00ean\n        else if(first) v=-search(pos,d-1,-beta,-alpha,1,true);\n        else { v=-search(pos,d-1,-alpha-1,-alpha,1,true); if(v>alpha && !stopped) v=-search(pos,d-1,-beta,-alpha,1,true); }\n        pos.unmake(mv,cap);\n        if(stopped) break;\n        rootScores.set(mv,v);\n        if(v>iterScore){ iterScore=v; iterBest=mv; }\n        if(v>alpha) alpha=v;\n        first=false;\n      }\n      if(stopped && !iterBest) break;\n      if(iterBest){ bestMv=iterBest; bestScore=iterScore; doneDepth=d; }\n      if(!stopped) lastFull=new Map(rootScores);\n      if(stopped) break;\n      // l\u01b0u n\u01b0\u1edbc t\u1ed1t nh\u1ea5t v\u00e0o TT \u0111\u1ec3 l\u1ea5y PV\n      const idx=pos.hl&TT_MASK; ttKey[idx]=pos.hh; ttMove[idx]=bestMv; ttFlag[idx]=1; ttDepth[idx]=d; ttScore[idx]=bestScore;\n      if(Math.abs(bestScore)>MATE-100) break;   // \u0111\u00e3 th\u1ea5y chi\u1ebfu b\u00ed\n      if(Date.now()-t0 > (opts.timeMs||1000)*0.55) break; // kh\u00f4ng \u0111\u1ee7 th\u1eddi gian cho v\u00f2ng sau\n    }\n    if(opts.noise){\n      // ch\u1ecdn ng\u1eabu nhi\u00ean trong c\u00e1c n\u01b0\u1edbc k\u00e9m n\u01b0\u1edbc t\u1ed1t nh\u1ea5t kh\u00f4ng qu\u00e1 `noise` \u0111i\u1ec3m\n      const sc=lastFull||rootScores, top=Math.max(...[...sc.values()]);\n      const cands=rootMoves.filter(m=>sc.has(m) && sc.get(m)>=top-opts.noise);\n      if(cands.length>1){ const m=cands[Math.floor(rng()*cands.length)]; bestMv=m; bestScore=sc.get(m); }\n    }\n    pv=[bestMv];\n    { const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }\n    return {move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};\n  }\n\n  // Kho\u00e1 th\u1ebf c\u1edd t\u01b0\u01a1ng th\u00edch v\u1edbi Game.key \u0111\u1ec3 truy\u1ec1n l\u1ecbch s\u1eed v\u00e1n v\u00e0o worker\n  function keyOf(board,turn){ const p=new Pos(); p.load(board,turn); return p.hl+':'+p.hh; }\n  function perft(board,turn,depth){\n    const pos=new Pos(); pos.load(board,turn);\n    const rec=d=>{ if(d===0) return 1; let n=0; for(const mv of pos.legalMoves()){ const c=pos.make(mv); n+=rec(d-1); pos.unmake(mv,c); } return n; };\n    return rec(depth);\n  }\n  function legalMoves(board,turn){ const p=new Pos(); p.load(board,turn); return p.legalMoves().map(toMove); }\n  function evaluate(board,turn){ const p=new Pos(); p.load(board,turn); return p.evaluate(); }\n  return {think, keyOf, perft, legalMoves, evaluate, ttClear, MATE, encode};\n})();\n\nself.onmessage=function(e){\n  const d=e.data;\n  try{\n    if(d.cmd==='think'){ postMessage({id:d.id,result:XQSearch.think(d.args)}); }\n    else if(d.cmd==='analyze'){\n      const out=[];\n      d.args.positions.forEach(function(p,i){\n        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:d.args.timeMs,maxDepth:d.args.maxDepth,historyKeys:p.historyKeys}));\n        postMessage({id:d.id,progress:i+1});\n      });\n      postMessage({id:d.id,result:out});\n    }\n  }catch(err){ postMessage({id:d.id,error:String(err)}); }\n};\n";
 /* =========================================================================
    BOARD WIDGET — bàn cờ SVG dùng chung cho mọi phần
    - Hỗ trợ lật bàn (flipped), số cột 1–9 cho cả hai bên, mũi tên nước đi,
@@ -1952,6 +2151,9 @@ function createBoardWidget(container, opts){
   const arrowsG = svgEl('g',{class:'xq-arrows'});
   svg.appendChild(overlayG); svg.appendChild(piecesG); svg.appendChild(arrowsG);
   container.appendChild(svg);
+  // Thông báo cho trình đọc màn hình khi di chuyển con trỏ bàn phím
+  const live = document.createElement('span'); live.className='sr-only'; live.setAttribute('aria-live','polite');
+  container.appendChild(live);
 
   // toạ độ bàn (r,c) -> toạ độ màn hình, có tính lật bàn
   function ptxy(r,c){ return flipped ? P(9-r,8-c) : P(r,c); }
@@ -1994,6 +2196,7 @@ function createBoardWidget(container, opts){
     opts.onSquareClick(r,c);
   });
 
+  let pieceEls={};
   function drawPiece(p,r,c){
     const {x,y}=ptxy(r,c);
     const g = svgEl('g',{class:`xq-piece xq-${p.color}`,transform:`translate(${x},${y})`});
@@ -2007,6 +2210,7 @@ function createBoardWidget(container, opts){
     const title = svgEl('title',{}); title.textContent = `${VN_NAME[p.type]} ${p.color==='red'?'Đỏ':'Đen'}`;
     g.appendChild(title);
     piecesG.appendChild(g);
+    pieceEls[r*9+c]=g;
   }
 
   function drawArrow(a){
@@ -2017,9 +2221,18 @@ function createBoardWidget(container, opts){
       'marker-end':`url(#${uid}-${a.alt?'arrowAlt':'arrow'})`}));
   }
 
+  const ANIM_MS=200; let anim=null;
+  const sameMv=(a,b)=>a&&b&&a.from[0]===b.from[0]&&a.from[1]===b.from[1]&&a.to[0]===b.to[0]&&a.to[1]===b.to[1];
+  // Nước vừa đi có phải là bước TIẾN mới từ bàn đang hiển thị không (để chạy hiệu ứng + âm thanh)?
+  function freshMove(prev, prevMeta, board, lm){
+    if(!lm || !prev || sameMv(prevMeta&&prevMeta.lastMove, lm)) return false;
+    const a=prev[lm.from[0]][lm.from[1]], b=board[lm.to[0]][lm.to[1]];
+    return !!(a && b && a.type===b.type && a.color===b.color && !board[lm.from[0]][lm.from[1]]);
+  }
   function setBoard(board, meta){
+    const prevBoard=lastBoard, prevMeta=lastMeta;
     lastBoard = board; lastMeta = meta = meta || {};
-    piecesG.innerHTML=''; overlayG.innerHTML=''; arrowsG.innerHTML='';
+    piecesG.innerHTML=''; overlayG.innerHTML=''; arrowsG.innerHTML=''; pieceEls={};
     if(meta.lastMove){
       for(const sq of [meta.lastMove.from, meta.lastMove.to]){
         const {x,y}=ptxy(sq[0],sq[1]);
@@ -2047,6 +2260,67 @@ function createBoardWidget(container, opts){
       overlayG.appendChild(svgEl('circle',{cx:x,cy:y,r:PIECE_R+9,class:'xq-check-ring'}));
     }
     if(meta.arrows) meta.arrows.forEach(drawArrow);
+    if(cursor && kbd && document.activeElement===svg){
+      const {x,y}=P(cursor[0],cursor[1]);
+      overlayG.appendChild(svgEl('circle',{cx:x,cy:y,r:PIECE_R+3,class:'xq-cursor'}));
+    }
+    const lm=meta.lastMove, fresh=!meta.silent && freshMove(prevBoard, prevMeta, board, lm);
+    if(fresh) anim={mv:lm, t0:Date.now()};
+    // Chạy (hoặc chạy tiếp nếu bàn vừa bị vẽ lại giữa chừng) hiệu ứng quân trượt tới ô mới
+    if(anim && sameMv(anim.mv,lm) && Date.now()-anim.t0<ANIM_MS){
+      const g=pieceEls[lm.to[0]*9+lm.to[1]];
+      if(g && g.animate && !prefersReducedMotion()){
+        const s=ptxy(lm.from[0],lm.from[1]), t=ptxy(lm.to[0],lm.to[1]);
+        piecesG.appendChild(g); // quân đang đi nằm trên cùng
+        try{ const a=g.animate([{transform:`translate(${s.x}px,${s.y}px)`},{transform:`translate(${t.x}px,${t.y}px)`}],{duration:ANIM_MS,easing:'cubic-bezier(.2,.7,.3,1)'}); a.currentTime=Date.now()-anim.t0; }catch(e){}
+      }
+    } else anim=null;
+    if(fresh){
+      if(typeof Sound!=='undefined'){
+        const over = meta.checkSq && Engine.generateLegalMoves(board, board[meta.checkSq[0]][meta.checkSq[1]].color).length===0;
+        Sound.play(over?'end': meta.checkSq?'check' : prevBoard[lm.to[0]][lm.to[1]]?'capture':'move');
+      }
+    }
+  }
+
+  // ---------- Bàn phím: Tab vào bàn, mũi tên di chuyển, Enter/Space để bấm ô ----------
+  let cursor=null; // toạ độ MÀN HÌNH [hàng, cột]
+  // Chỉ hiện con trỏ khi đang dùng bàn phím. Không vẽ lại bàn khi nhận focus bằng chuột:
+  // thay phần tử ngay giữa lúc nhấn/thả chuột sẽ làm trình duyệt bỏ sự kiện click.
+  let kbd=false;
+  const focusVisible=()=>{ try{ return svg.matches(':focus-visible'); }catch(e){ return false; } };
+  const redraw=()=>{ if(lastBoard) setBoard(lastBoard,Object.assign({},lastMeta,{silent:true})); };
+  const toBoard=(sr,sc)=> flipped ? [9-sr,8-sc] : [sr,sc];
+  function announce(){
+    if(!cursor || !lastBoard) return;
+    const [r,c]=toBoard(cursor[0],cursor[1]), p=lastBoard[r][c];
+    const bottom = flipped ? Engine.BLACK : Engine.RED;
+    const rowFromBottom = 10-cursor[0];
+    live.textContent = `Cột ${Notation.fileOf(c,bottom)}, hàng ${rowFromBottom}: ${p?VN_NAME[p.type]+' '+(p.color==='red'?'Đỏ':'Đen'):'trống'}`;
+  }
+  if(opts.onSquareClick){
+    svg.setAttribute('tabindex','0');
+    svg.setAttribute('role','application');
+    svg.setAttribute('aria-roledescription','bàn cờ');
+    const startKbd=()=>{
+      if(!cursor){ const sel=lastMeta&&lastMeta.selected; cursor = sel ? (flipped?[9-sel[0],8-sel[1]]:sel.slice()) : [7,4]; }
+      if(!kbd){ kbd=true; redraw(); }
+    };
+    svg.addEventListener('focus',()=>{ if(focusVisible()){ startKbd(); announce(); } });
+    svg.addEventListener('blur',()=>{ if(kbd){ kbd=false; redraw(); } });
+    svg.addEventListener('pointerdown',()=>{ if(kbd){ kbd=false; } });
+    svg.addEventListener('keydown',(e)=>{
+      const D={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];
+      if(D || e.key==='Enter' || e.key===' ') startKbd();
+      if(D){
+        e.preventDefault();
+        cursor=[Math.max(0,Math.min(9,cursor[0]+D[0])), Math.max(0,Math.min(8,cursor[1]+D[1]))];
+        redraw(); announce();
+      } else if(e.key==='Enter' || e.key===' '){
+        e.preventDefault();
+        const [r,c]=toBoard(cursor[0],cursor[1]); opts.onSquareClick(r,c); announce();
+      }
+    });
   }
   function rerender(){ drawStatic(); if(lastBoard) setBoard(lastBoard,lastMeta); }
   function setFlipped(f){ f=!!f; if(f===flipped) return; flipped=f; rerender(); }
@@ -2470,14 +2744,18 @@ const LESSONS = [
       '<b>Cấp độ của máy</b> trong tab Đấu với máy được đặt tên theo thang của Trung Quốc để bạn dễ hình dung. Đây là <b>mô phỏng tương đối</b>: sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, không phải đo bằng thi đấu thật.'
     ],
     table:{
-      head:['Cấp độ máy','Tương ứng (ước lượng)'],
+      head:['Cấp độ máy','Hình dung (ước lượng, chưa đo với người thật)','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–11)'],
-        ['2 · Kỳ sĩ cấp 10–7','Chơi cờ phong trào'],
-        ['3 · Kỳ sĩ cấp 6–4','Giải cấp phường/xã'],
-        ['4 · Kỳ sĩ cấp 3–2','≈ vô địch quận/huyện'],
-        ['5 · Kỳ sĩ cấp 1','≈ vô địch thành phố'],
-        ['6 · Đại sư địa phương','≈ tuyển thủ tỉnh'],
+        ['1 · Tân thủ','Vừa biết luật (kỳ sĩ cấp 16–15)','—'],
+        ['2 · Kỳ sĩ cấp 14–12','Mới chơi vài tháng','thắng cấp 1: ~83%'],
+        ['3 · Kỳ sĩ cấp 11–9','Chơi cờ phong trào','thắng cấp 2: ~84%'],
+        ['4 · Kỳ sĩ cấp 8–7','Phong trào khá','thắng cấp 3: ~75%'],
+        ['5 · Kỳ sĩ cấp 6–5','Giải cấp phường/xã','thắng cấp 4: ~84%'],
+        ['6 · Kỳ sĩ cấp 4–3','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
+        ['7 · Kỳ sĩ cấp 2','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
+        ['8 · Kỳ sĩ cấp 1','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
+        ['9 · Ứng viên đại sư','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
+        ['10 · Đại sư địa phương','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
       ]
     },
     sources:[
@@ -2536,7 +2814,7 @@ function initLessonDemo(container, demo){
       const b=game.board();
       if(demo.defender==='engine'){
         // thế lớn: dùng máy tìm kiếm (chạy trong Worker), ưu tiên kéo dài / giữ hoà
-        AIEngine.think({board:b, turn:opp, timeMs:demo.thinkMs||800, historyKeys:historyKeysOf(game)})
+        AIEngine.think(aiThinkArgs(game,{timeMs:demo.thinkMs||800}))
           .then(r=>apply(r.move || Engine.generateLegalMoves(b,opp)[0]))
           .catch(()=>apply(Solver.bestDefense(b,opp,1) || Engine.generateLegalMoves(b,opp)[0]));
         return;
@@ -2706,6 +2984,8 @@ $('#lessonNext').addEventListener('click',()=>{ if(currentLessonIdx<LESSONS.leng
    AI — chạy XQSearch trong Web Worker (tạo từ Blob) để giao diện không bị đơ.
    Nếu trình duyệt/trang chặn Worker, tự chuyển sang chạy trên luồng chính.
    ========================================================================= */
+// Mã nguồn Web Worker: build (tools/build.js) tự sinh từ 04-xqsearch.js + worker-shim.js
+const XQ_WORKER_SRC = "/* =========================================================================\n   XQSearch \u2014 engine t\u00ecm ki\u1ebfm c\u1ee7a m\u00e1y (t\u1ef1 ch\u1ee9a, ch\u1ea1y \u0111\u01b0\u1ee3c trong Web Worker)\n   - B\u00e0n c\u1edd 1 chi\u1ec1u Int8Array(90), \u00f4 = h\u00e0ng*9 + c\u1ed9t (h\u00e0ng 0 = ph\u00eda \u0110en)\n   - Qu\u00e2n: T\u01b0\u1edbng 1, S\u0129 2, T\u01b0\u1ee3ng 3, M\u00e3 4, Xe 5, Ph\u00e1o 6, T\u1ed1t 7; \u0110\u1ecf d\u01b0\u01a1ng, \u0110en \u00e2m\n   - Negamax alpha-beta (PVS), iterative deepening theo th\u1eddi gian, quiescence,\n     b\u1ea3ng b\u0103m Zobrist, killer + history, null-move, LMR, gia h\u1ea1n khi b\u1ecb chi\u1ebfu.\n   - \u0110\u00e1nh gi\u00e1: v\u1eadt ch\u1ea5t + b\u1ea3ng \u0111i\u1ec3m v\u1ecb tr\u00ed (PST).\n   ========================================================================= */\nconst XQSearch = (function(){\n  const K=1,A=2,E=3,H=4,R=5,C=6,P=7;\n  const TYPE_OF={G:K,A:A,E:E,H:H,R:R,C:C,S:P};\n  const LETTER=[null,'G','A','E','H','R','C','S'];\n  const MATE=30000, INF=32000;\n  const VAL=[0,0,120,120,270,600,285,30];\n\n  // ---------- B\u1ea3ng \u0111i\u1ec3m v\u1ecb tr\u00ed (g\u00f3c nh\u00ecn \u0110\u1ecf; h\u00e0ng 0 = h\u00e0ng cu\u1ed1i c\u1ee7a \u0110en) ----------\n  const PST={};\n  PST[P]=[\n    [0,3,6,9,12,9,6,3,0],[18,36,56,80,120,80,56,36,18],[14,26,42,60,80,60,42,26,14],\n    [10,20,30,34,40,34,30,20,10],[6,12,18,18,20,18,18,12,6],[2,0,8,0,8,0,8,0,2],\n    [0,0,-2,0,4,0,-2,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0]];\n  PST[H]=[\n    [4,8,16,12,4,12,16,8,4],[4,10,28,16,8,16,28,10,4],[12,14,16,20,18,20,16,14,12],\n    [8,24,18,24,20,24,18,24,8],[6,16,14,18,16,18,14,16,6],[4,12,16,14,12,14,16,12,4],\n    [2,6,8,6,10,6,8,6,2],[4,2,8,8,4,8,8,2,4],[0,2,4,4,-2,4,4,2,0],[0,-4,0,0,0,0,0,-4,0]];\n  PST[R]=[\n    [14,14,12,18,16,18,12,14,14],[16,20,18,24,26,24,18,20,16],[12,12,12,18,18,18,12,12,12],\n    [12,18,16,22,22,22,16,18,12],[12,14,12,18,18,18,12,14,12],[12,16,14,20,20,20,14,16,12],\n    [6,10,8,14,14,14,8,10,6],[4,8,6,14,12,14,6,8,4],[8,4,8,16,8,16,8,4,8],[-2,10,6,14,12,14,6,10,-2]];\n  PST[C]=[\n    [6,4,0,-10,-12,-10,0,4,6],[2,2,0,-4,-14,-4,0,2,2],[2,2,0,-10,-8,-10,0,2,2],\n    [0,0,-2,4,10,4,-2,0,0],[0,0,0,2,8,2,0,0,0],[-2,0,4,2,6,2,4,0,-2],\n    [0,0,0,2,4,2,0,0,0],[4,0,8,6,10,6,8,0,4],[0,2,4,6,6,6,4,2,0],[0,0,2,6,6,6,2,0,0]];\n  const zero=()=>Array.from({length:10},()=>Array(9).fill(0));\n  PST[A]=zero(); PST[A][8][4]=3;\n  PST[E]=zero(); PST[E][7][4]=3; PST[E][7][0]=-2; PST[E][7][8]=-2; PST[E][5][2]=-1; PST[E][5][6]=-1;\n  PST[K]=zero(); PST[K][8][4]=-8; PST[K][7][4]=-15; PST[K][9][3]=-2; PST[K][9][5]=-2; PST[K][8][3]=-10; PST[K][8][5]=-10; PST[K][7][3]=-18; PST[K][7][5]=-18;\n  // b\u1ea3ng ph\u1eb3ng: PSQ[piece+7][sq] = gi\u00e1 tr\u1ecb (g\u00f3c nh\u00ecn c\u1ee7a ch\u00ednh qu\u00e2n \u0111\u00f3) + v\u1eadt ch\u1ea5t\n  const PSQ=[];\n  for(let pc=-7;pc<=7;pc++){\n    const t=Math.abs(pc), arr=new Int16Array(90);\n    if(pc!==0) for(let sq=0;sq<90;sq++){ const r=(sq/9)|0, c=sq%9; const rr = pc>0 ? r : 9-r; arr[sq]=VAL[t]+PST[t][rr][c]; }\n    PSQ[pc+7]=arr;\n  }\n\n  // ---------- Zobrist ----------\n  let seed=0x9E3779B1;\n  function rnd32(){ seed^=seed<<13; seed^=seed>>>17; seed^=seed<<5; return seed|0; }\n  const ZL=[], ZH=[];\n  for(let pc=0;pc<15;pc++){ ZL.push(new Int32Array(90)); ZH.push(new Int32Array(90)); for(let s=0;s<90;s++){ ZL[pc][s]=rnd32(); ZH[pc][s]=rnd32(); } }\n  const ZSIDE_L=rnd32(), ZSIDE_H=rnd32();\n\n  // ---------- H\u00ecnh h\u1ecdc ----------\n  const inPal=(sq,side)=>{ const r=(sq/9)|0, c=sq%9; if(c<3||c>5) return false; return side>0 ? r>=7 : r<=2; };\n  const ownHalf=(sq,side)=>{ const r=(sq/9)|0; return side>0 ? r>=5 : r<=4; };\n  const ORTH=[[-1,0],[1,0],[0,-1],[0,1]], DIAG=[[-1,-1],[-1,1],[1,-1],[1,1]];\n  const HORSE=[[-2,-1,-1,0],[-2,1,-1,0],[2,-1,1,0],[2,1,1,0],[-1,-2,0,-1],[1,-2,0,-1],[-1,2,0,1],[1,2,0,1]];\n  const ok=(r,c)=>r>=0&&r<=9&&c>=0&&c<=8;\n\n  // ---------- Tr\u1ea1ng th\u00e1i t\u00ecm ki\u1ebfm ----------\n  function Pos(){\n    this.b=new Int8Array(90); this.side=1; this.kpos=[0,0]; // kpos[0]=\u0111\u1ecf, [1]=\u0111en\n    this.hl=0; this.hh=0; this.score=0; // score: \u0111i\u1ec3m t\u0129nh g\u00f3c nh\u00ecn \u0110\u1ecf\n    this.hist=[]; // b\u0103m c\u00e1c th\u1ebf \u0111\u00e3 qua (\u0111\u1ec3 ph\u00e1t hi\u1ec7n l\u1eb7p)\n    this.chk=[];  // chk[k] = 1 n\u1ebfu b\u00ean \u0111i \u1edf th\u1ebf th\u1ee9 k (c\u1eb7p hist th\u1ee9 k) \u0111ang b\u1ecb chi\u1ebfu\n    this.curChk=0; // th\u1ebf hi\u1ec7n t\u1ea1i c\u00f3 \u0111ang b\u1ecb chi\u1ebfu kh\u00f4ng (ng\u01b0\u1eddi g\u1ecdi make() g\u00e1n tr\u01b0\u1edbc)\n  }\n  Pos.prototype.load=function(board2d, turn){\n    this.b.fill(0); this.hl=0; this.hh=0; this.score=0;\n    for(let r=0;r<10;r++) for(let c=0;c<9;c++){\n      const p=board2d[r][c]; if(!p) continue;\n      const pc=TYPE_OF[p.type]*(p.color==='red'?1:-1), sq=r*9+c;\n      this.b[sq]=pc; this.hl^=ZL[pc+7][sq]; this.hh^=ZH[pc+7][sq];\n      this.score += pc>0 ? PSQ[pc+7][sq] : -PSQ[pc+7][sq];\n      if(pc===K) this.kpos[0]=sq; if(pc===-K) this.kpos[1]=sq;\n    }\n    this.side = turn==='red'?1:-1;\n    if(this.side<0){ this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; }\n  };\n  // N\u01b0\u1edbc \u0111i m\u00e3 ho\u00e1: from*128 + to ; b\u1eaft qu\u00e2n l\u01b0u ri\u00eang khi make\n  Pos.prototype.make=function(mv){\n    const f=mv>>7, t=mv&127, b=this.b, pc=b[f], cap=b[t];\n    this.hist.push(this.hl, this.hh); this.chk.push(this.curChk);\n    if(cap){ this.hl^=ZL[cap+7][t]; this.hh^=ZH[cap+7][t]; this.score -= cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t]; }\n    this.hl^=ZL[pc+7][f]^ZL[pc+7][t]; this.hh^=ZH[pc+7][f]^ZH[pc+7][t];\n    this.score += pc>0 ? (PSQ[pc+7][t]-PSQ[pc+7][f]) : -(PSQ[pc+7][t]-PSQ[pc+7][f]);\n    b[t]=pc; b[f]=0;\n    if(pc===K) this.kpos[0]=t; else if(pc===-K) this.kpos[1]=t;\n    this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H;\n    return cap;\n  };\n  Pos.prototype.unmake=function(mv,cap){\n    const f=mv>>7, t=mv&127, b=this.b, pc=b[t];\n    b[f]=pc; b[t]=cap;\n    if(pc===K) this.kpos[0]=f; else if(pc===-K) this.kpos[1]=f;\n    this.side=-this.side;\n    this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop();\n    this.score += pc>0 ? -(PSQ[pc+7][t]-PSQ[pc+7][f]) : (PSQ[pc+7][t]-PSQ[pc+7][f]);\n    if(cap) this.score += cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t];\n  };\n  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.chk.push(0); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };\n  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop(); };\n\n  // \u00d4 sq c\u00f3 b\u1ecb b\u00ean `by` (1/-1) t\u1ea5n c\u00f4ng kh\u00f4ng\n  Pos.prototype.attacked=function(sq,by){\n    const b=this.b, r=(sq/9)|0, c=sq%9;\n    // Xe, Ph\u00e1o, T\u01b0\u1edbng (l\u1ed9 m\u1eb7t) theo 4 h\u01b0\u1edbng\n    for(const [dr,dc] of ORTH){\n      let rr=r+dr, cc=c+dc, screen=false;\n      while(ok(rr,cc)){\n        const p=b[rr*9+cc];\n        if(p){\n          if(!screen){\n            if(p===R*by) return true;\n            if(dr!==0 && p===K*by) return true;           // hai T\u01b0\u1edbng \u0111\u1ed1i m\u1eb7t\n            screen=true;\n          } else { if(p===C*by) return true; break; }\n        }\n        rr+=dr; cc+=dc;\n      }\n    }\n    // M\u00e3 (ch\u00e2n M\u00e3 l\u00e0 \u00f4 ch\u00e9o s\u00e1t \u00f4 b\u1ecb t\u1ea5n c\u00f4ng)\n    for(const [dr,dc,lr,lc] of HORSE){\n      const hr=r-dr, hc=c-dc; if(!ok(hr,hc)) continue;\n      if(b[hr*9+hc]!==H*by) continue;\n      if(b[(hr+lr)*9+(hc+lc)]===0) return true;\n    }\n    // T\u1ed1t\n    const fr = r + (by>0?1:-1);   // T\u1ed1t \u0111\u1ecf \u0111\u1ee9ng h\u00e0ng d\u01b0\u1edbi (r+1) t\u1ea5n c\u00f4ng l\u00ean\n    if(ok(fr,c) && b[fr*9+c]===P*by) return true;\n    for(const dc of [-1,1]){\n      const cc=c+dc; if(!ok(r,cc)) continue;\n      if(b[r*9+cc]===P*by && !ownHalf(r*9+cc,by)) return true;\n    }\n    return false;\n  };\n  Pos.prototype.inCheck=function(side){ return this.attacked(this.kpos[side>0?0:1], -side); };\n\n  // Sinh n\u01b0\u1edbc gi\u1ea3 h\u1ee3p l\u1ec7 (ch\u01b0a l\u1ecdc t\u1ef1 chi\u1ebfu). capsOnly: ch\u1ec9 n\u01b0\u1edbc \u0103n qu\u00e2n\n  Pos.prototype.gen=function(out,capsOnly){\n    const b=this.b, s=this.side;\n    let n=0;\n    const push=(f,t)=>{ const q=b[t]; if(q && (q>0)===(s>0)) return; if(capsOnly && !q) return; out[n++]=(f<<7)|t; };\n    for(let sq=0;sq<90;sq++){\n      const pc=b[sq]; if(!pc || (pc>0)!==(s>0)) continue;\n      const t=Math.abs(pc), r=(sq/9)|0, c=sq%9;\n      switch(t){\n        case K: for(const [dr,dc] of ORTH){ const rr=r+dr, cc=c+dc; if(ok(rr,cc)&&inPal(rr*9+cc,s)) push(sq,rr*9+cc); } break;\n        case A: for(const [dr,dc] of DIAG){ const rr=r+dr, cc=c+dc; if(ok(rr,cc)&&inPal(rr*9+cc,s)) push(sq,rr*9+cc); } break;\n        case E: for(const [dr,dc] of DIAG){ const rr=r+2*dr, cc=c+2*dc; if(!ok(rr,cc)||!ownHalf(rr*9+cc,s)) continue; if(b[(r+dr)*9+c+dc]) continue; push(sq,rr*9+cc); } break;\n        case H: for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; push(sq,rr*9+cc); } break;\n        case R: for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(s>0)) out[n++]=(sq<<7)|(rr*9+cc); break; } if(!capsOnly) out[n++]=(sq<<7)|(rr*9+cc); rr+=dr; cc+=dc; } } break;\n        case C: for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc, scr=false; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(!scr){ if(q) scr=true; else if(!capsOnly) out[n++]=(sq<<7)|(rr*9+cc); } else if(q){ if((q>0)!==(s>0)) out[n++]=(sq<<7)|(rr*9+cc); break; } rr+=dr; cc+=dc; } } break;\n        case P: { const fr=r-(s>0?1:-1); if(ok(fr,c)) push(sq,fr*9+c); if(!ownHalf(sq,s)){ if(c>0) push(sq,sq-1); if(c<8) push(sq,sq+1); } } break;\n      }\n    }\n    return n;\n  };\n  // N\u01b0\u1edbc v\u1eeba \u0111i c\u00f3 h\u1ee3p l\u1ec7 kh\u00f4ng (kh\u00f4ng \u0111\u1ec3 T\u01b0\u1edbng m\u00ecnh b\u1ecb chi\u1ebfu / \u0111\u1ed1i m\u1eb7t)\n  Pos.prototype.legalAfterMake=function(){ return !this.attacked(this.kpos[this.side>0?1:0], this.side); };\n  Pos.prototype.legalMoves=function(){\n    const buf=new Int32Array(160), n=this.gen(buf,false), res=[];\n    for(let i=0;i<n;i++){ const cap=this.make(buf[i]); if(this.legalAfterMake()) res.push(buf[i]); this.unmake(buf[i],cap); }\n    return res;\n  };\n  // \u0110\u00e1nh gi\u00e1 = v\u1eadt ch\u1ea5t + b\u1ea3ng v\u1ecb tr\u00ed (c\u1ed9ng d\u1ed3n khi make/unmake) + c\u00e1c y\u1ebfu t\u1ed1 t\u00ednh t\u1ea1i ch\u1ed7:\n  //  \u00b7 an to\u00e0n T\u01b0\u1edbng: thi\u1ebfu S\u0129/T\u01b0\u1ee3ng b\u1ecb ph\u1ea1t, t\u1ec9 l\u1ec7 v\u1edbi l\u1ef1c t\u1ea5n c\u00f4ng c\u1ee7a \u0111\u1ed1i ph\u01b0\u01a1ng \u0111\u00e3 \u00e1p s\u00e1t\n  //  \u00b7 Ph\u00e1o m\u1ea1nh khi c\u00f2n nhi\u1ec1u qu\u00e2n (nhi\u1ec1u ng\u00f2i), M\u00e3 m\u1ea1nh h\u01a1n khi b\u00e0n th\u01b0a\n  //  \u00b7 \u0111\u1ed9 c\u01a1 \u0111\u1ed9ng c\u1ee7a Xe (s\u1ed1 \u00f4 \u0111i \u0111\u01b0\u1ee3c) v\u00e0 M\u00e3 (s\u1ed1 h\u01b0\u1edbng kh\u00f4ng b\u1ecb c\u1ea3n ch\u00e2n)\n  //  \u00b7 \"Ph\u00e1o \u0111\u1ea7u tr\u1ed1ng\": Ph\u00e1o \u0111\u1ed1i ph\u01b0\u01a1ng nh\u1eafm th\u1eb3ng T\u01b0\u1edbng tr\u00ean c\u1ed9t kh\u00f4ng c\u00f3 qu\u00e2n ch\u1eafn\n  Pos.prototype.evaluate=function(){ const s=this.score+evalExtra(this); return this.side>0 ? s : -s; };\n  function evalExtra(pos){\n    const b=pos.b;\n    let rA=0,rE=0,bA=0,bE=0, threatR=0, threatB=0, heavy=0, s=0;\n    for(let sq=0;sq<90;sq++){\n      const p=b[sq]; if(!p) continue;\n      const t=p>0?p:-p, r=(sq/9)|0;\n      if(t===R||t===H||t===C) heavy++;\n      if(p>0){\n        if(t===A) rA++; else if(t===E) rE++;\n        else if(t===R) threatB+=3; else if(t===C) threatB+=2;\n        else if(t===H) threatB+= r<=4?3:1; else if(t===P && r<=4) threatB+=1;\n      } else {\n        if(t===A) bA++; else if(t===E) bE++;\n        else if(t===R) threatR+=3; else if(t===C) threatR+=2;\n        else if(t===H) threatR+= r>=5?3:1; else if(t===P && r>=5) threatR+=1;\n      }\n    }\n    // An to\u00e0n T\u01b0\u1edbng (g\u00f3c nh\u00ecn \u0110\u1ecf: tr\u1eeb khi \u0110\u1ecf y\u1ebfu)\n    s -= ((2-rA)*16 + (2-rE)*10) * Math.min(threatR,14) / 10;\n    s += ((2-bA)*16 + (2-bE)*10) * Math.min(threatB,14) / 10;\n    // Ph\u00e1o / M\u00e3 theo giai \u0111o\u1ea1n v\u00e1n (heavy: s\u1ed1 Xe+M\u00e3+Ph\u00e1o c\u00f2n l\u1ea1i, t\u1ed1i \u0111a 12)\n    const phase=heavy-6;\n    for(let sq=0;sq<90;sq++){\n      const p=b[sq]; if(!p) continue;\n      const t=p>0?p:-p, sg=p>0?1:-1, r=(sq/9)|0, c=sq%9;\n      if(t===C) s += sg*phase*3;\n      else if(t===H){\n        s -= sg*phase*3;\n        let mob=0; for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; const q=b[rr*9+cc]; if(!q || (q>0)!==(p>0)) mob++; }\n        s += sg*(mob-4)*4;\n      } else if(t===R){\n        let mob=0;\n        for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(p>0)) mob++; break; } mob++; rr+=dr; cc+=dc; } }\n        s += sg*(mob-8)*2;\n      }\n    }\n    // Ph\u00e1o \u0111\u1ea7u tr\u1ed1ng: Ph\u00e1o \u0111\u1ed1i ph\u01b0\u01a1ng c\u00f9ng c\u1ed9t v\u1edbi T\u01b0\u1edbng, gi\u1eefa kh\u00f4ng c\u00f3 qu\u00e2n n\u00e0o\n    for(const side of [1,-1]){\n      const k=pos.kpos[side>0?0:1], kr=(k/9)|0, kc=k%9, dir= side>0?-1:1;\n      for(let rr=kr+dir; rr>=0 && rr<=9; rr+=dir){ const q=b[rr*9+kc]; if(!q) continue; if(q===-side*C) s -= side*45; break; }\n    }\n    return s|0;\n  }\n\n  // ---------- B\u1ea3ng b\u0103m ----------\n  const TT_BITS=18, TT_SIZE=1<<TT_BITS, TT_MASK=TT_SIZE-1;\n  const ttKey=new Int32Array(TT_SIZE), ttMove=new Int32Array(TT_SIZE), ttScore=new Int32Array(TT_SIZE);\n  const ttDepth=new Int8Array(TT_SIZE), ttFlag=new Int8Array(TT_SIZE);\n  function ttClear(){ ttKey.fill(0); ttDepth.fill(0); ttFlag.fill(0); ttMove.fill(0); }\n\n  // ---------- T\u00ecm ki\u1ebfm ----------\n  const MAXPLY=64;\n  let killers=[], history=new Int32Array(90*128), nodes=0, stopAt=0, stopped=false, gameHist=new Set();\n  const moveBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160)), scoreBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160));\n  function timeUp(){ if((nodes&1023)===0 && Date.now()>stopAt) stopped=true; return stopped; }\n\n  // \u0110i\u1ec3m khi th\u1ebf hi\u1ec7n t\u1ea1i l\u1eb7p l\u1ea1i m\u1ed9t th\u1ebf \u0111\u00e3 g\u1eb7p (trong \u0111\u01b0\u1eddng t\u00ecm ki\u1ebfm ho\u1eb7c trong v\u00e1n), theo\n  // \u0111\u00fang lu\u1eadt c\u1ee7a Game: trong chu k\u1ef3 l\u1eb7p, n\u1ebfu ch\u1ec9 M\u1ed8T b\u00ean chi\u1ebfu \u1edf m\u1ecdi n\u01b0\u1edbc th\u00ec b\u00ean \u0111\u00f3 thua\n  // (c\u1ea5m chi\u1ebfu m\u00e3i); c\u00f2n l\u1ea1i t\u00ednh ho\u00e0. Tr\u1ea3 v\u1ec1 null n\u1ebfu kh\u00f4ng l\u1eb7p. \u0110i\u1ec3m theo g\u00f3c nh\u00ecn b\u00ean \u0111ang \u0111i.\n  const RULE_WIN=20000;\n  function repetitionScore(pos,ply,inChk){\n    const h=pos.hist, L=h.length, lim=Math.max(0,L-2*ply);\n    let j=-1;\n    for(let i=L-4;i>=lim;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }\n    if(j<0){\n      if(!gameHist.has(pos.hl+':'+pos.hh)) return null;\n      for(let i=lim-((L-lim)%4===0?4:2);i>=0;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }\n      if(j<0) return 0;\n    }\n    // Th\u1ebf P_k (k = ch\u1ec9 s\u1ed1 c\u1eb7p hist), P_n l\u00e0 th\u1ebf hi\u1ec7n t\u1ea1i. N\u01b0\u1edbc d\u1eabn v\u00e0o P_k l\u00e0 n\u01b0\u1edbc chi\u1ebfu\n    // n\u1ebfu b\u00ean \u0111i \u1edf P_k b\u1ecb chi\u1ebfu. B\u00ean A = b\u00ean v\u1eeba \u0111i (d\u1eabn v\u00e0o P_n, P_n-2, \u2026), b\u00ean B = b\u00ean \u0111ang \u0111i.\n    const n=L>>1, pj=j>>1;\n    let aAll=true, bAll=true;\n    for(let k=n;k>pj;k--){\n      const c = k===n ? inChk : pos.chk[k];\n      if(((n-k)&1)===0){ if(!c) aAll=false; } else { if(!c) bAll=false; }\n    }\n    if(aAll && !bAll) return RULE_WIN;     // \u0111\u1ed1i ph\u01b0\u01a1ng chi\u1ebfu m\u00e3i \u2192 b\u00ean \u0111ang \u0111i th\u1eafng\n    if(bAll && !aAll) return -RULE_WIN;    // b\u00ean \u0111ang \u0111i chi\u1ebfu m\u00e3i \u2192 thua\n    return 0;\n  }\n\n  function orderMoves(pos,moves,scores,n,ttMv,ply){\n    const b=pos.b;\n    for(let i=0;i<n;i++){\n      const mv=moves[i], t=mv&127, cap=b[t];\n      let s;\n      if(mv===ttMv) s=1e7;\n      else if(cap) s=1e6 + VAL[Math.abs(cap)]*10 - VAL[Math.abs(b[mv>>7])]/10;\n      else if(killers[ply] && (killers[ply][0]===mv)) s=9e5;\n      else if(killers[ply] && (killers[ply][1]===mv)) s=8e5;\n      else s=history[(mv>>7)*128+t];\n      scores[i]=s;\n    }\n  }\n  function pickNext(moves,scores,n,i){\n    let bi=i; for(let j=i+1;j<n;j++) if(scores[j]>scores[bi]) bi=j;\n    if(bi!==i){ let t=moves[i]; moves[i]=moves[bi]; moves[bi]=t; t=scores[i]; scores[i]=scores[bi]; scores[bi]=t; }\n  }\n\n  function quiesce(pos,alpha,beta,ply,qd){\n    nodes++; if(timeUp()) return 0;\n    const inChk=pos.inCheck(pos.side);\n    if(!inChk){\n      const stand=pos.evaluate();\n      if(stand>=beta) return stand;\n      if(stand>alpha) alpha=stand;\n      if(qd>6) return stand;\n    } else if(qd>8) return pos.evaluate();\n    const moves=moveBufs[ply], scores=scoreBufs[ply];\n    const n=pos.gen(moves, !inChk);\n    orderMoves(pos,moves,scores,n,0,ply);\n    let legal=0, best = inChk ? -MATE+ply : alpha;\n    for(let i=0;i<n;i++){\n      pickNext(moves,scores,n,i);\n      pos.curChk=inChk?1:0;\n      const mv=moves[i], cap=pos.make(mv);\n      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }\n      legal++;\n      const v=-quiesce(pos,-beta,-alpha,ply+1,qd+1);\n      pos.unmake(mv,cap);\n      if(stopped) return 0;\n      if(v>best) best=v;\n      if(v>alpha){ alpha=v; if(alpha>=beta) break; }\n    }\n    if(inChk && legal===0) return -MATE+ply;\n    return inChk ? best : alpha;\n  }\n\n  function search(pos,depth,alpha,beta,ply,allowNull){\n    const inChk=pos.inCheck(pos.side);\n    if(ply>0){ const rs=repetitionScore(pos,ply,inChk); if(rs!==null) return rs; }\n    if(inChk) depth++;                         // gia h\u1ea1n khi b\u1ecb chi\u1ebfu\n    if(depth<=0) return quiesce(pos,alpha,beta,ply,0);\n    nodes++; if(timeUp()) return 0;\n    if(ply>=MAXPLY) return pos.evaluate();\n    // kho\u1ea3ng c\u00e1ch chi\u1ebfu b\u00ed\n    alpha=Math.max(alpha,-MATE+ply); beta=Math.min(beta,MATE-ply-1); if(alpha>=beta) return alpha;\n\n    const idx=pos.hl & TT_MASK; let ttMv=0;\n    if(ttKey[idx]===pos.hh && ttFlag[idx]){\n      ttMv=ttMove[idx];\n      if(ttDepth[idx]>=depth && ply>0){\n        let s=ttScore[idx]; if(s>MATE-200) s-=ply; else if(s<-MATE+200) s+=ply;\n        const f=ttFlag[idx];\n        if(f===1) return s; if(f===2 && s>=beta) return s; if(f===3 && s<=alpha) return s;\n      }\n    }\n    const pv = beta-alpha>1;\n    // Null-move\n    if(allowNull && !pv && !inChk && depth>=3 && pos.evaluate()>=beta){\n      let big=0; for(let sq=0;sq<90;sq++){ const p=pos.b[sq]; if(p && (p>0)===(pos.side>0) && (Math.abs(p)===R||Math.abs(p)===H||Math.abs(p)===C)) big++; }\n      if(big>=2){\n        pos.nullMove();\n        const v=-search(pos,depth-3,-beta,-beta+1,ply+1,false);\n        pos.unNull();\n        if(stopped) return 0;\n        if(v>=beta) return v;\n      }\n    }\n    const moves=moveBufs[ply], scores=scoreBufs[ply];\n    const n=pos.gen(moves,false);\n    orderMoves(pos,moves,scores,n,ttMv,ply);\n    let best=-INF, bestMv=0, legal=0, origAlpha=alpha;\n    for(let i=0;i<n;i++){\n      pickNext(moves,scores,n,i);\n      pos.curChk=inChk?1:0;\n      const mv=moves[i], cap=pos.make(mv);\n      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }\n      legal++;\n      let v;\n      const givesCheck = pos.inCheck(pos.side);\n      if(legal===1) v=-search(pos,depth-1,-beta,-alpha,ply+1,true);\n      else {\n        let red = (depth>=3 && legal>4 && !cap && !inChk && !givesCheck) ? 1 : 0;\n        v=-search(pos,depth-1-red,-alpha-1,-alpha,ply+1,true);\n        if(v>alpha && (red || v<beta)) v=-search(pos,depth-1,-beta,-alpha,ply+1,true);\n      }\n      pos.unmake(mv,cap);\n      if(stopped) return 0;\n      if(v>best){ best=v; bestMv=mv; }\n      if(v>alpha){\n        alpha=v;\n        if(alpha>=beta){\n          if(!cap){ if(!killers[ply]) killers[ply]=[0,0]; if(killers[ply][0]!==mv){ killers[ply][1]=killers[ply][0]; killers[ply][0]=mv; } history[(mv>>7)*128+(mv&127)]+=depth*depth; }\n          break;\n        }\n      }\n    }\n    if(legal===0) return -MATE+ply;           // h\u1ebft n\u01b0\u1edbc = thua (lu\u1eadt c\u1edd t\u01b0\u1edbng)\n    let st=best; if(st>MATE-200) st+=ply; else if(st<-MATE+200) st-=ply;\n    ttKey[idx]=pos.hh; ttMove[idx]=bestMv; ttScore[idx]=st; ttDepth[idx]=depth;\n    ttFlag[idx]= best>=beta ? 2 : (best>origAlpha ? 1 : 3);\n    return best;\n  }\n\n  function extractPV(pos,maxLen){\n    const pv=[], undo=[];\n    for(let i=0;i<maxLen;i++){\n      const idx=pos.hl&TT_MASK; if(ttKey[idx]!==pos.hh||!ttFlag[idx]) break;\n      const mv=ttMove[idx]; if(!mv) break;\n      if(!pos.legalMoves().includes(mv)) break;\n      pv.push(mv); undo.push([mv,pos.make(mv)]);\n    }\n    for(let i=undo.length-1;i>=0;i--) pos.unmake(undo[i][0],undo[i][1]);\n    return pv;\n  }\n  const toMove=mv=>({from:[(mv>>7)/9|0,(mv>>7)%9], to:[(mv&127)/9|0,(mv&127)%9]});\n  const encode=m=>((m.from[0]*9+m.from[1])<<7)|(m.to[0]*9+m.to[1]);\n\n  // opts: {board, turn, timeMs, maxDepth, historyKeys:[key...], historyChecks:[bool...],\n  //        excludeMoves:[{from,to}...], noise, blunder, rng, rootScores}\n  //  - historyKeys: kho\u00e1 c\u00e1c th\u1ebf \u0111\u00e3 qua trong v\u00e1n (kh\u00f4ng g\u1ed3m th\u1ebf hi\u1ec7n t\u1ea1i), theo th\u1ee9 t\u1ef1\n  //  - historyChecks[i]: b\u00ean \u0111i \u1edf th\u1ebf historyKeys[i] c\u00f3 \u0111ang b\u1ecb chi\u1ebfu kh\u00f4ng (\u0111\u1ec3 x\u00e9t lu\u1eadt chi\u1ebfu m\u00e3i)\n  //  - excludeMoves: n\u01b0\u1edbc kh\u00f4ng \u0111\u01b0\u1ee3c ch\u1ecdn \u1edf g\u1ed1c (vd. n\u01b0\u1edbc m\u00e0 lu\u1eadt v\u00e1n x\u1eed thua ngay)\n  function think(opts){\n    const pos=new Pos(); pos.load(opts.board, opts.turn);\n    const hk=opts.historyKeys||[], hc=opts.historyChecks||[];\n    gameHist = new Set(hk);\n    for(let i=0;i<hk.length;i++){ const [l,h]=String(hk[i]).split(':').map(Number); pos.hist.push(l|0,h|0); pos.chk.push(hc[i]?1:0); }\n    pos.curChk = pos.inCheck(pos.side)?1:0;\n    killers=[]; history.fill(0); nodes=0; stopped=false;\n    const t0=Date.now(); stopAt = t0 + (opts.timeMs||1000);\n    const maxDepth = opts.maxDepth||40;\n    let rootMoves=pos.legalMoves();\n    if(!rootMoves.length) return {move:null, score:-MATE, depth:0, pv:[], nodes:0};\n    if(opts.excludeMoves && opts.excludeMoves.length){\n      const ex=new Set(opts.excludeMoves.map(encode)), kept=rootMoves.filter(m=>!ex.has(m));\n      if(kept.length) rootMoves=kept;\n    }\n    let bestMv=rootMoves[0], bestScore=0, doneDepth=0, pv=[];\n    const rng = opts.rng || Math.random;\n    // C\u1ea5p th\u1ea5p: \u0111\u00f4i khi \u0111i n\u01b0\u1edbc ng\u1eabu nhi\u00ean (m\u00f4 ph\u1ecfng ng\u01b0\u1eddi m\u1edbi hay s\u01a1 su\u1ea5t)\n    if(opts.blunder && rng()<opts.blunder){\n      const m=rootMoves[Math.floor(rng()*rootMoves.length)];\n      return {move:toMove(m), score:0, depth:0, pv:[], nodes:0, random:true};\n    }\n    // \u0110i\u1ec3m t\u1eebng n\u01b0\u1edbc \u1edf g\u1ed1c (\u0111\u1ec3 th\u00eam nhi\u1ec5u cho c\u1ea5p th\u1ea5p)\n    const rootScores=new Map(); let lastFull=null; const rootChk=pos.curChk;\n    for(let d=1; d<=maxDepth; d++){\n      let alpha=-INF, beta=INF, iterBest=0, iterScore=-INF;\n      // s\u1eafp x\u1ebfp n\u01b0\u1edbc g\u1ed1c: n\u01b0\u1edbc t\u1ed1t nh\u1ea5t l\u1ea7n tr\u01b0\u1edbc l\u00ean \u0111\u1ea7u\n      rootMoves.sort((a,b)=>(b===bestMv)-(a===bestMv) || (rootScores.get(b)||-INF)-(rootScores.get(a)||-INF));\n      let first=true;\n      for(const mv of rootMoves){\n        pos.curChk=rootChk;\n        const cap=pos.make(mv);\n        let v;\n        if(opts.noise) v=-search(pos,d-1,-INF,INF,1,true);     // c\u1ea7n \u0111i\u1ec3m ch\u00ednh x\u00e1c cho m\u1ecdi n\u01b0\u1edbc \u0111\u1ec3 ch\u1ecdn ng\u1eabu nhi\u00ean\n        else if(first) v=-search(pos,d-1,-beta,-alpha,1,true);\n        else { v=-search(pos,d-1,-alpha-1,-alpha,1,true); if(v>alpha && !stopped) v=-search(pos,d-1,-beta,-alpha,1,true); }\n        pos.unmake(mv,cap);\n        if(stopped) break;\n        rootScores.set(mv,v);\n        if(v>iterScore){ iterScore=v; iterBest=mv; }\n        if(v>alpha) alpha=v;\n        first=false;\n      }\n      if(stopped && !iterBest) break;\n      if(iterBest){ bestMv=iterBest; bestScore=iterScore; doneDepth=d; }\n      if(!stopped) lastFull=new Map(rootScores);\n      if(stopped) break;\n      // l\u01b0u n\u01b0\u1edbc t\u1ed1t nh\u1ea5t v\u00e0o TT \u0111\u1ec3 l\u1ea5y PV\n      const idx=pos.hl&TT_MASK; ttKey[idx]=pos.hh; ttMove[idx]=bestMv; ttFlag[idx]=1; ttDepth[idx]=d; ttScore[idx]=bestScore;\n      if(Math.abs(bestScore)>MATE-100) break;   // \u0111\u00e3 th\u1ea5y chi\u1ebfu b\u00ed\n      if(Date.now()-t0 > (opts.timeMs||1000)*0.55) break; // kh\u00f4ng \u0111\u1ee7 th\u1eddi gian cho v\u00f2ng sau\n    }\n    if(opts.noise){\n      // ch\u1ecdn ng\u1eabu nhi\u00ean trong c\u00e1c n\u01b0\u1edbc k\u00e9m n\u01b0\u1edbc t\u1ed1t nh\u1ea5t kh\u00f4ng qu\u00e1 `noise` \u0111i\u1ec3m\n      const sc=lastFull||rootScores, top=Math.max(...[...sc.values()]);\n      const cands=rootMoves.filter(m=>sc.has(m) && sc.get(m)>=top-opts.noise);\n      if(cands.length>1){ const m=cands[Math.floor(rng()*cands.length)]; bestMv=m; bestScore=sc.get(m); }\n    }\n    pv=[bestMv];\n    { pos.curChk=rootChk; const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }\n    const res={move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};\n    if(opts.rootScores){ const sc=lastFull||rootScores; res.rootScores=rootMoves.filter(m=>sc.has(m)).map(m=>({move:toMove(m), score:sc.get(m)})); }\n    return res;\n  }\n\n  // T\u00ecm ki\u1ebfm thu\u1ea7n v\u1eadt ch\u1ea5t (minimax \u0111\u1ea7y \u0111\u1ee7, alpha-beta) \u2014 c\u00f9ng k\u1ebft qu\u1ea3 v\u1edbi b\u1ea3n d\u00f9ng m\u1ea3ng 2 chi\u1ec1u\n  // tr\u01b0\u1edbc \u0111\u00e2y nh\u01b0ng nhanh h\u01a1n nhi\u1ec1u nh\u1edd b\u00e0n c\u1edd 1 chi\u1ec1u + make/unmake. \u0110i\u1ec3m theo g\u00f3c nh\u00ecn `turn`:\n  // h\u1ebft n\u01b0\u1edbc \u0111i = -1000-depth; \u1edf l\u00e1 = ch\u00eanh l\u1ec7ch v\u1eadt ch\u1ea5t (Xe 9, Ph\u00e1o 4,5, M\u00e3 4, S\u0129/T\u01b0\u1ee3ng 2, T\u1ed1t 1).\n  const MVAL=[0,0,2,2,4,9,4.5,1];\n  const matBufs=Array.from({length:16},()=>new Int32Array(160));\n  function matMaterial(pos){ let s=0; const b=pos.b; for(let i=0;i<90;i++){ const p=b[i]; if(p) s += (p>0)===(pos.side>0) ? MVAL[p>0?p:-p] : -MVAL[p>0?p:-p]; } return s; }\n  function matSearch(pos,depth,alpha,beta){\n    const buf=matBufs[depth], n=pos.gen(buf,false), b=pos.b;\n    if(depth===0){\n      for(let i=0;i<n;i++){ const cap=pos.make(buf[i]), ok=pos.legalAfterMake(); pos.unmake(buf[i],cap); if(ok) return matMaterial(pos); }\n      return -1000;\n    }\n    // \u0103n qu\u00e2n tr\u01b0\u1edbc \u0111\u1ec3 c\u1eaft t\u1ec9a s\u1edbm (kh\u00f4ng \u0111\u1ed5i k\u1ebft qu\u1ea3)\n    let k=0; for(let i=0;i<n;i++) if(b[buf[i]&127]){ const t=buf[k]; buf[k]=buf[i]; buf[i]=t; k++; }\n    let best=-Infinity, legal=0;\n    for(let i=0;i<n;i++){\n      const mv=buf[i], cap=pos.make(mv);\n      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }\n      legal++;\n      const s=-matSearch(pos,depth-1,-beta,-alpha);\n      pos.unmake(mv,cap);\n      if(s>best) best=s; if(best>alpha) alpha=best; if(alpha>=beta) break;\n    }\n    return legal ? best : -1000-depth;\n  }\n  function materialSearch(board,turn,depth){ const p=new Pos(); p.load(board,turn); return matSearch(p,depth,-Infinity,Infinity); }\n\n  // Kho\u00e1 th\u1ebf c\u1edd t\u01b0\u01a1ng th\u00edch v\u1edbi Game.key \u0111\u1ec3 truy\u1ec1n l\u1ecbch s\u1eed v\u00e1n v\u00e0o worker\n  function keyOf(board,turn){ const p=new Pos(); p.load(board,turn); return p.hl+':'+p.hh; }\n  function perft(board,turn,depth){\n    const pos=new Pos(); pos.load(board,turn);\n    const rec=d=>{ if(d===0) return 1; let n=0; for(const mv of pos.legalMoves()){ const c=pos.make(mv); n+=rec(d-1); pos.unmake(mv,c); } return n; };\n    return rec(depth);\n  }\n  function legalMoves(board,turn){ const p=new Pos(); p.load(board,turn); return p.legalMoves().map(toMove); }\n  function evaluate(board,turn){ const p=new Pos(); p.load(board,turn); return p.evaluate(); }\n  return {think, keyOf, perft, legalMoves, evaluate, materialSearch, ttClear, MATE, RULE_WIN, encode};\n})();\n\nself.onmessage=function(e){\n  const d=e.data;\n  try{\n    if(d.cmd==='think'){ postMessage({id:d.id,result:XQSearch.think(d.args)}); }\n    else if(d.cmd==='analyze'){\n      const out=[];\n      d.args.positions.forEach(function(p,i){\n        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:d.args.timeMs,maxDepth:d.args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks}));\n        postMessage({id:d.id,progress:i+1});\n      });\n      postMessage({id:d.id,result:out});\n    }\n  }catch(err){ postMessage({id:d.id,error:String(err)}); }\n};\n";
 const AIEngine = (function(){
   let worker=null, mode='main', seq=0;
   const pending=new Map();
@@ -2734,7 +3014,7 @@ const AIEngine = (function(){
       const out=[];
       for(let i=0;i<args.positions.length;i++){
         const p=args.positions[i];
-        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys}));
+        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:Math.min(args.timeMs,200),maxDepth:args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks}));
         if(onProgress) onProgress(i+1);
         await sleep(0);
       }
@@ -2763,7 +3043,8 @@ const AIEngine = (function(){
 /* =========================================================================
    ĐẤU VỚI MÁY + REVIEW VÁN + LỊCH SỬ
    ========================================================================= */
-const aiGame = { game:null, humanColor:RED, level:3, widget:null, ctl:null, thinking:false, hint:null, bookNote:'', saved:false, book:null, token:0 };
+const aiGame = { game:null, humanColor:RED, level:3, start:null, widget:null, ctl:null, thinking:false, hint:null, bookNote:'', saved:false, book:null, token:0 };
+const boardToPieces = b => { const out=[]; for(let r=0;r<10;r++) for(let c=0;c<9;c++){ const p=b[r][c]; if(p) out.push([r,c,p.type,p.color]); } return out; };
 
 /* ---------------- Lịch sử ván (localStorage) ---------------- */
 const HISTORY_KEY='xq_ai_history';
@@ -2772,17 +3053,19 @@ function saveHistory(list){ safeLS_set(HISTORY_KEY, JSON.stringify(list.slice(0,
 function upsertHistory(rec){ const list=loadHistory().filter(x=>x.id!==rec.id); list.unshift(rec); saveHistory(list); }
 function gameToRecord(){
   const g=aiGame.game;
-  return { id: aiGame.recId, date: aiGame.recDate, level: aiGame.level, human: aiGame.humanColor,
+  const rec = { id: aiGame.recId, date: aiGame.recDate, level: aiGame.level, ladder: LADDER_VERSION, human: aiGame.humanColor,
     moves: g.moves.map(m=>[m.from[0],m.from[1],m.to[0],m.to[1]]),
     result: g.result ? {winner:g.result.winner, reason:g.result.reason} : null };
+  if(aiGame.start) rec.start=aiGame.start;   // ván bắt đầu từ một thế cờ cho trước
+  return rec;
 }
 function replayRecord(rec){
-  const g=Game.create();
+  const g = rec.start ? Game.create(mkBoard(rec.start.pieces), rec.start.turn) : Game.create();
   for(const [a,b,c,d] of rec.moves) g.play({from:[a,b],to:[c,d]});
   if(rec.result && !g.result) g.result=Object.assign({state:'over'},rec.result);
   return g;
 }
-function levelInfo(id){ return AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[2]; }
+function levelInfo(id){ return AI_LEVELS.find(l=>l.id===id)||AI_LEVELS[4]; }
 function resultForHuman(rec){
   if(!rec.result) return {txt:'Chưa kết thúc', cls:'badge-mid'};
   if(!rec.result.winner) return {txt:'Hoà', cls:'badge-mid'};
@@ -2794,8 +3077,8 @@ function renderHistoryList(){
   el.innerHTML = list.map(r=>{
     const rs=resultForHuman(r), d=new Date(r.date);
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
-    return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(r.level).name)}</b>
-      <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
+    return `<div class="hist-row"><div><span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(r)).name)}</b>
+      <div class="hint-text small">${d.toLocaleDateString('vi-VN')} ${d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} · Bạn cầm ${COLOR_VN[r.human]}${r.start?' · từ thế cho trước':''} · ${Math.ceil(r.moves.length/2)} nước${acc}</div></div>
       <div class="btn-row"><button class="btn btn-outline btn-sm" data-review="${esc(r.id)}">📊 Phân tích</button><button class="btn btn-outline btn-sm" data-del="${esc(r.id)}" aria-label="Xoá ván">🗑</button></div></div>`;
   }).join('');
   $$('[data-review]',el).forEach(b=>b.addEventListener('click',()=>openReview(loadHistory().find(x=>x.id===b.dataset.review))));
@@ -2808,6 +3091,28 @@ function historyKeysOf(g){
   const keys=[XQSearch.keyOf(g.start,g.startTurn)];
   for(let i=0;i<g.boards.length-1;i++) keys.push(XQSearch.keyOf(g.boards[i], i%2===0?Engine.otherColor(g.startTurn):g.startTurn));
   return keys;
+}
+// Cờ "đang bị chiếu" của từng thế trong historyKeysOf (cùng thứ tự) — để máy biết luật chiếu mãi
+function historyChecksOf(g){
+  const chk=[Engine.isInCheck(g.start,g.startTurn)];
+  for(let i=0;i<g.moves.length-1;i++) chk.push(!!g.moves[i].check);
+  return chk;
+}
+// Các nước mà luật ván (Game) xử bên đi THUA ngay (chiếu mãi / đuổi mãi ở lần lặp thứ 3).
+// Chỉ cần thử những nước dẫn tới thế đã xuất hiện ≥ 2 lần nên rất rẻ.
+function ruleLosingMoves(g){
+  const seen=new Map(); for(const k of [g.startKey].concat(g.keys)) seen.set(k,(seen.get(k)||0)+1);
+  const me=g.turn(), b=g.board(), out=[];
+  for(const mv of g.legalMoves()){
+    if((seen.get(Game.key(Engine.applyMove(b,mv),Engine.otherColor(me)))||0)<2) continue;
+    g.play(mv); const res=g.result; g.undo(1);
+    if(res && res.winner && res.winner!==me) out.push(mv);
+  }
+  return out;
+}
+// Tham số gọi máy cho thế hiện tại của ván g
+function aiThinkArgs(g, extra){
+  return Object.assign({board:g.board(), turn:g.turn(), historyKeys:historyKeysOf(g), historyChecks:historyChecksOf(g), excludeMoves:ruleLosingMoves(g)}, extra||{});
 }
 function aiMeta(){
   const g=aiGame.game, b=g.board(), turn=g.turn();
@@ -2855,7 +3160,7 @@ async function triggerAIMove(){
   if(!mv){
     aiGame.bookNote='';
     try{
-      const r=await AIEngine.think({board:g.board(), turn:g.turn(), timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder, historyKeys:historyKeysOf(g)});
+      const r=await AIEngine.think(aiThinkArgs(g,{timeMs:L.timeMs, maxDepth:L.maxDepth, noise:L.noise, blunder:L.blunder}));
       mv=r&&r.move;
     }catch(e){ mv=null; }
   }
@@ -2869,10 +3174,19 @@ async function triggerAIMove(){
   }, wait);
 }
 function aiStartGame(){
-  aiGame.humanColor = $('input[name="aiColor"]:checked').value;
-  aiGame.level = parseInt($('input[name="aiLevel"]:checked').value,10);
+  aiBeginGame({
+    humanColor: $('input[name="aiColor"]:checked').value,
+    level: parseInt($('input[name="aiLevel"]:checked').value,10),
+  });
+}
+// Bắt đầu ván. cfg: {humanColor, level, board?, turn?, source?}
+//  - board/turn: bắt đầu từ một thế cờ cho trước (vd. "chơi tiếp với máy" từ bài tập, ván danh thủ)
+function aiBeginGame(cfg){
+  aiGame.humanColor = cfg.humanColor || RED;
+  aiGame.level = cfg.level || aiGame.level || savedAiLevel();
   safeLS_set('xq_ai_level', String(aiGame.level));
-  aiGame.game = Game.create();
+  aiGame.start = cfg.board ? {pieces:boardToPieces(cfg.board), turn:cfg.turn||RED, source:cfg.source||''} : null;
+  aiGame.game = cfg.board ? Game.create(cfg.board, cfg.turn||RED) : Game.create();
   aiGame.thinking=false; aiGame.hint=null; aiGame.bookNote=''; aiGame.token++;
   aiGame.recId = 'g'+Date.now().toString(36); aiGame.recDate = Date.now();
   if(!aiGame.book) aiGame.book=buildOpeningBook(OPENINGS);
@@ -2889,12 +3203,13 @@ function showAICard(which){
   if(which==='setup') renderHistoryList();
 }
 function renderLevelPicker(){
-  const saved=parseInt(safeLS_get('xq_ai_level')||'3',10);
+  const saved=savedAiLevel();
   $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
     <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small></span></label>`).join('');
 }
 function initAIGame(){
   renderLevelPicker();
+
   $('#thinkSteps').innerHTML=Coach.THINKING_STEPS.map(([h,t])=>`<li><b>${esc(h)}</b><span>${esc(t)}</span></li>`).join('');
   if(window.matchMedia && matchMedia('(max-width:860px)').matches) $('#thinkBox').open=false;
   aiGame.widget = createBoardWidget($('#aiBoard'), {onSquareClick:(r,c)=>aiGame.ctl.click(r,c), label:'Bàn cờ đấu với máy'});
@@ -2917,7 +3232,7 @@ function initAIGame(){
   $('#aiHint').addEventListener('click', async ()=>{
     const g=aiGame.game; $('#aiHint').disabled=true;
     statusBanner($('#aiStatus'),'think','💡 Đang tìm gợi ý…');
-    const r=await AIEngine.think({board:g.board(), turn:g.turn(), timeMs:1200, maxDepth:40, historyKeys:historyKeysOf(g)});
+    const r=await AIEngine.think(aiThinkArgs(g,{timeMs:1200, maxDepth:40}));
     if(r&&r.move){
       aiGame.hint=r.move; aiRender();
       const why=Coach.whyGood(g.board(),r.move), danger=Coach.endangered(g.board(),g.turn());
@@ -2960,12 +3275,12 @@ const PIECE_PTS = {G:0,A:2,E:2,H:4,R:9,C:4.5,S:1};
 async function analyzeRecord(rec, onProgress){
   const g=replayRecord(rec);
   const positions=[];
-  const keysAll=[XQSearch.keyOf(g.start,g.startTurn)];
+  const keysAll=[XQSearch.keyOf(g.start,g.startTurn)], chkAll=[Engine.isInCheck(g.start,g.startTurn)];
   for(let k=0;k<=g.moves.length;k++){
     const board = k===0 ? g.start : g.boards[k-1];
     const turn = k%2===0 ? g.startTurn : Engine.otherColor(g.startTurn);
-    positions.push({board, turn, historyKeys: keysAll.slice(0,k)});
-    if(k<g.moves.length) keysAll.push(XQSearch.keyOf(g.boards[k], k%2===0?Engine.otherColor(g.startTurn):g.startTurn));
+    positions.push({board, turn, historyKeys: keysAll.slice(0,k), historyChecks: chkAll.slice(0,k)});
+    if(k<g.moves.length){ keysAll.push(XQSearch.keyOf(g.boards[k], k%2===0?Engine.otherColor(g.startTurn):g.startTurn)); chkAll.push(!!g.moves[k].check); }
   }
   const res = await AIEngine.analyze({positions, timeMs:260, maxDepth:12}, onProgress);
   return {g, res};
@@ -3067,7 +3382,7 @@ function openReview(rec){
   if(!review.widget) review.widget=createBoardWidget($('#reviewBoard'),{label:'Bàn cờ xem lại ván'});
   review.widget.setFlipped(rec.human===BLACK);
   const rs=resultForHuman(rec);
-  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(rec.level).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
+  $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${esc(levelInfo(recLevel(rec)).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
   $('#reviewSummary').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
   reviewRender();
   $('#aiReviewCard').scrollIntoView({block:'start'});
@@ -3428,12 +3743,14 @@ function markPuzzleSolved(id){
   if(!done.includes(id)){ done.push(id); safeLS_set('xq_puzzles_solved', JSON.stringify(done)); }
 }
 function puzzleList(){
+  if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
   return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff));
 }
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+  const due=Learn.due().length;
+  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','🔁 Cần ôn',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
     <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
@@ -3455,6 +3772,7 @@ function renderPuzzleGrid(){
 }
 function openPuzzle(id){
   pz.active = PUZZLES.find(p=>p.id===id);
+  pz.recorded=false; pz.usedHint=false;   // kết quả lần mở bài này (để ôn bài sai)
   $('#puzzleListCard').hidden = true;
   $('#puzzleDetailCard').hidden = false;
   $('#puzzleTitle').textContent = pz.active.title;
@@ -3524,17 +3842,25 @@ function puzzleExplainText(){
   const g=pz.targetGain!=null?Math.round(pz.targetGain):null;
   return `Vì sao đúng: nước này ${why.join('; ')||'tạo đòn'}${g!=null?`. Sau khi đối phương đáp tốt nhất, bạn vẫn lãi khoảng ${g} điểm quân`:''}. ${p.type==='fork'?'Bắt đôi hiệu quả vì đối phương chỉ cứu được một quân mỗi lượt.':Coach.QUESTIONS['missed-capture']}`;
 }
+// Ghi kết quả lần đầu của mỗi lần mở bài (đúng ngay / đúng nhờ gợi ý / sai) cho lịch ôn tập
+function puzzleRecord(outcome){
+  if(pz.recorded) return; pz.recorded=true;
+  Learn.record(pz.active.id, outcome);
+}
 function puzzleSuccess(){
   pz.locked=true;
   markPuzzleSolved(pz.active.id);
+  puzzleRecord(pz.peeked?'fail':pz.usedHint?'help':'ok');
+  const daily = !pz.peeked && Learn.markDailyDone(pz.active.id);
   if(pz.random && !pz.peeked){ pz.streak=(pz.streak||0)+1; }
-  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:''));
+  statusBanner($('#puzzleStatus'),'over','✔ Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` 🌅 Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
   pz.ctl.render();
 }
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
+  puzzleRecord('fail');
   statusBanner($('#puzzleStatus'),'fail',msg||'✘ Chưa đúng. Thử lại nhé!');
   pz.ctl.render();
   const token = pz.token = {};
@@ -3631,10 +3957,10 @@ function initPuzzles(){
   $('#puzzleRandomBtn').addEventListener('click',()=>{ pz.random=true; pz.streak=0; const p=puzzlePickRandom(); if(p) openPuzzle(p.id); });
   $('#puzzleBackBtn').addEventListener('click', ()=>{ pz.random=false; $('#puzzleListCard').hidden=false; $('#puzzleDetailCard').hidden=true; renderPuzzleGrid(); });
   $('#puzzleRetryBtn').addEventListener('click', puzzleResetBoard);
-  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
+  $('#puzzleHintBtn').addEventListener('click', ()=>{ if(pz.stage===0 && !pz.locked){ pz.hint=true; pz.usedHint=true; pz.ctl.render(); statusBanner($('#puzzleStatus'),'think','💡 Quân cần đi được khoanh nét đứt.'); } });
   $('#puzzleNextBtn').addEventListener('click', puzzleNext);
   $('#puzzleAnswerBtn').addEventListener('click', ()=>{
-    puzzleResetBoard(); pz.peeked=true; revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
+    puzzleResetBoard(); pz.peeked=true; puzzleRecord('fail'); revealBoard($('#puzzleBoard')); if(pz.random) pz.streak=0;
     const p=pz.active, sol=p.solution;
     const d=Notation.describe(p.board,sol);
     pz.locked=true; pz.arrows=[{from:sol.from,to:sol.to}];
@@ -4011,17 +4337,43 @@ if(typeof OPENING_TRAPS!=='undefined') OPENING_TRAPS.forEach(t=>{
 
 /* =========================================================================
    CẤP ĐỘ MÁY — đặt tên theo thang đẳng cấp của Hiệp hội Cờ tướng Trung Quốc.
-   Đây là MÔ PHỎNG TƯƠNG ĐỐI, được hiệu chỉnh bằng tự đấu (test/selfplay.js),
-   không phải đo bằng thi đấu với người thật.
+   Đây là MÔ PHỎNG TƯƠNG ĐỐI, không phải đo bằng thi đấu với người thật. Phần mô tả
+   ghi kết quả đo bằng tools/ladder.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
 const AI_LEVELS = [
-  {id:1, name:'Tân thủ',           desc:'Vừa biết luật (kỳ sĩ cấp 16–11)', maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false},
-  {id:2, name:'Kỳ sĩ cấp 10–7',    desc:'Chơi cờ phong trào',              maxDepth:2, timeMs:500,  noise:40,  blunder:0.05, book:false},
-  {id:3, name:'Kỳ sĩ cấp 6–4',     desc:'Giải cấp phường/xã',              maxDepth:3, timeMs:800,  noise:15,  blunder:0,    book:false},
-  {id:4, name:'Kỳ sĩ cấp 3–2',     desc:'≈ vô địch quận/huyện',            maxDepth:4, timeMs:1000, noise:0,   blunder:0,    book:false},
-  {id:5, name:'Kỳ sĩ cấp 1',       desc:'≈ vô địch thành phố',             maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true},
-  {id:6, name:'Đại sư địa phương', desc:'≈ tuyển thủ tỉnh',                maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true},
+  {id:1,  name:'Tân thủ',           maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false},
+  {id:2,  name:'Kỳ sĩ cấp 14–12',   maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false},
+  {id:3,  name:'Kỳ sĩ cấp 11–9',    maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false},
+  {id:4,  name:'Kỳ sĩ cấp 8–7',     maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false},
+  {id:5,  name:'Kỳ sĩ cấp 6–5',     maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false},
+  {id:6,  name:'Kỳ sĩ cấp 4–3',     maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false},
+  {id:7,  name:'Kỳ sĩ cấp 2',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false},
+  {id:8,  name:'Kỳ sĩ cấp 1',       maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false},
+  {id:9,  name:'Ứng viên đại sư',   maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true},
+  {id:10, name:'Đại sư địa phương', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true},
 ];
+// Mô tả cho người chơi: cách máy chơi ở mỗi cấp + kết quả đo với cấp ngay dưới (LEVEL_MEASURED)
+// Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp)
+const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};
+AI_LEVELS.forEach(l=>{
+  const how = l.blunder>=0.1 ? 'hay đi nước ngẫu nhiên, bỏ sót quân'
+    : l.blunder>0 ? 'thỉnh thoảng sơ suất'
+    : l.noise>0 ? 'không sơ suất ngẫu nhiên, đôi khi chọn nước chưa tối ưu'
+    : 'luôn chọn nước tốt nhất tìm được';
+  const depth = l.maxDepth>=40 ? `tính tới ${l.timeMs/1000} giây/nước` : `nhìn trước ${l.maxDepth} nửa nước`;
+  l.desc = `${depth[0].toUpperCase()+depth.slice(1)}${l.book?', có sách khai cuộc':''}, ${how}` + (LEVEL_MEASURED[l.id] ? ` · thắng cấp ${l.id-1} khoảng ${LEVEL_MEASURED[l.id]}% số ván` : '');
+});
+// Thang cấp cũ (6 cấp) → thang mới (10 cấp): cấp đã lưu và lịch sử ván trước đây vẫn hiển thị đúng
+const LADDER_VERSION=2, OLD_LEVEL_MAP={1:1,2:4,3:6,4:8,5:9,6:10};
+function recLevel(rec){ return rec.ladder===LADDER_VERSION ? rec.level : (OLD_LEVEL_MAP[rec.level]||rec.level); }
+function savedAiLevel(){
+  let lv=parseInt(safeLS_get('xq_ai_level')||'5',10);
+  if(safeLS_get('xq_ai_ladder')!==String(LADDER_VERSION)){
+    if(safeLS_get('xq_ai_level')) lv=OLD_LEVEL_MAP[lv]||5;
+    safeLS_set('xq_ai_ladder',String(LADDER_VERSION)); safeLS_set('xq_ai_level',String(lv));
+  }
+  return AI_LEVELS.some(l=>l.id===lv) ? lv : 5;
+}
 // Sách khai cuộc: lấy từ chính các thế ở tab Khai cuộc
 function buildOpeningBook(openings){
   const book=new Map();
@@ -4801,6 +5153,385 @@ function initTabs(){
 }
 
 /* =========================================================================
+   UX — âm thanh nước đi, xuất/nhập tiến độ, bảng cài đặt
+   - Âm thanh tổng hợp bằng WebAudio (không cần file ngoài), tắt/bật được.
+   - Tiến độ (bài đã học, bài tập đã giải, lịch sử ván…) nằm trong localStorage
+     của trình duyệt; xuất ra một đoạn mã/tệp JSON để chuyển sang máy khác.
+   ========================================================================= */
+const prefersReducedMotion = ()=> !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+const Sound = (function(){
+  let ctx=null;
+  let enabled = safeLS_get('xq_sound')!=='off';
+  function ac(){
+    if(ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    try{ ctx=new AC(); }catch(e){ ctx=null; }
+    return ctx;
+  }
+  // Tiếng "cạch" của quân gỗ: nhiễu ngắn qua bộ lọc + một nốt trầm rất ngắn
+  function knock(c, t, freq, gain, len){
+    const n=Math.floor(c.sampleRate*len), buf=c.createBuffer(1,n,c.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,4);
+    const src=c.createBufferSource(); src.buffer=buf;
+    const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=1.4;
+    const g=c.createGain(); g.gain.value=gain;
+    src.connect(bp); bp.connect(g); g.connect(c.destination); src.start(t);
+    const o=c.createOscillator(), og=c.createGain();
+    o.frequency.setValueAtTime(freq/6,t); og.gain.setValueAtTime(gain*0.5,t); og.gain.exponentialRampToValueAtTime(0.0001,t+len*1.6);
+    o.connect(og); og.connect(c.destination); o.start(t); o.stop(t+len*1.7);
+  }
+  function play(kind){
+    if(!enabled) return;
+    const c=ac(); if(!c) return;
+    try{
+      if(c.state==='suspended') c.resume();
+      const t=c.currentTime+0.01;
+      if(kind==='capture'){ knock(c,t,1500,0.9,0.06); knock(c,t+0.05,1100,0.7,0.07); }
+      else if(kind==='check'){ knock(c,t,2200,0.6,0.05); knock(c,t+0.09,2600,0.6,0.05); }
+      else if(kind==='end'){ knock(c,t,900,0.7,0.09); knock(c,t+0.12,700,0.7,0.12); }
+      else knock(c,t,1300,0.7,0.06);
+    }catch(e){}
+  }
+  return {
+    play,
+    isOn:()=>enabled,
+    set(on){ enabled=!!on; safeLS_set('xq_sound', enabled?'on':'off'); if(enabled) play('move'); },
+  };
+})();
+
+const Progress = (function(){
+  const APP='co-tuong-nhap-mon', VERSION=1, PREFIX='xq_';
+  // Các mục không phải "tiến độ học" thì không cần mang theo
+  const SKIP=new Set(['xq_last_tab']);
+  function keys(){
+    const out=[];
+    try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.startsWith(PREFIX) && !SKIP.has(k)) out.push(k); } }catch(e){}
+    return out.sort();
+  }
+  function snapshot(){
+    const data={}; for(const k of keys()){ const v=safeLS_get(k); if(v!=null) data[k]=v; }
+    return {app:APP, version:VERSION, exported:new Date().toISOString(), data};
+  }
+  function exportText(){ return JSON.stringify(snapshot()); }
+  // Trả về số mục đã nhập; ném lỗi (tiếng Việt) nếu dữ liệu không hợp lệ
+  function importText(text){
+    let obj;
+    try{ obj=JSON.parse(String(text||'').trim()); }catch(e){ throw new Error('Mã tiến độ không đọc được (không phải JSON).'); }
+    if(!obj || obj.app!==APP || typeof obj.data!=='object' || !obj.data) throw new Error('Đây không phải mã tiến độ của Cờ Tướng Nhập Môn.');
+    if(obj.version>VERSION) throw new Error('Mã tiến độ được tạo từ phiên bản mới hơn — hãy cập nhật ứng dụng.');
+    let n=0;
+    for(const [k,v] of Object.entries(obj.data)){
+      if(!k.startsWith(PREFIX) || SKIP.has(k) || typeof v!=='string') continue;
+      safeLS_set(k,v); n++;
+    }
+    return n;
+  }
+  // Tóm tắt ngắn để người dùng biết mình đang mang theo gì
+  function summary(){
+    const n=k=>{ const v=safeJSON(k,[]); return Array.isArray(v)?v.length:Object.keys(v||{}).length; };
+    return {lessons:n('xq_lessons_done'), puzzles:n('xq_puzzles_solved'), satcuc:n('xq_sc_solved'), games:n('xq_ai_history')};
+  }
+  return {exportText, importText, summary, keys};
+})();
+
+function initUxSettings(){
+  const panel=$('#settingsPanel'); if(!panel) return;
+  // Âm thanh
+  const sndBtns=$$('#soundToggle button');
+  const syncSound=()=>sndBtns.forEach(b=>b.setAttribute('aria-pressed', (b.dataset.sound==='on')===Sound.isOn()?'true':'false'));
+  sndBtns.forEach(b=>b.addEventListener('click',()=>{ Sound.set(b.dataset.sound==='on'); syncSound(); }));
+  syncSound();
+  // Tiến độ
+  const msg=$('#progressMsg'), box=$('#progressText');
+  const say=(t,ok)=>{ msg.textContent=t; msg.className='hint-text small '+(ok===false?'msg-bad':ok?'msg-good':''); };
+  const refreshSummary=()=>{ const s=Progress.summary(); $('#progressSummary').textContent=`Đang lưu trong trình duyệt này: ${s.lessons} bài học, ${s.puzzles} bài tập, ${s.satcuc} bài sát cục đã giải, ${s.games} ván đấu.`; };
+  panel.addEventListener('toggle',()=>{ if(panel.open) refreshSummary(); });
+  refreshSummary();
+  $('#progressCopy').addEventListener('click', async ()=>{
+    const t=Progress.exportText(); box.value=t; box.select();
+    try{ await navigator.clipboard.writeText(t); say('Đã sao chép mã tiến độ. Dán vào ô này ở máy khác rồi bấm “Nhập”.',true); }
+    catch(e){ say('Mã tiến độ đã hiện trong ô bên dưới — hãy tự sao chép (Ctrl/⌘+C).'); }
+  });
+  // Trong khung Artifact: tải tệp phải qua capability "downloads" (người xem xác nhận).
+  // Mở file trực tiếp (không có window.claude): dùng link tải thông thường.
+  const inArtifact = !!(window.claude && window.claude.use);
+  let downloads = null;
+  if(inArtifact){
+    $('#progressDownload').hidden = true;   // chỉ hiện khi capability sẵn sàng
+    window.claude.use('downloads').then(ns=>{ downloads=ns; if(ns) $('#progressDownload').hidden=false; }).catch(()=>{});
+  }
+  $('#progressDownload').addEventListener('click', async ()=>{
+    const t=Progress.exportText();
+    const filename='co-tuong-tien-do-'+new Date().toISOString().slice(0,10)+'.json';
+    if(downloads){
+      try{ await downloads.save({filename, data:t}); say('Đã lưu tệp tiến độ.',true); }
+      catch(e){
+        if(e && e.code==='declined') say('Đã huỷ lưu tệp.');
+        else { box.value=t; say('Không lưu được tệp ở đây — mã tiến độ đã hiện trong ô bên dưới, hãy dùng “Sao chép mã”.'); }
+      }
+      return;
+    }
+    try{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));
+      a.download=filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      say('Đã tạo tệp tiến độ. Nếu trình duyệt chặn tải xuống, hãy dùng nút “Sao chép mã”.',true);
+    }catch(e){ box.value=t; say('Không tải xuống được ở đây — mã tiến độ đã hiện trong ô bên dưới.'); }
+  });
+  const doImport=text=>{
+    try{
+      const n=Progress.importText(text);
+      say(`Đã nhập ${n} mục. Đang tải lại để áp dụng…`,true);
+      setTimeout(()=>location.reload(),600);
+    }catch(e){ say(e.message,false); }
+  };
+  $('#progressImport').addEventListener('click',()=>doImport(box.value));
+  $('#progressFile').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ box.value=String(r.result); doImport(r.result); }; r.readAsText(f);
+  });
+}
+/* =========================================================================
+   HỌC TẬP — FEN, ôn bài sai (lặp lại ngắt quãng), bài hôm nay, bảng tiến độ,
+   gợi ý cấp máy, "đấu với máy từ thế này"
+   ========================================================================= */
+
+/* ---------------- FEN (chuẩn UCCI / WXF) ----------------
+   Hàng 0 (phía Đen) ghi trước. Đỏ chữ hoa, Đen chữ thường:
+   K Tướng · A Sĩ · B Tượng · N Mã · R Xe · C Pháo · P Tốt  (đọc được cả E=Tượng, H=Mã).
+   Lượt: w/r = Đỏ đi, b = Đen đi. Ví dụ thế xuất phát:
+   rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1 */
+const Fen = (function(){
+  const TO={G:'k',A:'a',E:'b',H:'n',R:'r',C:'c',S:'p'};
+  const FROM={k:'G',a:'A',b:'E',e:'E',n:'H',h:'H',r:'R',c:'C',p:'S'};
+  const START='rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1';
+  function toFen(board,turn){
+    const rows=[];
+    for(let r=0;r<10;r++){
+      let s='', e=0;
+      for(let c=0;c<9;c++){
+        const p=board[r][c];
+        if(!p){ e++; continue; }
+        if(e){ s+=e; e=0; }
+        s += p.color==='red' ? TO[p.type].toUpperCase() : TO[p.type];
+      }
+      if(e) s+=e;
+      rows.push(s);
+    }
+    return rows.join('/')+' '+(turn==='black'?'b':'w')+' - - 0 1';
+  }
+  // Trả về {board, turn}; ném lỗi tiếng Việt nếu sai cú pháp hoặc thế cờ không hợp lệ
+  function parse(text){
+    const parts=String(text||'').trim().split(/\s+/);
+    const rows=(parts[0]||'').split('/');
+    if(rows.length!==10) throw new Error('FEN phải có đủ 10 hàng, ngăn cách bằng dấu “/”.');
+    const board=Array.from({length:10},()=>Array(9).fill(null));
+    rows.forEach((row,r)=>{
+      let c=0;
+      for(const ch of row){
+        if(/[1-9]/.test(ch)){ c+=+ch; continue; }
+        const t=FROM[ch.toLowerCase()];
+        if(!t) throw new Error(`Ký tự lạ “${ch}” ở hàng ${r+1}.`);
+        if(c>8) throw new Error(`Hàng ${r+1} có quá 9 cột.`);
+        board[r][c++]={type:t, color: ch===ch.toUpperCase() ? 'red' : 'black'};
+      }
+      if(c!==9) throw new Error(`Hàng ${r+1} có ${c} cột (cần đúng 9).`);
+    });
+    const tc=(parts[1]||'w').toLowerCase();
+    const turn = tc==='b' ? 'black' : 'red';
+    const err=positionError(board,turn);
+    if(err) throw new Error(err);
+    return {board, turn};
+  }
+  // Kiểm tra thế cờ có thể xảy ra (đủ Tướng, quân đúng chỗ, bên không đi không bị chiếu…)
+  function positionError(b,turn){
+    const count={red:{},black:{}};
+    const MAX={G:1,A:2,E:2,H:2,R:2,C:2,S:5};
+    for(let r=0;r<10;r++) for(let c=0;c<9;c++){
+      const p=b[r][c]; if(!p) continue;
+      count[p.color][p.type]=(count[p.color][p.type]||0)+1;
+      const who = p.color==='red'?'Đỏ':'Đen';
+      if((p.type==='G'||p.type==='A') && !Engine.inPalace(r,c,p.color)) return `${VN_NAME[p.type]} ${who} nằm ngoài cung.`;
+      if(p.type==='E' && !Engine.ownSide(r,p.color)) return `Tượng ${who} không thể qua sông.`;
+      if(p.type==='S' && (p.color==='red' ? r>6 : r<3)) return `Tốt ${who} không thể ở sau hàng xuất phát.`;
+    }
+    for(const col of ['red','black']) for(const [t,n] of Object.entries(count[col]))
+      if(n>MAX[t]) return `${col==='red'?'Đỏ':'Đen'} có ${n} quân ${VN_NAME[t]} (tối đa ${MAX[t]}).`;
+    if(!count.red.G || !count.black.G) return 'Mỗi bên phải có đúng một Tướng.';
+    if(Engine.generalsFacing(b)) return 'Hai Tướng đang đối mặt trực tiếp — thế cờ không hợp lệ.';
+    if(Engine.isInCheck(b,Engine.otherColor(turn))) return 'Bên không tới lượt đang bị chiếu — thế cờ không hợp lệ.';
+    return null;
+  }
+  return {toFen, parse, positionError, START};
+})();
+
+async function copyText(text, el){
+  try{ await navigator.clipboard.writeText(text); if(el) statusBanner(el,'over','📋 Đã sao chép FEN: <code>'+esc(text)+'</code>'); }
+  catch(e){ if(el) statusBanner(el,'think','FEN của thế này (hãy tự sao chép): <code>'+esc(text)+'</code>'); }
+}
+
+/* ---------------- Ôn bài sai: hộp Leitner ----------------
+   Mỗi bài từng làm sai có một "hộp" 0..5; đúng ngay lần đầu thì lên hộp, sai thì về hộp 0.
+   Hộp càng cao càng lâu mới phải ôn lại. */
+const Learn = (function(){
+  const KEY='xq_srs', DAILY='xq_daily';
+  const GAP_DAYS=[0,1,3,7,16,35];
+  const DAY=86400000;
+  const load=()=>safeJSON(KEY,{});
+  const save=s=>safeLS_set(KEY,JSON.stringify(s));
+  const today=(t)=>{ const d=new Date(t||Date.now()); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  // outcome: 'ok' (đúng ngay), 'help' (đúng nhưng đã dùng gợi ý), 'fail' (sai / xem đáp án)
+  function record(id, outcome, now){
+    now=now||Date.now();
+    const s=load(), e=s[id]||{box:0,due:0,ok:0,fail:0};
+    if(outcome==='fail'){ e.fail++; e.box=0; e.due=now; }
+    else {
+      e.ok++;
+      if(!s[id] && outcome==='ok'){ e.last=now; e.mastered=true; s[id]=e; save(s); return e; } // chưa từng sai: không cần ôn
+      if(outcome==='ok') e.box=Math.min(GAP_DAYS.length-1, e.box+1);
+      e.due = now + Math.max(1,GAP_DAYS[e.box])*DAY;
+    }
+    e.last=now; s[id]=e; save(s);
+    return e;
+  }
+  // Các bài cần ôn (đã từng sai, tới hạn), bài sai gần nhất lên trước
+  function due(now){
+    now=now||Date.now(); const s=load();
+    return Object.entries(s).filter(([,e])=>!e.mastered && e.fail>0 && e.due<=now && e.box<GAP_DAYS.length-1)
+      .sort((a,b)=>a[1].box-b[1].box || b[1].last-a[1].last).map(([id])=>id);
+  }
+  function stats(){ const s=load(); return {tracked:Object.keys(s).length, wrong:Object.values(s).filter(e=>e.fail>0).length}; }
+
+  // Bài hôm nay: chọn cố định theo ngày, ưu tiên bài chưa giải (không lấy bài sát cục — đã có mục riêng)
+  function hash(str){ let h=2166136261; for(const ch of str){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+  function dailyPuzzle(now){
+    const d=today(now), solved=getSolvedPuzzles();
+    const pool=PUZZLES.filter(p=>p.topic!=='satcuc');
+    const fresh=pool.filter(p=>!solved.includes(p.id));
+    const st=safeJSON(DAILY,{});
+    if(st.date===d && st.id && PUZZLES.some(p=>p.id===st.id)) return PUZZLES.find(p=>p.id===st.id);
+    const from=fresh.length?fresh:pool, p=from[hash(d)%from.length];
+    safeLS_set(DAILY,JSON.stringify(Object.assign({},st,{date:d,id:p.id,done:false})));
+    return p;
+  }
+  function dailyState(){ return safeJSON(DAILY,{}); }
+  function markDailyDone(id, now){
+    const st=dailyState(), d=today(now);
+    if(st.date!==d || st.id!==id || st.done) return st;
+    const yesterday=today((now||Date.now())-DAY);
+    st.streak = st.lastDone===yesterday ? (st.streak||0)+1 : 1;
+    st.lastDone=d; st.done=true; st.best=Math.max(st.best||0, st.streak);
+    safeLS_set(DAILY,JSON.stringify(st));
+    return st;
+  }
+  // Chuỗi ngày còn hiệu lực (bị đứt nếu hôm qua không làm)
+  function streak(now){ const st=dailyState(); const d=today(now), y=today((now||Date.now())-DAY); return (st.lastDone===d||st.lastDone===y) ? (st.streak||0) : 0; }
+  return {record, due, stats, dailyPuzzle, dailyState, markDailyDone, streak, today};
+})();
+
+/* ---------------- Gợi ý cấp máy dựa trên các ván gần đây ---------------- */
+function suggestAiLevel(history){
+  const games=(history||[]).filter(r=>!r.start && r.result && r.level>0);
+  if(games.length<2) return null;
+  const L=recLevel(games[0]), same=games.filter(r=>recLevel(r)===L);
+  const res=r=>!r.result.winner?'draw':r.result.winner===r.human?'win':'loss';
+  if(L<AI_LEVELS.length && same.length>=2 && res(same[0])==='win' && res(same[1])==='win')
+    return {level:L+1, why:`Bạn đã thắng 2 ván gần nhất ở cấp ${L}. Thử sức với cấp cao hơn?`};
+  if(L>1 && same.length>=3 && [0,1,2].every(i=>res(same[i])==='loss'))
+    return {level:L-1, why:`3 ván gần nhất ở cấp ${L} đều thua. Hạ một cấp để luyện chắc tay hơn rồi quay lại.`};
+  return null;
+}
+
+/* ---------------- Đấu với máy từ một thế cờ bất kỳ ---------------- */
+function playFromPosition(board, turn, source){
+  const err=Fen.positionError(board,turn);
+  if(err) return alertSoft(err);
+  if(Engine.generateLegalMoves(board,turn).length===0) return alertSoft('Thế này đã hết nước đi — không thể chơi tiếp.');
+  showTab('may');
+  aiBeginGame({board:Engine.cloneBoard(board), turn, humanColor:turn, level:savedAiLevel(), source});
+}
+function alertSoft(msg){ const el=document.querySelector('section:not([hidden]) [aria-live]'); if(el) statusBanner(el,'fail',esc(msg)); }
+
+/* ---------------- Bảng tiến độ ---------------- */
+function renderProgressDashboard(){
+  const el=$('#progressDash'); if(!el) return;
+  const done=lessonsDone().filter(k=>LESSONS.some(l=>l.key===k)).length;
+  const solved=getSolvedPuzzles();
+  const topics=Object.entries(PUZZLE_TOPICS).map(([k,v])=>{ const all=PUZZLES.filter(p=>p.topic===k); return {k,v,n:all.length,s:all.filter(p=>solved.includes(p.id)).length}; }).filter(t=>t.n);
+  const hist=loadHistory().filter(r=>r.result);
+  const w=hist.filter(r=>r.result.winner===r.human).length, d=hist.filter(r=>!r.result.winner).length, l=hist.length-w-d;
+  const accs=hist.filter(r=>r.analysis).map(r=>r.analysis.accuracy);
+  const acc=accs.length?Math.round(accs.reduce((a,b)=>a+b,0)/accs.length):null;
+  const due=Learn.due().length, st=Learn.streak();
+  const bar=(s,n)=>`<span class="pbar"><span style="width:${n?Math.round(100*s/n):0}%"></span></span>`;
+  el.innerHTML=`
+    <div class="dash-grid">
+      <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
+      <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
+      <div class="dash-tile"><b>${st?'🔥 '+st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
+      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy${acc!=null?` · chính xác TB ${acc}%`:''}</span></div>
+    </div>
+    <details class="dash-more"><summary>Chi tiết theo chủ đề bài tập</summary>
+      <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
+    </details>
+    ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview">🔁 Ôn ${due} bài từng làm sai</button></p>`:''}`;
+  const rb=$('#dashReview',el); if(rb) rb.addEventListener('click',()=>{ showTab('baitap'); pz.filter.topic='review'; renderPuzzleGrid(); });
+}
+
+/* ---------------- Gắn vào giao diện ---------------- */
+function renderDailyCard(){
+  const el=$('#dailyCard'); if(!el) return;
+  const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
+  const streak=Learn.streak();
+  el.innerHTML=`<div class="daily-inner"><div><b>🌅 Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
+      <div class="hint-text small">${done?'✓ Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · 🔥 Chuỗi ${streak} ngày`:''}</div></div>
+    <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
+  $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
+}
+function renderAiSuggestion(){
+  const el=$('#aiSuggest'); if(!el) return;
+  const s=suggestAiLevel(loadHistory());
+  if(!s){ el.innerHTML=''; return; }
+  const name=levelInfo(s.level).name;
+  el.innerHTML=`<div class="suggest-box">💡 ${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
+  $('#aiSuggestBtn',el).addEventListener('click',()=>{ const r=$(`input[name="aiLevel"][value="${s.level}"]`); if(r){ r.checked=true; } el.innerHTML=''; });
+}
+function initLearn(){
+  // Bài tập: chơi tiếp & FEN
+  $('#puzzlePlayBtn').addEventListener('click',()=>{ const p=pz.active; playFromPosition(p.board,p.turn,'Bài tập: '+p.title); });
+  $('#puzzleFenBtn').addEventListener('click',()=>copyText(Fen.toFen(pz.active.board,pz.active.turn), $('#puzzleStatus')));
+  // Ván danh thủ
+  const msTurn=()=>ms.pos%2===0?RED:BLACK;
+  $('#masterPlayBtn').addEventListener('click',()=>playFromPosition(masterBoard(),msTurn(),`Ván ${ms.g.red} – ${ms.g.black}, sau ${ms.pos} nửa nước`));
+  $('#masterFenBtn').addEventListener('click',()=>copyText(Fen.toFen(masterBoard(),msTurn()), $('#masterDetail')));
+  // Phân tích ván: thử lại từ thế TRƯỚC nước đang xem
+  const rvPos=()=>{ const g=review.game, i=review.idx; return i<0 ? {b:g.board(), t:g.turn()} : {b: i===0?g.start:g.boards[i-1], t:g.moves[i].color}; };
+  $('#reviewPlayBtn').addEventListener('click',()=>{ const {b,t}=rvPos(); playFromPosition(b,t,'Thử lại từ ván đã đấu'); });
+  $('#reviewFenBtn').addEventListener('click',()=>{ const {b,t}=rvPos(); copyText(Fen.toFen(b,t), $('#reviewDetail')); });
+  // Ván đang đấu
+  $('#aiFenBtn').addEventListener('click',()=>{ const g=aiGame.game; copyText(Fen.toFen(g.board(),g.turn()), $('#aiStatus')); });
+  // Bắt đầu từ FEN
+  $('#fenStartBtn').addEventListener('click',()=>{
+    const out=$('#fenMsg');
+    try{
+      const {board,turn}=Fen.parse($('#fenInput').value);
+      if(Engine.generateLegalMoves(board,turn).length===0) throw new Error('Thế này đã hết nước đi.');
+      out.textContent='';
+      const human=$('input[name="aiColor"]:checked').value;
+      aiBeginGame({board, turn, humanColor:human, level:parseInt($('input[name="aiLevel"]:checked').value,10), source:'FEN'});
+    }catch(e){ out.textContent='✘ '+e.message; }
+  });
+  renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
+  document.addEventListener('tabshown',e=>{
+    if(e.detail==='hoc') renderProgressDashboard();
+    if(e.detail==='baitap') renderDailyCard();
+    if(e.detail==='may') renderAiSuggestion();
+  });
+}
+/* =========================================================================
    BOOT
    ========================================================================= */
 function initSettings(){
@@ -4812,6 +5543,7 @@ function initSettings(){
 initTabs();
 updateStickyTop(); window.addEventListener('resize', updateStickyTop);
 initSettings();
+initUxSettings();
 buildLegend();
 initOpenings();
 initMasters();
@@ -4820,6 +5552,7 @@ initAIGame();
 AIEngine.init();
 initTactics();
 initPuzzles();
+initLearn();
 showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
 
 </script>

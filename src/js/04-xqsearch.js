@@ -62,6 +62,8 @@ const XQSearch = (function(){
     this.b=new Int8Array(90); this.side=1; this.kpos=[0,0]; // kpos[0]=đỏ, [1]=đen
     this.hl=0; this.hh=0; this.score=0; // score: điểm tĩnh góc nhìn Đỏ
     this.hist=[]; // băm các thế đã qua (để phát hiện lặp)
+    this.chk=[];  // chk[k] = 1 nếu bên đi ở thế thứ k (cặp hist thứ k) đang bị chiếu
+    this.curChk=0; // thế hiện tại có đang bị chiếu không (người gọi make() gán trước)
   }
   Pos.prototype.load=function(board2d, turn){
     this.b.fill(0); this.hl=0; this.hh=0; this.score=0;
@@ -78,7 +80,7 @@ const XQSearch = (function(){
   // Nước đi mã hoá: from*128 + to ; bắt quân lưu riêng khi make
   Pos.prototype.make=function(mv){
     const f=mv>>7, t=mv&127, b=this.b, pc=b[f], cap=b[t];
-    this.hist.push(this.hl, this.hh);
+    this.hist.push(this.hl, this.hh); this.chk.push(this.curChk);
     if(cap){ this.hl^=ZL[cap+7][t]; this.hh^=ZH[cap+7][t]; this.score -= cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t]; }
     this.hl^=ZL[pc+7][f]^ZL[pc+7][t]; this.hh^=ZH[pc+7][f]^ZH[pc+7][t];
     this.score += pc>0 ? (PSQ[pc+7][t]-PSQ[pc+7][f]) : -(PSQ[pc+7][t]-PSQ[pc+7][f]);
@@ -92,12 +94,12 @@ const XQSearch = (function(){
     b[f]=pc; b[t]=cap;
     if(pc===K) this.kpos[0]=f; else if(pc===-K) this.kpos[1]=f;
     this.side=-this.side;
-    this.hh=this.hist.pop(); this.hl=this.hist.pop();
+    this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop();
     this.score += pc>0 ? -(PSQ[pc+7][t]-PSQ[pc+7][f]) : (PSQ[pc+7][t]-PSQ[pc+7][f]);
     if(cap) this.score += cap>0 ? PSQ[cap+7][t] : -PSQ[cap+7][t];
   };
-  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };
-  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); };
+  Pos.prototype.nullMove=function(){ this.hist.push(this.hl,this.hh); this.chk.push(0); this.side=-this.side; this.hl^=ZSIDE_L; this.hh^=ZSIDE_H; };
+  Pos.prototype.unNull=function(){ this.side=-this.side; this.hh=this.hist.pop(); this.hl=this.hist.pop(); this.chk.pop(); };
 
   // Ô sq có bị bên `by` (1/-1) tấn công không
   Pos.prototype.attacked=function(sq,by){
@@ -161,7 +163,55 @@ const XQSearch = (function(){
     for(let i=0;i<n;i++){ const cap=this.make(buf[i]); if(this.legalAfterMake()) res.push(buf[i]); this.unmake(buf[i],cap); }
     return res;
   };
-  Pos.prototype.evaluate=function(){ return this.side>0 ? this.score : -this.score; };
+  // Đánh giá = vật chất + bảng vị trí (cộng dồn khi make/unmake) + các yếu tố tính tại chỗ:
+  //  · an toàn Tướng: thiếu Sĩ/Tượng bị phạt, tỉ lệ với lực tấn công của đối phương đã áp sát
+  //  · Pháo mạnh khi còn nhiều quân (nhiều ngòi), Mã mạnh hơn khi bàn thưa
+  //  · độ cơ động của Xe (số ô đi được) và Mã (số hướng không bị cản chân)
+  //  · "Pháo đầu trống": Pháo đối phương nhắm thẳng Tướng trên cột không có quân chắn
+  Pos.prototype.evaluate=function(){ const s=this.score+evalExtra(this); return this.side>0 ? s : -s; };
+  function evalExtra(pos){
+    const b=pos.b;
+    let rA=0,rE=0,bA=0,bE=0, threatR=0, threatB=0, heavy=0, s=0;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, r=(sq/9)|0;
+      if(t===R||t===H||t===C) heavy++;
+      if(p>0){
+        if(t===A) rA++; else if(t===E) rE++;
+        else if(t===R) threatB+=3; else if(t===C) threatB+=2;
+        else if(t===H) threatB+= r<=4?3:1; else if(t===P && r<=4) threatB+=1;
+      } else {
+        if(t===A) bA++; else if(t===E) bE++;
+        else if(t===R) threatR+=3; else if(t===C) threatR+=2;
+        else if(t===H) threatR+= r>=5?3:1; else if(t===P && r>=5) threatR+=1;
+      }
+    }
+    // An toàn Tướng (góc nhìn Đỏ: trừ khi Đỏ yếu)
+    s -= ((2-rA)*16 + (2-rE)*10) * Math.min(threatR,14) / 10;
+    s += ((2-bA)*16 + (2-bE)*10) * Math.min(threatB,14) / 10;
+    // Pháo / Mã theo giai đoạn ván (heavy: số Xe+Mã+Pháo còn lại, tối đa 12)
+    const phase=heavy-6;
+    for(let sq=0;sq<90;sq++){
+      const p=b[sq]; if(!p) continue;
+      const t=p>0?p:-p, sg=p>0?1:-1, r=(sq/9)|0, c=sq%9;
+      if(t===C) s += sg*phase*3;
+      else if(t===H){
+        s -= sg*phase*3;
+        let mob=0; for(const [dr,dc,lr,lc] of HORSE){ const rr=r+dr, cc=c+dc; if(!ok(rr,cc)) continue; if(b[(r+lr)*9+c+lc]) continue; const q=b[rr*9+cc]; if(!q || (q>0)!==(p>0)) mob++; }
+        s += sg*(mob-4)*4;
+      } else if(t===R){
+        let mob=0;
+        for(const [dr,dc] of ORTH){ let rr=r+dr, cc=c+dc; while(ok(rr,cc)){ const q=b[rr*9+cc]; if(q){ if((q>0)!==(p>0)) mob++; break; } mob++; rr+=dr; cc+=dc; } }
+        s += sg*(mob-8)*2;
+      }
+    }
+    // Pháo đầu trống: Pháo đối phương cùng cột với Tướng, giữa không có quân nào
+    for(const side of [1,-1]){
+      const k=pos.kpos[side>0?0:1], kr=(k/9)|0, kc=k%9, dir= side>0?-1:1;
+      for(let rr=kr+dir; rr>=0 && rr<=9; rr+=dir){ const q=b[rr*9+kc]; if(!q) continue; if(q===-side*C) s -= side*45; break; }
+    }
+    return s|0;
+  }
 
   // ---------- Bảng băm ----------
   const TT_BITS=18, TT_SIZE=1<<TT_BITS, TT_MASK=TT_SIZE-1;
@@ -175,11 +225,30 @@ const XQSearch = (function(){
   const moveBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160)), scoreBufs=Array.from({length:MAXPLY+8},()=>new Int32Array(160));
   function timeUp(){ if((nodes&1023)===0 && Date.now()>stopAt) stopped=true; return stopped; }
 
-  function isRepetition(pos,ply){
-    // lặp trong đường tìm kiếm (cùng bên đi) hoặc trùng thế đã có trong ván
-    const h=pos.hist, L=h.length;
-    for(let i=L-4;i>=0 && i>=L-2*ply;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh) return true; }
-    return gameHist.has(pos.hl+':'+pos.hh);
+  // Điểm khi thế hiện tại lặp lại một thế đã gặp (trong đường tìm kiếm hoặc trong ván), theo
+  // đúng luật của Game: trong chu kỳ lặp, nếu chỉ MỘT bên chiếu ở mọi nước thì bên đó thua
+  // (cấm chiếu mãi); còn lại tính hoà. Trả về null nếu không lặp. Điểm theo góc nhìn bên đang đi.
+  const RULE_WIN=20000;
+  function repetitionScore(pos,ply,inChk){
+    const h=pos.hist, L=h.length, lim=Math.max(0,L-2*ply);
+    let j=-1;
+    for(let i=L-4;i>=lim;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }
+    if(j<0){
+      if(!gameHist.has(pos.hl+':'+pos.hh)) return null;
+      for(let i=lim-((L-lim)%4===0?4:2);i>=0;i-=4){ if(h[i]===pos.hl && h[i+1]===pos.hh){ j=i; break; } }
+      if(j<0) return 0;
+    }
+    // Thế P_k (k = chỉ số cặp hist), P_n là thế hiện tại. Nước dẫn vào P_k là nước chiếu
+    // nếu bên đi ở P_k bị chiếu. Bên A = bên vừa đi (dẫn vào P_n, P_n-2, …), bên B = bên đang đi.
+    const n=L>>1, pj=j>>1;
+    let aAll=true, bAll=true;
+    for(let k=n;k>pj;k--){
+      const c = k===n ? inChk : pos.chk[k];
+      if(((n-k)&1)===0){ if(!c) aAll=false; } else { if(!c) bAll=false; }
+    }
+    if(aAll && !bAll) return RULE_WIN;     // đối phương chiếu mãi → bên đang đi thắng
+    if(bAll && !aAll) return -RULE_WIN;    // bên đang đi chiếu mãi → thua
+    return 0;
   }
 
   function orderMoves(pos,moves,scores,n,ttMv,ply){
@@ -215,6 +284,7 @@ const XQSearch = (function(){
     let legal=0, best = inChk ? -MATE+ply : alpha;
     for(let i=0;i<n;i++){
       pickNext(moves,scores,n,i);
+      pos.curChk=inChk?1:0;
       const mv=moves[i], cap=pos.make(mv);
       if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
       legal++;
@@ -229,8 +299,8 @@ const XQSearch = (function(){
   }
 
   function search(pos,depth,alpha,beta,ply,allowNull){
-    if(ply>0 && isRepetition(pos,ply)) return 0;
     const inChk=pos.inCheck(pos.side);
+    if(ply>0){ const rs=repetitionScore(pos,ply,inChk); if(rs!==null) return rs; }
     if(inChk) depth++;                         // gia hạn khi bị chiếu
     if(depth<=0) return quiesce(pos,alpha,beta,ply,0);
     nodes++; if(timeUp()) return 0;
@@ -265,6 +335,7 @@ const XQSearch = (function(){
     let best=-INF, bestMv=0, legal=0, origAlpha=alpha;
     for(let i=0;i<n;i++){
       pickNext(moves,scores,n,i);
+      pos.curChk=inChk?1:0;
       const mv=moves[i], cap=pos.make(mv);
       if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
       legal++;
@@ -308,15 +379,26 @@ const XQSearch = (function(){
   const toMove=mv=>({from:[(mv>>7)/9|0,(mv>>7)%9], to:[(mv&127)/9|0,(mv&127)%9]});
   const encode=m=>((m.from[0]*9+m.from[1])<<7)|(m.to[0]*9+m.to[1]);
 
-  // opts: {board, turn, timeMs, maxDepth, history:[key...], noise, blunder, rng}
+  // opts: {board, turn, timeMs, maxDepth, historyKeys:[key...], historyChecks:[bool...],
+  //        excludeMoves:[{from,to}...], noise, blunder, rng, rootScores}
+  //  - historyKeys: khoá các thế đã qua trong ván (không gồm thế hiện tại), theo thứ tự
+  //  - historyChecks[i]: bên đi ở thế historyKeys[i] có đang bị chiếu không (để xét luật chiếu mãi)
+  //  - excludeMoves: nước không được chọn ở gốc (vd. nước mà luật ván xử thua ngay)
   function think(opts){
     const pos=new Pos(); pos.load(opts.board, opts.turn);
-    gameHist = new Set(opts.historyKeys||[]);
+    const hk=opts.historyKeys||[], hc=opts.historyChecks||[];
+    gameHist = new Set(hk);
+    for(let i=0;i<hk.length;i++){ const [l,h]=String(hk[i]).split(':').map(Number); pos.hist.push(l|0,h|0); pos.chk.push(hc[i]?1:0); }
+    pos.curChk = pos.inCheck(pos.side)?1:0;
     killers=[]; history.fill(0); nodes=0; stopped=false;
     const t0=Date.now(); stopAt = t0 + (opts.timeMs||1000);
     const maxDepth = opts.maxDepth||40;
-    const rootMoves=pos.legalMoves();
+    let rootMoves=pos.legalMoves();
     if(!rootMoves.length) return {move:null, score:-MATE, depth:0, pv:[], nodes:0};
+    if(opts.excludeMoves && opts.excludeMoves.length){
+      const ex=new Set(opts.excludeMoves.map(encode)), kept=rootMoves.filter(m=>!ex.has(m));
+      if(kept.length) rootMoves=kept;
+    }
     let bestMv=rootMoves[0], bestScore=0, doneDepth=0, pv=[];
     const rng = opts.rng || Math.random;
     // Cấp thấp: đôi khi đi nước ngẫu nhiên (mô phỏng người mới hay sơ suất)
@@ -325,13 +407,14 @@ const XQSearch = (function(){
       return {move:toMove(m), score:0, depth:0, pv:[], nodes:0, random:true};
     }
     // Điểm từng nước ở gốc (để thêm nhiễu cho cấp thấp)
-    const rootScores=new Map(); let lastFull=null;
+    const rootScores=new Map(); let lastFull=null; const rootChk=pos.curChk;
     for(let d=1; d<=maxDepth; d++){
       let alpha=-INF, beta=INF, iterBest=0, iterScore=-INF;
       // sắp xếp nước gốc: nước tốt nhất lần trước lên đầu
       rootMoves.sort((a,b)=>(b===bestMv)-(a===bestMv) || (rootScores.get(b)||-INF)-(rootScores.get(a)||-INF));
       let first=true;
       for(const mv of rootMoves){
+        pos.curChk=rootChk;
         const cap=pos.make(mv);
         let v;
         if(opts.noise) v=-search(pos,d-1,-INF,INF,1,true);     // cần điểm chính xác cho mọi nước để chọn ngẫu nhiên
@@ -360,9 +443,38 @@ const XQSearch = (function(){
       if(cands.length>1){ const m=cands[Math.floor(rng()*cands.length)]; bestMv=m; bestScore=sc.get(m); }
     }
     pv=[bestMv];
-    { const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }
-    return {move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};
+    { pos.curChk=rootChk; const cap=pos.make(bestMv); pv=pv.concat(extractPV(pos,8)); pos.unmake(bestMv,cap); }
+    const res={move:toMove(bestMv), score:bestScore, depth:doneDepth, pv:pv.map(toMove), nodes, ms:Date.now()-t0};
+    if(opts.rootScores){ const sc=lastFull||rootScores; res.rootScores=rootMoves.filter(m=>sc.has(m)).map(m=>({move:toMove(m), score:sc.get(m)})); }
+    return res;
   }
+
+  // Tìm kiếm thuần vật chất (minimax đầy đủ, alpha-beta) — cùng kết quả với bản dùng mảng 2 chiều
+  // trước đây nhưng nhanh hơn nhiều nhờ bàn cờ 1 chiều + make/unmake. Điểm theo góc nhìn `turn`:
+  // hết nước đi = -1000-depth; ở lá = chênh lệch vật chất (Xe 9, Pháo 4,5, Mã 4, Sĩ/Tượng 2, Tốt 1).
+  const MVAL=[0,0,2,2,4,9,4.5,1];
+  const matBufs=Array.from({length:16},()=>new Int32Array(160));
+  function matMaterial(pos){ let s=0; const b=pos.b; for(let i=0;i<90;i++){ const p=b[i]; if(p) s += (p>0)===(pos.side>0) ? MVAL[p>0?p:-p] : -MVAL[p>0?p:-p]; } return s; }
+  function matSearch(pos,depth,alpha,beta){
+    const buf=matBufs[depth], n=pos.gen(buf,false), b=pos.b;
+    if(depth===0){
+      for(let i=0;i<n;i++){ const cap=pos.make(buf[i]), ok=pos.legalAfterMake(); pos.unmake(buf[i],cap); if(ok) return matMaterial(pos); }
+      return -1000;
+    }
+    // ăn quân trước để cắt tỉa sớm (không đổi kết quả)
+    let k=0; for(let i=0;i<n;i++) if(b[buf[i]&127]){ const t=buf[k]; buf[k]=buf[i]; buf[i]=t; k++; }
+    let best=-Infinity, legal=0;
+    for(let i=0;i<n;i++){
+      const mv=buf[i], cap=pos.make(mv);
+      if(!pos.legalAfterMake()){ pos.unmake(mv,cap); continue; }
+      legal++;
+      const s=-matSearch(pos,depth-1,-beta,-alpha);
+      pos.unmake(mv,cap);
+      if(s>best) best=s; if(best>alpha) alpha=best; if(alpha>=beta) break;
+    }
+    return legal ? best : -1000-depth;
+  }
+  function materialSearch(board,turn,depth){ const p=new Pos(); p.load(board,turn); return matSearch(p,depth,-Infinity,Infinity); }
 
   // Khoá thế cờ tương thích với Game.key để truyền lịch sử ván vào worker
   function keyOf(board,turn){ const p=new Pos(); p.load(board,turn); return p.hl+':'+p.hh; }
@@ -373,6 +485,6 @@ const XQSearch = (function(){
   }
   function legalMoves(board,turn){ const p=new Pos(); p.load(board,turn); return p.legalMoves().map(toMove); }
   function evaluate(board,turn){ const p=new Pos(); p.load(board,turn); return p.evaluate(); }
-  return {think, keyOf, perft, legalMoves, evaluate, ttClear, MATE, encode};
+  return {think, keyOf, perft, legalMoves, evaluate, materialSearch, ttClear, MATE, RULE_WIN, encode};
 })();
 

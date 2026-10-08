@@ -5,7 +5,7 @@ self.onmessage=function(e){
     else if(d.cmd==='analyze'){
       const out=[];
       d.args.positions.forEach(function(p,i){
-        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:d.args.timeMs,maxDepth:d.args.maxDepth,historyKeys:p.historyKeys}));
+        out.push(XQSearch.think({board:p.board,turn:p.turn,timeMs:d.args.timeMs,maxDepth:d.args.maxDepth,historyKeys:p.historyKeys,historyChecks:p.historyChecks}));
         postMessage({id:d.id,progress:i+1});
       });
       postMessage({id:d.id,result:out});
