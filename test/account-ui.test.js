@@ -229,3 +229,23 @@ test('không có máy chủ (vd. bản Artifact): nút đăng nhập tắt, có 
   assert.match(doc.getElementById('meNoServer').textContent, /bản web/);
   assert.equal(doc.getElementById('meLabel').textContent, 'Tôi');
 });
+
+test('bắt buộc đăng nhập: chưa đăng nhập thì che app; đăng nhập xong mở; đăng xuất che lại; Artifact không che', async () => {
+  const be = backend();
+  const { document: doc, window: win } = device(be);
+  assert.equal(doc.getElementById('authGate').hidden, false);
+  assert.ok(doc.body.classList.contains('gated'));
+  doc.querySelector('#authGate [data-open-register]').click();
+  fill(doc, 'rgUser', 'gate_ui'); fill(doc, 'rgPass', 'matkhau123'); fill(doc, 'rgPass2', 'matkhau123');
+  submit(doc);
+  await until(() => doc.getElementById('rcCode'));
+  doc.getElementById('rcOk').click(); doc.getElementById('rcNext').click();
+  await until(() => doc.getElementById('authGate').hidden);
+  assert.ok(!doc.body.classList.contains('gated'));
+  doc.querySelector('.zone-btn[data-zone="toi"]').click();
+  doc.getElementById('meLogout').click(); doc.getElementById('loKeep').click();
+  await until(() => !doc.getElementById('authGate').hidden);
+  const art = load({ fresh: true, setup(w) { w.claude = { use: () => Promise.resolve(null) }; } });
+  OPEN.push(art.window);
+  assert.equal(art.document.getElementById('authGate').hidden, true, 'Artifact không kết nối được máy chủ: không bắt đăng nhập');
+});

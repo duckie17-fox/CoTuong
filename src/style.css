@@ -821,3 +821,15 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
 .ranked-search .spinner{color:var(--accent);}
 .rank-elo{display:flex;align-items:center;gap:8px;}
 #meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+
+/* ---------- Bắt buộc đăng nhập ---------- */
+.auth-gate{position:fixed;inset:0;z-index:80;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;}
+body.gated{overflow:hidden;}
+.gate-box{width:100%;max-width:400px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.gate-seal{width:72px !important;height:72px !important;font-size:40px !important;border-radius:18px !important;display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(155deg,var(--b-red),var(--b-red-deep));color:#fff6ec;font-family:var(--han-font);box-shadow:0 4px 14px var(--shadow);}
+.gate-title{font-size:32px;margin:6px 0 0;}
+.gate-sub{color:var(--ink-soft);margin:0 0 10px;}
+.gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
+.gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
+.gate-note{margin-top:6px;}

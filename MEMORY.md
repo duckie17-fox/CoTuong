@@ -133,3 +133,8 @@
   Ván dở lưu `xq_ranked_bot` (không đồng bộ, không xuất) để tải lại trang vào tiếp. Phòng xếp hạng: ẩn "Đấu ván nữa", hiện "Tìm trận mới".
 - Thắng tự nhiên (chiếu bí…) được nhận dù < 10 nửa nước; chỉ "máy đầu hàng" mới cần ≥ 10 nửa nước và hơn ≥ 6 điểm quân.
 - Kiểm nhanh 20 cấp máy bằng ladder.js (6 cặp ván, giới hạn 600ms): cấp 3 thắng cấp 1 71%, cấp 7 thắng cấp 5 100%.
+- Tên cấp phòng tập (người dùng chọn kiểu "Võ tướng cổ", chê bản trước "phèn"): Tiểu Tốt, Ngũ Trưởng, Thập Trưởng, Bách Hộ, Thiên Hộ, Hiệu Úy, Tướng Quân, Đại Tướng, Thượng Tướng, Nguyên Soái.
+- **Bắt buộc đăng nhập** (người dùng yêu cầu): màn `#authGate` che toàn app khi `available() && !signedIn()`; Artifact (không có máy chủ)
+  không bị che. Mở link mời khi chưa đăng nhập → đăng nhập xong tự vào phòng (`accountchange` trong Online).
+  Test e2e giờ phải đăng ký trước: helper `test/e2e/helpers.js` (`registerUI`, `chromiumPath`, `PAGE`); browser.e2e chạy kèm dev server.
+  Rủi ro đã biết: máy chủ sập thì người chưa đăng nhập không vào được app (kể cả phần học).

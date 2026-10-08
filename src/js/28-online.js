@@ -565,7 +565,13 @@ const Online = (function(){
       if(t && send({type:'chat', text:t})) inp.value='';
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
-    document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('accountchange',()=>{
+      if(st.code) return;
+      // mở link mời khi chưa đăng nhập: đăng nhập xong thì vào phòng luôn
+      const rc=parseCode(params().get('room')||'');
+      if(rc && Account.signedIn()){ showZone('satruong'); enterRoom(rc); return; }
+      renderLobby();
+    });
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);

@@ -3,19 +3,19 @@
    Đây là MÔ PHỎNG TƯƠNG ĐỐI, không phải đo bằng thi đấu với người thật. Phần mô tả
    ghi kết quả đo bằng tools/ladder.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
-// Tên cấp viết theo kiểu dễ hiểu (người dùng góp ý: tên theo thang đẳng cấp Trung Quốc khó hiểu).
+// Tên cấp theo cấp bậc võ tướng thời xưa (người dùng chọn): Tiểu Tốt → Nguyên Soái.
 // elo: cùng thông số với cấp máy xếp hạng tương ứng (Ranked.BOT_LEVELS) để quy ra bậc hạng.
 const AI_LEVELS = [
-  {id:1,  name:'Mới tập',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
-  {id:2,  name:'Làm quen',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
-  {id:3,  name:'Biết chơi',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
-  {id:4,  name:'Khá',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
-  {id:5,  name:'Vững vàng',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
-  {id:6,  name:'Giỏi',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
-  {id:7,  name:'Rất giỏi',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
-  {id:8,  name:'Cao thủ',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
-  {id:9,  name:'Kiện tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
-  {id:10, name:'Đại kiện tướng', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
+  {id:1,  name:'Tiểu Tốt',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
+  {id:2,  name:'Ngũ Trưởng',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
+  {id:3,  name:'Thập Trưởng',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
+  {id:4,  name:'Bách Hộ',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
+  {id:5,  name:'Thiên Hộ',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
+  {id:6,  name:'Hiệu Úy',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
+  {id:7,  name:'Tướng Quân',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
+  {id:8,  name:'Đại Tướng',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
+  {id:9,  name:'Thượng Tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
+  {id:10, name:'Nguyên Soái', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
 ];
 // Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp) — cấp sau thắng cấp trước bao nhiêu %
 const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};

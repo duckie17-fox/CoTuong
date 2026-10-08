@@ -3,20 +3,10 @@
 // mở phân tích ván. Server dùng đúng RoomCore như bản Cloudflare (tools/online-dev-server.js).
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
 const { chromium } = require('playwright-core');
 const { start } = require('../../tools/online-dev-server');
 
-const PAGE = 'file://' + path.join(__dirname, '..', '..', 'dist', 'co-tuong.html');
-function chromiumPath() {
-  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
-  const base = process.env.PLAYWRIGHT_BROWSERS_PATH || '/opt/pw-browsers';
-  if (!fs.existsSync(base)) return undefined;
-  for (const d of fs.readdirSync(base).filter(d => /^chromium-\d+$/.test(d)))
-    for (const sub of ['chrome-linux/chrome', 'chrome-linux64/chrome']) { const p = path.join(base, d, sub); if (fs.existsSync(p)) return p; }
-  return undefined;
-}
+const { PAGE, chromiumPath, registerUI } = require('./helpers');
 async function clickSq(page, r, c) {
   const flipped = await page.evaluate(() => Online.state.widget.isFlipped());
   const box = await (await page.$('#olBoard svg')).boundingBox();
@@ -38,23 +28,19 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     const A = await ctxA.newPage(), B = await ctxB.newPage();
     for (const p of [A, B]) { p.on('pageerror', e => errors.push(e.message)); p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }); p.on('dialog', d => d.accept()); }
 
-    // An tạo phòng, cầm Đỏ
-    await A.goto(PAGE + q);
+    // An đăng nhập rồi tạo phòng giao hữu (tắt Tính Elo để còn xin đi lại), cầm Đỏ
+    await registerUI(A, PAGE + q, 'an_room', 'An');
     await A.click('.zone-btn[data-zone="satruong"]');
     assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'Sa trường không hiện thanh tab Kỳ viện');
-    await A.fill('#olName', 'An');
+    await A.evaluate(() => { document.querySelector('#olRated').checked = false; });
     await A.click('#olCreate');
     await A.waitForSelector('#olInvite:not([hidden]) .ol-link');
     const link = await A.inputValue('#olInvite .ol-link');
     const code = link.match(/room=([A-Z0-9]+)/)[1];
     assert.match(await text(A, '#olStatus'), /chờ đối thủ/);
 
-    // Bình mở link mời (chưa có tên → nhập tên rồi vào)
-    await B.goto(PAGE + `?room=${code}&server=ws://localhost:${srv.port}`);
-    await B.waitForSelector('#olLobby:not([hidden])');
-    assert.equal(await B.inputValue('#olJoinCode'), code);
-    await B.fill('#olName', 'Bình');
-    await B.click('#olJoin');
+    // Bình mở link mời khi chưa có tài khoản → bắt đăng nhập → tạo tài khoản xong vào thẳng phòng
+    await registerUI(B, PAGE + `?room=${code}&server=ws://localhost:${srv.port}`, 'binh_room', 'Bình');
     await B.waitForFunction(() => Online.state.room && Online.state.room.you === 'black');
     await A.waitForFunction(() => /Tới lượt bạn/.test(document.querySelector('#olStatus').textContent));
     assert.match(await text(A, '#olTop'), /Bình/);
@@ -137,14 +123,8 @@ test('tài khoản trên trình duyệt thật: đăng ký, kết bạn, mời �
     const A = await ctxA.newPage(), B = await ctxB.newPage();
     for (const p of [A, B]) { p.on('pageerror', e => errors.push(e.message)); p.on('dialog', d => d.accept()); }
     async function register(p, user, name) {
-      await p.goto(url);
+      await registerUI(p, url, user, name);
       await p.click('.zone-btn[data-zone="toi"]');
-      await p.click('#meIntro [data-open-register]');
-      await p.fill('#rgUser', user); await p.fill('#rgName', name);
-      await p.fill('#rgPass', 'matkhau123'); await p.fill('#rgPass2', 'matkhau123');
-      await p.click('#dlgBody button[type=submit]');
-      await p.waitForSelector('#rcCode');
-      await p.check('#rcOk'); await p.click('#rcNext');
       await p.waitForSelector('#meSigned:not([hidden])');
     }
     await register(A, 'an_e2e', 'An');

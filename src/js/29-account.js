@@ -336,8 +336,14 @@ const Account = (function(){
       + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
     renderSync();
   }
+  // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
+  function renderGate(){
+    const need = available() && !signedIn();
+    $('#authGate').hidden=!need;
+    document.body.classList.toggle('gated', need);
+  }
   function render(){
-    renderTop(); renderMe();
+    renderTop(); renderMe(); renderGate();
     const on=signedIn();
     $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
     $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });

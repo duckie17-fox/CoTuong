@@ -830,6 +830,18 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
 .ranked-search .spinner{color:var(--accent);}
 .rank-elo{display:flex;align-items:center;gap:8px;}
 #meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+
+/* ---------- Bắt buộc đăng nhập ---------- */
+.auth-gate{position:fixed;inset:0;z-index:80;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;}
+body.gated{overflow:hidden;}
+.gate-box{width:100%;max-width:400px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.gate-seal{width:72px !important;height:72px !important;font-size:40px !important;border-radius:18px !important;display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(155deg,var(--b-red),var(--b-red-deep));color:#fff6ec;font-family:var(--han-font);box-shadow:0 4px 14px var(--shadow);}
+.gate-title{font-size:32px;margin:6px 0 0;}
+.gate-sub{color:var(--ink-soft);margin:0 0 10px;}
+.gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
+.gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
+.gate-note{margin-top:6px;}
 </style>
 </head>
 <body>
@@ -1368,6 +1380,18 @@ body.hdr-hide .app-header{transform:translateY(-100%);}
 </section>
 
 </main>
+<div class="auth-gate" id="authGate" hidden>
+  <div class="gate-box">
+    <span class="seal gate-seal" aria-hidden="true">象</span>
+    <h1 class="gate-title">Cờ Tướng</h1>
+    <p class="gate-sub">Học cờ, đấu với máy và đấu xếp hạng với bạn bè.</p>
+    <div class="gate-btns">
+      <button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button>
+      <button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button>
+    </div>
+    <p class="hint-text small gate-note">Tiến độ của bạn được lưu theo tài khoản, dùng được trên mọi máy.</p>
+  </div>
+</div>
 <div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
 <div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 
@@ -3379,21 +3403,21 @@ const LESSONS = [
       '<b>Trung Quốc</b> (Hiệp hội Cờ tướng Trung Quốc) có khoảng 20 bậc, từ thấp lên cao: <b>Kỳ sĩ</b> cấp 16 → cấp 1 (棋士, dành cho người chơi nghiệp dư), <b>Đại sư địa phương</b> (地方大师, trình độ tuyển thủ thành phố/tỉnh), <b>Kỳ hiệp đại sư</b> (棋协大师, cỡ vô địch tỉnh), <b>Đại sư quốc gia</b> (国家大师, ranh giới giữa nghiệp dư và chuyên nghiệp) và cao nhất là <b>Đặc cấp đại sư</b> (特级大师).',
       '<b>Quốc tế</b> (Liên đoàn Cờ tướng Thế giới, WXF) phong các danh hiệu: <b>Kiện tướng Liên đoàn</b>, <b>Kiện tướng quốc tế</b> và <b>Đại kiện tướng quốc tế</b>.',
       '<b>Việt Nam:</b> vận động viên được phong đẳng cấp (như Kiện tướng quốc gia) dựa trên thành tích tại các giải quốc gia; ở quốc tế thì nhận danh hiệu của WXF.',
-      '<b>Cấp độ của máy</b> trong mục Đấu với máy có 10 cấp, đặt tên dễ hiểu (Mới tập → Đại kiện tướng) và ghi bậc hạng tương đương ở Đấu xếp hạng. Sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, chưa đo bằng thi đấu với người thật.'
+      '<b>Cấp độ của máy</b> trong mục Đấu với máy có 10 cấp, đặt tên theo cấp bậc võ tướng xưa (Tiểu Tốt → Nguyên Soái) và ghi bậc hạng tương đương ở Đấu xếp hạng. Sức mạnh được hiệu chỉnh bằng cách cho máy tự đấu với nhau, chưa đo bằng thi đấu với người thật.'
     ],
     table:{
       head:['Cấp độ máy','Hình dung','Đo bằng máy tự đấu'],
       rows:[
-        ['1 · Mới tập','Vừa biết luật','—'],
-        ['2 · Làm quen','Mới chơi vài tháng','thắng cấp 1: ~83%'],
-        ['3 · Biết chơi','Chơi cờ phong trào','thắng cấp 2: ~84%'],
-        ['4 · Khá','Phong trào khá','thắng cấp 3: ~75%'],
-        ['5 · Vững vàng','Giải cấp phường/xã','thắng cấp 4: ~84%'],
-        ['6 · Giỏi','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
-        ['7 · Rất giỏi','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
-        ['8 · Cao thủ','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
-        ['9 · Kiện tướng','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
-        ['10 · Đại kiện tướng','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
+        ['1 · Tiểu Tốt','Vừa biết luật','—'],
+        ['2 · Ngũ Trưởng','Mới chơi vài tháng','thắng cấp 1: ~83%'],
+        ['3 · Thập Trưởng','Chơi cờ phong trào','thắng cấp 2: ~84%'],
+        ['4 · Bách Hộ','Phong trào khá','thắng cấp 3: ~75%'],
+        ['5 · Thiên Hộ','Giải cấp phường/xã','thắng cấp 4: ~84%'],
+        ['6 · Hiệu Úy','Người chơi khá ở câu lạc bộ','thắng cấp 5: ~84%'],
+        ['7 · Tướng Quân','Câu lạc bộ, không còn sơ suất','thắng cấp 6: ~96%'],
+        ['8 · Đại Tướng','Người chơi giỏi phong trào','thắng cấp 7: ~85%'],
+        ['9 · Thượng Tướng','Có sách khai cuộc, tính 2 giây','thắng cấp 8: ~85%'],
+        ['10 · Nguyên Soái','Mạnh nhất của ứng dụng','thắng cấp 9: ~74%'],
       ]
     },
     sources:[
@@ -5304,19 +5328,19 @@ if(typeof OPENING_TRAPS!=='undefined') OPENING_TRAPS.forEach(t=>{
    Đây là MÔ PHỎNG TƯƠNG ĐỐI, không phải đo bằng thi đấu với người thật. Phần mô tả
    ghi kết quả đo bằng tools/ladder.js (mỗi cặp cấp liền kề, đổi màu luân phiên).
    ========================================================================= */
-// Tên cấp viết theo kiểu dễ hiểu (người dùng góp ý: tên theo thang đẳng cấp Trung Quốc khó hiểu).
+// Tên cấp theo cấp bậc võ tướng thời xưa (người dùng chọn): Tiểu Tốt → Nguyên Soái.
 // elo: cùng thông số với cấp máy xếp hạng tương ứng (Ranked.BOT_LEVELS) để quy ra bậc hạng.
 const AI_LEVELS = [
-  {id:1,  name:'Mới tập',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
-  {id:2,  name:'Làm quen',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
-  {id:3,  name:'Biết chơi',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
-  {id:4,  name:'Khá',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
-  {id:5,  name:'Vững vàng',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
-  {id:6,  name:'Giỏi',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
-  {id:7,  name:'Rất giỏi',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
-  {id:8,  name:'Cao thủ',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
-  {id:9,  name:'Kiện tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
-  {id:10, name:'Đại kiện tướng', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
+  {id:1,  name:'Tiểu Tốt',        maxDepth:1, timeMs:300,  noise:120, blunder:0.25, book:false, elo:785,  desc:'Đi gần như ngẫu nhiên, hay để mất quân. Hợp người vừa học luật.'},
+  {id:2,  name:'Ngũ Trưởng',       maxDepth:1, timeMs:300,  noise:80,  blunder:0.15, book:false, elo:955,  desc:'Biết ăn quân bị bỏ trống nhưng vẫn hay sơ hở.'},
+  {id:3,  name:'Thập Trưởng',      maxDepth:1, timeMs:300,  noise:45,  blunder:0.08, book:false, elo:1125, desc:'Ít sơ hở hơn, bắt đầu biết giữ quân.'},
+  {id:4,  name:'Bách Hộ',            maxDepth:2, timeMs:400,  noise:40,  blunder:0.06, book:false, elo:1295, desc:'Nhìn trước 2 nước, hiếm khi cho không quân.'},
+  {id:5,  name:'Thiên Hộ',      maxDepth:2, timeMs:500,  noise:20,  blunder:0.03, book:false, elo:1465, desc:'Chơi chắc tay, rất ít sơ suất.'},
+  {id:6,  name:'Hiệu Úy',           maxDepth:3, timeMs:600,  noise:25,  blunder:0.02, book:false, elo:1635, desc:'Tính trước 3 nước, biết đánh đòn đơn giản.'},
+  {id:7,  name:'Tướng Quân',       maxDepth:3, timeMs:800,  noise:10,  blunder:0,    book:false, elo:1805, desc:'Không sơ suất, thấy được đòn chiến thuật.'},
+  {id:8,  name:'Đại Tướng',        maxDepth:4, timeMs:800,  noise:12,  blunder:0,    book:false, elo:1890, desc:'Tính sâu, phòng thủ chắc.'},
+  {id:9,  name:'Thượng Tướng',     maxDepth:5, timeMs:2000, noise:0,   blunder:0,    book:true,  elo:2060, desc:'Thuộc khai cuộc, luôn chọn nước tốt nhất tìm được.'},
+  {id:10, name:'Nguyên Soái', maxDepth:40,timeMs:4000, noise:0,   blunder:0,    book:true,  elo:2315, desc:'Mạnh nhất: dùng hết sức máy, nghĩ tới 4 giây mỗi nước.'},
 ];
 // Đo bằng tools/ladder.js: mỗi cặp cấp liền kề, cùng khai cuộc ngẫu nhiên, đổi màu (40–64 ván/cặp) — cấp sau thắng cấp trước bao nhiêu %
 const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};
@@ -7207,7 +7231,13 @@ const Online = (function(){
       if(t && send({type:'chat', text:t})) inp.value='';
     });
     document.addEventListener('zoneshown',e=>{ if(e.detail==='satruong' && !st.code) renderLobby(); });
-    document.addEventListener('accountchange',()=>{ if(!st.code) renderLobby(); });
+    document.addEventListener('accountchange',()=>{
+      if(st.code) return;
+      // mở link mời khi chưa đăng nhập: đăng nhập xong thì vào phòng luôn
+      const rc=parseCode(params().get('room')||'');
+      if(rc && Account.signedIn()){ showZone('satruong'); enterRoom(rc); return; }
+      renderLobby();
+    });
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
     const code=parseCode(params().get('room')||'');
     if(code && myName()) enterRoom(code);
@@ -7554,8 +7584,14 @@ const Account = (function(){
       + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
     renderSync();
   }
+  // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
+  function renderGate(){
+    const need = available() && !signedIn();
+    $('#authGate').hidden=!need;
+    document.body.classList.toggle('gated', need);
+  }
   function render(){
-    renderTop(); renderMe();
+    renderTop(); renderMe(); renderGate();
     const on=signedIn();
     $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
     $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });

@@ -2,20 +2,10 @@
 // một mình thì sau 8 giây được ghép "người chơi" là máy, đánh, đầu hàng → bị trừ Elo; tải lại trang thì vào tiếp được ván dở.
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
 const { chromium } = require('playwright-core');
 const { start } = require('../../tools/online-dev-server');
 
-const PAGE = 'file://' + path.join(__dirname, '..', '..', 'dist', 'co-tuong.html');
-function chromiumPath() {
-  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
-  const base = process.env.PLAYWRIGHT_BROWSERS_PATH || '/opt/pw-browsers';
-  if (!fs.existsSync(base)) return undefined;
-  for (const d of fs.readdirSync(base).filter(d => /^chromium-\d+$/.test(d)))
-    for (const sub of ['chrome-linux/chrome', 'chrome-linux64/chrome']) { const p = path.join(base, d, sub); if (fs.existsSync(p)) return p; }
-  return undefined;
-}
+const { PAGE, chromiumPath, registerUI } = require('./helpers');
 async function clickSq(page, r, c) {
   const flipped = await page.evaluate(() => Online.state.widget.isFlipped());
   const box = await (await page.$('#olBoard svg')).boundingBox();
@@ -35,14 +25,7 @@ test('đấu xếp hạng: ghép hai người; một mình thì ghép máy, đ�
       const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const p = await ctx.newPage(); pages.push(p);
       p.on('pageerror', e => errors.push(e.message));
-      await p.goto(url);
-      await p.evaluate(() => { Account.api.iterations = 1000; });
-      await p.click('.zone-btn[data-zone="toi"]');
-      await p.click('#meIntro [data-open-register]');
-      await p.fill('#rgUser', name); await p.fill('#rgPass', 'matkhau123'); await p.fill('#rgPass2', 'matkhau123');
-      await p.click('#dlgBody button[type=submit]');
-      await p.waitForSelector('#rcCode'); await p.check('#rcOk'); await p.click('#rcNext');
-      await p.waitForSelector('#meSigned:not([hidden])');
+      await registerUI(p, url, name);
       await p.click('.zone-btn[data-zone="satruong"]');
       await p.waitForSelector('#olFindMatch');
       return p;
