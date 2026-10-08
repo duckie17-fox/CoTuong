@@ -379,7 +379,7 @@ select.field, input.field{
   .topbar{padding:6px max(10px, env(safe-area-inset-left)) 4px;gap:8px;}
   .topbar .seal{width:34px;height:34px;font-size:19px;}
   .tabs{padding-inline:6px;}
-  .tab-btn{padding:11px 10px;font-size:14px;}
+  .tab-btn{padding:11px 8px;font-size:13.5px;}
   .app-main{padding:14px max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));}
   .seg button{padding:8px 9px;font-size:12.5px;}
   .card{padding:14px 12px;border-radius:14px;}
@@ -476,7 +476,15 @@ select.field, input.field{
 /* ---------- Đấu với máy & review ---------- */
 fieldset.setup-field{border:0;padding:0;margin:14px 0 0;}
 fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);margin-bottom:8px;padding:0;}
-.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;}
+.level-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.level-chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;background:var(--card);
+  font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:38px;}
+.level-chip input{position:absolute;opacity:0;width:0;height:0;}
+.level-chip:hover{background:var(--paper-2);}
+.level-chip:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--accent);}
+.level-chip:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px;}
+.level-note{flex-basis:100%;margin:6px 0 0;color:var(--ink-soft);font-size:13.5px;line-height:1.5;}
+.level-note .lv-tier{color:var(--jade);font-weight:700;white-space:nowrap;}
 .level-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card);min-height:52px;}
 .level-opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none;}
 .level-opt span{display:flex;flex-direction:column;gap:2px;}
@@ -544,7 +552,6 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 @media (max-width:600px){
   .review-summary{grid-template-columns:1fr;}
   .acc-box{display:flex;align-items:baseline;gap:10px;justify-content:center;}
-  .level-grid{grid-template-columns:1fr;}
   .seg-radio{display:flex;} .seg-radio label{flex:1;text-align:center;}
 }
 
@@ -907,6 +914,20 @@ body::after{background:var(--gold);opacity:.2;
 .music-btn:hover{background:var(--paper-2);color:var(--ink);}
 .music-btn[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 40%, transparent);background:color-mix(in srgb, var(--accent) 9%, transparent);}
 .music-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* ---------- Khối "xem thêm" thu gọn (giữ màn hình gọn cho người mới) ---------- */
+.more-box{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px;}
+.more-box > summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:34px;display:flex;align-items:center;gap:6px;list-style:none;}
+.more-box > summary::-webkit-details-marker{display:none;}
+.more-box > summary::before{content:'';width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s ease;flex:none;margin-left:2px;}
+.more-box[open] > summary::before{transform:rotate(45deg);}
+.more-box > summary:hover{color:var(--ink);}
+.more-box > summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
+.more-box > :last-child{margin-bottom:4px;}
+#lessonToc .lesson-nav{margin-top:8px;}
+#pzFilterBox{border-top:0;margin-top:0;padding-top:0;}
+#pzFilterBox .chip-row{margin-top:8px;}
+@media (max-width:420px){ .tab-btn{padding:11px 6px;font-size:13px;} .tabs{padding-inline:4px;} }
 </style>
 </head>
 <body>
@@ -927,7 +948,7 @@ body::after{background:var(--gold);opacity:.2;
     <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
     <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
     <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
-    <button class="tab-btn" data-tab="may" role="tab">Đấu với máy</button>
+    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
   </nav>
   <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
     <button class="tab-btn st-btn" data-stab="phong" role="tab">Phòng đấu</button>
@@ -945,16 +966,20 @@ body::after{background:var(--gold);opacity:.2;
   </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
-    <p class="serif">Cờ tướng chơi trên bàn 9 cột × 10 hàng. Quân cờ <b>đứng trên giao điểm của các đường kẻ</b>, không phải trong ô như cờ vua. Ở giữa bàn cờ có một khoảng trống gọi là <b>sông</b> (chia bàn cờ thành lãnh thổ Đỏ và Đen). Mỗi bên có một cung nhỏ 3×3 ở giữa hàng cuối gọi là <b>cung</b> (vẽ hình chữ X) — nơi Tướng và Sĩ phải luôn ở trong đó.</p>
-    <p class="serif">Đỏ luôn đi trước. Hai bên lần lượt đi từng nước cho đến khi một Tướng bị <b>chiếu bí</b> (không còn cách thoát) thì thua cuộc.</p>
+    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ, không đứng trong ô như cờ vua. Đỏ đi trước, hai bên thay phiên nhau. Ai bắt được Tướng đối phương thì thắng.</p>
+    <details class="more-box"><summary>Vài từ hay gặp</summary>
+      <p class="serif"><b>Sông</b>: khoảng trống giữa bàn, chia hai bên Đỏ và Đen. <b>Cung</b>: ô vuông nhỏ có hình chữ X ở giữa hàng cuối — Tướng và Sĩ không được ra khỏi đó. <b>Chiếu bí</b>: Tướng bị tấn công và không còn cách nào thoát, bên đó thua.</p>
+    </details>
     <h3 class="mt16">7 loại quân cờ</h3>
     <div class="legend-grid" id="legendGrid"></div>
   </div>
 
   <div class="card">
     <h2 id="lessonsHeading">Các bài học</h2>
-    <p>Mỗi bài có một bàn cờ nhỏ để bạn bấm thử — chọn quân rồi bấm vào các ô sáng để xem nó đi được đâu.</p>
-    <div class="lesson-nav" id="lessonNav"></div>
+    <p>Mỗi bài có bàn cờ nhỏ để bấm thử: chọn quân rồi bấm ô sáng để xem nó đi được đâu.</p>
+    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
+      <div class="lesson-nav" id="lessonNav"></div>
+    </details>
     <div id="lessonContent"></div>
     <div class="lesson-foot">
       <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
@@ -973,16 +998,18 @@ body::after{background:var(--gold);opacity:.2;
     </div>
     <div data-opanel="master" hidden>
       <h2>Ván danh thủ có chú giải</h2>
-      <p class="serif">Xem lại những ván cờ nổi tiếng từng nước một. Mỗi nước có đánh giá của máy và lời giải thích <b>vì sao</b>; bật <b>“Đoán nước”</b> để tự đoán nước tiếp theo của danh thủ trước khi xem — cách luyện tư duy rất hiệu quả.</p>
-      <p class="hint-text">Chỉ đưa vào các ván có biên bản lấy từ nguồn ghi rõ (bấm vào ván để xem nguồn). Nhãn “2 nguồn” nghĩa là biên bản đã được đối chiếu khớp từng nước ở hai nguồn độc lập; “1 nguồn” là mới có một nguồn. Mọi nước đều đã được máy kiểm tra là hợp lệ.</p>
+      <p class="serif">Xem lại các ván cờ nổi tiếng từng nước một, kèm lời giải thích vì sao đi như vậy.</p>
+      <details class="more-box"><summary>Về nhãn “1 nguồn” và “2 nguồn”</summary>
+        <p class="hint-text">Biên bản mỗi ván đều ghi rõ nguồn (bấm vào ván để xem). “2 nguồn” là đã đối chiếu khớp từng nước ở hai nơi khác nhau, “1 nguồn” là mới có một nơi. Mọi nước đều được máy kiểm tra hợp lệ.</p>
+      </details>
       <div class="topic-grid" id="masterGrid"></div>
     </div>
     <div data-opanel="open">
     <h2>Các thế trận khai cuộc</h2>
-    <p class="serif">Khai cuộc là khoảng 10–15 nước đầu ván. Mục tiêu là đưa quân ra vị trí tốt, giữ cung Tướng an toàn và chuẩn bị cho trung cuộc. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b>: bạn tự đi các nước, sai là được nhắc ngay.</p>
+    <p class="serif">Khai cuộc là 10–15 nước đầu ván. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b> để tự đi — sai là được nhắc ngay.</p>
     <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện một thế ngẫu nhiên</button></div>
     <div id="openingGrid"></div>
-    <p class="sources">Các nước định danh đối chiếu theo <a href="https://www.xiangqi.com/articles/glossary-of-basic-xiangqi-chinese-chess-opening-systems" target="_blank" rel="noopener">xiangqi.com</a>, <a href="https://mocvien.com/tin-tuc/khai-cuoc--phao-dau-doi-voi-ban-do-nghich-phao" target="_blank" rel="noopener">mocvien.com</a>, <a href="https://zigavn.com/cotuong/tuyet-chieu-khai-cuoc-tien-nhan-chi-lo" target="_blank" rel="noopener">zigavn.com</a>. Các nước tiếp theo là diễn biến phát triển quân tiêu biểu cho người mới, không phải bảng biến đầy đủ.</p>
+    <details class="more-box"><summary>Nguồn tham khảo</summary><p class="sources">Các nước định danh đối chiếu theo <a href="https://www.xiangqi.com/articles/glossary-of-basic-xiangqi-chinese-chess-opening-systems" target="_blank" rel="noopener">xiangqi.com</a>, <a href="https://mocvien.com/tin-tuc/khai-cuoc--phao-dau-doi-voi-ban-do-nghich-phao" target="_blank" rel="noopener">mocvien.com</a>, <a href="https://zigavn.com/cotuong/tuyet-chieu-khai-cuoc-tien-nhan-chi-lo" target="_blank" rel="noopener">zigavn.com</a>. Các nước tiếp theo là diễn biến phát triển quân tiêu biểu cho người mới, không phải bảng biến đầy đủ.</p></details>
     </div>
   </div>
 
@@ -1084,7 +1111,7 @@ body::after{background:var(--gold);opacity:.2;
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp và màu quân. Mỗi cấp ghi bậc hạng tương đương ở Đấu xếp hạng. Xong ván, bấm <b>Phân tích ván</b> để xem mình đi hay, dở ở đâu.</p>
+    <p>Chọn cấp máy và màu quân của bạn, rồi bấm Bắt đầu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -1094,8 +1121,8 @@ body::after{background:var(--gold);opacity:.2;
     </fieldset>
     <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu ván mới</button>
-    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ có sẵn (mã FEN)</summary>
-      <p class="hint-text small">Dán mã thế cờ FEN (ví dụ sao chép từ nút “Sao chép thế cờ” ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
+    <details class="fen-box more-box mt10"><summary>Bắt đầu từ một thế cờ có sẵn</summary>
+      <p class="hint-text small">Dán mã thế cờ đã sao chép từ bài tập hoặc ván danh thủ.</p>
       <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
       <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu từ thế này</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
     </details>
@@ -1179,14 +1206,14 @@ body::after{background:var(--gold);opacity:.2;
 <section data-panel="chienthuat" hidden>
   <div class="card" id="tacticListCard">
     <h2>Chiến thuật & Tàn cuộc</h2>
-    <p class="serif">Ba mảng kiến thức phải thuộc: <b>sát cục</b> (các mẫu chiếu bí kinh điển), <b>đòn chiến thuật</b> để ăn quân, và <b>tàn cuộc</b> để biết thế nào thắng được, thế nào chỉ hoà.</p>
+    <p class="serif">Ba nhóm: các thế chiếu bí hay gặp, các đòn ăn quân, và tàn cuộc (lúc còn ít quân).</p>
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mảng">
       <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">Thế chiếu bí</button>
       <button class="chip" data-sub="don" role="tab" aria-selected="false">Đòn ăn quân</button>
       <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">Tàn cuộc</button>
     </div>
     <div data-subpanel="satcuc">
-      <p class="hint-text">Mỗi mẫu sát cục có: ý tưởng, <b>vì sao</b> nó hiệu quả, dấu hiệu nhận ra trong ván cờ, và 3 thế để bạn tự chiếu bí. Học thuộc mẫu hình giúp bạn nhìn ra đòn kết thúc nhanh hơn nhiều so với tính từng nước.</p>
+      <p class="hint-text">Mỗi thế có cách nhận ra trong ván cờ và 3 bài để bạn tự chiếu bí.</p>
       <p class="hint-text" id="satcucProgress"></p>
       <div id="satcucList"></div>
     </div>
@@ -1198,7 +1225,7 @@ body::after{background:var(--gold);opacity:.2;
       <p class="hint-text">Ở mỗi thế tàn cuộc, bạn cầm Đỏ, còn máy phòng thủ bằng những nước kéo dài nhất có thể.</p>
       <div class="topic-grid" id="endgameGrid"></div>
       <h3 class="group-h mt16">Tàn cuộc lý thuyết</h3>
-      <p class="hint-text">Những thế tàn cuộc kinh điển: thế nào thắng, thế nào chỉ hoà, và <b>vì sao</b>. Thế có nhãn “Máy kiểm chứng” được bảng tàn cuộc tính hết mọi khả năng; thế “Theo sách” quá lớn để tính hết nên ghi theo sách tàn cuộc.</p>
+      <p class="hint-text">Thế nào thắng được, thế nào chỉ hoà. Nhãn “Máy kiểm chứng” là đã tính hết mọi khả năng; “Theo sách” là ghi theo sách tàn cuộc.</p>
       <div id="egTheory"></div>
     </div>
   </div>
@@ -1212,12 +1239,13 @@ body::after{background:var(--gold);opacity:.2;
 <section data-panel="baitap" hidden>
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
-    <p>Chọn một thế cờ và tìm nước đi đúng. Đến lượt bạn, hãy suy nghĩ kỹ trước khi đi! Bài nào có nhiều cách giải đúng thì cách nào cũng được tính.</p>
+    <p>Chọn một thế cờ và tìm nước đi đúng. Bài có nhiều cách giải thì cách nào đúng cũng được tính.</p>
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
+    <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
 
   <div class="card" id="puzzleDetailCard" hidden>
@@ -1413,10 +1441,14 @@ body::after{background:var(--gold);opacity:.2;
           <button type="button" data-theme-set="light">Sáng</button><button type="button" data-theme-set="dark">Tối</button><button type="button" data-theme-set="auto">Theo máy</button>
         </div>
       </div>
-      <p class="hint-text small mt10">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+      <details class="more-box mt10"><summary>Dùng bàn phím</summary>
+        <p class="hint-text small">Nhấn Tab để vào bàn cờ, phím mũi tên để di chuyển, Enter hoặc Space để chọn và đi quân.</p>
+      </details>
     </div>
     <div class="card" id="meTransfer">
       <h2>Chuyển tiến độ sang máy khác</h2>
+      <p class="hint-text small">Cách nhanh nhất là tạo tài khoản — tiến độ tự theo bạn sang máy khác.</p>
+      <details class="more-box"><summary>Chuyển bằng tay (không cần tài khoản)</summary>
       <p class="hint-text small" id="progressSummary"></p>
       <div class="btn-row">
         <button type="button" class="btn btn-outline btn-sm" id="progressCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép mã</button>
@@ -1429,6 +1461,7 @@ body::after{background:var(--gold);opacity:.2;
         <label class="btn btn-outline btn-sm file-btn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-folder"></use></svg>Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
       </div>
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+      </details>
     </div>
   </div>
   <div class="card mt16" id="meAccount" hidden>
@@ -3670,7 +3703,7 @@ function renderLessonNav(){
         `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div></div>`;
   }).join('');
   $$('.lesson-dot',nav).forEach(btn=>{
-    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); renderLesson(true); });
+    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); const t=$('#lessonToc'); if(t) t.open=false; renderLesson(true); });
   });
 }
 function markLessonDone(key){
@@ -3701,7 +3734,7 @@ function renderLesson(scroll){
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
   });
-  $('#lessonsHeading').textContent = `${LESSONS.length} bài học`;
+  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;
@@ -3804,7 +3837,7 @@ function resultForHuman(rec){
 }
 function renderHistoryList(){
   const list=loadHistory(), el=$('#aiHistory');
-  if(!list.length){ el.innerHTML='<p class="hint-text">Chưa có ván nào. Các ván đấu với máy sẽ được lưu ở đây (trong trình duyệt này) để bạn xem lại và phân tích.</p>'; return; }
+  if(!list.length){ el.innerHTML='<p class="hint-text">Chưa có ván nào. Đánh xong một ván, ván đó sẽ hiện ở đây để bạn xem lại.</p>'; return; }
   el.innerHTML = list.map(r=>{
     const rs=resultForHuman(r), d=new Date(r.date);
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
@@ -3944,8 +3977,16 @@ function showAICard(which){
 }
 function renderLevelPicker(){
   const saved=savedAiLevel();
-  $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
-    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small><small class="lv-tier">Ngang bậc <b>${esc(Ranked.tierOf(l.elo).label)}</b></small></span></label>`).join('');
+  const pick=$('#aiLevelPicker');
+  pick.innerHTML = AI_LEVELS.map(l=>`<label class="level-chip"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}><span>${l.id}. ${esc(l.name)}</span></label>`).join('')
+    + '<p class="level-note" id="aiLevelNote"></p>';
+  const note=()=>{
+    const r=$('input[name="aiLevel"]:checked',pick); if(!r) return;
+    const l=AI_LEVELS.find(x=>x.id===+r.value);
+    $('#aiLevelNote').innerHTML = `${esc(l.desc)} <span class="lv-tier">Ngang bậc ${esc(Ranked.tierOf(l.elo).label)}</span>`;
+  };
+  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',note));
+  note();
 }
 function initAIGame(){
   renderLevelPicker();
@@ -4792,7 +4833,7 @@ PUZZLES.forEach(p=>{ p.topic = p.topic || ({mate:'mate1',mate2:'mate2',mate3:'ma
    UI BÀI TẬP — lọc theo chủ đề/độ khó, hỗ trợ chiếu bí 1–2 nước, bắt quân, bắt đôi
    ========================================================================= */
 const DIFF_LABEL = {1:['Dễ','badge-easy'],2:['Trung bình','badge-mid'],3:['Khó','badge-hard']};
-const pz = { widget:null, ctl:null, active:null, board:null, stage:0, locked:false, hint:false, arrows:null, last:null, filter:{topic:'all',diff:'all'} };
+const pz = { widget:null, ctl:null, active:null, board:null, stage:0, locked:false, hint:false, arrows:null, last:null, filter:{topic:'all',diff:'all'}, shown:null, shownKey:null };
 
 function getSolvedPuzzles(){ return safeJSON('xq_puzzles_solved',[]); }
 function markPuzzleSolved(id){
@@ -4807,16 +4848,21 @@ function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
   const due=Learn.due().length;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
-    <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
+  const on = pz.filter.topic!=='all' || pz.filter.diff!=='all';
+  el.innerHTML = `<details class="more-box" id="pzFilterBox" ${on?'open':''}><summary>Chọn loại bài${on?' (đang lọc)':''}</summary>
+    <div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+    <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div></details>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
+const PZ_PAGE=24;   // chỉ hiện một ít bài, bấm "Xem thêm" mới hiện tiếp (tránh đổ hàng trăm ô cùng lúc)
 function renderPuzzleGrid(){
   renderPuzzleFilters();
   const solved = getSolvedPuzzles();
   const list=puzzleList();
+  if(pz.shown==null || pz.shownKey!==JSON.stringify(pz.filter)){ pz.shown=PZ_PAGE; pz.shownKey=JSON.stringify(pz.filter); }
+  const shown=Math.min(pz.shown, list.length);
   $('#puzzleProgressTxt').textContent = `Đã giải ${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length} bài`;
-  $('#puzzleGrid').innerHTML = list.map(p=>{
+  $('#puzzleGrid').innerHTML = list.slice(0,shown).map(p=>{
     const [label,cls] = DIFF_LABEL[p.difficulty];
     return `<button class="puzzle-card ${solved.includes(p.id)?'solved':''}" data-id="${p.id}">
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
@@ -4826,6 +4872,14 @@ function renderPuzzleGrid(){
     </button>`;
   }).join('') || '<p class="hint-text">Không có bài nào khớp bộ lọc.</p>';
   $$('.puzzle-card',$('#puzzleGrid')).forEach(btn=> btn.addEventListener('click', ()=> openPuzzle(btn.dataset.id)));
+  const more=$('#puzzleMore');
+  if(more){
+    more.innerHTML = shown<list.length
+      ? `<button type="button" class="btn btn-outline" id="puzzleMoreBtn">Xem thêm bài (còn ${list.length-shown})</button>`
+      : (list.length>PZ_PAGE ? `<span class="hint-text">Đã hiện hết ${list.length} bài.</span>` : '');
+    const b=$('#puzzleMoreBtn',more);
+    if(b) b.addEventListener('click',()=>{ pz.shown=shown+PZ_PAGE; renderPuzzleGrid(); });
+  }
 }
 function openPuzzle(id){
   pz.active = PUZZLES.find(p=>p.id===id);
@@ -6711,10 +6765,10 @@ function renderProgressDashboard(){
     <div class="dash-grid">
       <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
       <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
-      <div class="dash-tile"><b>${st?st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
-      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy${acc!=null?` · chính xác TB ${acc}%`:''}</span></div>
+      <div class="dash-tile"><b>${st?st:'—'}</b><span>ngày liên tiếp có làm bài</span></div>
+      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy</span></div>
     </div>
-    <details class="dash-more"><summary>Chi tiết theo chủ đề bài tập</summary>
+    <details class="more-box dash-more"><summary>Chi tiết theo chủ đề bài tập${acc!=null?` · chính xác trung bình ${acc}%`:''}</summary>
       <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
     </details>
     ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ôn lại ${due} bài từng làm sai</button></p>`:''}`;

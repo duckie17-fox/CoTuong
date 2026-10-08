@@ -28,7 +28,7 @@
     <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
     <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
     <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
-    <button class="tab-btn" data-tab="may" role="tab">Đấu với máy</button>
+    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
   </nav>
   <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
     <button class="tab-btn st-btn" data-stab="phong" role="tab">Phòng đấu</button>
@@ -46,16 +46,20 @@
   </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
-    <p class="serif">Cờ tướng chơi trên bàn 9 cột × 10 hàng. Quân cờ <b>đứng trên giao điểm của các đường kẻ</b>, không phải trong ô như cờ vua. Ở giữa bàn cờ có một khoảng trống gọi là <b>sông</b> (chia bàn cờ thành lãnh thổ Đỏ và Đen). Mỗi bên có một cung nhỏ 3×3 ở giữa hàng cuối gọi là <b>cung</b> (vẽ hình chữ X) — nơi Tướng và Sĩ phải luôn ở trong đó.</p>
-    <p class="serif">Đỏ luôn đi trước. Hai bên lần lượt đi từng nước cho đến khi một Tướng bị <b>chiếu bí</b> (không còn cách thoát) thì thua cuộc.</p>
+    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ, không đứng trong ô như cờ vua. Đỏ đi trước, hai bên thay phiên nhau. Ai bắt được Tướng đối phương thì thắng.</p>
+    <details class="more-box"><summary>Vài từ hay gặp</summary>
+      <p class="serif"><b>Sông</b>: khoảng trống giữa bàn, chia hai bên Đỏ và Đen. <b>Cung</b>: ô vuông nhỏ có hình chữ X ở giữa hàng cuối — Tướng và Sĩ không được ra khỏi đó. <b>Chiếu bí</b>: Tướng bị tấn công và không còn cách nào thoát, bên đó thua.</p>
+    </details>
     <h3 class="mt16">7 loại quân cờ</h3>
     <div class="legend-grid" id="legendGrid"></div>
   </div>
 
   <div class="card">
     <h2 id="lessonsHeading">Các bài học</h2>
-    <p>Mỗi bài có một bàn cờ nhỏ để bạn bấm thử — chọn quân rồi bấm vào các ô sáng để xem nó đi được đâu.</p>
-    <div class="lesson-nav" id="lessonNav"></div>
+    <p>Mỗi bài có bàn cờ nhỏ để bấm thử: chọn quân rồi bấm ô sáng để xem nó đi được đâu.</p>
+    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
+      <div class="lesson-nav" id="lessonNav"></div>
+    </details>
     <div id="lessonContent"></div>
     <div class="lesson-foot">
       <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
@@ -74,16 +78,18 @@
     </div>
     <div data-opanel="master" hidden>
       <h2>Ván danh thủ có chú giải</h2>
-      <p class="serif">Xem lại những ván cờ nổi tiếng từng nước một. Mỗi nước có đánh giá của máy và lời giải thích <b>vì sao</b>; bật <b>“Đoán nước”</b> để tự đoán nước tiếp theo của danh thủ trước khi xem — cách luyện tư duy rất hiệu quả.</p>
-      <p class="hint-text">Chỉ đưa vào các ván có biên bản lấy từ nguồn ghi rõ (bấm vào ván để xem nguồn). Nhãn “2 nguồn” nghĩa là biên bản đã được đối chiếu khớp từng nước ở hai nguồn độc lập; “1 nguồn” là mới có một nguồn. Mọi nước đều đã được máy kiểm tra là hợp lệ.</p>
+      <p class="serif">Xem lại các ván cờ nổi tiếng từng nước một, kèm lời giải thích vì sao đi như vậy.</p>
+      <details class="more-box"><summary>Về nhãn “1 nguồn” và “2 nguồn”</summary>
+        <p class="hint-text">Biên bản mỗi ván đều ghi rõ nguồn (bấm vào ván để xem). “2 nguồn” là đã đối chiếu khớp từng nước ở hai nơi khác nhau, “1 nguồn” là mới có một nơi. Mọi nước đều được máy kiểm tra hợp lệ.</p>
+      </details>
       <div class="topic-grid" id="masterGrid"></div>
     </div>
     <div data-opanel="open">
     <h2>Các thế trận khai cuộc</h2>
-    <p class="serif">Khai cuộc là khoảng 10–15 nước đầu ván. Mục tiêu là đưa quân ra vị trí tốt, giữ cung Tướng an toàn và chuẩn bị cho trung cuộc. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b>: bạn tự đi các nước, sai là được nhắc ngay.</p>
+    <p class="serif">Khai cuộc là 10–15 nước đầu ván. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b> để tự đi — sai là được nhắc ngay.</p>
     <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện một thế ngẫu nhiên</button></div>
     <div id="openingGrid"></div>
-    <p class="sources">Các nước định danh đối chiếu theo <a href="https://www.xiangqi.com/articles/glossary-of-basic-xiangqi-chinese-chess-opening-systems" target="_blank" rel="noopener">xiangqi.com</a>, <a href="https://mocvien.com/tin-tuc/khai-cuoc--phao-dau-doi-voi-ban-do-nghich-phao" target="_blank" rel="noopener">mocvien.com</a>, <a href="https://zigavn.com/cotuong/tuyet-chieu-khai-cuoc-tien-nhan-chi-lo" target="_blank" rel="noopener">zigavn.com</a>. Các nước tiếp theo là diễn biến phát triển quân tiêu biểu cho người mới, không phải bảng biến đầy đủ.</p>
+    <details class="more-box"><summary>Nguồn tham khảo</summary><p class="sources">Các nước định danh đối chiếu theo <a href="https://www.xiangqi.com/articles/glossary-of-basic-xiangqi-chinese-chess-opening-systems" target="_blank" rel="noopener">xiangqi.com</a>, <a href="https://mocvien.com/tin-tuc/khai-cuoc--phao-dau-doi-voi-ban-do-nghich-phao" target="_blank" rel="noopener">mocvien.com</a>, <a href="https://zigavn.com/cotuong/tuyet-chieu-khai-cuoc-tien-nhan-chi-lo" target="_blank" rel="noopener">zigavn.com</a>. Các nước tiếp theo là diễn biến phát triển quân tiêu biểu cho người mới, không phải bảng biến đầy đủ.</p></details>
     </div>
   </div>
 
@@ -185,7 +191,7 @@
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp và màu quân. Mỗi cấp ghi bậc hạng tương đương ở Đấu xếp hạng. Xong ván, bấm <b>Phân tích ván</b> để xem mình đi hay, dở ở đâu.</p>
+    <p>Chọn cấp máy và màu quân của bạn, rồi bấm Bắt đầu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -195,8 +201,8 @@
     </fieldset>
     <div id="aiSuggest"></div>
     <button class="btn btn-primary mt10" id="aiStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu ván mới</button>
-    <details class="fen-box mt10"><summary>Bắt đầu từ một thế cờ có sẵn (mã FEN)</summary>
-      <p class="hint-text small">Dán mã thế cờ FEN (ví dụ sao chép từ nút “Sao chép thế cờ” ở bài tập hay ván danh thủ). Dùng cấp độ và màu quân đang chọn ở trên.</p>
+    <details class="fen-box more-box mt10"><summary>Bắt đầu từ một thế cờ có sẵn</summary>
+      <p class="hint-text small">Dán mã thế cờ đã sao chép từ bài tập hoặc ván danh thủ.</p>
       <input class="field" id="fenInput" spellcheck="false" placeholder="rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">
       <div class="btn-row mt10"><button type="button" class="btn btn-outline btn-sm" id="fenStartBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu từ thế này</button><span class="hint-text small" id="fenMsg" aria-live="polite"></span></div>
     </details>
@@ -280,14 +286,14 @@
 <section data-panel="chienthuat" hidden>
   <div class="card" id="tacticListCard">
     <h2>Chiến thuật & Tàn cuộc</h2>
-    <p class="serif">Ba mảng kiến thức phải thuộc: <b>sát cục</b> (các mẫu chiếu bí kinh điển), <b>đòn chiến thuật</b> để ăn quân, và <b>tàn cuộc</b> để biết thế nào thắng được, thế nào chỉ hoà.</p>
+    <p class="serif">Ba nhóm: các thế chiếu bí hay gặp, các đòn ăn quân, và tàn cuộc (lúc còn ít quân).</p>
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mảng">
       <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">Thế chiếu bí</button>
       <button class="chip" data-sub="don" role="tab" aria-selected="false">Đòn ăn quân</button>
       <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">Tàn cuộc</button>
     </div>
     <div data-subpanel="satcuc">
-      <p class="hint-text">Mỗi mẫu sát cục có: ý tưởng, <b>vì sao</b> nó hiệu quả, dấu hiệu nhận ra trong ván cờ, và 3 thế để bạn tự chiếu bí. Học thuộc mẫu hình giúp bạn nhìn ra đòn kết thúc nhanh hơn nhiều so với tính từng nước.</p>
+      <p class="hint-text">Mỗi thế có cách nhận ra trong ván cờ và 3 bài để bạn tự chiếu bí.</p>
       <p class="hint-text" id="satcucProgress"></p>
       <div id="satcucList"></div>
     </div>
@@ -299,7 +305,7 @@
       <p class="hint-text">Ở mỗi thế tàn cuộc, bạn cầm Đỏ, còn máy phòng thủ bằng những nước kéo dài nhất có thể.</p>
       <div class="topic-grid" id="endgameGrid"></div>
       <h3 class="group-h mt16">Tàn cuộc lý thuyết</h3>
-      <p class="hint-text">Những thế tàn cuộc kinh điển: thế nào thắng, thế nào chỉ hoà, và <b>vì sao</b>. Thế có nhãn “Máy kiểm chứng” được bảng tàn cuộc tính hết mọi khả năng; thế “Theo sách” quá lớn để tính hết nên ghi theo sách tàn cuộc.</p>
+      <p class="hint-text">Thế nào thắng được, thế nào chỉ hoà. Nhãn “Máy kiểm chứng” là đã tính hết mọi khả năng; “Theo sách” là ghi theo sách tàn cuộc.</p>
       <div id="egTheory"></div>
     </div>
   </div>
@@ -313,12 +319,13 @@
 <section data-panel="baitap" hidden>
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
-    <p>Chọn một thế cờ và tìm nước đi đúng. Đến lượt bạn, hãy suy nghĩ kỹ trước khi đi! Bài nào có nhiều cách giải đúng thì cách nào cũng được tính.</p>
+    <p>Chọn một thế cờ và tìm nước đi đúng. Bài có nhiều cách giải thì cách nào đúng cũng được tính.</p>
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy ngẫu nhiên các bài chưa giải trong bộ lọc đang chọn, đếm chuỗi giải đúng liên tiếp.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-jade" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
+    <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
 
   <div class="card" id="puzzleDetailCard" hidden>
@@ -514,10 +521,14 @@
           <button type="button" data-theme-set="light">Sáng</button><button type="button" data-theme-set="dark">Tối</button><button type="button" data-theme-set="auto">Theo máy</button>
         </div>
       </div>
-      <p class="hint-text small mt10">Hiệu ứng di chuyển quân tự tắt nếu thiết bị đang bật chế độ “giảm chuyển động”. Bàn cờ dùng được bằng bàn phím: Tab vào bàn, phím mũi tên để di chuyển, Enter/Space để chọn và đi quân.</p>
+      <details class="more-box mt10"><summary>Dùng bàn phím</summary>
+        <p class="hint-text small">Nhấn Tab để vào bàn cờ, phím mũi tên để di chuyển, Enter hoặc Space để chọn và đi quân.</p>
+      </details>
     </div>
     <div class="card" id="meTransfer">
       <h2>Chuyển tiến độ sang máy khác</h2>
+      <p class="hint-text small">Cách nhanh nhất là tạo tài khoản — tiến độ tự theo bạn sang máy khác.</p>
+      <details class="more-box"><summary>Chuyển bằng tay (không cần tài khoản)</summary>
       <p class="hint-text small" id="progressSummary"></p>
       <div class="btn-row">
         <button type="button" class="btn btn-outline btn-sm" id="progressCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép mã</button>
@@ -530,6 +541,7 @@
         <label class="btn btn-outline btn-sm file-btn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-folder"></use></svg>Chọn tệp<input type="file" id="progressFile" accept=".json,application/json"></label>
       </div>
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
+      </details>
     </div>
   </div>
   <div class="card mt16" id="meAccount" hidden>

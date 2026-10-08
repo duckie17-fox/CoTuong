@@ -1,13 +1,14 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-**PR #5 đã merge + deploy xanh** (2026-10-08): bottom nav điện thoại, bỏ nút đồng bộ, kết bạn nhanh, bàn cờ to trên máy tính,
-không xử thắng/không giới hạn giờ, nền kiểu cờ thủ, nhạc nền bật/tắt, ván xếp hạng với máy song song.
-Nhánh làm việc đã dựng lại từ main.
+Nhánh `claude/improvement-plan-xdtg8b` (chưa PR): dọn giao diện cho người mới — giữ nguyên cấu trúc tab, chỉ gom gọn.
+Chọn cấp máy thành chip 1 hàng, bài tập hiện 24 bài + "Xem thêm", bộ lọc gói vào "Chọn loại bài",
+mục lục bài học thu gọn, phần giải thích dài đưa vào khối "xem thêm", rút gọn chữ, tab vừa màn hình điện thoại.
+Test 79/79 + e2e 5/5 xanh.
 
 ## Next step
-1. Người dùng nghe thử nhạc / xem nền trên bản thật https://duckie17-fox.github.io/CoTuong/ → chỉnh nếu cần.
-2. Sau một thời gian có ván thật: hiệu chỉnh Elo các cấp máy xếp hạng (bảng bot_games).
+1. Người dùng xem lại giao diện đã gọn chưa.
+2. Khi người dùng bảo: tạo PR + merge → deploy.
 
 ## Blocker
 - Không có.

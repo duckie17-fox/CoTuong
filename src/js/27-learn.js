@@ -175,10 +175,10 @@ function renderProgressDashboard(){
     <div class="dash-grid">
       <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
       <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
-      <div class="dash-tile"><b>${st?st:'—'}</b><span>ngày liên tiếp làm bài hôm nay</span></div>
-      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy${acc!=null?` · chính xác TB ${acc}%`:''}</span></div>
+      <div class="dash-tile"><b>${st?st:'—'}</b><span>ngày liên tiếp có làm bài</span></div>
+      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>thắng–hoà–thua với máy</span></div>
     </div>
-    <details class="dash-more"><summary>Chi tiết theo chủ đề bài tập</summary>
+    <details class="more-box dash-more"><summary>Chi tiết theo chủ đề bài tập${acc!=null?` · chính xác trung bình ${acc}%`:''}</summary>
       <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
     </details>
     ${due?`<p class="mt10"><button type="button" class="btn btn-primary btn-sm" id="dashReview"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ôn lại ${due} bài từng làm sai</button></p>`:''}`;

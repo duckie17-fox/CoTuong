@@ -171,7 +171,7 @@ function renderLessonNav(){
         `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div></div>`;
   }).join('');
   $$('.lesson-dot',nav).forEach(btn=>{
-    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); renderLesson(true); });
+    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); const t=$('#lessonToc'); if(t) t.open=false; renderLesson(true); });
   });
 }
 function markLessonDone(key){
@@ -202,7 +202,7 @@ function renderLesson(scroll){
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
   });
-  $('#lessonsHeading').textContent = `${LESSONS.length} bài học`;
+  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;

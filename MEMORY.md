@@ -149,3 +149,11 @@
 - Nền: `body::before` (dấu vị trí quân kiểu bàn cờ, lặp 96px, màu --ink) + `body::after` (mây cát tường ở 2 góc, màu --gold), vẽ bằng CSS mask + SVG data URI để đổi màu theo theme. Phải để body nền trong suốt (chỉ html có nền), nếu không lớp z-index:-1 bị che.
 - Nhạc nền: module `Music` (26-ux.js) tự sinh bằng Web Audio — ngũ cung Rê, tiếng gảy kiểu đàn tranh (triangle + bồi âm, nhấn dây, rung cuối nốt), thỉnh thoảng lướt dây, nền ngân trầm, vang bằng Convolver. Không tệp ngoài. Mặc định tắt (`xq_music`), nút nốt nhạc ở thanh trên + mục Cài đặt; bật lại sau tải trang thì chờ lần chạm đầu (luật autoplay). Tạm dừng khi ẩn tab. Đo bản ghi 45s: trung bình ≈ -29 dB (nhỏ, làm nền).
 - **2026-10-08: PR #5 merge + deploy xanh** (không có migration mới).
+
+## 2026-10-08 — Dọn giao diện cho người mới (feedback "khó dùng với người nontech")
+- Người dùng chọn: **chỉ dọn gọn, giữ nguyên cấu trúc** tab và vị trí nội dung; nội dung nâng cao **giữ chỗ cũ**, chỉ gom nhóm. (Đã bác phương án thêm màn hình "Bắt đầu" và phương án tách mục "Nâng cao".)
+- Mẫu dùng lại: `<details class="more-box">` — khối "xem thêm" có mũi tên xoay, dùng cho mọi đoạn giải thích dài (từ ngữ, nguồn, bàn phím, chuyển tiến độ bằng tay, bộ lọc bài tập, mục lục bài học).
+- Chọn cấp máy: bỏ 10 thẻ radio 3 dòng → 10 chip 1 hàng (`.level-chip`), mô tả + "Ngang bậc X" chỉ hiện cho cấp đang chọn.
+- Bài tập: `PZ_PAGE=24`, nút "Xem thêm bài (còn N)"; `pz.shown/shownKey` reset khi đổi bộ lọc.
+- Tab điện thoại: đổi nhãn "Đấu với máy" → "Đấu máy" + giảm padding ≤420px → 5 tab vừa màn hình 390px, hết cuộn ngang.
+- Trang Học luật trên điện thoại rút từ ~4036px xuống ~2600px.

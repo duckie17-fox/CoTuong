@@ -370,7 +370,7 @@ select.field, input.field{
   .topbar{padding:6px max(10px, env(safe-area-inset-left)) 4px;gap:8px;}
   .topbar .seal{width:34px;height:34px;font-size:19px;}
   .tabs{padding-inline:6px;}
-  .tab-btn{padding:11px 10px;font-size:14px;}
+  .tab-btn{padding:11px 8px;font-size:13.5px;}
   .app-main{padding:14px max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));}
   .seg button{padding:8px 9px;font-size:12.5px;}
   .card{padding:14px 12px;border-radius:14px;}
@@ -467,7 +467,15 @@ select.field, input.field{
 /* ---------- Đấu với máy & review ---------- */
 fieldset.setup-field{border:0;padding:0;margin:14px 0 0;}
 fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);margin-bottom:8px;padding:0;}
-.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;}
+.level-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.level-chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;background:var(--card);
+  font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:38px;}
+.level-chip input{position:absolute;opacity:0;width:0;height:0;}
+.level-chip:hover{background:var(--paper-2);}
+.level-chip:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--accent);}
+.level-chip:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px;}
+.level-note{flex-basis:100%;margin:6px 0 0;color:var(--ink-soft);font-size:13.5px;line-height:1.5;}
+.level-note .lv-tier{color:var(--jade);font-weight:700;white-space:nowrap;}
 .level-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card);min-height:52px;}
 .level-opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none;}
 .level-opt span{display:flex;flex-direction:column;gap:2px;}
@@ -535,7 +543,6 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 @media (max-width:600px){
   .review-summary{grid-template-columns:1fr;}
   .acc-box{display:flex;align-items:baseline;gap:10px;justify-content:center;}
-  .level-grid{grid-template-columns:1fr;}
   .seg-radio{display:flex;} .seg-radio label{flex:1;text-align:center;}
 }
 
@@ -898,3 +905,17 @@ body::after{background:var(--gold);opacity:.2;
 .music-btn:hover{background:var(--paper-2);color:var(--ink);}
 .music-btn[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 40%, transparent);background:color-mix(in srgb, var(--accent) 9%, transparent);}
 .music-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* ---------- Khối "xem thêm" thu gọn (giữ màn hình gọn cho người mới) ---------- */
+.more-box{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px;}
+.more-box > summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:34px;display:flex;align-items:center;gap:6px;list-style:none;}
+.more-box > summary::-webkit-details-marker{display:none;}
+.more-box > summary::before{content:'';width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s ease;flex:none;margin-left:2px;}
+.more-box[open] > summary::before{transform:rotate(45deg);}
+.more-box > summary:hover{color:var(--ink);}
+.more-box > summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
+.more-box > :last-child{margin-bottom:4px;}
+#lessonToc .lesson-nav{margin-top:8px;}
+#pzFilterBox{border-top:0;margin-top:0;padding-top:0;}
+#pzFilterBox .chip-row{margin-top:8px;}
+@media (max-width:420px){ .tab-btn{padding:11px 6px;font-size:13px;} .tabs{padding-inline:4px;} }
