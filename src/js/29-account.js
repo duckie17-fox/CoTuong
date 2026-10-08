@@ -434,8 +434,8 @@ const Account = (function(){
     const stack=$('#noticeStack'); if(!stack) return;
     const old=$(`[data-notice="${n.id}"]`,stack); if(old) old.remove();
     const el=document.createElement('div'); el.className='notice'; el.dataset.notice=n.id; el.setAttribute('role','status');
-    el.innerHTML=`<div class="notice-text">${n.html}</div><div class="btn-row">${(n.actions||[]).map((a,i)=>`<button type="button" class="btn btn-sm ${a.primary?'btn-primary':'btn-outline'}" data-i="${i}">${a.label}</button>`).join('')}
-      <button type="button" class="notice-x" aria-label="Đóng">${I('x')}</button></div>`;
+    el.innerHTML=`<div class="notice-text">${n.html}</div><div class="btn-row">${(n.actions||[]).map((a,i)=>`<button type="button" class="btn btn-sm ${a.primary?'btn-primary':'btn-outline'}" data-i="${i}">${a.label}</button>`).join('')}</div>`
+      +`<button type="button" class="notice-x" aria-label="Đóng">${I('x')}</button>`;
     $$('[data-i]',el).forEach(b=>b.addEventListener('click',()=>{ el.remove(); n.actions[+b.dataset.i].run(); }));
     $('.notice-x',el).addEventListener('click',()=>{ el.remove(); n.onClose && n.onClose(); });
     stack.appendChild(el);
@@ -563,7 +563,7 @@ const Account = (function(){
     $$('#rankScope button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.scope===st.rankScope?'true':'false'));
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
-      <span class="rank-name"><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}<small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
+      <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
       <span class="rank-elo">${x.elo}</span></div>`;
     el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');

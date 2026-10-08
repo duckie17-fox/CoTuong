@@ -89,3 +89,16 @@
   bước cắt 512 KB sẽ cắt nhầm ván mới. Test gộp phải dùng chuỗi nước **không lặp thế** (lặp 3 lần → hoà, ván dừng sớm).
 - Phòng: `seatFor(conn)` (token hoặc uid) thay `seatOf(token)` ở mọi chỗ; `st.report` (ván vừa xong) → adapter gọi
   `Accounts.recordGame` rồi `room.setElo(r)`; `markLeft/markBack` để tính "rời ván 5 phút"; lý do kết thúc mới `abandon`.
+
+## 2026-10-08 — Giao diện tài khoản
+- Module `src/js/29-account.js` (Account): gọi API qua `fetch(base()+path)`, base = địa chỉ máy chủ Sa trường đổi `ws→http`.
+  Không có máy chủ hoặc đang trong Artifact → `available()=false`: nút đăng nhập tắt, trang Tôi chỉ đường sang bản web.
+- Phiên hết hạn nhận biết bằng `error==='unauthorized'` (KHÔNG theo mã 401 — sai mật khẩu ở đổi mật khẩu cũng trả 401).
+- Đồng bộ: `LS_HOOK` trong `safeLS_set` ghi `xq_sync_meta.t[key]` rồi hẹn gửi sau 5s; `applyRemote` bật cờ `applying` để không ghi đè thời điểm.
+  Có thay đổi từ máy khác → thông báo nổi "Tải lại để xem" (không tự tải lại giữa chừng). Lần đăng nhập đầu: hai bên đều có tiến độ
+  thì hỏi Gộp / Bỏ qua, xong thì tải lại trang (`Account.api.reload`, test thay bằng bộ đếm).
+- Mời đấu: người mời tạo phòng ngay (`Online.enterRoom(code,{color,rated})`), người được mời thấy thông báo khi hỏi `/api/inbox`
+  (20s, và khi quay lại tab — `visibilitychange`).
+- Test jsdom tài khoản: `load({setup})` gắn `window.fetch` → `Accounts.handle` (D1 giả), `crypto` = Node webcrypto, `TextEncoder` của Node;
+  PBKDF2 hạ còn 1000 vòng trong test. Đóng cửa sổ jsdom ở `test.after` (đóng giữa test làm timer còn chạy → lỗi sau khi test xong).
+- Gotcha lặp lại: đừng `pkill -f` theo tên tệp test — giết luôn shell đang chạy.

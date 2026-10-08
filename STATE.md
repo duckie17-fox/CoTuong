@@ -1,13 +1,17 @@
 # STATE — cập nhật lần cuối: 2026-10-08
 
 ## Đang làm
-**Giao diện tài khoản** (`src/js/29-account.js` mới + sửa `28-online.js`, `shell.html`, `style.css`):
-đăng ký/đăng nhập/quên mật khẩu (PBKDF2 ở trình duyệt), mã khôi phục, gộp tiến độ lần đầu, trang Tôi khi đã đăng nhập,
-đồng bộ (ghi thời điểm sửa từng khoá qua hook trong `safeLS_set`), Bạn bè + mời đấu (hỏi `/api/inbox` 20s), Xếp hạng,
-phòng Tính Elo (công tắc, Elo ở ghế, xử thắng). Server đã xong ở commit 51d7c72.
+**Spec v3 đã làm xong phần chính** (chưa deploy): khung 3 phần, server tài khoản (D1), giao diện tài khoản
+(đăng ký/đăng nhập/quên mật khẩu, mã khôi phục, gộp + đồng bộ tiến độ, trang Tôi, Bạn bè + mời đấu, Xếp hạng, phòng Tính Elo + xử thắng).
+Chờ người dùng xem và quyết định tạo PR → merge → deploy.
 
 ## Next step
-1. Viết xong giao diện → test jsdom (fetch giả nối thẳng `Accounts.handle` + D1 giả) + e2e → build → Artifact → commit.
+1. Người dùng xem Artifact (chỉ thấy giao diện; tài khoản cần bản web sau khi deploy) → góp ý.
+2. Người dùng bảo thì tạo PR vào main → merge → workflow deploy tự tạo D1 + migrations + đưa server/web lên.
+3. Sau deploy: nhờ người dùng thử đăng ký trên https://duckie17-fox.github.io/CoTuong/ (container không vào được workers.dev).
 
 ## Blocker
-- Nhánh có commit chưa merge vào main. Chỉ PR khi người dùng bảo. Server mới chỉ lên Cloudflare sau khi merge.
+- Nhánh có nhiều commit chưa merge vào main. Chỉ PR khi người dùng bảo.
+
+## Vừa xong
+- Giao diện tài khoản: 74 test đơn vị (6 test giao diện tài khoản mới), e2e 4/4 (thêm ván tính Elo hai trình duyệt từ đăng ký → kết bạn → mời → Elo).

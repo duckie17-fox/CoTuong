@@ -4,8 +4,8 @@
 một kiểu điều hướng: thanh trên + hàng thẻ con; màn có bàn cờ thì bảng phụ có thẻ nằm bên phải hoặc ngay dưới bàn):
 
 - **🏯 Kỳ viện**: học luật, khai cuộc, ván danh thủ, chiến thuật, sát cục, tàn cuộc, bài tập, đấu với máy (có phân tích ván).
-- **⚔️ Sa trường**: đấu với bạn bè qua mạng — tạo phòng, gửi link mời, server làm trọng tài. (Bạn bè, Xếp hạng: cần tài khoản — đang làm.)
-- **👤 Tôi**: cài đặt (âm thanh, sáng/tối), chuyển tiến độ sang máy khác; sau này là tài khoản, Elo, đồng bộ.
+- **⚔️ Sa trường**: đấu với bạn bè qua mạng — tạo phòng, gửi link mời, server làm trọng tài. Có tài khoản thì thêm Bạn bè (kết bạn, mời đấu) và Xếp hạng Elo.
+- **👤 Tôi**: tài khoản (đăng ký/đăng nhập bằng tên đăng nhập + mật khẩu, mã khôi phục), Elo, thống kê, đồng bộ tiến độ nhiều máy, cài đặt.
 
 Bản web (có Sa trường): https://duckie17-fox.github.io/CoTuong/ (sau khi làm các bước ở mục [Sa trường](#sa-trường-đấu-với-bạn-bè)).
 
