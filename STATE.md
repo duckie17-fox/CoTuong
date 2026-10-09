@@ -1,10 +1,10 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-PR #8 (37 mục rà UI/UX) đã merge + deploy xanh. Vừa đổi tên hai khu về "Kỳ viện" / "Sa trường" theo người dùng (Đấu máy vẫn ở Sa trường).
+PR #8, #9 đã merge + deploy xanh. Vừa làm dịu tiếng đàn nhị trong nhạc nền (người dùng chê nghe như kèn) — đã push nhánh, cập nhật Artifact.
 
 ## Next step
-- PR #9 (giữ tên Kỳ viện / Sa trường) đã merge (3041553); chờ góp ý tiếp.
+- Chờ người dùng nghe thử; tạo PR/merge khi được bảo.
 
 ## Blocker
 - Không.

@@ -214,3 +214,7 @@
 
 ## 2026-10-09 — Giữ tên "Kỳ viện" / "Sa trường" (người dùng chốt, sau khi C9 đã đổi sang Học/Chơi)
 - KHÔNG đổi tên hai khu nữa. Phần cấu trúc của C9 vẫn giữ: thẻ "Đấu máy" nằm ở hàng thẻ Sa trường (cạnh "Đấu người").
+
+## 2026-10-09 — Nhạc: người dùng chê 'tiếng kèn hơi ghê'
+- Nguyên nhân: giọng đàn nhị dùng sóng răng cưa + đỉnh 1.1kHz (+5dB) → nghe như kèn đồng.
+- Sửa: nhị = tam giác + 18% răng cưa, lowpass ≤1600Hz (f*3), đỉnh 700Hz chỉ +2dB, vào chậm 0.25s. KHÔNG quay lại sawtooth thuần cho giọng chính.
