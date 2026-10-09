@@ -1,12 +1,14 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-Nhánh `claude/improvement-plan-xdtg8b` (chưa PR, đã đẩy, Artifact đã cập nhật): chọn cấp máy gọn trong một thẻ
-(‹ tên · cấp · nhóm · bậc / mô tả › + vạch 10 nấc màu theo nhóm Dễ / Vừa sức / Khó / Cao thủ). Test 80/80 + e2e 5/5 xanh.
+Rà UI/UX toàn bộ theo kế hoạch đã duyệt (/root/.claude/plans/linear-nibbling-book.md): đã xong Bước 0–3.
+Trang báo cáo 37 mục (8 nặng, 18 vừa, 11 nhẹ): https://claude.ai/artifact/K3fhPn6WoCzjAPzcTmUKvL
+— người dùng tick "Duyệt sửa"; lựa chọn lưu ở db của trang, collection `approvals` (doc id = mã mục, {approved:true}).
+**Đang chờ người dùng duyệt — chưa sửa gì.**
 
 ## Next step
-1. Khi người dùng bảo: tạo PR + merge → deploy.
-2. Sau một thời gian có ván thật: hiệu chỉnh Elo các cấp máy xếp hạng (bảng bot_games).
+1. Đọc `approvals` (ArtifactData list), sửa đúng các mục được duyệt (Bước 4 trong kế hoạch), nặng → nhẹ.
+2. Test + chụp lại so trước/sau; cập nhật Artifact app; PR/merge khi người dùng bảo.
 
 ## Blocker
-- Không có.
+- Chờ người dùng duyệt.
