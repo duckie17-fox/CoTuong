@@ -31,7 +31,12 @@ function markTabRow(btns, keyOf, key, focus){
     btn.setAttribute('aria-selected', on?'true':'false');
     btn.tabIndex = on?0:-1;
     if(on && focus) btn.focus();
-    if(on) btn.scrollIntoView({block:'nearest', inline:'nearest'});
+    // chỉ cuộn ngang hàng thẻ cho thấy thẻ đang chọn (không kéo cả trang)
+    const row=btn.parentElement;
+    if(on && row && row.scrollWidth>row.clientWidth){
+      const l=btn.offsetLeft-row.offsetLeft, r=l+btn.offsetWidth;
+      if(l<row.scrollLeft) row.scrollLeft=l; else if(r>row.scrollLeft+row.clientWidth) row.scrollLeft=r-row.clientWidth;
+    }
   });
 }
 

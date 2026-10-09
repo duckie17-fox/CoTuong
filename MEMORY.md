@@ -223,3 +223,8 @@
 - Người dùng: tên kiểu "Cờ Thủ Nam Định" nhìn là biết bot. Ranked.botNick (src/js/30-ranked.js, dùng chung server qua build-server) giờ chỉ sinh:
   tên riêng, họ + tên, tên + họ, tuan1998, hungnguyen, hung.nguyen, khanh_96, tlong02, "Hiếu P.". KHÔNG dùng tên chủ đề (Cờ Thủ, Pháo Đầu, địa danh, xX..Xx, Bé Mèo Ú…).
 - rng xorshift: seed gần nhau ra số đầu giống nhau → bỏ 4 số đầu. Ván dở cũ giữ tên đã lưu.
+
+## 2026-10-09 — Giật trang khi bấm 'Nước tiếp' (khai cuộc, điện thoại/máy tính bảng)
+- Nguyên nhân: renderMoveLog dùng act.scrollIntoView({block:'nearest'}) → kéo cả trang tới dòng biên bản mới (biên bản nằm dưới bàn, không giới hạn chiều cao trên ≤899px).
+- Sửa: chỉ cuộn bên trong khung biên bản (khi khung tự cuộn được). markTabRow cũng bỏ scrollIntoView, chỉ cuộn ngang hàng thẻ.
+- KHÔNG dùng scrollIntoView cho phần tử con khi chỉ muốn cuộn trong khung. Test: test/e2e/scroll.e2e.js.
