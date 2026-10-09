@@ -1029,7 +1029,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .lvl-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 8px;}
 .lvl-name{font:800 17px 'Be Vietnam Pro',sans-serif;color:var(--ink);}
 .lvl-meta{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
-.lvl-g{color:var(--lg);font-weight:800;}
+.lvl-g{font:800 11px 'Be Vietnam Pro',sans-serif;color:#fff;background:var(--lg);padding:2px 8px;border-radius:999px;align-self:center;}
 .lvl-meta .tier{font-size:10.5px;padding:1px 7px;}
 .lvl-desc{font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px;}
 .lvl-easy{--lg:#3f8a5e;} .lvl-mid{--lg:#b8871f;} .lvl-hard{--lg:#c2603a;} .lvl-pro{--lg:#a3283a;}
@@ -4166,9 +4166,9 @@ function renderLevelPicker(){
   const cur=()=>{ const r=$('input[name="aiLevel"]:checked',pick); return r ? +r.value : saved; };
   const show=()=>{
     const id=cur(), l=AI_LEVELS.find(x=>x.id===id), g=levelGroup(id), t=Ranked.tierOf(l.elo);
-    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b>
-        <span class="lvl-meta">Cấp ${id}/${N} · <span class="lvl-g lvl-${g.key}">${g.label}</span> · ngang <span class="tier tier-${t.key}">${esc(t.label)}</span></span></div>
+    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b><span class="lvl-g lvl-${g.key}">${g.label}</span></div>
       <div class="lvl-desc">${esc(l.desc)}</div>`;
+    pick.title = `Cấp ${id}/${N} · ngang bậc ${t.label} ở Đấu xếp hạng`;
     $$('.lvl-seg',pick).forEach(b=>{ const v=+$('input',b).value; b.classList.toggle('on', v<=id); });
     $$('.lvl-step',pick).forEach(b=>b.disabled = (+b.dataset.step<0 ? id<=1 : id>=N));
   };

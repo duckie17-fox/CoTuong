@@ -1020,7 +1020,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .lvl-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 8px;}
 .lvl-name{font:800 17px 'Be Vietnam Pro',sans-serif;color:var(--ink);}
 .lvl-meta{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
-.lvl-g{color:var(--lg);font-weight:800;}
+.lvl-g{font:800 11px 'Be Vietnam Pro',sans-serif;color:#fff;background:var(--lg);padding:2px 8px;border-radius:999px;align-self:center;}
 .lvl-meta .tier{font-size:10.5px;padding:1px 7px;}
 .lvl-desc{font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px;}
 .lvl-easy{--lg:#3f8a5e;} .lvl-mid{--lg:#b8871f;} .lvl-hard{--lg:#c2603a;} .lvl-pro{--lg:#a3283a;}

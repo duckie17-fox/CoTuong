@@ -181,3 +181,4 @@
 - **2026-10-09: PR #7 merge + deploy xanh** (không có migration mới).
 - **2026-10-09 — chọn cấp máy** (người dùng: danh sách cấp "hơi thô"): thay 10 chip bằng thẻ lớn (nhóm, "Cấp n/10", tên, mô tả, "Ngang bậc" + nút ‹ ›) và thang 10 cột cao dần, tô màu theo nhóm `LEVEL_GROUPS` (1–3 Dễ, 4–6 Vừa sức, 7–8 Khó, 9–10 Cao thủ; class `lvl-easy/mid/hard/pro` — tránh `lvl-top` vì trùng hàng tiêu đề). Vẫn giữ radio `name="aiLevel"`; đặt cấp từ ngoài bằng sự kiện `levelset` trên `#aiLevelPicker`.
 - Người dùng chê thang 10 cột "tốn diện tích minh hoạ mà không có ý nghĩa" → thu về một thẻ gọn (~120px): ‹ tên · Cấp n/10 · nhóm · ngang bậc / mô tả › + vạch mảnh 10 nấc bấm được (`.lvl-seg`). Bài học: tránh trang trí lớn không mang thông tin.
+- Dòng thông tin cấp máy (người dùng: "dài dòng") → chỉ còn tên + nhãn nhóm màu + mô tả; "Cấp n/10 · ngang bậc…" chuyển vào tooltip (title) của khối chọn cấp.

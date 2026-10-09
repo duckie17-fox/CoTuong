@@ -188,9 +188,9 @@ function renderLevelPicker(){
   const cur=()=>{ const r=$('input[name="aiLevel"]:checked',pick); return r ? +r.value : saved; };
   const show=()=>{
     const id=cur(), l=AI_LEVELS.find(x=>x.id===id), g=levelGroup(id), t=Ranked.tierOf(l.elo);
-    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b>
-        <span class="lvl-meta">Cấp ${id}/${N} · <span class="lvl-g lvl-${g.key}">${g.label}</span> · ngang <span class="tier tier-${t.key}">${esc(t.label)}</span></span></div>
+    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b><span class="lvl-g lvl-${g.key}">${g.label}</span></div>
       <div class="lvl-desc">${esc(l.desc)}</div>`;
+    pick.title = `Cấp ${id}/${N} · ngang bậc ${t.label} ở Đấu xếp hạng`;
     $$('.lvl-seg',pick).forEach(b=>{ const v=+$('input',b).value; b.classList.toggle('on', v<=id); });
     $$('.lvl-step',pick).forEach(b=>b.disabled = (+b.dataset.step<0 ? id<=1 : id>=N));
   };
