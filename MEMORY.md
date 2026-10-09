@@ -209,3 +209,5 @@
   biểu đồ #reviewChart nằm trong play-board (cột phải desktop), ẩn khi không có lỗi; bỏ nút #rvStart (dùng nút thanh công cụ).
 - Nút phụ "Sao chép thế cờ / Đấu với máy từ thế này" gom vào `<details class="more-box tool-more">Thêm`.
 - Thông báo nổi ≤899px hiện ở đầu màn; toast 3s.
+
+## 2026-10-09 — PR #8 (rà UI/UX 37 mục) đã merge vào main.
