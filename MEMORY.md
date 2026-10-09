@@ -228,3 +228,9 @@
 - Nguyên nhân: renderMoveLog dùng act.scrollIntoView({block:'nearest'}) → kéo cả trang tới dòng biên bản mới (biên bản nằm dưới bàn, không giới hạn chiều cao trên ≤899px).
 - Sửa: chỉ cuộn bên trong khung biên bản (khi khung tự cuộn được). markTabRow cũng bỏ scrollIntoView, chỉ cuộn ngang hàng thẻ.
 - KHÔNG dùng scrollIntoView cho phần tử con khi chỉ muốn cuộn trong khung. Test: test/e2e/scroll.e2e.js.
+
+## 2026-10-09 — Tự đi lại khai cuộc: nhận nước đối xứng trái ↔ phải
+- Người dùng muốn luyện Pháo trái (P8-5) khi bài là Pháo phải (P2-5). trainer.other = mirrorLine(mỗi biến) (cột c → 8-c);
+  khi người chơi đi đúng bản đối xứng (mọi nước đã đi khớp bản đó) thì hoán trainer.lines/other, máy đi theo hướng mới.
+  Máy cũng tự chọn ngẫu nhiên hướng (50%) khi thế cờ còn đối xứng. mirrorCaption đổi ký hiệu (cột đầu 10-n; số cuối đổi khi '-' hoặc M/T/S),
+  'cột N'/'Tốt N' → 10-N, '<quân|bên|cánh…> trái/phải' đổi chiều (không đổi chữ 'phải' nghĩa 'cần'). Test: test/trainer-mirror.test.js.

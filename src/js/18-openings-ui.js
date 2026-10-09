@@ -85,12 +85,13 @@ function openingRender(){
 function startTrainer(o, color, multi){
   const lines = multi ? o.lines : [openingView.line && o.lines.includes(openingView.line) ? openingView.line : o.lines[0]];
   trainer.op=o; trainer.color=color; trainer.multi=!!multi; trainer.lines=lines.map(l=>l.moves.filter(m=>!m.error));
+  trainer.other=trainer.lines.map(mirrorLine); trainer.mirror=false;   // bản đối xứng: dùng khi người chơi đi phía bên kia
   trainer.lineNames=lines.map(l=>l.id==='main'?'Diễn biến chính':l.name);
   trainer.mistakes=0; trainer.wrongHere=0; trainer.hint=false; trainer.busy=false; trainer.feedback=null; trainer.mine=0;
   trainer.game=Game.create();
   showOpeningCard('trainer');
   $('#trainerTitle').textContent = `Tự đi lại: ${o.name}`;
-  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}, máy đi bên kia${multi?' (chọn ngẫu nhiên nhánh)':''}.`;
+  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}, máy đi bên kia${multi?' (chọn ngẫu nhiên nhánh)':''}. Đi phía trái hay phải đều được.`;
   if(!trainer.widget){
     trainer.widget = createBoardWidget($('#trainerBoard'), {onSquareClick:(r,c)=>trainer.ctl.click(r,c), label:'Bàn cờ Trainer khai cuộc'});
     trainer.ctl = makeClickController({
@@ -108,6 +109,25 @@ function startTrainer(o, color, multi){
   trainerAdvance();
 }
 const sameMv=(a,b)=>a.from[0]===b.from[0]&&a.from[1]===b.from[1]&&a.to[0]===b.to[0]&&a.to[1]===b.to[1];
+/* ---- Đối xứng trái ↔ phải: bàn khai cuộc đối xứng nên đi phía bên kia (vd. Pháo trái P8-5 thay cho P2-5) cũng đúng lý thuyết ---- */
+const flipCol = n => String(10-(+n));
+// đổi ký hiệu trong lời giải thích: "P2-5" → "P8-5", "M8.7" → "M2.3", "X1.1" giữ số bước; "cột 2" → "cột 8", "Mã trái" → "Mã phải"
+function mirrorCaption(t){
+  return String(t||'')
+    .replace(/\b(Tg|[XMTSPB])([1-9])([.\/-])([1-9])\b/g, (m,pc,c,sep,n)=> pc+flipCol(c)+sep+(sep==='-'||'MTS'.includes(pc)&&pc!=='Tg' ? flipCol(n) : n))
+    .replace(/\b(cột|Tốt|Binh|Mã|Xe|Pháo|Tượng|Sĩ) ([1-9])\b/g, (m,w,n)=> w+' '+flipCol(n))
+    .replace(/\b(Mã|Xe|Pháo|Tượng|Sĩ|Tốt|bên|cánh|phía|tay|góc|sườn) (trái|phải)\b/g, (m,w,d)=> w+' '+(d==='trái'?'phải':'trái'));
+}
+function mirrorLine(line){
+  const g=Game.create(), out=[];
+  for(const m of line){
+    const mm={from:[m.from[0],8-m.from[1]], to:[m.to[0],8-m.to[1]]};
+    if(!g.legalMoves().some(x=>sameMv(x,mm))) break;
+    out.push(Object.assign({}, m, mm, {text:Notation.describe(g.board(),mm).short, caption:mirrorCaption(m.caption)}));
+    g.play(mm);
+  }
+  return out;
+}
 // các nhánh khớp với ván hiện tại và còn nước tiếp theo
 function trainerCands(){
   const played=trainer.game.moves, n=played.length;
@@ -138,6 +158,10 @@ function trainerAdvance(){
   if(trainer.game.turn()!==trainer.color){
     trainer.busy=true; trainerRender();
     setTimeout(()=>{
+      // khi cả hai hướng còn đúng (thế cờ vẫn đối xứng), máy chọn ngẫu nhiên phía trái hoặc phải để bạn luyện cả hai
+      { const played=trainer.game.moves, nn=played.length;
+        const alt=trainer.other.filter(l=> l.length>nn && played.every((m,i)=>sameMv(m,l[i])));
+        if(alt.length && Math.random()<0.5){ [trainer.lines, trainer.other]=[trainer.other, trainer.lines]; trainer.mirror=!trainer.mirror; } }
       const cands=trainerCands(), n=trainer.game.moves.length;
       const pick=cands[Math.floor(Math.random()*cands.length)];
       const m=pick[n];
@@ -155,7 +179,13 @@ function trainerAdvance(){
 function trainerUserMove(mv){
   const cands=trainerCands(), n=trainer.game.moves.length;
   const b=trainer.game.board();
-  const hit=cands.find(l=>sameMv(l[n],mv));
+  let hit=cands.find(l=>sameMv(l[n],mv));
+  if(!hit){
+    // đi đúng theo bản đối xứng (vd. Pháo trái thay Pháo phải) → đổi sang hướng đó, máy cũng đi theo
+    const played=trainer.game.moves;
+    const alt=trainer.other.filter(l=> l.length>n && played.every((m,i)=>sameMv(m,l[i])) && sameMv(l[n],mv));
+    if(alt.length){ [trainer.lines, trainer.other]=[trainer.other, trainer.lines]; trainer.mirror=!trainer.mirror; hit=alt[0]; }
+  }
   if(hit){
     const exp=hit[n];
     trainer.game.play(mv); trainer.mine++;
