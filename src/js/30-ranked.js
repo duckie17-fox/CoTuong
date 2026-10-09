@@ -49,30 +49,28 @@ const Ranked = (function(){
     return l ? l.level : BOT_LEVELS.length;
   }
 
-  // Nick máy kiểu game thủ Việt — sinh từ một số ngẫu nhiên (seed) để máy chủ và ứng dụng ra cùng tên
+  // Nick máy giống tên người chơi thật (tên riêng, họ, năm sinh, tên đăng nhập kiểu thường gặp) — không dùng tên
+  // "chủ đề" kiểu "Cờ Thủ Nam Định", "Pháo Đầu 07" vì nhìn là biết máy. Sinh từ seed để máy chủ và ứng dụng ra cùng tên.
   const NAMES = ['Tuấn','Hùng','Long','Minh','Huy','Nam','Phong','Khánh','Đạt','Quân','Linh','Trang','Vy','Thảo','Bảo',
-    'Duy','Tú','Sơn','Hiếu','Nhật','Khoa','Tâm','Lâm','Thắng','Trung','Đức','Hải','Kiên','Vũ','Hoàng','Phúc','Thịnh'];
-  const ASCII = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
-  const NICK_SUFFIX = ['Đẹp Trai','Cờ Thủ','Pro','Vô Đối','Tàng Hình','Lạnh Lùng','Bất Bại','Mắt Nai','Tốc Độ','Thần Đồng'];
-  const PLACES = ['Hà Nội','Sài Gòn','Đà Nẵng','Hải Phòng','Cần Thơ','Huế','Nghệ An','Thanh Hoá','Quảng Ninh','Bình Dương','Nam Định','Đồng Nai'];
-  const CHESS = ['Pháo Đầu','Hắc Mã','Xe Thần','Mã Hồi','Tốt Qua Sông','Thuận Pháo','Bình Phong Mã','Song Xe','Phi Tượng','Liên Hoàn Mã'];
-  const CUTE = ['Bé Mèo Ú','Gấu Lười','Tèo Em','Cún Con','Thỏ Bông','Mèo Mướp','Cá Mập Con','Sóc Nâu','Heo Hồng','Chuột Nhắt'];
-  const TAGS = ['pro','dz','vip','tv','2k','gaming','cotuong','99','vn','official'];
+    'Duy','Tú','Sơn','Hiếu','Nhật','Khoa','Tâm','Lâm','Thắng','Trung','Đức','Hải','Kiên','Vũ','Hoàng','Phúc','Thịnh',
+    'An','Bình','Cường','Dũng','Giang','Hà','Hưng','Lộc','Mạnh','Nghĩa','Quang','Tài','Thành','Toàn','Việt','Vinh'];
+  const SURNAMES = ['Nguyễn','Trần','Lê','Phạm','Hoàng','Phan','Vũ','Võ','Đặng','Bùi','Đỗ','Hồ','Ngô','Dương','Lý'];
+  const ASCII = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
   function rng(seed){ let s=(seed>>>0)||1; return ()=>{ s^=s<<13; s>>>=0; s^=s>>>17; s^=s<<5; s>>>=0; return s/4294967296; }; }
   function botNick(seed){
-    const r=rng(seed), pick=a=>a[Math.floor(r()*a.length)], n=pick(NAMES), num=()=>String(Math.floor(r()*100)).padStart(2,'0');
-    const yr=()=>String(1990+Math.floor(r()*18)), k=Math.floor(r()*10);
-    switch(k){
-      case 0: return `${n}${yr()}`;
-      case 1: return `${ASCII(n).toLowerCase()}_${pick(TAGS)}`;
-      case 2: return `xX${ASCII(n)}Xx`;
-      case 3: return `${n} ${pick(NICK_SUFFIX)}`;
-      case 4: return `Cờ Thủ ${pick(PLACES)}`;
-      case 5: return `${pick(CHESS)} ${pick(PLACES)}`;
-      case 6: return `${pick(CUTE)} ${num()}`;
-      case 7: return `${ASCII(n).toLowerCase()}${pick(['dz','pro','cute','123','kute'])}${num()}`;
-      case 8: return `${pick(CHESS)} ${num()}`;
-      default: return `${n}.${ASCII(pick(NAMES)).toLowerCase()}${Math.floor(r()*10)}`;
+    const r=rng(seed); for(let k=0;k<4;k++) r();   // bỏ vài số đầu: seed gần nhau vẫn ra tên khác nhau
+    const pick=a=>a[Math.floor(r()*a.length)], n=pick(NAMES), sn=pick(SURNAMES);
+    const low=x=>ASCII(x).toLowerCase(), yr2=()=>String(Math.floor(r()*20)+88).slice(-2), yr4=()=>String(1985+Math.floor(r()*22));
+    switch(Math.floor(r()*9)){
+      case 0: return n;                                   // Long
+      case 1: return `${sn} ${n}`;                        // Trần Minh
+      case 2: return `${n} ${sn}`;                        // Minh Trần
+      case 3: return `${low(n)}${yr4()}`;                 // tuan1998
+      case 4: return `${low(n)}${low(sn)}`;               // hungnguyen
+      case 5: return `${low(n)}.${low(sn)}`;              // hung.nguyen
+      case 6: return `${low(n)}_${yr2()}`;                // khanh_96
+      case 7: return `${low(sn)[0]}${low(n)}${yr2()}`;    // tlong02
+      default: return `${n} ${low(sn)[0].toUpperCase()}.`; // Hiếu P.
     }
   }
   return {TIERS, tierOf, BOT_LEVELS, botLevelFor, botNick, MATCH_WAIT_MS:8000, ELO_RANGE:200};

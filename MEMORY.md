@@ -214,3 +214,12 @@
 
 ## 2026-10-09 — Giữ tên "Kỳ viện" / "Sa trường" (người dùng chốt, sau khi C9 đã đổi sang Học/Chơi)
 - KHÔNG đổi tên hai khu nữa. Phần cấu trúc của C9 vẫn giữ: thẻ "Đấu máy" nằm ở hàng thẻ Sa trường (cạnh "Đấu người").
+
+## 2026-10-09 — Nhạc: người dùng chê 'tiếng kèn hơi ghê'
+- Nguyên nhân: giọng đàn nhị dùng sóng răng cưa + đỉnh 1.1kHz (+5dB) → nghe như kèn đồng.
+- Sửa: nhị = tam giác + 18% răng cưa, lowpass ≤1600Hz (f*3), đỉnh 700Hz chỉ +2dB, vào chậm 0.25s. KHÔNG quay lại sawtooth thuần cho giọng chính.
+
+## 2026-10-09 — Tên đối thủ máy (đấu xếp hạng) phải giống nick người thật
+- Người dùng: tên kiểu "Cờ Thủ Nam Định" nhìn là biết bot. Ranked.botNick (src/js/30-ranked.js, dùng chung server qua build-server) giờ chỉ sinh:
+  tên riêng, họ + tên, tên + họ, tuan1998, hungnguyen, hung.nguyen, khanh_96, tlong02, "Hiếu P.". KHÔNG dùng tên chủ đề (Cờ Thủ, Pháo Đầu, địa danh, xX..Xx, Bé Mèo Ú…).
+- rng xorshift: seed gần nhau ra số đầu giống nhau → bỏ 4 số đầu. Ván dở cũ giữ tên đã lưu.
