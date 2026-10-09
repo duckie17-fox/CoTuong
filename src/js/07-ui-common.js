@@ -107,7 +107,8 @@ function revealBoard(el){
   if(hide) document.body.classList.add('hdr-hide');
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
-function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:767px)').matches); }catch(e){ return false; } }
+// Màn có thanh điều hướng dưới (điện thoại + máy tính bảng dọc, ≤899px): thanh trên tự ẩn khi cuộn
+function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:899px)').matches); }catch(e){ return false; } }
 // Điện thoại: cuộn xuống thì ẩn thanh trên (nhường chỗ cho bàn cờ), cuộn lên thì hiện lại
 function initAutoHideHeader(){
   let lastY=window.scrollY||0;
@@ -219,3 +220,21 @@ function playerBarHTML(p){
     ${p.note?`<span class="ol-turn">${p.note}</span>`:''}`;
 }
 function setPlayerBar(el, p){ el.innerHTML=playerBarHTML(p); el.classList.toggle('pb-active', !!p.active); }
+
+/* ---------- Cách đọc ký hiệu nước đi (gắn dưới mọi biên bản nước đi) ---------- */
+const NOTATION_HELP = `<details class="more-box notation-help"><summary>Cách đọc ký hiệu nước đi</summary>
+  <p>Ví dụ <b>P2-5</b>: <b>P</b>háo đang ở <b>cột 2</b>, đi <b>ngang</b> sang <b>cột 5</b>.</p>
+  <ul>
+    <li><b>Chữ cái</b> là quân: Tg Tướng · S Sĩ · T Tượng · M Mã · X Xe · P Pháo · B Tốt (Binh).</li>
+    <li><b>Số đầu</b> là cột quân đang đứng. Mỗi bên đếm cột 1→9 từ tay phải của mình — chính là các số in ở mép bàn cờ phía mình.</li>
+    <li><b>Dấu</b>: <b>.</b> tiến lên · <b>/</b> lùi về · <b>-</b> đi ngang.</li>
+    <li><b>Số cuối</b>: Xe, Pháo, Tốt, Tướng đi thẳng thì là <b>số bước</b>; đi ngang thì là <b>cột đến</b>. Mã, Sĩ, Tượng đi chéo nên luôn là <b>cột đến</b>.</li>
+    <li>Thêm ví dụ: <b>M8.7</b> Mã cột 8 tiến lên cột 7 · <b>X1/2</b> Xe cột 1 lùi 2 bước · <b>B7.1</b> Tốt cột 7 tiến 1 bước.</li>
+    <li>Hai quân cùng loại đứng chung một cột thì ghi <b>t</b> (quân trước) hoặc <b>s</b> (quân sau) thay cho số cột, ví dụ <b>Xt.3</b>.</li>
+  </ul></details>`;
+function addNotationHelp(){
+  $$('.movelog').forEach(el=>{
+    if(el.classList.contains('demo-log') || (el.nextElementSibling && el.nextElementSibling.classList.contains('notation-help'))) return;
+    el.insertAdjacentHTML('afterend', NOTATION_HELP);
+  });
+}

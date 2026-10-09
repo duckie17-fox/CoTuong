@@ -848,8 +848,8 @@ body.gated{overflow:hidden;}
 .gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
 .gate-note{margin-top:6px;}
 
-/* ---------- Điện thoại / máy tính bảng dọc: 3 mục chính nằm ở thanh dưới (bottom nav) ---------- */
-@media (max-width:767px){
+/* ---------- Điện thoại / máy tính bảng dọc (≤899px): 3 mục chính nằm ở thanh dưới (bottom nav) ---------- */
+@media (max-width:899px){
   .topbar{padding:8px max(14px, env(safe-area-inset-left)) 6px;gap:10px;min-height:48px;}
   .topbar .seal{width:32px;height:32px;font-size:18px;border-radius:9px;}
   .app-name{display:block;font-size:18px;flex:1;}
@@ -999,3 +999,12 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .lesson-card > #lessonToc{border-top:0;margin-top:0;padding-top:0;}
 .lesson-card > #lessonToc > summary{position:absolute;top:20px;right:20px;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);}
 @media (max-width:600px){ .lesson-card > h2{padding-right:0;padding-top:36px;} .lesson-card > #lessonToc > summary{top:12px;right:12px;} }
+/* Máy tính bảng: thanh dưới gọn, không trải nút quá rộng */
+@media (min-width:768px) and (max-width:899px){
+  .zone-switch{padding-inline:calc(50vw - 260px);}
+}
+/* ---------- Cách đọc ký hiệu nước đi ---------- */
+.notation-help{margin-top:8px;}
+.notation-help ul{margin:6px 0 4px;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
+.notation-help p{font-size:13.5px;margin:6px 0 0;}
+.notation-help b{color:var(--ink);}

@@ -16,6 +16,7 @@ updateStickyTop(); window.addEventListener('resize', updateStickyTop);
 initAutoHideHeader();
 initSettings();
 initUxSettings();
+addNotationHelp(); { const oh=document.getElementById('openingNotationHelp'); if(oh) oh.outerHTML=NOTATION_HELP; }
 buildLegend();
 initOpenings();
 initMasters();

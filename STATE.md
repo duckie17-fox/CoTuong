@@ -1,12 +1,12 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-**PR #6 đã merge + deploy xanh** (2026-10-09): giao diện gọn cho người mới, rà UI/UX toàn bộ, bài học 2 cột bàn cờ to,
-nhạc nền "Kỳ đình" (5 nhạc cụ). Nhánh làm việc đã dựng lại từ main.
+Nhánh `claude/improvement-plan-xdtg8b` (chưa PR, đã đẩy, Artifact đã cập nhật): làm 2 phần còn để ngỏ —
+thanh điều hướng dưới cho cả máy tính bảng dọc (≤899px) và khối "Cách đọc ký hiệu nước đi" dưới mọi biên bản nước đi
++ ở danh sách khai cuộc. Test 80/80 + e2e 5/5 xanh.
 
 ## Next step
-1. Người dùng dùng thử bản thật https://duckie17-fox.github.io/CoTuong/ (container không vào được github.io).
-2. Để ngỏ, chờ người dùng: 768–899px chưa có thanh dưới; giải thích ký hiệu nước đi (B7.1, P2-5).
+1. Khi người dùng bảo: tạo PR + merge → deploy.
 
 ## Blocker
 - Không có.
