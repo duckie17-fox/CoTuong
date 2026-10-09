@@ -186,23 +186,34 @@ function renderLesson(scroll){
   const content = $('#lessonContent');
   const table = lesson.table ? `<div class="table-wrap"><table class="lesson-table"><thead><tr>${lesson.table.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${lesson.table.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
   const sources = lesson.sources ? `<p class="sources">Nguồn: ${lesson.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p>` : '';
+  // tiêu đề bài nằm trong cột chữ để cột bàn cờ bắt đầu ngang hàng, vừa một màn hình
   content.innerHTML = `
-    <div class="lesson-head">
-      <span class="han" aria-hidden="true">${lesson.han}</span>
-      <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
-    </div>
     <div class="lesson-body ${lesson.demos.length?'':'no-demo'}">
-      <div class="lesson-text">${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
+      <div class="lesson-text"><div class="lesson-head">
+        <span class="han" aria-hidden="true">${lesson.han}</span>
+        <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
+      </div>${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
       <div class="lesson-demos"></div>
     </div>`;
+  // Bàn cờ minh hoạ: nhiều ví dụ thì chuyển bằng nút "Ví dụ 1 / 2…" (một bàn tại một lúc, luôn cạnh phần chữ)
   const demosEl = $('.lesson-demos',content);
-  lesson.demos.forEach(demo=>{
+  if(lesson.demos.length>1){
+    demosEl.insertAdjacentHTML('beforeend', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${lesson.demos.map((d,i)=>
+      `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">Ví dụ ${i+1}</button>`).join('')}</div>`);
+  }
+  const slots = lesson.demos.map((demo,i)=>{
     const d = document.createElement('div');
-    d.className='lesson-demo-slot';
+    d.className='lesson-demo-slot'; d.hidden = i>0;
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
+    return d;
   });
-  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
+  $$('[data-demo]',demosEl).forEach(b=>b.addEventListener('click',()=>{
+    const k=+b.dataset.demo;
+    slots.forEach((d,i)=>d.hidden = i!==k);
+    $$('[data-demo]',demosEl).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
+  }));
+  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}: ${lesson.title}`;
   $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;

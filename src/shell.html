@@ -40,9 +40,17 @@
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
-  <div class="card" id="progressCard">
-    <h2>Tiến độ của bạn</h2>
-    <div id="progressDash"></div>
+  <div class="card">
+    <h2 id="lessonsHeading">Các bài học</h2>
+    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
+      <div class="lesson-nav" id="lessonNav"></div>
+    </details>
+    <div id="lessonContent"></div>
+    <div class="lesson-foot">
+      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
+      <span id="lessonProgress" class="hint-text"></span>
+      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+    </div>
   </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
@@ -54,18 +62,9 @@
     <div class="legend-grid" id="legendGrid"></div>
   </div>
 
-  <div class="card">
-    <h2 id="lessonsHeading">Các bài học</h2>
-    <p>Mỗi bài có bàn cờ nhỏ để bấm thử: chọn quân rồi bấm ô sáng để xem nó đi được đâu.</p>
-    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
-      <div class="lesson-nav" id="lessonNav"></div>
-    </details>
-    <div id="lessonContent"></div>
-    <div class="lesson-foot">
-      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
-      <span id="lessonProgress" class="hint-text"></span>
-      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
-    </div>
+  <div class="card" id="progressCard">
+    <h2>Tiến độ của bạn</h2>
+    <div id="progressDash"></div>
   </div>
 </section>
 
@@ -515,7 +514,7 @@
           <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
         </div>
       </div>
-      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời, tiếng tiêu và cổ cầm)</small></span>
+      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời, sáo trúc và đàn tranh)</small></span>
         <div class="seg" id="musicToggle" role="group" aria-label="Nhạc nền">
           <button type="button" data-music="on">Bật</button><button type="button" data-music="off">Tắt</button>
         </div>

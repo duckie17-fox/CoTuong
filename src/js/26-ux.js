@@ -47,30 +47,29 @@ const Sound = (function(){
   };
 })();
 
-/* ---------- Nhạc nền "Trúc lâm": tiêu thổi giai điệu chậm trên điệu Vũ, cổ cầm gảy trầm đệm,
-   thỉnh thoảng tiếng bồi âm trong như chuông. Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
+/* ---------- Nhạc nền "Xuân phong": sáo trúc thổi giai điệu điệu Cung (ngũ cung trưởng, sáng, nhẹ nhàng),
+   đàn tranh rải hợp âm khe khẽ, cổ cầm đệm trầm, thỉnh thoảng tiếng chuông nhỏ. Tự sinh bằng Web Audio ---------- */
 const Music = (function(){
   let ctx=null, out=null, noise=null, drone=null, timer=0, next=0, queue=[], prevF=0, playing=false, armed=false, round=0;
   let on = safeLS_get('xq_music')==='on';
-  const BEAT=60/52;                                   // chậm, khoảng 52 nhịp/phút
-  // Điệu Vũ (ngũ cung trên nền La): La Đô Rê Mi Sol, từ La3 lên Mi6
+  const BEAT=60/72;                                   // vừa phải, khoảng 72 nhịp/phút
+  // Điệu Cung (ngũ cung trưởng trên nền Rê): Rê Mi Fa# La Si, từ Rê4 lên
   const SC=[];
-  for(let o=0;o<3;o++) for(const st of [0,3,5,7,10]) SC.push(220*Math.pow(2,(st+12*o)/12));
+  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) SC.push(293.66*Math.pow(2,(st+12*o)/12));
   const rnd=a=>a[Math.floor(Math.random()*a.length)];
-  // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ
+  // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ. Đi lên nhiều, kết về chủ âm Rê
   const P={
-    a:[[8,2],[7,1],[6,1],[5,3],[-1,1]],
-    b:[[5,1],[6,1],[7,2],[8,1],[10,1],[9,3],[-1,1]],
-    c:[[9,1.5],[8,.5],[7,1],[6,1],[7,2],[5,2],[-1,2]],
-    d:[[3,2],[5,1],[6,1],[5,1],[4,1],[3,2],[-1,2]],
-    e:[[10,2],[11,1],[10,1],[9,2],[8,1],[7,1],[8,4],[-1,2]],
-    f:[[7,1],[6,1],[5,4],[-1,3]],
-    g:[[6,1],[7,1],[8,2],[7,1],[6,.5],[5,.5],[6,3],[-1,1]],
+    a:[[5,1],[6,1],[7,1],[8,1],[7,2],[6,1],[5,1]],
+    b:[[8,1],[9,1],[10,2],[9,1],[8,1],[7,2]],
+    c:[[7,1],[8,.5],[7,.5],[6,1],[5,1],[3,1],[4,1],[5,2]],
+    d:[[3,1],[4,1],[5,1],[7,1],[6,2],[5,1],[4,1]],
+    e:[[10,1.5],[9,.5],[8,1],[7,1],[8,1],[9,1],[10,2]],
+    f:[[7,1],[6,1],[5,3],[-1,1]],
+    g:[[5,.5],[6,.5],[7,1],[8,1],[7,.5],[6,.5],[5,1],[6,2],[-1,1]],
   };
-  // Trình tự bài: hai đoạn, mỗi vòng đổi câu giữa cho đỡ lặp
-  const FORM=[['a','b','c','f'],['d','b','e','f'],['a','g','c','f'],['d','g','e','f']];
-  // Bè trầm cổ cầm theo từng câu (Hz)
-  const BASS={a:[110,146.83],b:[110,164.81],c:[98,130.81],d:[146.83,110],e:[130.81,164.81],f:[164.81,110],g:[110,98]};
+  const FORM=[['a','b','c','f'],['d','g','e','f'],['a','e','c','f'],['d','b','g','f']];
+  // Gốc hợp âm cho từng câu (Rê, La, Sol, Si thứ) — quãng trầm
+  const BASS={a:[146.83,110],b:[146.83,98],c:[110,146.83],d:[98,110],e:[146.83,123.47],f:[110,146.83],g:[146.83,98]};
   function ac(){
     if(ctx) return ctx;
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
@@ -81,7 +80,7 @@ const Music = (function(){
       const len=Math.floor(ctx.sampleRate*4.5), ir=ctx.createBuffer(2,len,ctx.sampleRate);
       for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.5); }
       const rev=ctx.createConvolver(); rev.buffer=ir;
-      const wet=ctx.createGain(); wet.gain.value=0.55;
+      const wet=ctx.createGain(); wet.gain.value=0.42;
       out.connect(ctx.destination); out.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
       // nhiễu dùng chung cho tiếng hơi thổi
       const n=ctx.sampleRate*2; noise=ctx.createBuffer(1,n,ctx.sampleRate);
@@ -93,11 +92,11 @@ const Music = (function(){
   function flute(t, f, dur, v){
     const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
     const lfo=ctx.createOscillator(), lg=ctx.createGain();
-    o.type='sine'; o2.type='triangle'; h.gain.value=0.12;
+    o.type='sine'; o2.type='triangle'; h.gain.value=0.18;
     if(prevF && Math.abs(prevF-f)>1){ o.frequency.setValueAtTime(prevF,t); o.frequency.exponentialRampToValueAtTime(f,t+0.14); }
     else o.frequency.setValueAtTime(f,t);
     o2.frequency.value=f*2;
-    lfo.frequency.value=4.6; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
+    lfo.frequency.value=5.4; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
     lfo.connect(lg); lg.connect(o.frequency);
     lp.type='lowpass'; lp.frequency.value=Math.min(f*4,5000);
     const end=t+dur;
@@ -126,6 +125,15 @@ const Music = (function(){
     });
     lp.connect(g); g.connect(out);
   }
+  // Đàn tranh rải hợp âm: tiếng gảy sáng, tắt nhanh, rất nhỏ
+  function zheng(t, f, v){
+    const o=ctx.createOscillator(), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='triangle'; o.frequency.setValueAtTime(f*1.01,t); o.frequency.exponentialRampToValueAtTime(f,t+0.05);
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*6,7000),t); lp.frequency.exponentialRampToValueAtTime(f*1.5,t+1.2);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+    o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t+1.7);
+  }
+  function arp(t, root){ [2,3,4,3].forEach((m,i)=>zheng(t+i*BEAT*0.5, root*m, 0.03)); }
   // Bồi âm: tiếng trong, mỏng như chuông nhỏ
   function bell(t, f, v){
     const o=ctx.createOscillator(), g=ctx.createGain();
@@ -146,14 +154,14 @@ const Music = (function(){
         beats+=b;
       });
     });
-    queue.push({rest:3+Math.random()*3});
+    queue.push({rest:2+Math.random()*2});
   }
   function schedule(){
     if(!playing) return;
     while(next < ctx.currentTime+1.5){
       if(!queue.length) fill();
       const n=queue.shift();
-      if(n.bass){ qin(next+0.02, n.bass, 0.11); continue; }
+      if(n.bass){ qin(next+0.02, n.bass, 0.09); arp(next+0.02, n.bass); continue; }
       if(n.bell){ bell(next+0.05, n.bell, 0.035); continue; }
       if(n.rest){ prevF=0; next+=n.rest*BEAT; continue; }
       const dur=n.b*BEAT*(0.96+Math.random()*0.08);
@@ -166,7 +174,7 @@ const Music = (function(){
   function startDrone(){
     const t=ctx.currentTime, g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
     g.gain.value=0.016; lfo.frequency.value=0.05; lg.gain.value=0.008; lfo.connect(lg); lg.connect(g.gain);
-    const os=[55, 110, 164.81].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
+    const os=[73.42, 146.83, 220].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
     g.connect(out); lfo.start(t);
     drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
   }

@@ -255,8 +255,15 @@ select.field, input.field{
 }
 .lesson-vn{color:var(--ink-soft);font-size:14px;font-weight:600;}
 .lesson-body{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;}
-@media(min-width:680px){
-  .lesson-body{grid-template-columns:1.1fr 1fr;align-items:start;}
+/* Bài học: chữ bên trái, bàn cờ bên phải luôn đứng yên khi cuộn đọc (≥768px); điện thoại: bàn cờ lên trước */
+@media(min-width:768px){
+  .lesson-body{--lbw:max(300px, min(560px, 48vw, calc((100vh - 300px) * 0.88)));
+    grid-template-columns:minmax(0,1fr) var(--lbw);align-items:start;gap:24px;}
+  .lesson-body .lesson-demos{min-width:0;}
+  .lesson-body .lesson-demos{position:sticky;top:calc(var(--sticky-top, 100px) + 12px);}
+}
+@media(max-width:767px){
+  .lesson-body .lesson-demos{order:-1;}
 }
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
@@ -406,7 +413,7 @@ select.field, input.field{
 .demo-msg.bad{color:var(--accent);}
 .demo-msg.think{color:var(--ink-soft);font-weight:600;}
 .demo-log{max-height:130px;}
-.lesson-demo-slot + .lesson-demo-slot{margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);}
+
 .table-wrap{overflow-x:auto;margin:6px 0 12px;}
 .lesson-table{border-collapse:collapse;width:100%;font-size:14px;}
 .lesson-table th,.lesson-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top;}
@@ -970,3 +977,13 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
   .play-layout > .play-board > .board-toolbar:has(#reviewPrev){flex-wrap:nowrap;gap:6px;}
 }
 .settings-row > span small{display:block;font-weight:500;}
+
+.demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.lesson-demo-slot[hidden]{display:none;}
+/* Ô ví dụ: câu hướng dẫn + nút Làm lại cùng một hàng, bàn cờ ngay dưới */
+.lesson-demo-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;}
+.lesson-demo-slot > *{grid-column:1 / -1;}
+.lesson-demo-slot > .demo-cap{grid-column:1;text-align:left;margin:0 0 6px;}
+.lesson-demo-slot > .board-toolbar{grid-column:2;margin:0 0 6px;justify-content:flex-end;}
+.lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
+.lesson-text .lesson-head{margin-bottom:10px;}

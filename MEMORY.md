@@ -171,3 +171,5 @@
 - Bài tập trên máy tính dùng chung bố cục 2 cột `.play-layout`; cột bàn + cột phải được canh giữa thành một cặp (`--bw`).
 - Phân tích ván < 6 nước của mình: không chấm %, không đoán phong cách, không vẽ biểu đồ.
 - Cấp máy mặc định cho người mới: 2 (trước là 5 — quá khó). Bài tập xếp dễ → khó. "Bài tiếp" chỉ nổi bật khi đã giải xong.
+- **2026-10-09**: người dùng chê nhạc "Trúc lâm" (điệu Vũ, thứ) **hơi buồn** → đổi sang "Xuân phong": điệu Cung (ngũ cung trưởng trên Rê), 72 nhịp/phút, câu nhạc đi lên kết về chủ âm, thêm đàn tranh rải hợp âm khe khẽ, vang ngắn hơn. Tránh điệu thứ/chậm nếu làm nhạc tiếp.
+- **Bố cục bài học** (người dùng: "phải cuộn xuống mới dùng được bàn cờ, không nắm được ngữ cảnh"): ≥768px chữ trái + bàn cờ phải `position:sticky`, cỡ bàn `--lbw` tính theo chiều cao màn (vừa một màn ở 1366×768); nhiều ví dụ → nút "Ví dụ 1/2" (một bàn mỗi lúc); câu hướng dẫn + "Làm lại" cùng hàng; tiêu đề bài nằm trong cột chữ; điện thoại: bàn cờ `order:-1` lên trước, tiêu đề thẻ "Bài n/19: Tên bài". Thẻ bài học đưa lên đầu tab, phần 7 loại quân và bảng tiến độ xuống dưới.

@@ -264,8 +264,15 @@ select.field, input.field{
 }
 .lesson-vn{color:var(--ink-soft);font-size:14px;font-weight:600;}
 .lesson-body{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;}
-@media(min-width:680px){
-  .lesson-body{grid-template-columns:1.1fr 1fr;align-items:start;}
+/* Bài học: chữ bên trái, bàn cờ bên phải luôn đứng yên khi cuộn đọc (≥768px); điện thoại: bàn cờ lên trước */
+@media(min-width:768px){
+  .lesson-body{--lbw:max(300px, min(560px, 48vw, calc((100vh - 300px) * 0.88)));
+    grid-template-columns:minmax(0,1fr) var(--lbw);align-items:start;gap:24px;}
+  .lesson-body .lesson-demos{min-width:0;}
+  .lesson-body .lesson-demos{position:sticky;top:calc(var(--sticky-top, 100px) + 12px);}
+}
+@media(max-width:767px){
+  .lesson-body .lesson-demos{order:-1;}
 }
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
@@ -415,7 +422,7 @@ select.field, input.field{
 .demo-msg.bad{color:var(--accent);}
 .demo-msg.think{color:var(--ink-soft);font-weight:600;}
 .demo-log{max-height:130px;}
-.lesson-demo-slot + .lesson-demo-slot{margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);}
+
 .table-wrap{overflow-x:auto;margin:6px 0 12px;}
 .lesson-table{border-collapse:collapse;width:100%;font-size:14px;}
 .lesson-table th,.lesson-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top;}
@@ -979,6 +986,16 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
   .play-layout > .play-board > .board-toolbar:has(#reviewPrev){flex-wrap:nowrap;gap:6px;}
 }
 .settings-row > span small{display:block;font-weight:500;}
+
+.demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.lesson-demo-slot[hidden]{display:none;}
+/* Ô ví dụ: câu hướng dẫn + nút Làm lại cùng một hàng, bàn cờ ngay dưới */
+.lesson-demo-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;}
+.lesson-demo-slot > *{grid-column:1 / -1;}
+.lesson-demo-slot > .demo-cap{grid-column:1;text-align:left;margin:0 0 6px;}
+.lesson-demo-slot > .board-toolbar{grid-column:2;margin:0 0 6px;justify-content:flex-end;}
+.lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
+.lesson-text .lesson-head{margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -1011,9 +1028,17 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
-  <div class="card" id="progressCard">
-    <h2>Tiến độ của bạn</h2>
-    <div id="progressDash"></div>
+  <div class="card">
+    <h2 id="lessonsHeading">Các bài học</h2>
+    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
+      <div class="lesson-nav" id="lessonNav"></div>
+    </details>
+    <div id="lessonContent"></div>
+    <div class="lesson-foot">
+      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
+      <span id="lessonProgress" class="hint-text"></span>
+      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+    </div>
   </div>
   <div class="card">
     <h2>Bàn cờ và những điều cơ bản</h2>
@@ -1025,18 +1050,9 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <div class="legend-grid" id="legendGrid"></div>
   </div>
 
-  <div class="card">
-    <h2 id="lessonsHeading">Các bài học</h2>
-    <p>Mỗi bài có bàn cờ nhỏ để bấm thử: chọn quân rồi bấm ô sáng để xem nó đi được đâu.</p>
-    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
-      <div class="lesson-nav" id="lessonNav"></div>
-    </details>
-    <div id="lessonContent"></div>
-    <div class="lesson-foot">
-      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
-      <span id="lessonProgress" class="hint-text"></span>
-      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
-    </div>
+  <div class="card" id="progressCard">
+    <h2>Tiến độ của bạn</h2>
+    <div id="progressDash"></div>
   </div>
 </section>
 
@@ -1486,7 +1502,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
           <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
         </div>
       </div>
-      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời, tiếng tiêu và cổ cầm)</small></span>
+      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời, sáo trúc và đàn tranh)</small></span>
         <div class="seg" id="musicToggle" role="group" aria-label="Nhạc nền">
           <button type="button" data-music="on">Bật</button><button type="button" data-music="off">Tắt</button>
         </div>
@@ -3797,23 +3813,34 @@ function renderLesson(scroll){
   const content = $('#lessonContent');
   const table = lesson.table ? `<div class="table-wrap"><table class="lesson-table"><thead><tr>${lesson.table.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${lesson.table.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
   const sources = lesson.sources ? `<p class="sources">Nguồn: ${lesson.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p>` : '';
+  // tiêu đề bài nằm trong cột chữ để cột bàn cờ bắt đầu ngang hàng, vừa một màn hình
   content.innerHTML = `
-    <div class="lesson-head">
-      <span class="han" aria-hidden="true">${lesson.han}</span>
-      <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
-    </div>
     <div class="lesson-body ${lesson.demos.length?'':'no-demo'}">
-      <div class="lesson-text">${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
+      <div class="lesson-text"><div class="lesson-head">
+        <span class="han" aria-hidden="true">${lesson.han}</span>
+        <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
+      </div>${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
       <div class="lesson-demos"></div>
     </div>`;
+  // Bàn cờ minh hoạ: nhiều ví dụ thì chuyển bằng nút "Ví dụ 1 / 2…" (một bàn tại một lúc, luôn cạnh phần chữ)
   const demosEl = $('.lesson-demos',content);
-  lesson.demos.forEach(demo=>{
+  if(lesson.demos.length>1){
+    demosEl.insertAdjacentHTML('beforeend', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${lesson.demos.map((d,i)=>
+      `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">Ví dụ ${i+1}</button>`).join('')}</div>`);
+  }
+  const slots = lesson.demos.map((demo,i)=>{
     const d = document.createElement('div');
-    d.className='lesson-demo-slot';
+    d.className='lesson-demo-slot'; d.hidden = i>0;
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
+    return d;
   });
-  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
+  $$('[data-demo]',demosEl).forEach(b=>b.addEventListener('click',()=>{
+    const k=+b.dataset.demo;
+    slots.forEach((d,i)=>d.hidden = i!==k);
+    $$('[data-demo]',demosEl).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
+  }));
+  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}: ${lesson.title}`;
   $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;
@@ -6464,30 +6491,29 @@ const Sound = (function(){
   };
 })();
 
-/* ---------- Nhạc nền "Trúc lâm": tiêu thổi giai điệu chậm trên điệu Vũ, cổ cầm gảy trầm đệm,
-   thỉnh thoảng tiếng bồi âm trong như chuông. Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
+/* ---------- Nhạc nền "Xuân phong": sáo trúc thổi giai điệu điệu Cung (ngũ cung trưởng, sáng, nhẹ nhàng),
+   đàn tranh rải hợp âm khe khẽ, cổ cầm đệm trầm, thỉnh thoảng tiếng chuông nhỏ. Tự sinh bằng Web Audio ---------- */
 const Music = (function(){
   let ctx=null, out=null, noise=null, drone=null, timer=0, next=0, queue=[], prevF=0, playing=false, armed=false, round=0;
   let on = safeLS_get('xq_music')==='on';
-  const BEAT=60/52;                                   // chậm, khoảng 52 nhịp/phút
-  // Điệu Vũ (ngũ cung trên nền La): La Đô Rê Mi Sol, từ La3 lên Mi6
+  const BEAT=60/72;                                   // vừa phải, khoảng 72 nhịp/phút
+  // Điệu Cung (ngũ cung trưởng trên nền Rê): Rê Mi Fa# La Si, từ Rê4 lên
   const SC=[];
-  for(let o=0;o<3;o++) for(const st of [0,3,5,7,10]) SC.push(220*Math.pow(2,(st+12*o)/12));
+  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) SC.push(293.66*Math.pow(2,(st+12*o)/12));
   const rnd=a=>a[Math.floor(Math.random()*a.length)];
-  // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ
+  // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ. Đi lên nhiều, kết về chủ âm Rê
   const P={
-    a:[[8,2],[7,1],[6,1],[5,3],[-1,1]],
-    b:[[5,1],[6,1],[7,2],[8,1],[10,1],[9,3],[-1,1]],
-    c:[[9,1.5],[8,.5],[7,1],[6,1],[7,2],[5,2],[-1,2]],
-    d:[[3,2],[5,1],[6,1],[5,1],[4,1],[3,2],[-1,2]],
-    e:[[10,2],[11,1],[10,1],[9,2],[8,1],[7,1],[8,4],[-1,2]],
-    f:[[7,1],[6,1],[5,4],[-1,3]],
-    g:[[6,1],[7,1],[8,2],[7,1],[6,.5],[5,.5],[6,3],[-1,1]],
+    a:[[5,1],[6,1],[7,1],[8,1],[7,2],[6,1],[5,1]],
+    b:[[8,1],[9,1],[10,2],[9,1],[8,1],[7,2]],
+    c:[[7,1],[8,.5],[7,.5],[6,1],[5,1],[3,1],[4,1],[5,2]],
+    d:[[3,1],[4,1],[5,1],[7,1],[6,2],[5,1],[4,1]],
+    e:[[10,1.5],[9,.5],[8,1],[7,1],[8,1],[9,1],[10,2]],
+    f:[[7,1],[6,1],[5,3],[-1,1]],
+    g:[[5,.5],[6,.5],[7,1],[8,1],[7,.5],[6,.5],[5,1],[6,2],[-1,1]],
   };
-  // Trình tự bài: hai đoạn, mỗi vòng đổi câu giữa cho đỡ lặp
-  const FORM=[['a','b','c','f'],['d','b','e','f'],['a','g','c','f'],['d','g','e','f']];
-  // Bè trầm cổ cầm theo từng câu (Hz)
-  const BASS={a:[110,146.83],b:[110,164.81],c:[98,130.81],d:[146.83,110],e:[130.81,164.81],f:[164.81,110],g:[110,98]};
+  const FORM=[['a','b','c','f'],['d','g','e','f'],['a','e','c','f'],['d','b','g','f']];
+  // Gốc hợp âm cho từng câu (Rê, La, Sol, Si thứ) — quãng trầm
+  const BASS={a:[146.83,110],b:[146.83,98],c:[110,146.83],d:[98,110],e:[146.83,123.47],f:[110,146.83],g:[146.83,98]};
   function ac(){
     if(ctx) return ctx;
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
@@ -6498,7 +6524,7 @@ const Music = (function(){
       const len=Math.floor(ctx.sampleRate*4.5), ir=ctx.createBuffer(2,len,ctx.sampleRate);
       for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.5); }
       const rev=ctx.createConvolver(); rev.buffer=ir;
-      const wet=ctx.createGain(); wet.gain.value=0.55;
+      const wet=ctx.createGain(); wet.gain.value=0.42;
       out.connect(ctx.destination); out.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
       // nhiễu dùng chung cho tiếng hơi thổi
       const n=ctx.sampleRate*2; noise=ctx.createBuffer(1,n,ctx.sampleRate);
@@ -6510,11 +6536,11 @@ const Music = (function(){
   function flute(t, f, dur, v){
     const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
     const lfo=ctx.createOscillator(), lg=ctx.createGain();
-    o.type='sine'; o2.type='triangle'; h.gain.value=0.12;
+    o.type='sine'; o2.type='triangle'; h.gain.value=0.18;
     if(prevF && Math.abs(prevF-f)>1){ o.frequency.setValueAtTime(prevF,t); o.frequency.exponentialRampToValueAtTime(f,t+0.14); }
     else o.frequency.setValueAtTime(f,t);
     o2.frequency.value=f*2;
-    lfo.frequency.value=4.6; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
+    lfo.frequency.value=5.4; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
     lfo.connect(lg); lg.connect(o.frequency);
     lp.type='lowpass'; lp.frequency.value=Math.min(f*4,5000);
     const end=t+dur;
@@ -6543,6 +6569,15 @@ const Music = (function(){
     });
     lp.connect(g); g.connect(out);
   }
+  // Đàn tranh rải hợp âm: tiếng gảy sáng, tắt nhanh, rất nhỏ
+  function zheng(t, f, v){
+    const o=ctx.createOscillator(), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='triangle'; o.frequency.setValueAtTime(f*1.01,t); o.frequency.exponentialRampToValueAtTime(f,t+0.05);
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*6,7000),t); lp.frequency.exponentialRampToValueAtTime(f*1.5,t+1.2);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+    o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t+1.7);
+  }
+  function arp(t, root){ [2,3,4,3].forEach((m,i)=>zheng(t+i*BEAT*0.5, root*m, 0.03)); }
   // Bồi âm: tiếng trong, mỏng như chuông nhỏ
   function bell(t, f, v){
     const o=ctx.createOscillator(), g=ctx.createGain();
@@ -6563,14 +6598,14 @@ const Music = (function(){
         beats+=b;
       });
     });
-    queue.push({rest:3+Math.random()*3});
+    queue.push({rest:2+Math.random()*2});
   }
   function schedule(){
     if(!playing) return;
     while(next < ctx.currentTime+1.5){
       if(!queue.length) fill();
       const n=queue.shift();
-      if(n.bass){ qin(next+0.02, n.bass, 0.11); continue; }
+      if(n.bass){ qin(next+0.02, n.bass, 0.09); arp(next+0.02, n.bass); continue; }
       if(n.bell){ bell(next+0.05, n.bell, 0.035); continue; }
       if(n.rest){ prevF=0; next+=n.rest*BEAT; continue; }
       const dur=n.b*BEAT*(0.96+Math.random()*0.08);
@@ -6583,7 +6618,7 @@ const Music = (function(){
   function startDrone(){
     const t=ctx.currentTime, g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
     g.gain.value=0.016; lfo.frequency.value=0.05; lg.gain.value=0.008; lfo.connect(lg); lg.connect(g.gain);
-    const os=[55, 110, 164.81].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
+    const os=[73.42, 146.83, 220].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
     g.connect(out); lfo.start(t);
     drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
   }
