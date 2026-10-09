@@ -31,7 +31,7 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     // An đăng nhập rồi tạo phòng giao hữu (tắt Tính Elo để còn xin đi lại), cầm Đỏ
     await registerUI(A, PAGE + q, 'an_room', 'An');
     await A.click('.zone-btn[data-zone="satruong"]');
-    assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'phần Chơi không hiện thanh tab của phần Học');
+    assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'Sa trường không hiện thanh tab Kỳ viện');
     await A.evaluate(() => { document.querySelector('#olRated').checked = false; });
     await A.click('#olCreate');
     await A.waitForSelector('#olInvite:not([hidden]) .ol-link', { state: 'attached' });   // ô link ẩn, chỉ hiện khi không sao chép được

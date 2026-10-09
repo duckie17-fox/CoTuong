@@ -211,3 +211,6 @@
 - Thông báo nổi ≤899px hiện ở đầu màn; toast 3s.
 
 ## 2026-10-09 — PR #8 (rà UI/UX 37 mục) đã merge vào main.
+
+## 2026-10-09 — Giữ tên "Kỳ viện" / "Sa trường" (người dùng chốt, sau khi C9 đã đổi sang Học/Chơi)
+- KHÔNG đổi tên hai khu nữa. Phần cấu trúc của C9 vẫn giữ: thẻ "Đấu máy" nằm ở hàng thẻ Sa trường (cạnh "Đấu người").

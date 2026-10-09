@@ -1,10 +1,10 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-Đã sửa xong cả 37 mục báo cáo rà UI/UX (kể cả C9 đổi tên Học/Chơi). PR #8 đã merge vào main (d49636d); deploy chạy tự động.
+PR #8 (37 mục rà UI/UX) đã merge + deploy xanh. Vừa đổi tên hai khu về "Kỳ viện" / "Sa trường" theo người dùng (Đấu máy vẫn ở Sa trường).
 
 ## Next step
-- Kiểm tra deploy PR #8 xanh; chờ góp ý tiếp của người dùng.
+- Tạo PR/merge thay đổi tên khi người dùng bảo.
 
 ## Blocker
 - Không.

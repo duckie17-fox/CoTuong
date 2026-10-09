@@ -1,7 +1,7 @@
 /* =========================================================================
-   ĐIỀU HƯỚNG — ba phần (Học / Chơi / Tôi), mỗi phần một hàng thẻ con.
+   ĐIỀU HƯỚNG — ba phần (Kỳ viện / Sa trường / Tôi), mỗi phần một hàng thẻ con.
    Mã nội bộ vẫn là kyvien / satruong (giữ dữ liệu đã lưu). Thẻ "Đấu máy" (panel "may")
-   nằm ở hàng thẻ của phần Chơi dù là một section[data-panel].
+   nằm ở hàng thẻ của Sa trường dù là một section[data-panel].
    Điện thoại và máy tính dùng chung một kiểu; chỉ khác độ rộng.
    ========================================================================= */
 const TAB_KEYS = $$('.tab-btn[data-tab]').map(b=>b.dataset.tab);
@@ -35,7 +35,7 @@ function markTabRow(btns, keyOf, key, focus){
   });
 }
 
-const PLAY_TABS=['may'];   // các panel thuộc phần Chơi
+const PLAY_TABS=['may'];   // các panel thuộc Sa trường
 const tabKey = b=>b.dataset.tab||b.dataset.stab;
 function showTab(key, focus){
   const play=PLAY_TABS.includes(key);

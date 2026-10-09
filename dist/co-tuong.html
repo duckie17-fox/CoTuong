@@ -1111,19 +1111,19 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <span class="seal" aria-hidden="true">象</span>
     <h1 class="app-name">Cờ Tướng</h1>
     <nav class="zone-switch" aria-label="Chọn phần">
-      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Học</span></button>
-      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Chơi</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
+      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
+      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
       <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
     <button type="button" class="music-btn" id="musicBtn" aria-pressed="false" aria-label="Bật nhạc nền" title="Bật nhạc nền"></button>
   </div>
-  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Học">
+  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
     <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
     <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
     <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
   </nav>
-  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Chơi" hidden>
+  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
     <button class="tab-btn st-btn" data-stab="phong" role="tab">Đấu người</button>
     <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
     <button class="tab-btn st-btn" data-stab="banbe" role="tab">Bạn bè</button>
@@ -6483,9 +6483,9 @@ function initTactics(){
 }
 
 /* =========================================================================
-   ĐIỀU HƯỚNG — ba phần (Học / Chơi / Tôi), mỗi phần một hàng thẻ con.
+   ĐIỀU HƯỚNG — ba phần (Kỳ viện / Sa trường / Tôi), mỗi phần một hàng thẻ con.
    Mã nội bộ vẫn là kyvien / satruong (giữ dữ liệu đã lưu). Thẻ "Đấu máy" (panel "may")
-   nằm ở hàng thẻ của phần Chơi dù là một section[data-panel].
+   nằm ở hàng thẻ của Sa trường dù là một section[data-panel].
    Điện thoại và máy tính dùng chung một kiểu; chỉ khác độ rộng.
    ========================================================================= */
 const TAB_KEYS = $$('.tab-btn[data-tab]').map(b=>b.dataset.tab);
@@ -6519,7 +6519,7 @@ function markTabRow(btns, keyOf, key, focus){
   });
 }
 
-const PLAY_TABS=['may'];   // các panel thuộc phần Chơi
+const PLAY_TABS=['may'];   // các panel thuộc Sa trường
 const tabKey = b=>b.dataset.tab||b.dataset.stab;
 function showTab(key, focus){
   const play=PLAY_TABS.includes(key);
