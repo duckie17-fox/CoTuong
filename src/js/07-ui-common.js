@@ -26,9 +26,13 @@ function renderMoveLog(el, moves, opts){
   html+='</ol>';
   el.innerHTML=html;
   if(opts.onPick) $$('.log-cell[data-ply]',el).forEach(b=>b.addEventListener('click',()=>opts.onPick(+b.dataset.ply)));
-  if(opts.scroll!==false){
+  // chỉ cuộn bên trong khung biên bản — không dùng scrollIntoView vì nó kéo cả trang (giật khi bấm "Nước tiếp")
+  if(opts.scroll!==false && el.scrollHeight>el.clientHeight){
     const act=$('.log-cell.active',el);
-    if(act) act.scrollIntoView({block:'nearest'}); else el.scrollTop=el.scrollHeight;
+    if(!act){ el.scrollTop=el.scrollHeight; return; }
+    const r=act.getBoundingClientRect(), c=el.getBoundingClientRect();
+    if(r.top<c.top) el.scrollTop-=c.top-r.top;
+    else if(r.bottom>c.bottom) el.scrollTop+=r.bottom-c.bottom;
   }
 }
 
