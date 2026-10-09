@@ -29,9 +29,8 @@ function renderEndgameTheoryList(){
     const items=ENDGAME_THEORY.filter(x=>x.group===g.id);
     if(!items.length) return '';
     return `<h4 class="eg-group-h">${esc(g.name)}</h4><div class="topic-grid">${items.map(it=>
-      `<button class="opening-card topic-card ${seen.includes(it.key)?'seen':''}" data-eg="${it.key}">
-        <div class="puzzle-top">${egBadge(it,true)}${seen.includes(it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}</div>
-        <h4>${esc(it.title)}</h4><span class="han-sm">${esc(it.han)}</span></button>`).join('')}</div>`;
+      `<button class="opening-card topic-card topic-row ${seen.includes(it.key)?'seen':''}" data-eg="${it.key}">
+        <h4>${esc(it.title)}</h4><span class="tr-end">${seen.includes(it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}${egBadge(it,true)}</span></button>`).join('')}</div>`;
   }).join('');
   host.innerHTML=`<div class="chip-row" role="group" aria-label="Lọc theo nhóm">${chips}</div>${groups}`;
   $$('[data-eg-filter]',host).forEach(b=>b.addEventListener('click',()=>{ egFilter=b.dataset.egFilter; renderEndgameTheoryList(); }));
@@ -58,7 +57,7 @@ function openEndgameTheory(key){
     ? (dtmMoves ? `Bạn cầm Đỏ. Đánh hay nhất thì thắng trong ${dtmMoves} nước; máy giữ Đen và chống cự lâu nhất có thể.` : 'Bạn cầm Đỏ, máy giữ Đen. Hãy tìm cách thắng.')
     : 'Bạn cầm Đỏ, máy giữ Đen. Thử xem bạn có phá được không — nếu bên yếu phòng thủ đúng thì đây là thế hoà.';
   $('#tacticContent').innerHTML = `
-    <div class="lesson-head"><span class="han" aria-hidden="true">${esc(it.han)}</span><div>${egBadge(it)}<h3 style="margin:4px 0 0;">${esc(it.title)}</h3></div></div>
+    <div class="lesson-head"><h3>${esc(it.title)}</h3>${egBadge(it)}</div>
     <div class="lesson-body"><div class="lesson-text">
       ${egStatsHtml(it)}
       <p><b>Vì sao?</b> ${esc(it.why)}</p>

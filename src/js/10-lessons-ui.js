@@ -12,6 +12,7 @@ function initLessonDemo(container, demo){
     <div class="demo-msg" aria-live="polite"></div>
     <div class="demo-log movelog" hidden></div>`;
   const msgEl = $('.demo-msg',container), logEl=$('.demo-log',container);
+  const showLog = moves=>{ logEl.hidden=!moves.length; if(moves.length) renderMoveLog(logEl, moves); };
   const heroInit = demo.hero ? demo.hero.map(h=>h.slice()) : null;
   let shown=false, game, board, solved=false, showArrows=true, stage=0, busy=false, token=null, userColor=demo.toMove||RED;
   const say=(cls,html)=>{ msgEl.className='demo-msg'+(cls?' '+cls:''); msgEl.innerHTML=html; };
@@ -20,8 +21,7 @@ function initLessonDemo(container, demo){
     if(heroInit) demo.hero=heroInit.map(h=>h.slice());
     if(turnBased) game=Game.create(demo.board, demo.toMove||RED);
     board=Engine.cloneBoard(demo.board);
-    logEl.hidden = !turnBased;
-    if(turnBased) renderMoveLog(logEl, []);
+    logEl.hidden = true;   // hộp nước đi chỉ hiện từ nước đầu tiên
     if(ctl){ ctl.clear(); ctl.render(); }
   }
   const curBoard=()=> turnBased ? game.board() : board;
@@ -36,7 +36,7 @@ function initLessonDemo(container, demo){
     const apply=(d)=>{
       if(token!==my) return;
       const rec=game.play(d); busy=false;
-      renderMoveLog(logEl, game.moves);
+      showLog(game.moves);
       if(game.result){ endgameResult(); }
       else say('', `Máy đáp <b>${esc(rec.text.short)}</b>. Đến lượt bạn.` + (game.moves.length>=40 && demo.result==='draw' ? ' <i>Đã 20 nước mà chưa thắng được — đúng như lý thuyết, thế này là hoà.</i>':''));
       ctl.render();
@@ -74,7 +74,7 @@ function initLessonDemo(container, demo){
       showArrows=false;
       if(turnBased){
         const rec=game.play(mv);
-        renderMoveLog(logEl, game.moves);
+        showLog(game.moves);
         if(mode==='endgame'){
           if(game.result) endgameResult(); else machineReply();
         } else {
@@ -145,7 +145,7 @@ function initLessonDemo(container, demo){
         let i=0;
         const step=()=>{ if(token!==my) return;
           if(i>=line.length){ busy=false; say('ok', `${demo.result==='draw'?'Diễn biến mẫu':'Lời giải'}: ${esc(Notation.gameRecord(demo.board,line,demo.toMove).map(r=>r.n+'. '+(r.red?r.red.short:'…')+' '+(r.black?r.black.short:'')).join('  '))}`); return; }
-          game.play(line[i++]); renderMoveLog(logEl, game.moves); ctl.render(); setTimeout(step, line.length>16?450:700); };
+          game.play(line[i++]); showLog(game.moves); ctl.render(); setTimeout(step, line.length>16?450:700); };
         step();
       }, 50);
       return;
@@ -166,13 +166,16 @@ function renderLessonNav(){
   const done = lessonsDone();
   nav.innerHTML = LESSON_LEVELS.map(lv=>{
     const items=LESSONS.map((l,i)=>({l,i})).filter(x=>x.l.level===lv.id);
-    return `<div class="lesson-level"><div class="lesson-level-h"><b>${esc(lv.name)}</b> <span>${esc(lv.desc)}</span></div>
-      <div class="lesson-level-items">${items.map(({l,i})=>
-        `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div></div>`;
+    return `<div class="lesson-level"><b class="lesson-level-h">${esc(lv.name)}</b>${items.map(({l,i})=>
+        `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div>`;
   }).join('');
   $$('.lesson-dot',nav).forEach(btn=>{
-    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); const t=$('#lessonToc'); if(t) t.open=false; renderLesson(true); });
+    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); setLessonToc(false); renderLesson(true); });
   });
+}
+function setLessonToc(open){
+  $('#lessonToc').hidden=!open; $('#lessonTocBtn').setAttribute('aria-expanded', open?'true':'false');
+  if(open) $('#lessonToc').scrollIntoView({block:'nearest'});
 }
 function markLessonDone(key){
   const done = lessonsDone();
@@ -186,40 +189,29 @@ function renderLesson(scroll){
   const content = $('#lessonContent');
   const table = lesson.table ? `<div class="table-wrap"><table class="lesson-table"><thead><tr>${lesson.table.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${lesson.table.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
   const sources = lesson.sources ? `<p class="sources">Nguồn: ${lesson.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p>` : '';
-  // tiêu đề bài nằm trong cột chữ để cột bàn cờ bắt đầu ngang hàng, vừa một màn hình
   content.innerHTML = `
     <div class="lesson-body ${lesson.demos.length?'':'no-demo'}">
-      <div class="lesson-text"><div class="lesson-head">
-        <span class="han" aria-hidden="true">${lesson.han}</span>
-        <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
-      </div>${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
+      <div class="lesson-text">${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
       <div class="lesson-demos"></div>
     </div>`;
   // Bàn cờ minh hoạ: nhiều ví dụ thì chuyển bằng nút "Ví dụ 1 / 2…" (một bàn tại một lúc, luôn cạnh phần chữ)
   const demosEl = $('.lesson-demos',content);
-  if(lesson.demos.length>1){
-    demosEl.insertAdjacentHTML('beforeend', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${lesson.demos.map((d,i)=>
-      `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">Ví dụ ${i+1}</button>`).join('')}</div>`);
-  }
-  const slots = lesson.demos.map((demo,i)=>{
+  const slots = lesson.demos.map(demo=>{
     const d = document.createElement('div');
-    d.className='lesson-demo-slot'; d.hidden = i>0;
+    d.className='lesson-demo-slot';
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
     return d;
   });
-  $$('[data-demo]',demosEl).forEach(b=>b.addEventListener('click',()=>{
-    const k=+b.dataset.demo;
-    slots.forEach((d,i)=>d.hidden = i!==k);
-    $$('[data-demo]',demosEl).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
-  }));
-  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}: ${lesson.title}`;
-  $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
+  wireDemoTabs(demosEl, slots, lesson.demos.map((d,i)=>'Ví dụ '+(i+1)));
+  $('#lessonsHeading').innerHTML = `${esc(lesson.title)} <span class="lesson-level-tag">${esc(lv.name)}</span>`;
+  $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;
   $('#lessonNext').innerHTML = currentLessonIdx===LESSONS.length-1 ? 'Đã hết bài' : 'Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg>';
-  if(scroll) content.scrollIntoView({behavior:'smooth', block:'start'});
+  if(scroll) $('.lesson-card').scrollIntoView({behavior:'smooth', block:'start'});
 }
+$('#lessonTocBtn').addEventListener('click',()=>setLessonToc($('#lessonToc').hidden));
 $('#lessonPrev').addEventListener('click',()=>{ if(currentLessonIdx>0){ currentLessonIdx--; renderLesson(true); } });
 $('#lessonNext').addEventListener('click',()=>{ if(currentLessonIdx<LESSONS.length-1){ currentLessonIdx++; renderLesson(true); } });
 

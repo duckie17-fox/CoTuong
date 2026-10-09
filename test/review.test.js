@@ -23,7 +23,7 @@ test('mở phân tích ở trang tổng quan (không nhảy tới lỗi lớn nh
   assert.ok(items.length >= 5);
   assert.deepEqual(items, errs());
   assert.deepEqual(items, [...items].sort((a, b) => a - b), 'dòng thời gian phải theo thứ tự ván');
-  assert.ok(det().querySelector('.tl-star'), 'thiếu đánh dấu bước ngoặt');
+  assert.ok(det().querySelector('.tl-star'), 'thiếu đánh dấu lỗi đắt nhất');
   assert.match(document.querySelector('#reviewNextMistake').textContent, /Bắt đầu/);
 });
 
@@ -103,18 +103,19 @@ test('xếp hạng nước theo cơ hội thắng: !!, !, (không dấu), ?!, ?,
   assert.equal(c({ ...base, sameAsBest: true, best: 0, played: 0, second: -400, forced: true }), 'best', 'nước bắt buộc không tính là nước hay');
 });
 
-test('bảng ký hiệu, nước tốt có gợi ý tối ưu hơn, phân tích phong cách', () => {
+test('nhãn bằng chữ (không ký hiệu), nước tốt có gợi ý hay hơn, phân tích phong cách dưới bàn cờ', () => {
   const { document, window, det } = open();
-  const sum = document.querySelector('#reviewSummary');
+  const top = document.querySelector('#reviewSummary');
+  const sum = document.querySelector('#reviewMore');
   const legend = txt(sum.querySelector('.cls-legend'));
-  for (const s of ['!!', '?!', '??', 'Sai lầm nặng', 'không có dấu', 'nước duy nhất', 'thí quân', 'cơ hội thắng']) assert.ok(legend.includes(s), s);
+  for (const s of ['Sai lầm nặng', 'Đáng ngờ', 'nước duy nhất', 'thí quân']) assert.ok(legend.includes(s), s);
   // nước "tốt" khác nước máy chọn → có mục "Nước tối ưu hơn" với mục đích
   const good = [...window.eval('review.an.plies')].find(p => p.color === window.eval('review.rec.human') && p.cls === 'good' && p.bestMove);
   assert.ok(good, 'ván mẫu cần có nước "tốt"');
   assert.ok(det().querySelector(`.better-list .tl-item[data-k="${good.k}"]`), 'tổng quan thiếu danh sách nước tốt còn tối ưu hơn');
   window.eval(`reviewGo(${good.k})`);
   const t = txt(det());
-  assert.match(t, /Nước tối ưu hơn/);
+  assert.match(t, /Nước hay hơn/);
   assert.match(t, /Mục đích:/);
   assert.ok(document.querySelector('#rvShowBest'), 'thiếu nút xem nước tốt hơn');
   // phong cách + đề xuất thế khai cuộc mở được
@@ -123,7 +124,7 @@ test('bảng ký hiệu, nước tốt có gợi ý tối ưu hơn, phân tích 
   assert.match(st, /Tấn công|Cân bằng|Chắc chắn/);
   assert.match(st, /Nên học tiếp/);
   assert.doesNotMatch(st, /undefined|NaN/);
-  assert.doesNotMatch(txt(sum.querySelector('.cls-chips')) + legend, /[★✓✗📖]/, 'chỉ dùng 5 ký hiệu !! ! ?! ? ??');
+  assert.doesNotMatch(txt(top) + legend, /[★✓✗📖]|\?\?|\?!/, 'nhãn chỉ dùng chữ');
   const op = sum.querySelector('[data-op]');
   op.click();
   assert.equal(document.querySelector('#openingDetailCard').hidden, false);

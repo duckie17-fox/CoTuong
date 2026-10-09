@@ -4,9 +4,13 @@
 function tacticsDone(){ return safeJSON('xq_tactics_seen',[]); }
 function renderTacticLists(){
   const seen=tacticsDone();
-  const card=(it,kind)=>`<button class="opening-card topic-card ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
-      <div class="puzzle-top">${kind==='end' ? `<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thắng':'Hoà'}</span>` : `<span class="han-sm">${esc(it.han)}</span>`}${seen.includes(kind+':'+it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}</div>
-      <h4>${esc(it.title)}</h4></button>`;
+  const ck=it=>seen.includes(it)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':'';
+  const card=(it,kind)=> kind==='end'
+    ? `<button class="opening-card topic-card topic-row ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
+      <h4>${esc(it.title)}</h4><span class="tr-end">${ck(kind+':'+it.key)}<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thắng':'Hoà'}</span></span></button>`
+    : `<button class="opening-card topic-card ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
+      <div class="puzzle-top"><h4>${esc(it.title)}</h4>${ck(kind+':'+it.key)}</div>
+      <span class="tc-hint">${esc(cardHint(it.text[0]))}</span></button>`;
   $('#tacticGrid').innerHTML = TACTICS.map(t=>card(t,'tac')).join('');
   $('#endgameGrid').innerHTML = ENDGAMES.map(t=>card(t,'end')).join('');
   renderEndgameTheoryList();
@@ -21,7 +25,7 @@ function openTactic(kind,key){
   const idx=list.indexOf(it);
   const badge = kind==='end' ? `<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thế thắng':'Thế hoà'}</span>` : '<span class="badge badge-mid">Chiến thuật</span>';
   $('#tacticContent').innerHTML = `
-    <div class="lesson-head"><span class="han" aria-hidden="true">${esc(it.han||(it.result==='win'?'勝':'和'))}</span><div>${badge}<h3 style="margin:4px 0 0;">${esc(it.title)}</h3></div></div>
+    <div class="lesson-head"><h3>${esc(it.title)}</h3>${kind==='end'?badge:''}</div>
     <div class="lesson-body"><div class="lesson-text">${it.text.map(t=>`<p>${t}</p>`).join('')}</div><div class="lesson-demos"><div class="lesson-demo-slot"></div></div></div>
     <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Trước</button><span class="hint-text">${kind==='tac'?'Chiến thuật':'Tàn cuộc'} ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button></div>`;
   const demo=Object.assign({}, it.demo, {hero: it.demo.hero ? it.demo.hero.map(h=>h.slice()) : undefined, mateIn: it.mateIn, result: it.result});

@@ -38,7 +38,6 @@ function renderPuzzleGrid(){
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
         ${solved.includes(p.id) ? '<span class="solved-check" title="Đã giải"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>' : ''}</div>
       <h4>${esc(p.title)}</h4>
-      <p>${esc(p.prompt)}</p>
     </button>`;
   }).join('') || '<p class="hint-text">Không có bài nào khớp bộ lọc.</p>';
   $$('.puzzle-card',$('#puzzleGrid')).forEach(btn=> btn.addEventListener('click', ()=> openPuzzle(btn.dataset.id)));
@@ -80,7 +79,7 @@ function openPuzzle(id){
     pz.targetGain = -Solver.materialSearch(Engine.applyMove(b,pz.active.solution),Engine.otherColor(me),3) - Solver.material(b,me);
   }
   puzzleResetBoard();
-  $('#puzzleDetailCard').scrollIntoView({block:'start'});
+  $('#puzzleDetailCard').scrollIntoView({block:'start'}); revealBoard($('#puzzleBoard'));
 }
 function puzzleResetBoard(){
   pz.token=null;
@@ -99,15 +98,17 @@ function puzzleExplainHTML(){
           : p.type==='defend' ? Coach.QUESTIONS['ignored-threat']
           : p.type==='fork' ? 'Tìm ô mà từ đó một quân của mình tấn công được HAI mục tiêu cùng lúc — đối phương chỉ cứu được một.'
           : Coach.QUESTIONS['missed-capture'];
-  return thinkStepsHTML([
-    {ic:'eye', q:'Trước tiên: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
-    {ic:'search', q:'Nước giải làm gì?', html:`<b>${esc(d.short)}</b> (${esc(d.long)}): ${esc(Coach.plainMove(p.board,sol))}.`},
-    {ic:'check', q:'Vì sao đúng?', cls:'ts-good', html:esc(
+  // Gọn: chỉ "Đáp án" + "Vì sao"; các bước tư duy khác để trong "Xem thêm"
+  const why = esc(
       p.type==='defend' ? 'Sau nước này, đối phương đáp cách nào bạn cũng không bị mất quân. Các nước khác đều để mất ít nhất một quân nhỏ.'
       : (p.type==='capture'||p.type==='fork') && !p.explain ? `Đối phương đáp tốt nhất rồi mà bạn vẫn lãi khoảng ${Math.max(1,Math.round(pz.targetGain||0))} điểm quân.${p.type==='fork'?' Đối phương chỉ cứu được một trong hai quân bị nhắm.':''}`
-      : puzzleExplainText())},
-    {ic:'question', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
-  ]);
+      : puzzleExplainText());
+  return `<p class="ex-line"><b>Đáp án:</b> ${esc(d.short)} (${esc(d.long)}).</p><p class="ex-line"><b>Vì sao:</b> ${why}</p>
+    <details class="more-box"><summary>Xem thêm</summary>${thinkStepsHTML([
+      {ic:'eye', q:'Trước nước giải: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
+      {ic:'search', q:'Nước giải làm gì?', html:esc(Coach.plainMove(p.board,sol))+'.'},
+      {ic:'question', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
+    ])}</details>`;
 }
 function puzzleExplainText(){
   const p=pz.active;

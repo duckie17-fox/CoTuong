@@ -1,5 +1,7 @@
 /* =========================================================================
-   ĐIỀU HƯỚNG — ba phần (Kỳ viện / Sa trường / Tôi), mỗi phần một hàng thẻ con.
+   ĐIỀU HƯỚNG — ba phần (Học / Chơi / Tôi), mỗi phần một hàng thẻ con.
+   Mã nội bộ vẫn là kyvien / satruong (giữ dữ liệu đã lưu). Thẻ "Đấu máy" (panel "may")
+   nằm ở hàng thẻ của phần Chơi dù là một section[data-panel].
    Điện thoại và máy tính dùng chung một kiểu; chỉ khác độ rộng.
    ========================================================================= */
 const TAB_KEYS = $$('.tab-btn[data-tab]').map(b=>b.dataset.tab);
@@ -33,11 +35,16 @@ function markTabRow(btns, keyOf, key, focus){
   });
 }
 
+const PLAY_TABS=['may'];   // các panel thuộc phần Chơi
+const tabKey = b=>b.dataset.tab||b.dataset.stab;
 function showTab(key, focus){
-  setZoneUI('kyvien');
+  const play=PLAY_TABS.includes(key);
+  setZoneUI(play?'satruong':'kyvien');
+  const zp=$('section[data-zone-panel="satruong"]'); if(play && zp) zp.hidden=true;
   TAB_KEYS.forEach(k=>{ $(`section[data-panel="${k}"]`).hidden = k!==key; });
-  markTabRow($$('.tab-btn[data-tab]'), b=>b.dataset.tab, key, focus);
-  safeLS_set('xq_last_tab', key);
+  markTabRow($$('.tab-btn'), tabKey, key, focus);
+  if(play){ currentStab=key; safeLS_set('xq_last_stab', key); }
+  else safeLS_set('xq_last_tab', key);
   document.dispatchEvent(new CustomEvent('tabshown',{detail:key}));
 }
 function initTabs(){
@@ -46,20 +53,23 @@ function initTabs(){
     btn.id='tab-'+k; btn.setAttribute('aria-controls','panel-'+k);
     panel.id='panel-'+k; panel.setAttribute('role','tabpanel'); panel.setAttribute('aria-labelledby','tab-'+k);
   });
-  wireTabRow($$('.tab-btn[data-tab]'), b=>b.dataset.tab, showTab);
-  wireTabRow($$('.st-btn'), b=>b.dataset.stab, showStab);
+  wireTabRow($$('[data-zone-tabs="kyvien"] .tab-btn'), tabKey, showTab);
+  wireTabRow($$('[data-zone-tabs="satruong"] .tab-btn'), tabKey, showStab);
   $$('[data-goto-stab]').forEach(b=>b.addEventListener('click',()=>showStab(b.dataset.gotoStab)));
   initSidePanels();
 }
 
 /* ---------- Thẻ con của Sa trường ---------- */
-let currentStab='phong';
+let currentStab = safeLS_get('xq_last_stab') || 'phong';
 function showStab(key, focus){
+  if(PLAY_TABS.includes(key)){ showTab(key, focus); return; }
   if(!ST_KEYS.includes(key)) key='phong';
-  currentStab=key;
+  currentStab=key; safeLS_set('xq_last_stab', key);
   setZoneUI('satruong');
+  const zp=$('section[data-zone-panel="satruong"]'); if(zp) zp.hidden=false;
+  PLAY_TABS.forEach(k=>{ const p=$(`section[data-panel="${k}"]`); if(p) p.hidden=true; });
   $$('[data-stpanel]').forEach(p=>{ p.hidden = p.dataset.stpanel!==key; });
-  markTabRow($$('.st-btn'), b=>b.dataset.stab, key, focus);
+  markTabRow($$('.tab-btn'), tabKey, key, focus);
   document.dispatchEvent(new CustomEvent('zoneshown',{detail:'satruong'}));
 }
 
@@ -76,7 +86,7 @@ function setZoneUI(z){
   updateStickyTop();
 }
 function showZone(z){
-  if(z==='kyvien'){ showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc'); return; }
+  if(z==='kyvien'){ const t=safeLS_get('xq_last_tab'); showTab(TAB_KEYS.includes(t) && !PLAY_TABS.includes(t) ? t : 'hoc'); return; }
   if(z==='satruong'){ showStab(currentStab); return; }
   setZoneUI(z);
   document.dispatchEvent(new CustomEvent('zoneshown',{detail:z}));

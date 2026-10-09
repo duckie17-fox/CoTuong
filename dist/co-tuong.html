@@ -93,7 +93,7 @@
 }
 
 *{box-sizing:border-box;}
-html{background:var(--paper);}
+html{background:var(--paper);scroll-padding-top:calc(var(--sticky-top, 0px) + 8px);}
 body{
   margin:0;
   font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -131,7 +131,7 @@ a{color:var(--accent);}
 .zone-btn:hover{background:var(--paper-2);color:var(--ink);}
 .zone-btn[aria-pressed="true"]{color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .zone-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.zone-badge{position:absolute;top:3px;right:5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:17px;text-align:center;}
+.zone-badge{position:absolute;top:3px;right:5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:12px;line-height:17px;text-align:center;}
 .sync-ic{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);width:36px;height:36px;border-radius:50%;cursor:pointer;flex:none;}
 
 .tabs{
@@ -199,7 +199,8 @@ select.field, input.field{
   padding:14px;box-shadow:0 4px 16px var(--shadow);
 }
 .board-shell{max-width:460px;margin:0 auto;}
-@media(min-width:900px){ .play-layout .board-shell{max-width:max(400px, min(780px, calc((100vh - 250px) * 0.95)));} }
+/* Máy tính bảng dọc (601–899px): bàn cờ rộng hết khung nội dung, chỉ giới hạn theo chiều cao màn */
+@media(min-width:601px) and (max-width:899px){ .board-shell{max-width:max(320px, min(760px, calc((100svh - 250px) / 1.1)));} }
 .xq-board-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
 .xq-piece{cursor:pointer;}
 .xq-piece-outer{stroke:var(--b-line);stroke-width:2;}
@@ -279,6 +280,7 @@ select.field, input.field{
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
 .lesson-foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap;}
+.lesson-top .lesson-foot{margin-top:0;gap:6px;}
 
 /* ---------- Puzzle list ---------- */
 .puzzle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px;}
@@ -358,7 +360,7 @@ select.field, input.field{
 .log-list li:last-child{border-bottom:0;}
 .log-n{color:var(--ink-soft);font-size:12.5px;text-align:right;padding-right:4px;}
 .log-cell{appearance:none;border:0;background:transparent;text-align:left;font:600 14px 'Be Vietnam Pro',sans-serif;color:var(--ink);padding:6px 6px;border-radius:6px;cursor:pointer;min-height:34px;}
-.log-cell small{color:var(--accent);font-weight:800;margin-left:2px;}
+.log-cell small{color:var(--accent);font-weight:800;margin-left:2px;font-size:14px;}
 .log-cell:hover{background:var(--card);}
 .log-cell.active{background:var(--accent);color:var(--accent-ink);}
 .log-cell.active small{color:inherit;}
@@ -409,12 +411,10 @@ select.field, input.field{
 }
 
 /* ---------- Lộ trình bài học ---------- */
-.lesson-nav{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
-.lesson-level{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper-2);}
-.lesson-level-h{font-size:13.5px;color:var(--ink-soft);margin-bottom:8px;line-height:1.4;}
-.lesson-level-h b{color:var(--ink);font-size:14.5px;margin-right:4px;}
-.lesson-level-items{display:flex;gap:6px;flex-wrap:wrap;}
-.lesson-dot{min-height:38px;}
+.lesson-nav{display:flex;flex-direction:column;gap:8px;margin:0;}
+.lesson-level{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.lesson-level-h{font-size:13px;color:var(--ink-soft);min-width:84px;}
+.lesson-dot{min-height:34px;padding:5px 10px;}
 .lesson-level-tag{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;}
 .lesson-body.no-demo{grid-template-columns:1fr !important;}
 .lesson-text ol{font-family:'Noto Serif',Georgia,serif;font-size:15px;line-height:1.6;padding-left:22px;margin:0 0 12px;}
@@ -466,7 +466,6 @@ select.field, input.field{
 #puzzleMeta{display:flex;gap:6px;align-items:center;}
 @media (max-width:600px){
   .opening-cards,.topic-grid{grid-template-columns:1fr;}
-  .lesson-level{padding:8px 10px;}
   .trainer-cta .btn-row{width:100%;}
   #satcucList .topic-grid,#egTheory .topic-grid,#tacticGrid,#endgameGrid{grid-template-columns:1fr 1fr;gap:8px;}
   #satcucList .topic-card,#egTheory .topic-card,#tacticGrid .topic-card,#endgameGrid .topic-card{padding:10px 12px;}
@@ -580,7 +579,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 
 
 /* ---------- Cài đặt & tiến độ ---------- */
-.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line);}
 /* ---------- Tôi ---------- */
 .me-head{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
 .me-head h2{margin:0;}
@@ -724,7 +723,7 @@ body.dlg-open{overflow:hidden;}
 .switch input:focus-visible + .switch-ui{outline:2px solid var(--gold);outline-offset:2px;}
 .avatar{--av:20;display:inline-flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border-radius:50%;
   background:hsl(var(--av) 45% 42%);color:#fff;font:800 14px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;}
-.avatar-xs{width:24px;height:24px;font-size:10px;}
+.avatar-xs{width:24px;height:24px;font-size:11px;}
 .me-letter{background:hsl(var(--av,20) 45% 42%);color:#fff;font:800 22px 'Be Vietnam Pro',sans-serif;border:0;}
 .me-profile .me-head{flex-wrap:wrap;margin:0;}
 .me-id{flex:1;min-width:180px;}
@@ -735,7 +734,8 @@ body.dlg-open{overflow:hidden;}
 .me-elo small{color:var(--ink-soft);font-size:12.5px;}
 .me-actions{display:flex;flex-wrap:wrap;gap:8px;}
 #meSigned .card + .card{margin-top:14px;}
-#meSigned{margin-bottom:14px;}
+#meSigned{margin-bottom:0;}
+#progressCard{margin-top:14px;}
 .person{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
 .person:last-child{border-bottom:0;}
 .person-main{flex:1;min-width:150px;display:flex;flex-direction:column;gap:2px;}
@@ -744,7 +744,7 @@ body.dlg-open{overflow:hidden;}
 .friends-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;}
 .friend-chip{appearance:none;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:8px 4px;border:1px solid var(--line);border-radius:12px;background:var(--paper-2);color:var(--ink);cursor:pointer;font:600 13px 'Be Vietnam Pro',sans-serif;}
 .friend-chip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.friend-chip small{color:var(--jade);font-weight:700;font-size:11.5px;}
+.friend-chip small{color:var(--jade);font-weight:700;font-size:12px;}
 .friend-chip:hover{border-color:var(--gold);}
 .rank-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed var(--line);}
 .rank-row .rank-n{width:30px;flex:none;}
@@ -811,8 +811,9 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
 .pb-main{display:flex;flex-direction:column;min-width:0;line-height:1.2;}
 .pb-main .ol-pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pb-sub{color:var(--ink-soft);font-size:12px;font-weight:600;}
-.pb-caps{display:flex;flex-wrap:wrap;gap:1px;flex:1;min-width:0;justify-content:flex-end;}
-.cap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:12px;line-height:1;}
+.pb-caps{display:flex;flex-wrap:wrap;gap:2px 0;flex:1;min-width:0;justify-content:flex-end;}
+.pb-caps .cap + .cap{margin-left:-5px;}
+.cap{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:16px;line-height:1;}
 .cap-red{color:var(--b-red-deep);} .cap-black{color:var(--b-black-deep);}
 .ol-player .ol-turn{flex:none;}
 .ol-player .ol-dot{flex:none;}
@@ -823,12 +824,12 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
   .game-head .btn-label{display:none;}
   .game-head .btn{padding:8px 10px;min-height:40px;}
   .ol-player{padding:3px 8px;min-height:36px;}
-  .cap{width:18px;height:18px;font-size:11px;}
+  .cap{width:23px;height:23px;font-size:15px;}
 }
 .level-opt .lv-tier{color:var(--jade);font-weight:600;}
 
 /* ---------- Đấu xếp hạng: bậc hạng, thẻ tìm trận ---------- */
-.tier{display:inline-flex;align-items:center;gap:4px;font:800 11.5px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
+.tier{display:inline-flex;align-items:center;gap:4px;font:800 12px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
 .tier-dong{--tier:#9a6236;} .tier-bac{--tier:#7d8895;} .tier-vang{--tier:#b8871f;} .tier-bachkim{--tier:#2f948f;}
 .tier-kimcuong{--tier:#3e6fc4;} .tier-tinhanh{--tier:#7b4fc4;} .tier-caothu{--tier:#c23e50;} .tier-daicaothu{--tier:#8f1d2c;}
 .tier-thachdau{--tier:linear-gradient(120deg,#b8871f,#c23e50,#7b4fc4);background:var(--tier);}
@@ -872,7 +873,8 @@ body.gated{overflow:hidden;}
   .zone-btn[aria-pressed="true"] #meIcon .zone-ic{background:none;padding:0;}
   .zone-badge{top:2px;right:calc(50% - 30px);}
   body{padding-bottom:calc(84px + env(safe-area-inset-bottom));}
-  .notice-stack{bottom:calc(78px + env(safe-area-inset-bottom));}
+  /* thông báo nổi ở trên đầu màn: không che thanh nút dưới bàn cờ và thanh điều hướng */
+  .notice-stack{bottom:auto;top:calc(8px + env(safe-area-inset-top, 0px));}
   .sync-ic{width:34px;height:34px;}
 }
 
@@ -896,22 +898,23 @@ body.gated{overflow:hidden;}
   .play-layout > .side-panel{grid-column:2;}
   .play-layout > .play-board > .board-toolbar{margin-top:0;justify-content:flex-start;}
   .play-layout > .play-board > .board-caption{margin-top:0;text-align:left;}
-  .play-layout{--bw:max(420px, min(780px, calc((100vh - 220px) * 0.9)));grid-template-columns:minmax(0,var(--bw)) 320px;justify-content:center;column-gap:24px;}
+  /* cỡ bàn theo chiều cao màn: bàn (tỉ lệ ~1:1.1) vừa khít dưới thanh trên đang dính */
+  .play-layout{--bw:max(420px, min(880px, calc((100vh - var(--sticky-top, 100px) - 30px) / 1.1)));grid-template-columns:minmax(0,var(--bw)) 320px;justify-content:center;column-gap:24px;}
   .play-layout .board-shell{max-width:var(--bw);}
 }
 
 /* ---------- Nền: điểm nhấn nhẹ kiểu cờ thủ — dấu vị trí quân như trên bàn cờ, mây cát tường ở hai góc ---------- */
 body::before,body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;}
-body::before{background:var(--ink);opacity:.07;
+body::before{background:var(--ink);opacity:.04;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;}
-body::after{background:var(--gold);opacity:.2;
+body::after{background:var(--gold);opacity:.11;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;}
-:root[data-theme="dark"] body::before{opacity:.05;}
-:root[data-theme="dark"] body::after{opacity:.13;}
+:root[data-theme="dark"] body::before{opacity:.025;}
+:root[data-theme="dark"] body::after{opacity:.06;}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) body::before{opacity:.05;}
-  :root:not([data-theme="light"]) body::after{opacity:.13;}
+  :root:not([data-theme="light"]) body::before{opacity:.025;}
+  :root:not([data-theme="light"]) body::after{opacity:.06;}
 }
 @media (max-width:767px){
   body::after{-webkit-mask-size:200px auto,230px auto;mask-size:200px auto,230px auto;
@@ -934,7 +937,6 @@ body::after{background:var(--gold);opacity:.2;
 .more-box > summary:hover{color:var(--ink);}
 .more-box > summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
 .more-box > :last-child{margin-bottom:4px;}
-#lessonToc .lesson-nav{margin-top:8px;}
 #pzFilterBox{border-top:0;margin-top:0;padding-top:0;}
 #pzFilterBox .chip-row{margin-top:8px;}
 @media (max-width:420px){ .tab-btn{padding:11px 6px;font-size:13px;} .tabs{padding-inline:4px;} }
@@ -946,10 +948,14 @@ body::after{background:var(--gold);opacity:.2;
 .ol-invite-row .btn-row{margin:0;}
 /* Máy tính: thông báo nổi ở góc phải dưới, không đè lên bàn cờ */
 @media (min-width:900px){ .notice-stack{left:auto;right:20px;transform:none;width:min(400px, calc(100vw - 40px));} }
-/* Điện thoại: hàng Bài trước / Bài tiếp luôn dính ngay trên thanh dưới */
+/* Điện thoại: hàng Bài trước / Bài n/19 / Bài tiếp luôn dính ngay trên thanh dưới */
 @media (max-width:767px){
-  .lesson-foot{position:sticky;bottom:calc(65px + env(safe-area-inset-bottom));z-index:5;background:var(--card);
-    margin:12px -12px -4px;padding:8px 12px;border-top:1px solid var(--line);}
+  .lesson-foot{position:fixed;left:0;right:0;bottom:calc(65px + env(safe-area-inset-bottom));z-index:35;background:var(--card);
+    margin:0;padding:6px max(10px, env(safe-area-inset-left));border-top:1px solid var(--line);flex-wrap:nowrap;
+    box-shadow:0 -3px 10px color-mix(in srgb, var(--shadow) 25%, transparent);}
+  .lesson-foot .btn-label{display:none;}
+  .lesson-foot #lessonTocBtn{flex:1;}
+  section[data-panel="hoc"]{padding-bottom:56px;}
 }
 
 /* ---------- Giao diện tối: tăng tương phản (chấm quân Đen, nhãn độ khó, hộp thoại, ô số liệu) ---------- */
@@ -1002,12 +1008,13 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
 .lesson-text .lesson-head{margin-bottom:10px;}
 @media(min-width:768px){ .lesson-demos .board-shell{max-width:none;width:100%;margin:0;} }
-/* "Chọn bài khác" nằm cùng hàng với tiêu đề bài (góc phải), mở ra thì danh sách hiện ngay dưới */
-.lesson-card{position:relative;}
-.lesson-card > h2{padding-right:150px;}
-.lesson-card > #lessonToc{border-top:0;margin-top:0;padding-top:0;}
-.lesson-card > #lessonToc > summary{position:absolute;top:20px;right:20px;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);}
-@media (max-width:600px){ .lesson-card > h2{padding-right:0;padding-top:36px;} .lesson-card > #lessonToc > summary{top:12px;right:12px;} }
+/* Bài học: tiêu đề + hàng ‹ Bài n/19 ▾ Bài tiếp › cùng một hàng; bấm "Bài n/19" mở danh sách bài */
+.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;}
+.lesson-top h2{margin:0;flex:1 1 220px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.lesson-top .lesson-level-tag{font-family:'Be Vietnam Pro',sans-serif;}
+.lesson-foot .btn{min-height:40px;padding:7px 12px;font-size:13.5px;}
+#lessonTocBtn .ic{width:15px;height:15px;}
+#lessonToc{margin-top:10px;}
 /* Máy tính bảng: thanh dưới gọn, không trải nút quá rộng */
 @media (min-width:768px) and (max-width:899px){
   .zone-switch{padding-inline:calc(50vw - 260px);}
@@ -1017,6 +1024,84 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .notation-help ul{margin:6px 0 4px;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
 .notation-help p{font-size:13.5px;margin:6px 0 0;}
 .notation-help b{color:var(--ink);}
+
+/* ---------- Chọn cấp máy: một thẻ gọn ‹ thông tin › + vạch 10 nấc ---------- */
+.level-grid:has(.lvl-card){display:block;}
+.lvl-card{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:6px 8px;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:10px;}
+.lvl-step{appearance:none;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.lvl-step:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.lvl-step:disabled{opacity:.35;cursor:default;}
+.lvl-step .ic{width:18px;height:18px;}
+.lvl-main{min-width:0;text-align:center;}
+.lvl-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 8px;}
+.lvl-name{font:800 17px 'Be Vietnam Pro',sans-serif;color:var(--ink);}
+.lvl-meta{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+.lvl-g{font:800 12px 'Be Vietnam Pro',sans-serif;color:#fff;background:var(--lg);padding:2px 8px;border-radius:999px;align-self:center;}
+.lvl-desc{font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px;}
+.lvl-easy{--lg:#3f8a5e;} .lvl-mid{--lg:#b8871f;} .lvl-hard{--lg:#c2603a;} .lvl-pro{--lg:#a3283a;}
+.lvl-track{grid-column:1 / -1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;margin:2px 4px 0;}
+.lvl-seg{position:relative;display:block;height:16px;cursor:pointer;}
+.lvl-seg::before{content:'';position:absolute;left:0;right:0;top:5px;height:6px;border-radius:3px;background:color-mix(in srgb, var(--lg) 22%, var(--card));transition:background .15s ease;}
+.lvl-seg.on::before{background:var(--lg);}
+.lvl-seg:has(input:checked)::after{content:'';position:absolute;right:-1px;top:1px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--lg);box-sizing:border-box;}
+.lvl-seg input{position:absolute;opacity:0;width:0;height:0;}
+.lvl-seg:has(input:focus-visible)::before{outline:2px solid var(--gold);outline-offset:2px;}
+@media (min-width:900px){ #aiSetupCard .lvl-card{max-width:620px;} }
+@media (min-width:900px){ #aiSetupCard .setup-field, #aiSetupCard #aiStartBtn{max-width:620px;} #aiSetupCard .seg-radio{display:flex;} #aiSetupCard .seg-radio label{flex:1;text-align:center;} }
+/* Màn lớn: nới khung để bàn cờ to theo chiều cao màn, bảng phụ rộng hơn */
+@media(min-width:1500px){
+  .app-main,.topbar,.tabs{max-width:1440px;}
+  .play-layout{grid-template-columns:minmax(0,var(--bw)) 380px;column-gap:32px;}
+}
+/* Nút phụ (Sao chép thế cờ, Đấu với máy từ thế này) gom vào "Thêm" */
+.tool-more{border-top:0;margin-top:6px;padding-top:0;}
+.tool-more > summary{min-height:32px;font-size:13px;}
+.tool-more .btn-row{margin-top:4px;}
+@media(max-width:899px){ .tool-more > summary{justify-content:center;} }
+/* Thẻ chiến thuật: tên + gợi ý thường 2 dòng (thay dòng chữ Hán) */
+.topic-card .puzzle-top h4{margin:0;flex:1;min-width:0;}
+.tc-count{font-size:12.5px;font-weight:700;color:var(--ink-soft);flex:none;}
+.tc-hint{font-size:13px;color:var(--ink-soft);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+/* Tàn cuộc: mỗi thế một hàng gọn, nhãn Thắng/Hoà bên phải */
+.topic-grid:has(.topic-row){grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;}
+.topic-card.topic-row{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;min-height:44px;}
+.topic-card.topic-row h4{margin:0;font-size:14.5px;}
+.tr-end{display:flex;align-items:center;gap:6px;flex:none;}
+@media (max-width:600px){
+  #satcucList .topic-grid,#tacticGrid{grid-template-columns:1fr 1fr;}
+  #egTheory .topic-grid,#endgameGrid{grid-template-columns:1fr !important;gap:6px;}
+  #egTheory .topic-card.topic-row,#endgameGrid .topic-card.topic-row{padding:8px 12px;}
+  #egTheory .topic-card.topic-row h4,#endgameGrid .topic-card.topic-row h4{margin:0;font-size:14px;}
+}
+.lesson-head h3{margin:0;}
+/* Học luật: phần tra nhanh bàn cờ + 7 loại quân thu gọn một dòng */
+.card.basics-box{border-top:1px solid var(--line);margin-top:14px;padding-block:8px;}
+.basics-box > summary{font-size:14px;}
+.basics-box[open]{padding-bottom:14px;}
+/* Khai cuộc: thẻ một dòng (tên + số nhánh + mức); nhánh cuộn ngang một hàng */
+.opening-card.op-row{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;min-height:44px;}
+.opening-card.op-row h4{margin:0;font-size:14.5px;min-width:0;}
+.opening-cards:has(.op-row){grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px;}
+@media (max-width:600px){ .opening-cards:has(.op-row){grid-template-columns:1fr;gap:6px;} }
+.group-desc{margin:0;font-size:13.5px;}
+.opening-group{margin-top:14px;}
+.line-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px 0;padding-bottom:2px;}
+.line-chips::-webkit-scrollbar{display:none;}
+.line-chips .chip{flex:none;}
+.explain-box .ex-line{margin:0 0 6px;}
+.explain-box .more-box{margin-top:6px;}
+/* Phân tích ván: tóm tắt một dòng trên cùng; biểu đồ là dải mỏng cạnh nút */
+.rv-sum{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;background:var(--paper-2);border-radius:12px;padding:8px 12px;}
+.rv-sum .acc-num{font-size:24px;line-height:1;}
+.rv-sum .cls-chip{background:var(--card);}
+#reviewChart .eval-svg,#masterChart .eval-svg{max-height:84px;}
+#reviewChart:empty{display:none;}
+/* Phòng chờ: nút mời nằm trên hàng tiêu đề, không còn khung mã phòng riêng */
+.ol-room-head .ol-invite{background:none;border:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;flex:none;max-width:100%;}
+.ol-room-head{flex-wrap:wrap;}
+.ol-invite .ol-link{flex-basis:100%;width:100%;}
+.btn-label-s{display:none;}
+@media (max-width:600px){ .ol-room-head .btn-label-s{display:inline;} }
 </style>
 </head>
 <body>
@@ -1026,21 +1111,21 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <span class="seal" aria-hidden="true">象</span>
     <h1 class="app-name">Cờ Tướng</h1>
     <nav class="zone-switch" aria-label="Chọn phần">
-      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
-      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
+      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Học</span></button>
+      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Chơi</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
       <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
     <button type="button" class="music-btn" id="musicBtn" aria-pressed="false" aria-label="Bật nhạc nền" title="Bật nhạc nền"></button>
   </div>
-  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
+  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Học">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
     <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
     <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
     <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
-    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
   </nav>
-  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
-    <button class="tab-btn st-btn" data-stab="phong" role="tab">Phòng đấu</button>
+  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Chơi" hidden>
+    <button class="tab-btn st-btn" data-stab="phong" role="tab">Đấu người</button>
+    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
     <button class="tab-btn st-btn" data-stab="banbe" role="tab">Bạn bè</button>
     <button class="tab-btn st-btn" data-stab="xephang" role="tab">Xếp hạng</button>
   </nav>
@@ -1050,31 +1135,21 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
   <div class="card lesson-card">
-    <h2 id="lessonsHeading">Các bài học</h2>
-    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
-      <div class="lesson-nav" id="lessonNav"></div>
-    </details>
-    <div id="lessonContent"></div>
-    <div class="lesson-foot">
-      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
-      <span id="lessonProgress" class="hint-text"></span>
-      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+    <div class="lesson-top">
+      <h2 id="lessonsHeading">Các bài học</h2>
+      <div class="lesson-foot">
+        <button class="btn btn-outline" id="lessonPrev" aria-label="Bài trước" title="Bài trước"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg><span class="btn-label">Bài trước</span></button>
+        <button type="button" class="btn btn-outline" id="lessonTocBtn" aria-expanded="false" aria-controls="lessonToc"><span id="lessonProgress"></span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chevDown"></use></svg></button>
+        <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+      </div>
     </div>
+    <div id="lessonToc" hidden><div class="lesson-nav" id="lessonNav"></div></div>
+    <div id="lessonContent"></div>
   </div>
-  <div class="card">
-    <h2>Bàn cờ và những điều cơ bản</h2>
-    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ, không đứng trong ô như cờ vua. Đỏ đi trước, hai bên thay phiên nhau. Ai bắt được Tướng đối phương thì thắng.</p>
-    <details class="more-box"><summary>Vài từ hay gặp</summary>
-      <p class="serif"><b>Sông</b>: khoảng trống giữa bàn, chia hai bên Đỏ và Đen. <b>Cung</b>: ô vuông nhỏ có hình chữ X ở giữa hàng cuối — Tướng và Sĩ không được ra khỏi đó. <b>Chiếu bí</b>: Tướng bị tấn công và không còn cách nào thoát, bên đó thua.</p>
-    </details>
-    <h3 class="mt16">7 loại quân cờ</h3>
+  <details class="card more-box basics-box"><summary>Tra nhanh: bàn cờ và 7 loại quân</summary>
+    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ. Đỏ đi trước, hai bên thay phiên. Bắt được Tướng đối phương (chiếu bí) là thắng. <b>Sông</b> chia đôi bàn; <b>Cung</b> là ô có hình chữ X — Tướng và Sĩ không ra khỏi đó.</p>
     <div class="legend-grid" id="legendGrid"></div>
-  </div>
-
-  <div class="card" id="progressCard">
-    <h2>Tiến độ của bạn</h2>
-    <div id="progressDash"></div>
-  </div>
+  </details>
 </section>
 
 <!-- ===================== TAB: KHAI CUOC ===================== -->
@@ -1086,15 +1161,12 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     </div>
     <div data-opanel="master" hidden>
       <h2>Ván danh thủ có chú giải</h2>
-      <p class="serif">Xem lại các ván cờ nổi tiếng từng nước một, kèm lời giải thích vì sao đi như vậy.</p>
-      <details class="more-box"><summary>Về nhãn “1 nguồn” và “2 nguồn”</summary>
-        <p class="hint-text">Biên bản mỗi ván đều ghi rõ nguồn (bấm vào ván để xem). “2 nguồn” là đã đối chiếu khớp từng nước ở hai nơi khác nhau, “1 nguồn” là mới có một nơi. Mọi nước đều được máy kiểm tra hợp lệ.</p>
-      </details>
+      <p class="serif">Ván nổi tiếng, có giải thích từng nước.</p>
       <div class="topic-grid" id="masterGrid"></div>
     </div>
     <div data-opanel="open">
     <h2>Các thế trận khai cuộc</h2>
-    <p class="serif">Khai cuộc là 10–15 nước đầu ván. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b> để tự đi — sai là được nhắc ngay.</p>
+    <p class="serif">Chọn thế trận để xem từng nước, rồi bấm <b>Tự đi lại</b> để luyện.</p>
     <div id="openingNotationHelp"></div>
     <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện một thế ngẫu nhiên</button></div>
     <div id="openingGrid"></div>
@@ -1106,9 +1178,6 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <button class="btn btn-outline" id="masterBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách ván</button>
     <h2 id="masterTitle" class="mt10"></h2>
     <div id="masterHead" class="hint-text"></div>
-    <div class="btn-row mt10"><label class="toggle"><input type="checkbox" id="masterGuess"> Tự đoán nước tiếp theo trước khi xem</label>
-      <select id="masterSide" aria-label="Đoán nước của bên"><option value="both">Đoán cả hai bên</option><option value="red">Chỉ đoán nước Đỏ</option><option value="black">Chỉ đoán nước Đen</option></select></div>
-    <div id="masterChart" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
@@ -1119,10 +1188,13 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
           <button class="btn btn-outline" id="masterKey"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-star"></use></svg>Nước quan trọng</button>
           <button class="btn btn-outline" id="masterFlip" aria-label="Xoay bàn cờ" title="Xoay bàn cờ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg></button>
         </div>
-        <div class="btn-row btn-row-center mt10">
+        <div class="btn-row master-opts"><label class="toggle"><input type="checkbox" id="masterGuess"> Tự đoán nước tiếp theo</label>
+          <select id="masterSide" aria-label="Đoán nước của bên" hidden><option value="both">Đoán cả hai bên</option><option value="red">Chỉ đoán nước Đỏ</option><option value="black">Chỉ đoán nước Đen</option></select></div>
+        <div id="masterChart"></div>
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="explain">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
@@ -1134,13 +1206,13 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         </div>
       </div>
     </div>
+    <p class="hint-text mt10" id="masterFamous"></p>
     <p class="sources" id="masterSources"></p>
   </div>
 
   <div class="card" id="openingDetailCard" hidden>
     <button class="btn btn-outline" id="openingBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách khai cuộc</button>
     <h2 id="openingTitle" class="mt10"></h2>
-    <p id="openingSummary" class="hint-text"></p>
     <div id="openingLines"></div>
     <div class="play-layout">
       <div class="play-board">
@@ -1160,6 +1232,8 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         </div>
       </div>
     </div>
+    <div id="openingLineInfo" class="mt10"></div>
+    <p id="openingSummary" class="hint-text mt10"></p>
     <div class="info-grid mt16">
       <div class="info-box"><h3 id="openingIdeasH">Ý chính</h3><ul id="openingIdeas"></ul></div>
       <div class="info-box warn"><h3 id="openingTrapsH">Bẫy thường gặp</h3><ul id="openingTraps"></ul></div>
@@ -1200,7 +1274,6 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp máy và màu quân của bạn, rồi bấm Bắt đầu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -1240,8 +1313,10 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         <div class="btn-row btn-row-center mt10" id="aiAfter" hidden>
           <button class="btn btn-primary" id="aiAgainBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ván mới</button>
           <button class="btn btn-jade" id="aiReviewBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
-          <button type="button" class="btn btn-outline" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
         </div>
+        <details class="more-box tool-more" id="aiMore" hidden><summary>Thêm</summary><div class="btn-row">
+          <button type="button" class="btn btn-outline btn-sm" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="log">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button><button type="button" class="side-tab" data-side-tab="think">Cách suy nghĩ</button></div>
@@ -1260,8 +1335,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <h2 class="mt10">Phân tích ván cờ</h2>
     <div id="reviewHead" class="hint-text"></div>
     <div id="reviewProgress" class="mt10" hidden><div class="progress"><div class="progress-bar" id="reviewProgressBar"></div></div><div class="hint-text small mt10" id="reviewProgressTxt"></div></div>
-    <div id="reviewSummary" class="review-summary mt10"></div>
-    <div id="reviewChart" class="mt10"></div>
+    <div id="reviewSummary" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div id="reviewStep" class="review-step" aria-live="polite"></div>
@@ -1273,10 +1347,11 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
           <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
           <span class="tb-extra" id="reviewTools"></span>
         </div>
-        <div class="btn-row btn-row-center mt10">
+        <div id="reviewChart"></div>
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Chơi lại từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="explain">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
@@ -1288,6 +1363,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         </div>
       </div>
     </div>
+    <div id="reviewMore" class="mt10"></div>
   </div>
 </section>
 
@@ -1295,14 +1371,12 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 <section data-panel="chienthuat" hidden>
   <div class="card" id="tacticListCard">
     <h2>Chiến thuật & Tàn cuộc</h2>
-    <p class="serif">Ba nhóm: các thế chiếu bí hay gặp, các đòn ăn quân, và tàn cuộc (lúc còn ít quân).</p>
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mảng">
       <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">Thế chiếu bí</button>
       <button class="chip" data-sub="don" role="tab" aria-selected="false">Đòn ăn quân</button>
       <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">Tàn cuộc</button>
     </div>
     <div data-subpanel="satcuc">
-      <p class="hint-text">Mỗi thế có cách nhận ra trong ván cờ và 3 bài để bạn tự chiếu bí.</p>
       <p class="hint-text" id="satcucProgress"></p>
       <div id="satcucList"></div>
     </div>
@@ -1311,10 +1385,10 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     </div>
     <div data-subpanel="tancuoc" hidden>
       <h3 class="group-h mt16">Tàn cuộc nhập môn</h3>
-      <p class="hint-text">Ở mỗi thế tàn cuộc, bạn cầm Đỏ, còn máy phòng thủ bằng những nước kéo dài nhất có thể.</p>
+      <p class="hint-text">Bạn cầm Đỏ, máy thủ hết sức.</p>
       <div class="topic-grid" id="endgameGrid"></div>
       <h3 class="group-h mt16">Tàn cuộc lý thuyết</h3>
-      <p class="hint-text">Thế nào thắng được, thế nào chỉ hoà. Nhãn “Máy kiểm chứng” là đã tính hết mọi khả năng; “Theo sách” là ghi theo sách tàn cuộc.</p>
+      <p class="hint-text">Thế nào thắng, thế nào chỉ hoà.</p>
       <div id="egTheory"></div>
     </div>
   </div>
@@ -1328,11 +1402,11 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 <section data-panel="baitap" hidden>
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
-    <p>Chọn một thế cờ và tìm nước đi đúng. Bài có nhiều cách giải thì cách nào đúng cũng được tính.</p>
+    <p class="hint-text">Tìm nước đi đúng — cách nào đúng cũng được.</p>
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Làm bài chưa giải</button></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
     <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
@@ -1349,15 +1423,15 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         </div>
         <div class="board-toolbar">
           <button class="btn btn-outline" id="puzzleHintBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
-          <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Thử lại</button>
-          <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem đáp án</button>
-          <button class="btn btn-outline" id="puzzleNextBtn">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+          <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Làm lại</button>
+          <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem lời giải</button>
+          <button class="btn btn-outline" id="puzzleNextBtn">Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
         </div>
         <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center">
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
         <div id="puzzleExplain" class="explain-box" hidden></div>
       </div>
     </div>
@@ -1380,7 +1454,6 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <div class="ol-grid">
       <div class="card ol-box">
         <h2>Tạo phòng</h2>
-        <p class="hint-text small" id="olAsUser" hidden></p>
         <label class="setup-field ol-name">Tên của bạn
           <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
         </label>
@@ -1410,9 +1483,9 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
       <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
-      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
+      <div class="ol-room-title"><b id="olTitle">Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
+      <div id="olInvite" class="ol-invite" hidden></div>
     </div>
-    <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div class="ol-player" id="olTop"></div>
@@ -1457,17 +1530,15 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div data-when-login hidden>
-    <div class="card">
-      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
-      <div id="friendResults" class="mt10" aria-live="polite"></div>
-    </div>
     <div class="card" id="friendRequestsCard" hidden>
       <h2>Lời mời kết bạn</h2>
       <div id="friendRequests"></div>
     </div>
     <div class="card">
       <h2>Bạn bè</h2>
-      <div id="friendList"></div>
+      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
+      <div id="friendResults" class="mt10" aria-live="polite"></div>
+      <div id="friendList" class="mt10"></div>
       <div id="friendOutgoing"></div>
     </div>
   </div>
@@ -1496,7 +1567,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
     <div class="me-head"><span class="me-avatar"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><div><h2>Tài khoản</h2><div class="hint-text small">Bạn đang dùng không cần tài khoản — tiến độ lưu trong trình duyệt này.</div></div></div>
     <ul class="me-benefits">
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Tiến độ học, bài tập, ván đã đấu đi theo bạn sang mọi máy</li>
-      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng ở Sa trường, kết bạn và mời đấu trực tiếp</li>
+      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng khi đấu online, kết bạn và mời đấu trực tiếp</li>
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
     </ul>
     <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
@@ -1514,7 +1585,10 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
         <div class="me-elo"><b id="meElo"></b><small id="meEloSub"></small></div>
       </div>
     </div>
-    <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
+  </div>
+  <div class="card" id="progressCard">
+    <h2>Tiến độ</h2>
+    <div id="progressDash"></div>
   </div>
   <div class="me-grid">
     <div class="card" id="settingsPanel">
@@ -1524,7 +1598,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
           <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
         </div>
       </div>
-      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời: đàn tranh, sáo trúc, đàn nhị, tỳ bà, cổ cầm)</small></span>
+      <div class="settings-row"><span>Nhạc nền</span>
         <div class="seg" id="musicToggle" role="group" aria-label="Nhạc nền">
           <button type="button" data-music="on">Bật</button><button type="button" data-music="off">Tắt</button>
         </div>
@@ -1556,17 +1630,17 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
       </details>
     </div>
-  </div>
-  <div class="card mt16" id="meAccount" hidden>
-    <h2>Tài khoản</h2>
-    <div class="me-actions">
-      <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
-      <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
-      <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
-      <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+    <div class="card" id="meAccount" hidden>
+      <h2>Tài khoản</h2>
+      <div class="me-actions">
+        <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
+        <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
+        <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
+        <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+      </div>
+      <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
+      <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
     </div>
-    <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
-    <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
   </div>
 </section>
 
@@ -3151,14 +3225,20 @@ function statusBanner(el, kind, html){
 /* Cuộn để bàn cờ hiện đủ (dưới thanh tab và thanh nút đang dính ở trên) */
 // Nút cần bấm 2 lần mới chạy (vd. Đầu hàng): lần 1 đổi sang kiểu cảnh báo "Chắc chắn?", 3 giây không bấm thì trở lại.
 // Bỏ qua lần bấm thứ hai quá nhanh (chạm đúp vô tình). Không dùng confirm() vì có thể bị chặn trong khung nhúng.
+// Lần 1 hiện thêm nút "Huỷ" ngay cạnh để thoát rõ ràng (không phải chờ hết giờ).
 function confirmTap(btn, run, label){
   const html=btn.innerHTML;
-  const reset=()=>{ clearTimeout(btn._ctT); delete btn.dataset.confirm; btn.classList.remove('btn-confirm'); btn.innerHTML=html; };
+  let cancel=null;
+  const reset=()=>{ clearTimeout(btn._ctT); delete btn.dataset.confirm; btn.classList.remove('btn-confirm'); btn.innerHTML=html;
+    if(cancel){ cancel.remove(); cancel=null; } };
   btn.addEventListener('click',()=>{
     if(!btn.dataset.confirm){
       btn.dataset.confirm=String(Date.now()); btn.classList.add('btn-confirm');
       btn.innerHTML=`${icon('flag')}${label||'Chắc chắn?'}`;
-      btn._ctT=setTimeout(reset,3000); return;
+      cancel=document.createElement('button'); cancel.type='button'; cancel.className='btn btn-outline btn-cancel';
+      cancel.innerHTML=`${icon('x')}Huỷ`; cancel.addEventListener('click',reset);
+      btn.after(cancel);
+      btn._ctT=setTimeout(reset,4000); return;
     }
     if(Date.now()-(+btn.dataset.confirm)<400) return;
     reset(); run();
@@ -3166,7 +3246,8 @@ function confirmTap(btn, run, label){
   return reset;
 }
 function stickyTop(){ const v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-top'))||0; return v; }
-function revealBoard(el){
+// snap: khi vào ván (điện thoại) luôn cuộn bàn cờ sát mép trên và ẩn thanh trên, kể cả khi bàn đã thấy đủ
+function revealBoard(el, snap){
   if(!el) return;
   const shell = el.closest ? (el.closest('.board-shell')||el) : el;
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
@@ -3178,14 +3259,16 @@ function revealBoard(el){
   // điện thoại: cuộn xuống đủ xa thì ẩn thanh trên (xem initAutoHideHeader) → bàn cờ được sát mép trên.
   // Cuộn ít (< 60px) thì thanh trên vẫn hiện → phải chừa chỗ cho nó, kẻo che mất thanh người chơi.
   const hide = isPhone() && r.top>0 && (window.scrollY||0)+r.top-4>=60;
-  const top = (hide ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
+  // máy tính: thanh nút nằm ở cột phải, không cần chừa chỗ dưới bàn
+  const top = (hide ? 0 : stickyTop())+4, extra=tb&&isPhone()?tb.offsetHeight+6:0;
   // trừ thanh dưới (bottom nav trên điện thoại)
   const nav=document.querySelector('.zone-switch'), navH = nav && getComputedStyle(nav).position==='fixed' ? nav.offsetHeight : 0;
   const vh=(window.innerHeight||document.documentElement.clientHeight)-navH;
   // "đã thấy" tính theo thanh trên hiện tại (đang hiện thì nó che phần trên)
   const now = (isPhone() && document.body.classList.contains('hdr-hide') ? 0 : stickyTop())+4;
-  if(r.top>=now && r.bottom+extra<=vh) return;              // đã thấy đủ
-  if(r.top>=now && r.height+extra>vh-now && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
+  const snapNow = snap && hide;
+  if(!snapNow && r.top>=now && r.bottom+extra<=vh) return;              // đã thấy đủ
+  if(!snapNow && r.top>=now && r.height+extra>vh-now && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   if(hide) document.body.classList.add('hdr-hide');
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
@@ -3241,6 +3324,7 @@ const ICON_PATHS = {
   flip:'<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
   flag:'<path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/>',
   left:'<path d="m15 18-6-6 6-6"/>',
+  chevDown:'<path d="m6 9 6 6 6-6"/>',
   right:'<path d="m9 18 6-6-6-6"/>',
   back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   prevErr:'<path d="M19 20 9 12l10-8z"/><path d="M5 19V5"/>',
@@ -3303,9 +3387,23 @@ function playerBarHTML(p){
 }
 function setPlayerBar(el, p){ el.innerHTML=playerBarHTML(p); el.classList.toggle('pb-active', !!p.active); }
 
+/* ---------- Nhiều bàn minh hoạ: chỉ hiện một bàn, chuyển bằng hàng nút (bài học, sát cục) ---------- */
+function wireDemoTabs(host, slots, labels){
+  if(slots.length<2) return;
+  host.insertAdjacentHTML('afterbegin', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${labels.map((t,i)=>
+    `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">${esc(t)}</button>`).join('')}</div>`);
+  slots.forEach((d,i)=>{ d.hidden = i>0; });
+  $$('[data-demo]',host).forEach(b=>b.addEventListener('click',()=>{
+    const k=+b.dataset.demo;
+    slots.forEach((d,i)=>d.hidden = i!==k);
+    $$('[data-demo]',host).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
+  }));
+}
+
 /* ---------- Cách đọc ký hiệu nước đi (gắn dưới mọi biên bản nước đi) ---------- */
 const NOTATION_HELP = `<details class="more-box notation-help"><summary>Cách đọc ký hiệu nước đi</summary>
   <p>Ví dụ <b>P2-5</b>: <b>P</b>háo đang ở <b>cột 2</b>, đi <b>ngang</b> sang <b>cột 5</b>.</p>
+  <p>Dấu <b>×</b> sau nước đi: ăn quân · <b>+</b>: chiếu Tướng.</p>
   <ul>
     <li><b>Chữ cái</b> là quân: Tg Tướng · S Sĩ · T Tượng · M Mã · X Xe · P Pháo · B Tốt (Binh).</li>
     <li><b>Số đầu</b> là cột quân đang đứng. Mỗi bên đếm cột 1→9 từ tay phải của mình — chính là các số in ở mép bàn cờ phía mình.</li>
@@ -3499,7 +3597,7 @@ const LESSONS = [
   {
     key:'giatri', level:1, type:'R', title:'Giá trị các quân', han:'子力',
     text:[
-      'Muốn biết một cuộc đổi quân có lợi hay không, người chơi dùng bảng điểm ước lượng dưới đây. Đây chỉ là con số tham khảo; giá trị thật còn tuỳ vị trí.',
+      'Điểm ước lượng của mỗi quân (chỉ để tham khảo, giá trị thật còn tuỳ vị trí).',
       '<b>Pháo mạnh ở đầu ván</b> vì bàn còn nhiều quân làm ngòi. <b>Mã mạnh hơn ở cuối ván</b> khi bàn thưa, ít bị cản chân. <b>Tốt qua sông</b> được đi ngang nên giá trị tăng gấp đôi; Tốt đã tới hàng cuối thì yếu đi.',
       'Hai quy tắc hay dùng: đổi một Xe lấy Mã + Pháo thường là có lợi cho bên lấy hai quân. Mất Sĩ Tượng thì Tướng dễ bị chiếu bí, dù điểm số không cao.'
     ],
@@ -3680,6 +3778,7 @@ function initLessonDemo(container, demo){
     <div class="demo-msg" aria-live="polite"></div>
     <div class="demo-log movelog" hidden></div>`;
   const msgEl = $('.demo-msg',container), logEl=$('.demo-log',container);
+  const showLog = moves=>{ logEl.hidden=!moves.length; if(moves.length) renderMoveLog(logEl, moves); };
   const heroInit = demo.hero ? demo.hero.map(h=>h.slice()) : null;
   let shown=false, game, board, solved=false, showArrows=true, stage=0, busy=false, token=null, userColor=demo.toMove||RED;
   const say=(cls,html)=>{ msgEl.className='demo-msg'+(cls?' '+cls:''); msgEl.innerHTML=html; };
@@ -3688,8 +3787,7 @@ function initLessonDemo(container, demo){
     if(heroInit) demo.hero=heroInit.map(h=>h.slice());
     if(turnBased) game=Game.create(demo.board, demo.toMove||RED);
     board=Engine.cloneBoard(demo.board);
-    logEl.hidden = !turnBased;
-    if(turnBased) renderMoveLog(logEl, []);
+    logEl.hidden = true;   // hộp nước đi chỉ hiện từ nước đầu tiên
     if(ctl){ ctl.clear(); ctl.render(); }
   }
   const curBoard=()=> turnBased ? game.board() : board;
@@ -3704,7 +3802,7 @@ function initLessonDemo(container, demo){
     const apply=(d)=>{
       if(token!==my) return;
       const rec=game.play(d); busy=false;
-      renderMoveLog(logEl, game.moves);
+      showLog(game.moves);
       if(game.result){ endgameResult(); }
       else say('', `Máy đáp <b>${esc(rec.text.short)}</b>. Đến lượt bạn.` + (game.moves.length>=40 && demo.result==='draw' ? ' <i>Đã 20 nước mà chưa thắng được — đúng như lý thuyết, thế này là hoà.</i>':''));
       ctl.render();
@@ -3742,7 +3840,7 @@ function initLessonDemo(container, demo){
       showArrows=false;
       if(turnBased){
         const rec=game.play(mv);
-        renderMoveLog(logEl, game.moves);
+        showLog(game.moves);
         if(mode==='endgame'){
           if(game.result) endgameResult(); else machineReply();
         } else {
@@ -3813,7 +3911,7 @@ function initLessonDemo(container, demo){
         let i=0;
         const step=()=>{ if(token!==my) return;
           if(i>=line.length){ busy=false; say('ok', `${demo.result==='draw'?'Diễn biến mẫu':'Lời giải'}: ${esc(Notation.gameRecord(demo.board,line,demo.toMove).map(r=>r.n+'. '+(r.red?r.red.short:'…')+' '+(r.black?r.black.short:'')).join('  '))}`); return; }
-          game.play(line[i++]); renderMoveLog(logEl, game.moves); ctl.render(); setTimeout(step, line.length>16?450:700); };
+          game.play(line[i++]); showLog(game.moves); ctl.render(); setTimeout(step, line.length>16?450:700); };
         step();
       }, 50);
       return;
@@ -3834,13 +3932,16 @@ function renderLessonNav(){
   const done = lessonsDone();
   nav.innerHTML = LESSON_LEVELS.map(lv=>{
     const items=LESSONS.map((l,i)=>({l,i})).filter(x=>x.l.level===lv.id);
-    return `<div class="lesson-level"><div class="lesson-level-h"><b>${esc(lv.name)}</b> <span>${esc(lv.desc)}</span></div>
-      <div class="lesson-level-items">${items.map(({l,i})=>
-        `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div></div>`;
+    return `<div class="lesson-level"><b class="lesson-level-h">${esc(lv.name)}</b>${items.map(({l,i})=>
+        `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div>`;
   }).join('');
   $$('.lesson-dot',nav).forEach(btn=>{
-    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); const t=$('#lessonToc'); if(t) t.open=false; renderLesson(true); });
+    btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); setLessonToc(false); renderLesson(true); });
   });
+}
+function setLessonToc(open){
+  $('#lessonToc').hidden=!open; $('#lessonTocBtn').setAttribute('aria-expanded', open?'true':'false');
+  if(open) $('#lessonToc').scrollIntoView({block:'nearest'});
 }
 function markLessonDone(key){
   const done = lessonsDone();
@@ -3854,40 +3955,29 @@ function renderLesson(scroll){
   const content = $('#lessonContent');
   const table = lesson.table ? `<div class="table-wrap"><table class="lesson-table"><thead><tr>${lesson.table.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${lesson.table.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
   const sources = lesson.sources ? `<p class="sources">Nguồn: ${lesson.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p>` : '';
-  // tiêu đề bài nằm trong cột chữ để cột bàn cờ bắt đầu ngang hàng, vừa một màn hình
   content.innerHTML = `
     <div class="lesson-body ${lesson.demos.length?'':'no-demo'}">
-      <div class="lesson-text"><div class="lesson-head">
-        <span class="han" aria-hidden="true">${lesson.han}</span>
-        <div><div class="lesson-level-tag">${esc(lv.name)}</div><h3 style="margin:0;">${esc(lesson.title)}</h3></div>
-      </div>${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
+      <div class="lesson-text">${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
       <div class="lesson-demos"></div>
     </div>`;
   // Bàn cờ minh hoạ: nhiều ví dụ thì chuyển bằng nút "Ví dụ 1 / 2…" (một bàn tại một lúc, luôn cạnh phần chữ)
   const demosEl = $('.lesson-demos',content);
-  if(lesson.demos.length>1){
-    demosEl.insertAdjacentHTML('beforeend', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${lesson.demos.map((d,i)=>
-      `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">Ví dụ ${i+1}</button>`).join('')}</div>`);
-  }
-  const slots = lesson.demos.map((demo,i)=>{
+  const slots = lesson.demos.map(demo=>{
     const d = document.createElement('div');
-    d.className='lesson-demo-slot'; d.hidden = i>0;
+    d.className='lesson-demo-slot';
     demosEl.appendChild(d);
     initLessonDemo(d, Object.assign({}, demo, {hero: demo.hero ? demo.hero.map(h=>h.slice()) : demo.hero}));
     return d;
   });
-  $$('[data-demo]',demosEl).forEach(b=>b.addEventListener('click',()=>{
-    const k=+b.dataset.demo;
-    slots.forEach((d,i)=>d.hidden = i!==k);
-    $$('[data-demo]',demosEl).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
-  }));
-  $('#lessonsHeading').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}: ${lesson.title}`;
-  $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1} / ${LESSONS.length}`;
+  wireDemoTabs(demosEl, slots, lesson.demos.map((d,i)=>'Ví dụ '+(i+1)));
+  $('#lessonsHeading').innerHTML = `${esc(lesson.title)} <span class="lesson-level-tag">${esc(lv.name)}</span>`;
+  $('#lessonProgress').textContent = `Bài ${currentLessonIdx+1}/${LESSONS.length}`;
   $('#lessonPrev').disabled = currentLessonIdx===0;
   $('#lessonNext').disabled = currentLessonIdx===LESSONS.length-1;
   $('#lessonNext').innerHTML = currentLessonIdx===LESSONS.length-1 ? 'Đã hết bài' : 'Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg>';
-  if(scroll) content.scrollIntoView({behavior:'smooth', block:'start'});
+  if(scroll) $('.lesson-card').scrollIntoView({behavior:'smooth', block:'start'});
 }
+$('#lessonTocBtn').addEventListener('click',()=>setLessonToc($('#lessonToc').hidden));
 $('#lessonPrev').addEventListener('click',()=>{ if(currentLessonIdx>0){ currentLessonIdx--; renderLesson(true); } });
 $('#lessonNext').addEventListener('click',()=>{ if(currentLessonIdx<LESSONS.length-1){ currentLessonIdx++; renderLesson(true); } });
 
@@ -4043,10 +4133,12 @@ function aiRender(){
     active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
   if(g.result){
     const human = g.result.winner===H, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
+    const selfResign = g.result.reason==='resign' && g.result.winner===M;
+    statusBanner(el, draw?'draw':(human?'over':'fail'), selfResign ? '<b>Bạn đã đầu hàng.</b>' : `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
   } else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===H ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
   else if(aiGame.hint && aiGame.hintText) statusBanner(el,'think', aiGame.hintText);
-  else el.innerHTML = turn===H && !aiGame.thinking ? `<span class="hint-text small">Đến lượt bạn — chạm quân rồi chạm ô sáng để đi.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
+  // dòng nhắc cách đi chỉ ở vài nước đầu (thanh người chơi đã báo "tới lượt")
+  else el.innerHTML = turn===H && !aiGame.thinking && g.moves.filter(m=>m.color===H).length<2 ? `<span class="hint-text small">Chạm quân, rồi chạm ô sáng.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
   renderMoveLog($('#aiLog'), g.moves);
   const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
   $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
@@ -4054,7 +4146,7 @@ function aiRender(){
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
   $('#aiActions').hidden = over;
-  $('#aiAfter').hidden = !over;
+  $('#aiAfter').hidden = !over; $('#aiMore').hidden = !over;
   $('#aiLevelTag').textContent = '';
 }
 function aiPersist(){
@@ -4114,7 +4206,7 @@ function aiBeginGame(cfg){
   aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
-  revealBoard($('#aiBoardCard'));
+  revealBoard($('#aiBoardCard'), true);
 }
 function showAICard(which){
   $('#aiSetupCard').hidden = which!=='setup';
@@ -4122,18 +4214,36 @@ function showAICard(which){
   $('#aiReviewCard').hidden = which!=='review';
   if(which==='setup') renderHistoryList();
 }
+// Nhóm độ khó cho thang chọn cấp
+const LEVEL_GROUPS=[{to:3,label:'Dễ',key:'easy'},{to:6,label:'Vừa sức',key:'mid'},{to:8,label:'Khó',key:'hard'},{to:10,label:'Cao thủ',key:'pro'}];
+const levelGroup=id=>LEVEL_GROUPS.find(g=>id<=g.to);
+// Chọn cấp máy gọn trong một thẻ: ‹ [tên · cấp · nhóm · bậc tương đương / mô tả] ›, dưới là vạch 10 nấc bấm được.
+// Vẫn dùng radio name="aiLevel" để các phần khác đọc cấp đang chọn như cũ.
 function renderLevelPicker(){
   const saved=savedAiLevel();
   const pick=$('#aiLevelPicker');
-  pick.innerHTML = AI_LEVELS.map(l=>`<label class="level-chip"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}><span>${l.id}. ${esc(l.name)}</span></label>`).join('')
-    + '<p class="level-note" id="aiLevelNote"></p>';
-  const note=()=>{
-    const r=$('input[name="aiLevel"]:checked',pick); if(!r) return;
-    const l=AI_LEVELS.find(x=>x.id===+r.value);
-    $('#aiLevelNote').innerHTML = `${esc(l.desc)} <span class="lv-tier">Ngang bậc ${esc(Ranked.tierOf(l.elo).label)}</span>`;
+  const N=AI_LEVELS.length;
+  pick.innerHTML = `<div class="lvl-card">
+      <button type="button" class="lvl-step" data-step="-1" aria-label="Cấp dễ hơn">${icon('left')}</button>
+      <div class="lvl-main" aria-live="polite"></div>
+      <button type="button" class="lvl-step" data-step="1" aria-label="Cấp khó hơn">${icon('right')}</button>
+      <div class="lvl-track" role="radiogroup" aria-label="Cấp độ máy">${AI_LEVELS.map(l=>`<label class="lvl-seg lvl-${levelGroup(l.id).key}" title="Cấp ${l.id}: ${esc(l.name)} (${levelGroup(l.id).label})">
+        <input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''} aria-label="Cấp ${l.id}: ${esc(l.name)}"></label>`).join('')}</div>
+    </div>`;
+  const cur=()=>{ const r=$('input[name="aiLevel"]:checked',pick); return r ? +r.value : saved; };
+  const show=()=>{
+    const id=cur(), l=AI_LEVELS.find(x=>x.id===id), g=levelGroup(id), t=Ranked.tierOf(l.elo);
+    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b><span class="lvl-g lvl-${g.key}">${g.label}</span></div>
+      <div class="lvl-desc">${esc(l.desc)}</div>`;
+    pick.title = `Cấp ${id}/${N} · ngang bậc ${t.label} ở Đấu xếp hạng`;
+    $$('.lvl-seg',pick).forEach(b=>{ const v=+$('input',b).value; b.classList.toggle('on', v<=id); });
+    $$('.lvl-step',pick).forEach(b=>b.disabled = (+b.dataset.step<0 ? id<=1 : id>=N));
   };
-  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',note));
-  note();
+  const set=id=>{ const r=$(`input[name="aiLevel"][value="${id}"]`,pick); if(r){ r.checked=true; show(); } };
+  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',show));
+  $$('.lvl-step',pick).forEach(b=>b.addEventListener('click',()=>set(Math.max(1,Math.min(N,cur()+(+b.dataset.step))))));
+  pick.addEventListener('levelset',e=>set(e.detail));
+  show();
 }
 function initAIGame(){
   renderLevelPicker();
@@ -4190,13 +4300,13 @@ const CLASS_INFO = {
   brilliant:{label:'Tuyệt hay',  icon:'!!', cls:'brilliant', desc:'Giống “Hay”, nhưng nước đó còn <b>thí quân</b> (để đối phương ăn quân của mình) để đổi lấy cái lợi lớn hơn. Hiếm nhất, khó tìm nhất.'},
   great:  {label:'Hay',          icon:'!',  cls:'great',   desc:'Đúng nước máy chọn <b>và là nước duy nhất</b>: mọi nước khác đều làm thế cờ kém hẳn. Khen vì bạn tìm ra lối thoát duy nhất.'},
   best:   {label:'Tốt nhất',     icon:'',   cls:'best',    desc:'Đúng (hoặc ngang) nước máy chọn, nhưng còn những nước khác cũng ổn — nên không có gì phải khen riêng.'},
-  good:   {label:'Tốt',          icon:'',   cls:'good',    desc:'Kém nước máy chọn một chút, thế cờ không bị ảnh hưởng. Bấm vào để xem nước tối ưu hơn.'},
+  good:   {label:'Tốt',          icon:'',   cls:'good',    desc:'Kém nước máy chọn một chút, thế cờ không bị ảnh hưởng. Bấm vào để xem nước hay hơn.'},
   book:   {label:'Theo sách',    icon:'',   cls:'book',    desc:'Nước khai cuộc đúng lý thuyết.'},
   inacc:  {label:'Đáng ngờ',     icon:'?!', cls:'inacc',   desc:'Thiệt nhẹ (cỡ 2 Tốt trở lên), hoặc bỏ lỡ đòn thắng trong khi vẫn đang hơn.'},
   mistake:{label:'Sai lầm',      icon:'?',  cls:'mistake', desc:'Thiệt đáng kể (cỡ một Sĩ/Tượng trở lên), thế cờ xấu đi rõ.'},
   blunder:{label:'Sai lầm nặng', icon:'??', cls:'blunder', desc:'Đổi kết quả ván: mất quân lớn, để bị chiếu bí, hoặc đánh mất thế thắng.'},
 };
-const clsTag = info => (info.icon ? `<b>${info.icon}</b> ` : '') + info.label;
+const clsTag = info => info.label;   // chỉ dùng chữ, không dùng ký hiệu ?! ??
 // Bỏ lỡ đòn thắng nhưng vẫn đang hơn rõ
 const missedWin = p => (p.bestScore>MATE_T || winChance(p.bestScore)>=0.6) && winChance(p.played)>=0.2;
 // "Cơ hội thắng" trong khoảng [-1, 1] theo điểm của máy (thang: Tốt≈30, Mã/Pháo≈280, Xe≈600).
@@ -4345,15 +4455,15 @@ function explainPly(g, p){
   if(p.cls==='best'||p.cls==='good'){
     const res={ic:'check', q:'Kết quả', cls:'ts-good', html:(p.cls==='best'
       ? (same?'Đây chính là nước tốt nhất máy tìm được.':'Ngang bằng nước tốt nhất máy tìm được.')
-      : `Nước tốt — chỉ kém nước tối ưu ${diffWords(p.loss)}, thế cờ không bị ảnh hưởng.`)+purposeHTML(before,m,same?p.bestPv:null)};
+      : `Nước tốt — chỉ kém nước hay nhất ${diffWords(p.loss)}, thế cờ không bị ảnh hưởng.`)+purposeHTML(before,m,same?p.bestPv:null)};
     if(same || !bestTxt) return thinkStepsHTML([step1, step2, res]);
-    // Nước đã tốt nhưng vẫn có nước tối ưu hơn (hoặc một lựa chọn ngang bằng) → chỉ ra để học thêm
+    // Nước đã tốt nhưng vẫn có nước hay hơn (hoặc một lựa chọn ngang bằng) → chỉ ra để học thêm
     const bi=Coach.intent(before,p.bestMove)[0], mi=Coach.intent(before,m)[0];
     const cmp = bi && mi && bi.key!==mi.key ? `Nước của bạn nhằm ${esc(mi.goal)} — chưa sai, nhưng lúc này có việc đáng làm hơn:`
       : bi && !mi ? 'Nước của bạn chưa có mục tiêu cụ thể, còn nước này có:' : '';
     const best=lineText(before, p.bestPv, 4);
     return thinkStepsHTML([step1, step2, res,
-      {ic:p.cls==='best'?'repeat':'bulb', q:p.cls==='best'?'Lựa chọn khác ngang bằng':'Nước tối ưu hơn', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh)${p.cls==='good'?` — hơn nước của bạn ${diffWords(p.loss)}`:''}.${cmp?`<br>${cmp}`:''}${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
+      {ic:p.cls==='best'?'repeat':'bulb', q:p.cls==='best'?'Lựa chọn khác ngang bằng':'Nước hay hơn', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh)${p.cls==='good'?` — hơn nước của bạn ${diffWords(p.loss)}`:''}.${cmp?`<br>${cmp}`:''}${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
     ]);
   }
 
@@ -4404,7 +4514,7 @@ function lessonsFrom(rec, g, an){
   const missMate=mine.filter(p=>p.bestScore>MATE_T && p.played<MATE_T).length;
   const allowMate=mine.filter(p=>p.played< -MATE_T && p.bestScore> -MATE_T).length;
   if(allowMate) L.push(`Có ${allowMate} lần bạn đi nước để đối phương có đường chiếu bí. Trước mỗi nước, hãy tự hỏi: "Sau nước này đối phương có chiếu được không, Tướng mình còn chỗ chạy không?"`);
-  if(hang) L.push(`Có ${hang} lần bạn để quân bị ăn không (treo quân). Thói quen tốt: trước khi đi, kiểm tra quân vừa đi và các quân khác xem có bị Xe, Mã, Pháo đối phương nhắm không.`);
+  if(hang) L.push(`Có ${hang} lần bạn để quân bị ăn không (quân không được bảo vệ). Thói quen tốt: trước khi đi, kiểm tra quân vừa đi và các quân khác xem có bị Xe, Mã, Pháo đối phương nhắm không.`);
   if(missMate) L.push(`Bạn bỏ lỡ ${missMate} cơ hội chiếu bí. Khi Tướng đối phương ít chỗ chạy, hãy thử tính các nước chiếu trước tiên. Luyện mục "Sát cục" trong tab Chiến thuật.`);
   if(missCap) L.push(`Bạn bỏ lỡ ${missCap} lần ăn quân miễn phí. Mỗi lượt, hãy nhìn một vòng xem quân nào của đối phương đang không được bảo vệ.`);
   // ra Xe chậm
@@ -4420,7 +4530,7 @@ function lessonsFrom(rec, g, an){
   const qCount={}; mine.forEach(p=>{ if(p.qKey && ERR_ALL.includes(p.cls)) qCount[p.qKey]=(qCount[p.qKey]||0)+1; });
   const topQ=Object.entries(qCount).sort((a,b)=>b[1]-a[1])[0];
   if(topQ && topQ[1]>=2) L.unshift(`Thói quen cần luyện nhất (${topQ[1]} lỗi): ${Coach.QUESTIONS[topQ[0]]}`);
-  if(an.accuracy>=85 && lost) L.push(`Độ chính xác ${an.accuracy}% nhưng vẫn thua: thường là do nhiều nước “tốt” nhưng chưa tối ưu dồn lại. Hãy xem mục “nước tốt nhưng vẫn có nước tối ưu hơn” ở phần tổng quan.`);
+  if(an.accuracy>=85 && lost) L.push(`Độ chính xác ${an.accuracy}% nhưng vẫn thua: thường là do nhiều nước “tốt” nhưng chưa hay nhất dồn lại. Hãy xem mục “nước tốt nhưng vẫn có nước hay hơn” ở phần tổng quan.`);
   if(!L.length) L.push('Ván cờ khá ổn. Hãy bấm vào các nước được đánh dấu màu để xem chỗ có thể cải thiện.');
   return L.slice(0,5);
 }
@@ -4502,7 +4612,7 @@ function styleHTML(sp, an){
   const advice=[];
   const hangs=an.plies.filter(p=>p.color===sp.color && p.hanging && ['mistake','blunder'].includes(p.cls)).length;
   if(sp.kind==='attack') advice.push(hangs>=2
-    ? 'Bạn có máu tấn công nhưng ván này để treo quân khá nhiều. Hãy giữ lối đánh chủ động, nhưng trước mỗi nước tấn công tự hỏi “quân vừa đi có bị ăn không?”. Thế trận dưới đây cho thế công rõ ràng mà vẫn có nền chắc.'
+    ? 'Bạn có máu tấn công nhưng ván này để mất quân không đáng khá nhiều. Hãy giữ lối đánh chủ động, nhưng trước mỗi nước tấn công tự hỏi “quân vừa đi có bị ăn không?”. Thế trận dưới đây cho thế công rõ ràng mà vẫn có nền chắc.'
     : 'Lối đánh chủ động hợp với các thế trận mở, giao chiến sớm. Hãy chọn thế khai cuộc có kế hoạch tấn công rõ ràng.');
   else if(sp.kind==='solid') advice.push('Lối đánh chắc chắn hợp với các thế trận kín, triển khai đủ quân rồi mới phản công. Điểm cần luyện: biết lúc nào nên chuyển sang tấn công — khi đã ra đủ Xe và Tướng an toàn, đừng ngại đưa Xe qua sông.');
   else advice.push('Lối đánh cân bằng hợp với các thế trận linh hoạt, để ngỏ nhiều kế hoạch. Hãy luyện thêm cả thế công lẫn thế thủ để chọn theo đối thủ.');
@@ -4517,12 +4627,11 @@ function styleHTML(sp, an){
     <ul class="lesson-list">${traits.map(t=>`<li>${t}</li>`).join('')}</ul>
     <h3 class="side-h mt10">Nên học tiếp</h3><ul class="lesson-list">${advice.map(t=>`<li>${t}</li>`).join('')}</ul>
     ${ops.length?`<div class="btn-row">${ops.map(o=>`<button type="button" class="btn btn-outline btn-sm" data-op="${o.id}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-book"></use></svg>${esc(o.name)}</button>`).join('')}</div>`:''}
-    ${sp.games<3?'<p class="hint-text small">Mới có ít ván nên nhận xét chỉ là tạm thời; chơi thêm vài ván để thấy rõ phong cách.</p>':''}</div>`;
+    ${sp.games<3?'<p class="hint-text small">Nhận xét tạm (mới ít ván).</p>':''}</div>`;
 }
 function legendHTML(){
   const C=CLASS_INFO, rows=[C.brilliant, C.great, C.best, C.good, C.book, C.inacc, C.mistake, C.blunder];
-  return `<details class="cls-legend more-box"><summary>Ý nghĩa các nhãn</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}"><b>${i.icon||'—'}</b> ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
-    <p class="hint-text small">Dấu <b>!</b> là khen, dấu <b>?</b> là chê, càng nhiều dấu càng mạnh. Nước <b>không có dấu</b> (Tốt nhất, Tốt, Theo sách) là nước bình thường, không có gì sai. <b>Tốt nhất</b> khác <b>Hay</b> ở chỗ: Tốt nhất là nước đúng nhưng dễ tìm (còn nước khác cũng được), Hay là nước đúng mà gần như chỉ có một. Mức lỗi tính theo <b>cơ hội thắng</b> bị mất: cùng thiệt một Mã, khi thế cờ đang cân bằng là lỗi nặng, còn khi bạn đang thắng đậm thì nhẹ hơn.</p></details>`;
+  return `<details class="cls-legend more-box"><summary>Ý nghĩa các nhãn</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}">${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl></details>`;
 }
 
 function openReview(rec){
@@ -4533,9 +4642,9 @@ function openReview(rec){
   review.widget.setFlipped(rec.human===BLACK);
   const rs=resultForHuman(rec);
   $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${rec.online?`Đấu với ${esc(rec.oppName||'bạn')}`:esc(levelInfo(recLevel(rec)).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
-  $('#reviewSummary').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
+  $('#reviewSummary').innerHTML=''; $('#reviewMore').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
   reviewRender();
-  $('#aiReviewCard').scrollIntoView({block:'start'});
+  $('#aiReviewCard').scrollIntoView({block:'start'}); revealBoard($('#reviewBoard'));
   if(rec.analysis && (rec.analysis.version===2 || rec.analysis.version===3)) { applyStoredAnalysis(rec); return; }
   runAnalysis();
 }
@@ -4586,12 +4695,13 @@ function reviewShowAnalysis(){
   const mine=an.plies.filter(p=>p.color===rec.human).length;
   review.short = mine<SHORT_GAME;   // ván quá ngắn: không chấm % chính xác, không đoán phong cách, không vẽ biểu đồ
   $('#reviewSummary').innerHTML = review.short
-    ? `<div class="acc-side"><p><b>Ván quá ngắn để chấm điểm</b> — bạn mới đi ${mine} nước. Chơi dài hơn (từ ${SHORT_GAME} nước) thì máy sẽ chấm độ chính xác và nhận xét lối chơi.</p>
-       ${cnt?`<div class="cls-chips">${cnt}</div>${legendHTML()}`:''}</div>`
-    : `<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
-    <div class="acc-side"><div class="cls-chips">${cnt}</div>${legendHTML()}<h3 class="side-h mt10">Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>
-    ${styleHTML(styleProfile(rec,g,an), an)}`;
-  $$('[data-op]',$('#reviewSummary')).forEach(b=>b.addEventListener('click',()=>{ showTab('khaicuoc'); openOpening(b.dataset.op); }));
+    ? `<div class="rv-sum"><span>Ván ngắn (${mine} nước), chưa chấm điểm</span>${cnt}</div>`
+    : `<div class="rv-sum"><span class="acc-num">${an.accuracy}%</span><span class="hint-text small">chính xác</span>${cnt}</div>`;
+  $('#reviewMore').innerHTML = `<details class="more-box"><summary>Nhận xét cả ván</summary>
+    ${review.short?`<p class="hint-text">Chơi từ ${SHORT_GAME} nước trở lên thì máy chấm độ chính xác và nhận xét lối chơi.</p>`
+      :`<h3 class="side-h">Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul>${styleHTML(styleProfile(rec,g,an), an)}`}
+    ${cnt?legendHTML():''}</details>`;
+  $$('[data-op]',$('#reviewMore')).forEach(b=>b.addEventListener('click',()=>{ showTab('khaicuoc'); openOpening(b.dataset.op); }));
   review.overview=true; review.idx=-1;
   renderEvalChart();
   reviewRender();
@@ -4599,19 +4709,18 @@ function reviewShowAnalysis(){
 function overviewHTML(){
   const g=review.game, errs=reviewErrors(), tp=turningPoint(), an=review.an;
   const nInacc=an.plies.filter(p=>p.color===review.rec.human && p.cls==='inacc').length;
-  const filter=`<label class="toggle small"><input type="checkbox" id="rvOnlyBig" ${review.onlyBig?'checked':''}> Chỉ xem sai lầm lớn (bỏ qua ${nInacc} nước đáng ngờ ?!)</label>`;
+  const filter=`<label class="toggle small"><input type="checkbox" id="rvOnlyBig" ${review.onlyBig?'checked':''}> Chỉ xem lỗi lớn</label>`;
   const better=an.plies.filter(q=>q.color===review.rec.human && q.cls==='good' && q.bestMove);
-  const betterHTML = better.length ? `<details class="better-list mt10"><summary>${better.length} nước tốt nhưng vẫn có nước tối ưu hơn</summary><div class="timeline">${better.map(q=>`<button type="button" class="tl-item" data-k="${q.k}"><span class="tl-n"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span><span class="tl-body"><b>Nước ${moveNum(q.k)}: ${esc(g.moves[q.k].text.short)}</b> → tối ưu hơn: <b>${esc(Notation.describe(q.k===0?g.start:g.boards[q.k-1], q.bestMove).short)}</b><small>chênh ${diffWords(q.loss)}</small></span></button>`).join('')}</div></details>` : '';
+  const betterHTML = better.length ? `<details class="better-list mt10"><summary>${better.length} nước ổn, còn cách hay hơn</summary><div class="timeline">${better.map(q=>`<button type="button" class="tl-item" data-k="${q.k}"><span class="tl-n"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span><span class="tl-body"><b>Nước ${moveNum(q.k)}: ${esc(g.moves[q.k].text.short)}</b> → tối ưu hơn: <b>${esc(Notation.describe(q.k===0?g.start:g.boards[q.k-1], q.bestMove).short)}</b><small>chênh ${diffWords(q.loss)}</small></span></button>`).join('')}</div></details>` : '';
   if(!errs.length) return `<p><b>Không có lỗi đáng kể${review.onlyBig?' (sai lầm lớn)':''}.</b> Bạn có thể bấm từng nước trong biên bản để xem máy nhận xét.</p>${filter}${betterHTML}`;
   const groups={};
   errs.forEach((p,i)=>{ const ph=phaseOf(g,p.k); (groups[ph]=groups[ph]||[]).push({p,i}); });
   const items=Object.entries(groups).map(([ph,list])=>`<div class="tl-phase"><div class="tl-phase-h">${ph}</div>${list.map(({p,i})=>{
       const info=CLASS_INFO[p.cls], m=g.moves[p.k];
       return `<button type="button" class="tl-item" data-k="${p.k}"><span class="tl-n">${i+1}</span><span class="tl-body"><b>Nước ${moveNum(p.k)}: ${esc(m.text.short)}</b> <span class="cls-chip cls-${info.cls}">${clsTag(info)}</span>${p===tp?' <span class="tl-star"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-star"></use></svg>bước ngoặt</span>':''}<small>${esc(p.short||lossWords(p.loss))}</small></span></button>`; }).join('')}</div>`).join('');
-  const tpLine = tp ? `<p class="hint-text"><b>Bước ngoặt</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
-  return `<p><b>Ván này có ${errs.length} chỗ bạn có thể đi tốt hơn.</b> Hãy xem lần lượt từ đầu đến cuối: mỗi chỗ có tình huống, vì sao chưa tốt, máy đáp thế nào và nên đi gì.</p>
-    ${tpLine}${filter}<div class="timeline">${items}</div>${betterHTML}
-    <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="rvStart"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu từ lỗi 1</button></div>`;
+  const tpLine = tp ? `<p class="hint-text"><b>Lỗi đắt nhất</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
+  return `<p><b>${errs.length} chỗ có thể đi tốt hơn.</b> Bấm <b>Bắt đầu</b> để xem từng chỗ.</p>
+    ${tpLine}${filter}<div class="timeline">${items}</div>${betterHTML}`;
 }
 function endHTML(){
   const rec=review.rec, errs=reviewErrors(), res=review.game.result;
@@ -4647,9 +4756,9 @@ function reviewPrevErr(){
 }
 const SHORT_GAME=6;
 function renderEvalChart(){
-  if(review.short){ $('#reviewChart').innerHTML=''; return; }
+  if(review.short || !reviewErrors().length){ $('#reviewChart').innerHTML=''; return; }
   const an=review.an, rec=review.rec, n=an.plies.length;
-  const W=600, H=130, pad=6, sign = rec.human===RED?1:-1;
+  const W=600, H=64, pad=5, sign = rec.human===RED?1:-1;
   const vals=an.plies.map(p=>sign*p.evalRed).concat([sign*an.finalRed]);
   const x=i=>pad+(W-2*pad)*i/Math.max(1,vals.length-1), y=v=>H/2 - (H/2-pad)*Math.max(-1,Math.min(1,v/800));
   const path=vals.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
@@ -4659,7 +4768,7 @@ function renderEvalChart(){
   $('#reviewChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="eval-svg" role="img" aria-label="Biểu đồ lợi thế theo từng nước (phía trên là bạn đang hơn)">
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${area}" class="area"/><path d="${path}" class="line"/>${dots}
     ${review.idx>=0?`<line class="cursor" x1="${x(review.idx+1)}" x2="${x(review.idx+1)}" y1="0" y2="${H}"/>`:''}</svg>
-    <div class="chart-legend"><span>Phía trên: bạn hơn</span><span>Phía dưới: máy hơn</span></div>`;
+    <div class="chart-legend"><span>Trên: bạn hơn</span><span>Dưới: đối thủ hơn</span></div>`;
   $$('.dot',$('#reviewChart')).forEach(d=>d.addEventListener('click',()=>reviewGo(+d.dataset.k)));
   $('#reviewChart svg').addEventListener('click',(e)=>{
     if(e.target.classList.contains('dot')) return;
@@ -4679,7 +4788,7 @@ function reviewRender(){
   if(p && p.bestMove && !(p.bestMove.from+''===m.from+''&&p.bestMove.to+''===m.to+'') && !['book','best'].includes(p.cls)) arrows.push({from:p.bestMove.from,to:p.bestMove.to});
   review.widget.setBoard(ov ? g.start : idx<0 && g.moves.length ? g.board() : board, {arrows, lastMove: !ov && idx<0 ? g.lastMove() : null});
   const marks={}, badges={};
-  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(CLASS_INFO[q.cls].icon) badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
+  if(an) an.plies.forEach(q=>{ if(q.color===rec.human) marks[q.k]=CLASS_INFO[q.cls].cls; });
   renderMoveLog($('#reviewLog'), g.moves, {active:ov?null:idx, marks, badges, onPick:(k)=>reviewGo(k)});
   // Thanh tiến trình: đang ở đâu trong luồng xem lại
   const errs=reviewErrors(), ei = idx>=0 ? errs.findIndex(q=>q.k===idx) : -1, tp=turningPoint();
@@ -4687,7 +4796,7 @@ function reviewRender(){
   if(!an) stepEl.innerHTML='';
   else if(ov) stepEl.innerHTML=`<b>Tổng quan</b> · ${errs.length} lỗi cần xem, theo thứ tự ván`;
   else if(idx<0) stepEl.innerHTML=`<b>Tổng kết</b> · đã xem ${errs.length}/${errs.length} lỗi`;
-  else if(ei>=0) stepEl.innerHTML=`<b>Lỗi ${ei+1}/${errs.length}</b> · Nước ${moveNum(idx)} · ${phaseOf(g,idx)}${errs[ei]===tp?' · bước ngoặt':''}
+  else if(ei>=0) stepEl.innerHTML=`<b>Lỗi ${ei+1}/${errs.length}</b> · Nước ${moveNum(idx)} · ${phaseOf(g,idx)}${errs[ei]===tp?' · lỗi đắt nhất':''}
     <div class="step-dots">${errs.map((q,j)=>`<span class="sd ${j<ei?'done':j===ei?'cur':''}"></span>`).join('')}</div>`;
   else stepEl.innerHTML=`Nước ${moveNum(idx)} · ${phaseOf(g,idx)} <span class="hint-text small">(không nằm trong danh sách lỗi)</span>`;
   const det=$('#reviewDetail');
@@ -4717,7 +4826,6 @@ function reviewRender(){
   }
   // nút trong khung chi tiết
   $$('.tl-item',det).forEach(b=>b.addEventListener('click',()=>reviewGo(+b.dataset.k)));
-  const st=$('#rvStart',det); if(st) st.addEventListener('click',reviewNextErr);
   const rs=$('#rvRestart',det); if(rs) rs.addEventListener('click',()=>{ review.overview=true; review.idx=-1; reviewRender(); });
   const nx=det.querySelector('[data-rv="next"]'); if(nx) nx.addEventListener('click',reviewNextErr);
   const ob=$('#rvOnlyBig',det); if(ob) ob.addEventListener('change',()=>{ review.onlyBig=ob.checked; safeLS_set('xq_review_big',ob.checked?'1':'0'); reviewRender(); });
@@ -4732,7 +4840,7 @@ function reviewRender(){
   $('#reviewNext').disabled = !ov && idx===-1;
 }
 function initReview(){
-  $('#reviewBack').addEventListener('click',()=>{ review.token++; if(review.rec && review.rec.online){ showZone('satruong'); return; } showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
+  $('#reviewBack').addEventListener('click',()=>{ review.token++; if(review.rec && review.rec.online){ showStab('phong'); return; } showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
   // ◀ ▶: từng nửa nước. Tổng quan ↔ nước đầu ↔ … ↔ nước cuối (tổng kết)
   $('#reviewPrev').addEventListener('click',()=>{ const n=review.game.moves.length;
     if(review.overview) return;
@@ -5018,7 +5126,6 @@ function renderPuzzleGrid(){
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
         ${solved.includes(p.id) ? '<span class="solved-check" title="Đã giải"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>' : ''}</div>
       <h4>${esc(p.title)}</h4>
-      <p>${esc(p.prompt)}</p>
     </button>`;
   }).join('') || '<p class="hint-text">Không có bài nào khớp bộ lọc.</p>';
   $$('.puzzle-card',$('#puzzleGrid')).forEach(btn=> btn.addEventListener('click', ()=> openPuzzle(btn.dataset.id)));
@@ -5060,7 +5167,7 @@ function openPuzzle(id){
     pz.targetGain = -Solver.materialSearch(Engine.applyMove(b,pz.active.solution),Engine.otherColor(me),3) - Solver.material(b,me);
   }
   puzzleResetBoard();
-  $('#puzzleDetailCard').scrollIntoView({block:'start'});
+  $('#puzzleDetailCard').scrollIntoView({block:'start'}); revealBoard($('#puzzleBoard'));
 }
 function puzzleResetBoard(){
   pz.token=null;
@@ -5079,15 +5186,17 @@ function puzzleExplainHTML(){
           : p.type==='defend' ? Coach.QUESTIONS['ignored-threat']
           : p.type==='fork' ? 'Tìm ô mà từ đó một quân của mình tấn công được HAI mục tiêu cùng lúc — đối phương chỉ cứu được một.'
           : Coach.QUESTIONS['missed-capture'];
-  return thinkStepsHTML([
-    {ic:'eye', q:'Trước tiên: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
-    {ic:'search', q:'Nước giải làm gì?', html:`<b>${esc(d.short)}</b> (${esc(d.long)}): ${esc(Coach.plainMove(p.board,sol))}.`},
-    {ic:'check', q:'Vì sao đúng?', cls:'ts-good', html:esc(
+  // Gọn: chỉ "Đáp án" + "Vì sao"; các bước tư duy khác để trong "Xem thêm"
+  const why = esc(
       p.type==='defend' ? 'Sau nước này, đối phương đáp cách nào bạn cũng không bị mất quân. Các nước khác đều để mất ít nhất một quân nhỏ.'
       : (p.type==='capture'||p.type==='fork') && !p.explain ? `Đối phương đáp tốt nhất rồi mà bạn vẫn lãi khoảng ${Math.max(1,Math.round(pz.targetGain||0))} điểm quân.${p.type==='fork'?' Đối phương chỉ cứu được một trong hai quân bị nhắm.':''}`
-      : puzzleExplainText())},
-    {ic:'question', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
-  ]);
+      : puzzleExplainText());
+  return `<p class="ex-line"><b>Đáp án:</b> ${esc(d.short)} (${esc(d.long)}).</p><p class="ex-line"><b>Vì sao:</b> ${why}</p>
+    <details class="more-box"><summary>Xem thêm</summary>${thinkStepsHTML([
+      {ic:'eye', q:'Trước nước giải: bên nào đang doạ gì?', html:esc(Coach.threatText(p.board,me))},
+      {ic:'search', q:'Nước giải làm gì?', html:esc(Coach.plainMove(p.board,sol))+'.'},
+      {ic:'question', q:'Lần sau hãy tự hỏi', cls:'ts-q-row', html:esc(Q)},
+    ])}</details>`;
 }
 function puzzleExplainText(){
   const p=pz.active;
@@ -5255,9 +5364,9 @@ const OPENING_TRAPS = [{"id":"shunpao_qima13","name":"Thuận Pháo Xe ngang: Đ
    được chọn để minh hoạ nguyên tắc khai cuộc cho người mới — không phải bảng biến đầy đủ.
    ========================================================================= */
 const OPENING_GROUPS = [
-  {id:'phaodau', name:'Đỏ đi Pháo đầu', desc:'Nước mở màn phổ biến nhất: Pháo vào cột giữa nhắm Tốt đầu. Các thế dưới đây là những cách Đen đáp lại.'},
-  {id:'mem', name:'Khai cuộc mềm', desc:'Đỏ không vào Pháo đầu ngay mà chuẩn bị kín đáo hơn, giữ thế linh hoạt.'},
-  {id:'bay', name:'Bẫy khai cuộc', desc:'Những cái bẫy có thật trong sách và thực chiến, mỗi bẫy đều có nguồn. Xem bên mắc bẫy sai ở đâu và vì sao — để mình không mắc, và biết cách trừng phạt khi đối phương mắc.'},
+  {id:'phaodau', name:'Đỏ đi Pháo đầu', desc:'Pháo vào giữa nhắm Tốt đầu. Các cách Đen đáp lại:'},
+  {id:'mem', name:'Khai cuộc mềm', desc:'Đỏ chưa vào Pháo đầu, chuẩn bị kín đáo hơn.'},
+  {id:'bay', name:'Bẫy khai cuộc', desc:'Bẫy có thật trong sách và thực chiến: sai ở đâu, trừng phạt thế nào.'},
 ];
 
 const OPENINGS_RAW = [
@@ -5664,15 +5773,13 @@ function renderOpeningList(){
   const grid = $('#openingGrid');
   grid.innerHTML = OPENING_GROUPS.map(g=>`
     <div class="opening-group">
-      <h3 class="group-h">${esc(g.name)}</h3><p class="hint-text">${esc(g.desc)}</p>
+      <h3 class="group-h">${esc(g.name)}</h3><p class="hint-text group-desc">${esc(g.desc)}</p>
       <div class="opening-cards">${OPENINGS.filter(o=>o.group===g.id).map(o=>{
         const b=[best[o.id+':red'],best[o.id+':black']].filter(x=>x!=null);
         const star = b.length ? `<span class="solved-check" title="Điểm cao nhất khi tự đi lại">${Math.max(...b)}%</span>` : '';
-        return `<button class="opening-card" data-id="${o.id}">
-          <div class="puzzle-top">${o.isTrap?'<span class="badge badge-hard">Bẫy</span>':`<span class="badge ${['','badge-easy','badge-mid','badge-hard'][o.level]}">${['','Cơ bản','Phổ biến','Nâng cao'][o.level]}</span>`}${o.lines.length>1?`<span class="hint-text small">${o.lines.length-1} nhánh</span>`:''}${star}</div>
-          <h4>${esc(o.name)} <span class="han-sm">${esc(o.han)}</span></h4>
-          <p>${esc(o.summary)}</p>
-          <div class="op-first">${esc(o.moves.slice(0,4).map((m,i)=>(i%2===0?(i/2+1)+'. ':'')+m.text).join(' '))} …</div>
+        return `<button class="opening-card op-row" data-id="${o.id}">
+          <h4>${esc(o.name)}</h4>
+          <span class="tr-end">${star}${o.lines.length>1?`<span class="hint-text small">${o.lines.length-1} nhánh</span>`:''}${o.isTrap?'<span class="badge badge-hard">Bẫy</span>':`<span class="badge ${['','badge-easy','badge-mid','badge-hard'][o.level]}">${['','Cơ bản','Phổ biến','Nâng cao'][o.level]}</span>`}</span>
         </button>`;}).join('')}</div>
     </div>`).join('');
   $$('.opening-card',grid).forEach(btn=> btn.addEventListener('click', ()=> openOpening(btn.dataset.id)));
@@ -5688,7 +5795,7 @@ function openOpening(id, lineId){
   openingView.active=o; openingView.idx=0;
   openingView.line = o.lines.find(l=>l.id===lineId) || o.lines[0];
   showOpeningCard('detail');
-  $('#openingTitle').innerHTML = `${esc(o.name)} <span class="han-sm">${esc(o.han)}</span>`;
+  $('#openingTitle').textContent = o.name;
   $('#openingSummary').textContent = o.summary;
   $('#openingIdeasH').textContent = o.isTrap ? 'Bài học' : 'Ý chính';
   $('#openingTrapsH').textContent = o.isTrap ? 'Chỗ mắc bẫy' : 'Bẫy thường gặp';
@@ -5700,14 +5807,16 @@ function openOpening(id, lineId){
   if(!openingView.widget) openingView.widget = createBoardWidget($('#openingBoard'), {label:'Bàn cờ khai cuộc'});
   openingView.widget.setFlipped(false);
   openingRender();
-  $('#openingDetailCard').scrollIntoView({block:'start'});
+  $('#openingDetailCard').scrollIntoView({block:'start'}); revealBoard($('#openingBoard'));
 }
 function renderOpeningLines(){
   const o=openingView.active, cur=openingView.line, el=$('#openingLines');
   const src=(arr)=>arr&&arr.length?`<p class="sources">Nguồn: ${arr.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t||'nguồn')}</a>`).join(' · ')}</p>`:'';
-  if(o.lines.length<2){ el.innerHTML = o.isTrap ? src(o.sources) : ''; return; }
-  el.innerHTML = `<div class="chip-row" role="group" aria-label="Chọn nhánh">${o.lines.map(l=>`<button class="chip ${l===cur?'on':''}" data-line="${esc(l.id)}" aria-pressed="${l===cur}">${l.id==='main'?'Diễn biến chính':esc(l.name.replace(/^.*?—\s*/,''))}</button>`).join('')}</div>
-    ${cur.id!=='main'?`<div class="explain-box"><b>${esc(cur.name)}</b> <span class="han-sm">${esc(cur.han||'')}</span><br>${esc(cur.idea||'')}${src(cur.sources)}</div>`:''}`;
+  const info=$('#openingLineInfo');
+  if(o.lines.length<2){ el.innerHTML=''; info.innerHTML = o.isTrap ? src(o.sources) : ''; return; }
+  // các nhánh: một hàng cuộn ngang; giải thích nhánh nằm dưới bàn cờ (không đẩy bàn xuống)
+  el.innerHTML = `<div class="chip-row line-chips" role="group" aria-label="Chọn nhánh">${o.lines.map(l=>`<button class="chip ${l===cur?'on':''}" data-line="${esc(l.id)}" aria-pressed="${l===cur}">${l.id==='main'?'Diễn biến chính':esc(l.name.replace(/^.*?—\s*/,''))}</button>`).join('')}</div>`;
+  info.innerHTML = cur.id!=='main'?`<div class="explain-box"><b>${esc(cur.name)}</b><br>${esc(cur.idea||'')}${src(cur.sources)}</div>`:'';
   $$('[data-line]',el).forEach(b=>b.addEventListener('click',()=>{ openingView.line=o.lines.find(l=>l.id===b.dataset.line); openingView.idx=0; renderOpeningLines(); openingRender(); }));
 }
 function openingGame(moves, upto){
@@ -5743,8 +5852,8 @@ function startTrainer(o, color, multi){
   trainer.mistakes=0; trainer.wrongHere=0; trainer.hint=false; trainer.busy=false; trainer.feedback=null; trainer.mine=0;
   trainer.game=Game.create();
   showOpeningCard('trainer');
-  $('#trainerTitle').textContent = `Trainer: ${o.name}`;
-  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}. Hãy đi đúng các nước lý thuyết của bên ${COLOR_VN[color]}; máy đi bên kia${multi?' và chọn ngẫu nhiên một trong '+lines.length+' nhánh ở mỗi chỗ rẽ':''}.`;
+  $('#trainerTitle').textContent = `Tự đi lại: ${o.name}`;
+  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}, máy đi bên kia${multi?' (chọn ngẫu nhiên nhánh)':''}.`;
   if(!trainer.widget){
     trainer.widget = createBoardWidget($('#trainerBoard'), {onSquareClick:(r,c)=>trainer.ctl.click(r,c), label:'Bàn cờ Trainer khai cuộc'});
     trainer.ctl = makeClickController({
@@ -5758,7 +5867,7 @@ function startTrainer(o, color, multi){
   }
   trainer.widget.setFlipped(color===BLACK);
   trainer.ctl.clear();
-  $('#trainerCard').scrollIntoView({block:'start'});
+  $('#trainerCard').scrollIntoView({block:'start'}); revealBoard($('#trainerBoard'));
   trainerAdvance();
 }
 const sameMv=(a,b)=>a.from[0]===b.from[0]&&a.from[1]===b.from[1]&&a.to[0]===b.to[0]&&a.to[1]===b.to[1];
@@ -5881,10 +5990,8 @@ function masterKeyPlies(g){
 function renderMasterList(){
   const el=$('#masterGrid'); if(!el || typeof MASTER_GAMES==='undefined') return;
   el.innerHTML=MASTER_GAMES.map(g=>`<button class="opening-card topic-card" data-master="${g.id}">
-    <div class="puzzle-top"><span class="badge ${g.result==='1-0'?'badge-hard':g.result==='0-1'?'badge-mid':'badge-easy'}">${g.year}</span>
-      <span class="badge ${g.verified>=2?'badge-verified':'badge-source'}">${g.verified>=2?'2 nguồn':'1 nguồn'}</span></div>
-    <h4>${esc(g.red)} – ${esc(g.black)}</h4><span class="han-sm">${esc(g.redHan)} – ${esc(g.blackHan)}</span>
-    <p>${esc(g.resultText)} · ${Math.ceil(g.plies.length/2)} nước · ${esc(g.event)}</p></button>`).join('');
+    <div class="puzzle-top"><h4>${esc(g.red)} – ${esc(g.black)}</h4><span class="badge ${g.result==='1-0'?'badge-hard':g.result==='0-1'?'badge-mid':'badge-easy'}">${g.year}</span></div>
+    <span class="tc-hint">${esc(g.resultText)} · ${Math.ceil(g.plies.length/2)} nước · ${esc(g.event)}</span></button>`).join('');
   $$('[data-master]',el).forEach(b=>b.addEventListener('click',()=>openMaster(b.dataset.master)));
 }
 function showOpeningSub(id){
@@ -5898,8 +6005,9 @@ function openMaster(id){
   for(const p of g.plies) ms.game.play({from:[p.m[0],p.m[1]],to:[p.m[2],p.m[3]]});
   ms.pos=0; ms.right=0; ms.total=0; ms.feedback='';
   $('#openingListCard').hidden=true; $('#masterCard').hidden=false;
-  $('#masterTitle').innerHTML=`${esc(g.red)} <span class="han-sm">${esc(g.redHan)}</span> – ${esc(g.black)} <span class="han-sm">${esc(g.blackHan)}</span>`;
-  $('#masterHead').innerHTML=`<b>${g.year}</b> · ${esc(g.event)} · <b>${esc(g.resultText)}</b><br>${esc(g.famous)}`;
+  $('#masterTitle').textContent=`${g.red} – ${g.black}`;
+  $('#masterHead').innerHTML=`<b>${g.year}</b> · ${esc(g.event)} · <b>${esc(g.resultText)}</b>`;
+  $('#masterFamous').textContent=g.famous||'';
   $('#masterSources').innerHTML=`Nguồn biên bản (${g.verified>=2?'đã đối chiếu khớp từng nước ở hai nguồn':'một nguồn, đã kiểm mọi nước hợp lệ'}): ${g.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}. Đánh giá và chú giải tự động là của máy (tìm kiếm có giới hạn thời gian), có thể khác nhận định của danh thủ.`;
   if(!ms.widget){
     ms.widget=createBoardWidget($('#masterBoard'),{onSquareClick:(r,c)=>ms.ctl.click(r,c), label:'Bàn cờ ván danh thủ'});
@@ -5914,7 +6022,7 @@ function openMaster(id){
   }
   ms.widget.setFlipped(false);
   masterRender();
-  $('#masterCard').scrollIntoView({block:'start'});
+  $('#masterCard').scrollIntoView({block:'start'}); revealBoard($('#masterBoard'));
 }
 function masterBoard(){ return ms.pos===0 ? ms.game.start : ms.game.boards[ms.pos-1]; }
 function masterGuessing(){
@@ -5968,7 +6076,7 @@ function masterRender(){
   masterChart();
 }
 function masterChart(){
-  const g=ms.g, n=g.plies.length, W=600, H=110, pad=6;
+  const g=ms.g, n=g.plies.length, W=600, H=80, pad=6;
   const shown = ms.guess ? ms.pos : n;
   const vals=[0].concat(g.plies.map(p=>p.e)).slice(0,shown+1);
   const x=i=>pad+(W-2*pad)*i/Math.max(1,n), y=v=>H/2-(H/2-pad)*Math.max(-1,Math.min(1,v/800));
@@ -5977,7 +6085,7 @@ function masterChart(){
   $('#masterChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="eval-svg" role="img" aria-label="Biểu đồ đánh giá của máy theo từng nước (phía trên: Đỏ hơn)">
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${path}" class="line"/>${keys}
     <line class="cursor" x1="${x(ms.pos)}" x2="${x(ms.pos)}" y1="0" y2="${H}"/></svg>
-    <div class="chart-legend"><span>Phía trên: Đỏ hơn</span><span>Chấm vàng: nước quan trọng</span><span>Phía dưới: Đen hơn</span></div>`;
+    <div class="chart-legend"><span>Trên: Đỏ hơn</span><span>Chấm vàng: nước quan trọng</span><span>Dưới: Đen hơn</span></div>`;
   $$('.dot-key',$('#masterChart')).forEach(d=>d.addEventListener('click',()=>{ ms.pos=+d.dataset.k+1; ms.feedback=''; masterRender(); revealBoard($('#masterBoard')); }));
 }
 function masterGuessMove(mv){
@@ -6011,7 +6119,7 @@ function initMasters(){
   $('#masterNext').addEventListener('click',()=>{ ms.tk=null; if(ms.pos<ms.g.plies.length){ ms.pos++; ms.feedback=''; masterAutoAdvance(); } });
   $('#masterFlip').addEventListener('click',()=>ms.widget.setFlipped(!ms.widget.isFlipped()));
   $('#masterKey').addEventListener('click',()=>{ if(ms.guess) return; const keys=masterKeyPlies(ms.g); const nx=keys.find(k=>k+1>ms.pos) ; ms.pos = nx!=null ? nx+1 : (keys.length?keys[0]+1:ms.pos); ms.feedback=''; masterRender(); revealBoard($('#masterBoard')); });
-  $('#masterGuess').addEventListener('change',e=>{ ms.guess=e.target.checked; ms.feedback=''; if(ms.guess){ ms.right=0; ms.total=0; } masterAutoAdvance(); });
+  $('#masterGuess').addEventListener('change',e=>{ ms.guess=e.target.checked; $('#masterSide').hidden=!ms.guess; ms.feedback=''; if(ms.guess){ ms.right=0; ms.total=0; } masterAutoAdvance(); });
   $('#masterSide').addEventListener('change',e=>{ ms.side=e.target.value; ms.widget.setFlipped(ms.side==='black'); masterAutoAdvance(); });
 }
 
@@ -6222,9 +6330,8 @@ function renderEndgameTheoryList(){
     const items=ENDGAME_THEORY.filter(x=>x.group===g.id);
     if(!items.length) return '';
     return `<h4 class="eg-group-h">${esc(g.name)}</h4><div class="topic-grid">${items.map(it=>
-      `<button class="opening-card topic-card ${seen.includes(it.key)?'seen':''}" data-eg="${it.key}">
-        <div class="puzzle-top">${egBadge(it,true)}${seen.includes(it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}</div>
-        <h4>${esc(it.title)}</h4><span class="han-sm">${esc(it.han)}</span></button>`).join('')}</div>`;
+      `<button class="opening-card topic-card topic-row ${seen.includes(it.key)?'seen':''}" data-eg="${it.key}">
+        <h4>${esc(it.title)}</h4><span class="tr-end">${seen.includes(it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}${egBadge(it,true)}</span></button>`).join('')}</div>`;
   }).join('');
   host.innerHTML=`<div class="chip-row" role="group" aria-label="Lọc theo nhóm">${chips}</div>${groups}`;
   $$('[data-eg-filter]',host).forEach(b=>b.addEventListener('click',()=>{ egFilter=b.dataset.egFilter; renderEndgameTheoryList(); }));
@@ -6251,7 +6358,7 @@ function openEndgameTheory(key){
     ? (dtmMoves ? `Bạn cầm Đỏ. Đánh hay nhất thì thắng trong ${dtmMoves} nước; máy giữ Đen và chống cự lâu nhất có thể.` : 'Bạn cầm Đỏ, máy giữ Đen. Hãy tìm cách thắng.')
     : 'Bạn cầm Đỏ, máy giữ Đen. Thử xem bạn có phá được không — nếu bên yếu phòng thủ đúng thì đây là thế hoà.';
   $('#tacticContent').innerHTML = `
-    <div class="lesson-head"><span class="han" aria-hidden="true">${esc(it.han)}</span><div>${egBadge(it)}<h3 style="margin:4px 0 0;">${esc(it.title)}</h3></div></div>
+    <div class="lesson-head"><h3>${esc(it.title)}</h3>${egBadge(it)}</div>
     <div class="lesson-body"><div class="lesson-text">
       ${egStatsHtml(it)}
       <p><b>Vì sao?</b> ${esc(it.why)}</p>
@@ -6279,20 +6386,22 @@ const SC_GROUPS = [
   {id:'ma', name:'Mã'}, {id:'phao', name:'Pháo'}, {id:'xe', name:'Xe'},
   {id:'tot', name:'Tốt'}, {id:'tuong', name:'Tướng'}, {id:'ket-hop', name:'Kết hợp'},
 ];
+// Gợi ý ngắn trên thẻ: câu đầu của phần ý tưởng (bỏ thẻ HTML)
+function cardHint(t){ return String(t||'').replace(/<[^>]+>/g,'').split(/(?<=\.)\s/)[0]; }
 function scSolved(){ return safeJSON('xq_sc_solved',[]); }
 function markScSolved(id){ const s=scSolved(); if(!s.includes(id)){ s.push(id); safeLS_set('xq_sc_solved',JSON.stringify(s)); } }
 function renderSatcucList(){
   const host=$('#satcucList'); if(!host || typeof SATCUC==='undefined') return;
   const solved=scSolved();
   const total=SATCUC.reduce((a,x)=>a+x.drills.length,0);
-  $('#satcucProgress').textContent=`${SATCUC.length} mẫu sát cục · ${total} thế luyện · bạn đã giải ${solved.length}.`;
+  $('#satcucProgress').textContent=`${SATCUC.length} thế · đã giải ${solved.length}/${total}`;
   host.innerHTML = SC_GROUPS.map(g=>{
     const items=SATCUC.filter(x=>x.group===g.id); if(!items.length) return '';
     return `<h4 class="eg-group-h">${esc(g.name)}</h4><div class="topic-grid">${items.map(it=>{
       const done=it.drills.filter((d,i)=>solved.includes(it.key+':'+i)).length;
       return `<button class="opening-card topic-card ${done===it.drills.length&&done?'seen':''}" data-sc="${it.key}">
-        <div class="puzzle-top"><span class="han-sm">${esc(it.han)}</span><span class="hint-text">${done}/${it.drills.length}</span></div>
-        <h4>${esc(it.name)}</h4></button>`; }).join('')}</div>`;
+        <div class="puzzle-top"><h4>${esc(it.name)}</h4><span class="tc-count">${done}/${it.drills.length}</span></div>
+        <span class="tc-hint">${esc(cardHint(it.idea))}</span></button>`; }).join('')}</div>`;
   }).join('');
   $$('[data-sc]',host).forEach(b=>b.addEventListener('click',()=>openSatcuc(b.dataset.sc)));
 }
@@ -6300,7 +6409,7 @@ function openSatcuc(key){
   const list=SATCUC, idx=list.findIndex(x=>x.key===key), it=list[idx];
   $('#tacticListCard').hidden=true; $('#tacticDetailCard').hidden=false;
   $('#tacticContent').innerHTML = `
-    <div class="lesson-head"><span class="han" aria-hidden="true">${esc(it.han)}</span><div><span class="badge badge-hard">Sát cục</span><h3 style="margin:4px 0 0;">${esc(it.name)}</h3></div></div>
+    <div class="lesson-head"><h3>${esc(it.name)}</h3></div>
     <div class="lesson-body"><div class="lesson-text">
       <p><b>Ý tưởng.</b> ${esc(it.idea)}</p>
       <p><b>Vì sao hiệu quả?</b> ${esc(it.why)}</p>
@@ -6309,13 +6418,16 @@ function openSatcuc(key){
     </div><div class="lesson-demos"></div></div>
     <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Trước</button><span class="hint-text">Sát cục ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button></div>`;
   const host=$('.lesson-demos',$('#tacticContent'));
-  it.drills.forEach((d,i)=>{
+  const slots=it.drills.map((d,i)=>{
     const slot=document.createElement('div'); slot.className='lesson-demo-slot'; host.appendChild(slot);
     const board=mkBoard(d.pieces.map(p=>[p[0],p[1],p[2],p[3]]));
-    const caption = (i===0?'<b>Ví dụ.</b> ':`<b>Luyện ${i}.</b> `) + (d.n===1 ? `Đỏ đi, chiếu bí trong 1 nước theo mẫu ${esc(it.name)}.` : `Đỏ đi, ép chiếu bí trong 2 nước (mọi cách đỡ đều thua).`);
+    const caption = (d.n===1 ? `Đỏ đi, chiếu bí trong 1 nước theo mẫu ${esc(it.name)}.` : `Đỏ đi, ép chiếu bí trong 2 nước (mọi cách đỡ đều thua).`);
     initLessonDemo(slot, {board, toMove:RED, goal:d.n===1?'mate':'mate2', solution:{from:[d.sol[0],d.sol[1]],to:[d.sol[2],d.sol[3]]}, caption,
       explain:`Mẫu ${it.name}: ${it.idea}`, onSolved:()=>{ markScSolved(it.key+':'+i); }});
+    return slot;
   });
+  // một bàn tại một lúc: Ví dụ · Bài 1 · Bài 2 · Bài 3
+  wireDemoTabs(host, slots, it.drills.map((d,i)=>i?'Bài '+i:'Ví dụ'));
   $('#tacPrev').addEventListener('click',()=>openSatcuc(list[idx-1].key));
   $('#tacNext').addEventListener('click',()=>openSatcuc(list[idx+1].key));
   $('#tacticDetailCard').scrollIntoView({block:'start'});
@@ -6327,9 +6439,13 @@ function openSatcuc(key){
 function tacticsDone(){ return safeJSON('xq_tactics_seen',[]); }
 function renderTacticLists(){
   const seen=tacticsDone();
-  const card=(it,kind)=>`<button class="opening-card topic-card ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
-      <div class="puzzle-top">${kind==='end' ? `<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thắng':'Hoà'}</span>` : `<span class="han-sm">${esc(it.han)}</span>`}${seen.includes(kind+':'+it.key)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':''}</div>
-      <h4>${esc(it.title)}</h4></button>`;
+  const ck=it=>seen.includes(it)?'<span class="solved-check" title="Đã xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>':'';
+  const card=(it,kind)=> kind==='end'
+    ? `<button class="opening-card topic-card topic-row ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
+      <h4>${esc(it.title)}</h4><span class="tr-end">${ck(kind+':'+it.key)}<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thắng':'Hoà'}</span></span></button>`
+    : `<button class="opening-card topic-card ${seen.includes(kind+':'+it.key)?'seen':''}" data-kind="${kind}" data-key="${it.key}">
+      <div class="puzzle-top"><h4>${esc(it.title)}</h4>${ck(kind+':'+it.key)}</div>
+      <span class="tc-hint">${esc(cardHint(it.text[0]))}</span></button>`;
   $('#tacticGrid').innerHTML = TACTICS.map(t=>card(t,'tac')).join('');
   $('#endgameGrid').innerHTML = ENDGAMES.map(t=>card(t,'end')).join('');
   renderEndgameTheoryList();
@@ -6344,7 +6460,7 @@ function openTactic(kind,key){
   const idx=list.indexOf(it);
   const badge = kind==='end' ? `<span class="badge ${it.result==='win'?'badge-easy':'badge-mid'}">${it.result==='win'?'Thế thắng':'Thế hoà'}</span>` : '<span class="badge badge-mid">Chiến thuật</span>';
   $('#tacticContent').innerHTML = `
-    <div class="lesson-head"><span class="han" aria-hidden="true">${esc(it.han||(it.result==='win'?'勝':'和'))}</span><div>${badge}<h3 style="margin:4px 0 0;">${esc(it.title)}</h3></div></div>
+    <div class="lesson-head"><h3>${esc(it.title)}</h3>${kind==='end'?badge:''}</div>
     <div class="lesson-body"><div class="lesson-text">${it.text.map(t=>`<p>${t}</p>`).join('')}</div><div class="lesson-demos"><div class="lesson-demo-slot"></div></div></div>
     <div class="lesson-foot"><button class="btn btn-outline" id="tacPrev" ${idx===0?'disabled':''}><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Trước</button><span class="hint-text">${kind==='tac'?'Chiến thuật':'Tàn cuộc'} ${idx+1}/${list.length}</span><button class="btn btn-jade" id="tacNext" ${idx===list.length-1?'disabled':''}>Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button></div>`;
   const demo=Object.assign({}, it.demo, {hero: it.demo.hero ? it.demo.hero.map(h=>h.slice()) : undefined, mateIn: it.mateIn, result: it.result});
@@ -6367,7 +6483,9 @@ function initTactics(){
 }
 
 /* =========================================================================
-   ĐIỀU HƯỚNG — ba phần (Kỳ viện / Sa trường / Tôi), mỗi phần một hàng thẻ con.
+   ĐIỀU HƯỚNG — ba phần (Học / Chơi / Tôi), mỗi phần một hàng thẻ con.
+   Mã nội bộ vẫn là kyvien / satruong (giữ dữ liệu đã lưu). Thẻ "Đấu máy" (panel "may")
+   nằm ở hàng thẻ của phần Chơi dù là một section[data-panel].
    Điện thoại và máy tính dùng chung một kiểu; chỉ khác độ rộng.
    ========================================================================= */
 const TAB_KEYS = $$('.tab-btn[data-tab]').map(b=>b.dataset.tab);
@@ -6401,11 +6519,16 @@ function markTabRow(btns, keyOf, key, focus){
   });
 }
 
+const PLAY_TABS=['may'];   // các panel thuộc phần Chơi
+const tabKey = b=>b.dataset.tab||b.dataset.stab;
 function showTab(key, focus){
-  setZoneUI('kyvien');
+  const play=PLAY_TABS.includes(key);
+  setZoneUI(play?'satruong':'kyvien');
+  const zp=$('section[data-zone-panel="satruong"]'); if(play && zp) zp.hidden=true;
   TAB_KEYS.forEach(k=>{ $(`section[data-panel="${k}"]`).hidden = k!==key; });
-  markTabRow($$('.tab-btn[data-tab]'), b=>b.dataset.tab, key, focus);
-  safeLS_set('xq_last_tab', key);
+  markTabRow($$('.tab-btn'), tabKey, key, focus);
+  if(play){ currentStab=key; safeLS_set('xq_last_stab', key); }
+  else safeLS_set('xq_last_tab', key);
   document.dispatchEvent(new CustomEvent('tabshown',{detail:key}));
 }
 function initTabs(){
@@ -6414,20 +6537,23 @@ function initTabs(){
     btn.id='tab-'+k; btn.setAttribute('aria-controls','panel-'+k);
     panel.id='panel-'+k; panel.setAttribute('role','tabpanel'); panel.setAttribute('aria-labelledby','tab-'+k);
   });
-  wireTabRow($$('.tab-btn[data-tab]'), b=>b.dataset.tab, showTab);
-  wireTabRow($$('.st-btn'), b=>b.dataset.stab, showStab);
+  wireTabRow($$('[data-zone-tabs="kyvien"] .tab-btn'), tabKey, showTab);
+  wireTabRow($$('[data-zone-tabs="satruong"] .tab-btn'), tabKey, showStab);
   $$('[data-goto-stab]').forEach(b=>b.addEventListener('click',()=>showStab(b.dataset.gotoStab)));
   initSidePanels();
 }
 
 /* ---------- Thẻ con của Sa trường ---------- */
-let currentStab='phong';
+let currentStab = safeLS_get('xq_last_stab') || 'phong';
 function showStab(key, focus){
+  if(PLAY_TABS.includes(key)){ showTab(key, focus); return; }
   if(!ST_KEYS.includes(key)) key='phong';
-  currentStab=key;
+  currentStab=key; safeLS_set('xq_last_stab', key);
   setZoneUI('satruong');
+  const zp=$('section[data-zone-panel="satruong"]'); if(zp) zp.hidden=false;
+  PLAY_TABS.forEach(k=>{ const p=$(`section[data-panel="${k}"]`); if(p) p.hidden=true; });
   $$('[data-stpanel]').forEach(p=>{ p.hidden = p.dataset.stpanel!==key; });
-  markTabRow($$('.st-btn'), b=>b.dataset.stab, key, focus);
+  markTabRow($$('.tab-btn'), tabKey, key, focus);
   document.dispatchEvent(new CustomEvent('zoneshown',{detail:'satruong'}));
 }
 
@@ -6444,7 +6570,7 @@ function setZoneUI(z){
   updateStickyTop();
 }
 function showZone(z){
-  if(z==='kyvien'){ showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc'); return; }
+  if(z==='kyvien'){ const t=safeLS_get('xq_last_tab'); showTab(TAB_KEYS.includes(t) && !PLAY_TABS.includes(t) ? t : 'hoc'); return; }
   if(z==='satruong'){ showStab(currentStab); return; }
   setZoneUI(z);
   document.dispatchEvent(new CustomEvent('zoneshown',{detail:z}));
@@ -7011,6 +7137,8 @@ function playFromPosition(board, turn, source){
 function alertSoft(msg){ const el=document.querySelector('section:not([hidden]) [aria-live]'); if(el) statusBanner(el,'fail',esc(msg)); }
 
 /* ---------------- Bảng tiến độ ---------------- */
+// "2 thắng · 1 thua" (bỏ mục bằng 0); chưa có ván thì "Chưa có ván"
+function wdlText(w,d,l){ const p=[]; if(w) p.push(w+' thắng'); if(d) p.push(d+' hoà'); if(l) p.push(l+' thua'); return p.join(' · ')||'Chưa có ván'; }
 function renderProgressDashboard(){
   const el=$('#progressDash'); if(!el) return;
   const done=lessonsDone().filter(k=>LESSONS.some(l=>l.key===k)).length;
@@ -7027,7 +7155,7 @@ function renderProgressDashboard(){
       <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
       <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
       <div class="dash-tile"><b>${st||0} ngày</b><span>liên tiếp có làm bài</span></div>
-      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>đấu máy: thắng–hoà–thua</span></div>
+      <div class="dash-tile"><b>${wdlText(w,d,l)}</b><span>đấu máy</span></div>
     </div>
     <details class="more-box dash-more"><summary>Chi tiết theo chủ đề bài tập${acc!=null?` · chính xác trung bình ${acc}%`:''}</summary>
       <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
@@ -7041,8 +7169,9 @@ function renderDailyCard(){
   const el=$('#dailyCard'); if(!el) return;
   const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
   const streak=Learn.streak();
-  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
-      <div class="hint-text small">${done?'Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · Chuỗi ${streak} ngày liên tiếp`:''}</div></div>
+  const sub=[done?'Đã xong hôm nay. Mai có bài mới!':'', streak?`Chuỗi ${streak} ngày liên tiếp`:''].filter(Boolean).join(' · ');
+  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)}
+      ${sub?`<div class="hint-text small">${sub}</div>`:''}</div>
     <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
   $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
 }
@@ -7052,7 +7181,7 @@ function renderAiSuggestion(){
   if(!s){ el.innerHTML=''; return; }
   const name=levelInfo(s.level).name;
   el.innerHTML=`<div class="suggest-box">${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
-  $('#aiSuggestBtn',el).addEventListener('click',()=>{ const r=$(`input[name="aiLevel"][value="${s.level}"]`); if(r){ r.checked=true; } el.innerHTML=''; });
+  $('#aiSuggestBtn',el).addEventListener('click',()=>{ $('#aiLevelPicker').dispatchEvent(new CustomEvent('levelset',{detail:s.level})); el.innerHTML=''; });
 }
 function initLearn(){
   // Bài tập: chơi tiếp & FEN
@@ -7080,8 +7209,8 @@ function initLearn(){
     }catch(e){ out.textContent=e.message; }
   });
   renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
+  document.addEventListener('zoneshown',e=>{ if(e.detail==='toi') renderProgressDashboard(); });
   document.addEventListener('tabshown',e=>{
-    if(e.detail==='hoc') renderProgressDashboard();
     if(e.detail==='baitap') renderDailyCard();
     if(e.detail==='may') renderAiSuggestion();
   });
@@ -7357,7 +7486,7 @@ const Online = (function(){
   // Thanh người chơi: tên, Elo, quân đã ăn; sáng lên khi tới lượt
   function renderPlayer(el, color){
     const r=st.room, s=r.seats[color], g=st.local||st.game, isTurn=!r.result && g.turn()===color;
-    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`; return; }
+    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Chờ đối thủ…</span>`; return; }
     const sub=[s.elo!=null?`Elo ${s.elo}`:'', s.online?'':'mất kết nối'].filter(Boolean).join(' · ');
     setPlayerBar(el, {color, name:s.name, me:r.you===color, sub:esc(sub), captured:capturedBy(g.moves,color), active:isTurn && !!r.seats[other(color)],
       note: isTurn && r.seats[other(color)] ? (r.you===color?'tới lượt':'đang nghĩ…') : ''});
@@ -7388,7 +7517,7 @@ const Online = (function(){
       const head = r.you==='spectator' ? '' : `<b>${!res.winner?'Hoà.':res.winner===r.you?'Bạn thắng!':'Bạn thua.'}</b> `;
       statusBanner(el, kind, head+esc(txt)+elo); return;
     }
-    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
+    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ el.innerHTML=''; return; }   // thanh người chơi đã ghi "Chờ đối thủ…"
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
@@ -7424,9 +7553,9 @@ const Online = (function(){
     if(!waiting){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
-    el.innerHTML=`<div class="ol-invite-row"><span>Mã phòng <b class="ol-bigcode">${st.code}</b><span class="hint-text small ol-invite-hint">Gửi cho bạn để vào chơi cùng</span></span>
-      <span class="btn-row"><button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép link mời</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</span></div>
-      <input class="field ol-link mt10" readonly value="${esc(link)}" aria-label="Link mời" hidden>`;
+    // gọn: chỉ nút mời nằm trên hàng tiêu đề (mã phòng đã có ở tiêu đề)
+    el.innerHTML=`<button type="button" class="btn btn-primary btn-sm" id="olCopy" title="Sao chép link mời"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg><span class="btn-label">Sao chép link mời</span><span class="btn-label-s">Mời</span></button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare" aria-label="Chia sẻ" title="Chia sẻ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg></button>':''}
+      <input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời" hidden>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
       try{ await navigator.clipboard.writeText(link); flash('Đã sao chép link mời.'); }
       catch(e){ const inp=$('.ol-link',el); inp.hidden=false; inp.select(); flash('Hãy tự sao chép link trong ô (Ctrl/⌘+C).'); }
@@ -7435,7 +7564,8 @@ const Online = (function(){
   }
   function render(){
     const r=st.room;
-    $('#olCode').textContent=st.code||'';
+    // ván ghép xếp hạng: mã phòng không có ý nghĩa với người chơi
+    $('#olTitle').innerHTML = st.ranked ? 'Đấu xếp hạng' : `Phòng <span id="olCode">${esc(st.code||'')}</span>`;
     renderInvite();
     if(!r){ $('#olKind').hidden=true; st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
     const me = r.you==='spectator' ? 'red' : r.you;
@@ -7463,8 +7593,8 @@ const Online = (function(){
     if(isArtifact() && (st.conn==='blocked' || !server()))
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
-      return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
+      return `Không kết nối được máy chủ đấu online. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
+    if(!server()) return 'Đấu online tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -7479,7 +7609,7 @@ const Online = (function(){
     renderRanked();
     const u=Account.signedIn() ? Account.user() : null;
     $('.ol-name').hidden=!!u; $('#olRatedWrap').hidden=!u;
-    $('#olAsUser').hidden=!u; if(u) $('#olAsUser').innerHTML=`Bạn chơi với tên <b>${esc(u.displayName)}</b> · Elo ${u.elo}.`;
+
     const rc=recent();
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
         <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
@@ -7519,10 +7649,12 @@ const Online = (function(){
     disconnect();
     st.ranked=!!(create && create.match);
     st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
-    $('#olLobby').hidden=true; $('#olRoom').hidden=false;
+    $('#olLobby').hidden=true; $('#olRoom').hidden=false; $('#olToast').hidden=true;
     setRoomParam(code);
     render(); connect();
-    revealBoard($('#olBoardCard'));
+    // vừa tạo phòng (chờ bạn vào): giữ hàng tiêu đề có nút mời trong tầm nhìn
+    if(create && !create.match) $('#olRoom').scrollIntoView({block:'start'});
+    else revealBoard($('#olBoardCard'), true);
   }
   function review(id){
     const rec=history().find(r=>r.id===id); if(!rec) return;
@@ -7546,8 +7678,9 @@ const Online = (function(){
       body.innerHTML=`<div class="ranked-search"><span class="spinner" aria-hidden="true"></span><span>Đang tìm đối thủ… <b>0:${String(sec).padStart(2,'0')}</b></span><button type="button" class="btn btn-outline btn-sm" id="olSearchCancel">Huỷ</button></div>`;
       $('#olSearchCancel').addEventListener('click',cancelSearch); return;
     }
-    body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-outline btn-sm" data-resume="${g.id}">Vào tiếp</button></div>`).join('')
-      +`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button><p class="hint-text small ranked-note">${open.length ? 'Ván đang dở vẫn giữ nguyên, vào tiếp lúc nào cũng được.' : 'Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.'}</p>`;
+    // có ván dở: "Vào tiếp" là nút chính, "Tìm trận mới" là nút phụ
+    body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-primary btn-sm" data-resume="${g.id}">${icon('play')}Vào tiếp</button></div>`).join('')
+      +`<button type="button" class="btn ${open.length?'btn-outline':'btn-primary ranked-go'} ol-wide" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button>${open.length?'':'<p class="hint-text small ranked-note">Thắng cộng Elo, thua trừ. Không gợi ý, không đi lại.</p>'}`;
     $$('[data-resume]',body).forEach(b=>b.addEventListener('click',()=>{ const g=savedBots().find(x=>String(x.id)===b.dataset.resume); if(g) startBotMatch(g, true); }));
     $('#olFindMatch').addEventListener('click',startSearch);
   }
@@ -7606,7 +7739,7 @@ const Online = (function(){
     botPush();
     if(st.bot.result && !st.bot.submitted) botSubmit();
     else botMaybeMove();
-    revealBoard($('#olBoardCard'));
+    revealBoard($('#olBoardCard'), true);
   }
   function botGame(){ return replay(st.bot.moves, null); }
   function botMaterial(board, color){
@@ -7678,7 +7811,7 @@ const Online = (function(){
   }
 
   function init(){
-    st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ Sa trường'});
+    st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ đấu online'});
     st.ctl=makeClickController({ widget:st.widget, getBoard:board, turn:()=>(st.local||st.game||Game.create()).turn(), canMove, onMove, extraMeta:meta,
       legalMoves:()=>(st.game?st.game.legalMoves():[]) });
     st.game=Game.create();
@@ -7929,7 +8062,7 @@ const Account = (function(){
     openDialog(`${dlgHead('Tạo tài khoản')}
       <form novalidate>
         ${fieldHTML('rgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
-        <small class="hint-text small dlg-hint">3–20 ký tự: chữ không dấu, số, dấu _ và dấu chấm. Bạn bè tìm bạn bằng tên này.</small>
+        <small class="hint-text small dlg-hint">3–20 ký tự, không dấu. Bạn bè tìm bạn bằng tên này.</small>
         ${fieldHTML('rgName','Tên hiển thị','text','autocomplete="nickname" maxlength="24"')}
         ${fieldHTML('rgPass','Mật khẩu','password','autocomplete="new-password"')}
         ${fieldHTML('rgPass2','Nhập lại mật khẩu','password','autocomplete="new-password"')}
@@ -8010,7 +8143,7 @@ const Account = (function(){
   async function afterSignIn(r, fresh){
     saveSession(r.token, r.user);
     closeDialog();
-    if(fresh){ await sync({quiet:true}); toastMsg(`Chào ${r.user.displayName}! Tiến độ trên máy này đã được lưu vào tài khoản.`); return; }
+    if(fresh){ await sync({quiet:true}); toastMsg('Đã lưu tiến độ vào tài khoản.'); return; }
     let remote=null;
     try{ remote=await call('GET','/api/progress'); }catch(e){}
     const remoteHas = remote && Object.keys(remote.data||{}).some(k=>LEARN_KEYS.includes(k));
@@ -8062,7 +8195,6 @@ const Account = (function(){
         : m.last ? `Lần đồng bộ cuối: ${new Date(m.last).toLocaleString('vi-VN')}. Tiến độ tự đồng bộ vài giây sau mỗi thay đổi.` : 'Chưa đồng bộ lần nào.';
     }
   }
-  function statTile(big, small){ return `<div class="dash-tile"><b>${big}</b><span>${small}</span></div>`; }
   function renderMe(){
     const u=st.user;
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
@@ -8073,15 +8205,10 @@ const Account = (function(){
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;
-    $('#meSub').textContent=`@${u.username} · tham gia ${fmtDate(u.createdAt)}`;
     $('#meElo').textContent=u.elo;
     const t=Ranked.tierOf(u.elo);
     $('#meEloSub').innerHTML = `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
-    const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
-    const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
-    $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
-      + statTile(`${streak||0} ngày`,'liên tiếp có làm bài') + statTile(`${w}–${d}–${l}`,'đấu máy: thắng–hoà–thua')
-      + statTile(`${u.wins}–${u.draws}–${u.losses}`,'xếp hạng: thắng–hoà–thua');
+    $('#meSub').textContent=`@${u.username} · xếp hạng: ${wdlText(u.wins,u.draws,u.losses).toLowerCase()}`;
     renderSync();
   }
   // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
@@ -8137,10 +8264,10 @@ const Account = (function(){
       });
     });
     $('#meLogout').addEventListener('click',()=>{
-      openDialog(`${dlgHead('Đăng xuất')}<p>Giữ tiến độ học trên máy này sau khi đăng xuất?</p>
-        <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="loKeep">Đăng xuất, giữ tiến độ</button><button type="button" class="btn btn-outline" id="loWipe">Đăng xuất và xoá tiến độ trên máy này</button></div>`, ()=>{
-        $('#loKeep').addEventListener('click',()=>logout(false));
-        $('#loWipe').addEventListener('click',()=>logout(true));
+      openDialog(`${dlgHead('Đăng xuất?')}<p class="hint-text">Tiến độ đã lưu trong tài khoản.</p>
+        <label class="check-line"><input type="checkbox" id="loWipe"> Xoá dữ liệu trên máy này</label>
+        <button type="button" class="btn btn-primary dlg-main" id="loGo">Đăng xuất</button>`, ()=>{
+        $('#loGo').addEventListener('click',()=>logout($('#loWipe').checked));
       });
     });
     $('#meLogoutAll').addEventListener('click',()=>confirmDialog('Đăng xuất mọi thiết bị','<p>Tất cả các máy đang đăng nhập tài khoản này (kể cả máy này) sẽ bị đăng xuất.</p>','Đăng xuất tất cả', async ()=>{
@@ -8155,7 +8282,7 @@ const Account = (function(){
           if(val('dlUser').trim().toLowerCase()!==u) return fieldErr('dlUser','Tên đăng nhập chưa khớp');
           try{ await call('DELETE','/api/me',{username:u, passHash:await passHash(u, val('dlPass'))}); }
           catch(e){ if(e.status===401) return fieldErr('dlPass','Mật khẩu chưa đúng'); throw e; }
-          closeDialog(); clearSession(); toastMsg('Đã xoá tài khoản. Tiến độ trên máy này vẫn giữ nguyên.');
+          closeDialog(); clearSession(); toastMsg('Đã xoá tài khoản.');
         });
       });
     });
@@ -8179,7 +8306,7 @@ const Account = (function(){
     const keys=syncedKeys();
     clearSession();
     if(wipe){ for(const k of keys) try{ localStorage.removeItem(k); }catch(e){} api.reload(); return; }
-    toastMsg('Đã đăng xuất. Tiến độ trên máy này vẫn giữ nguyên.');
+    toastMsg('Đã đăng xuất.');
   }
 
   /* ---------- thông báo nổi (lời mời đấu, phiên hết hạn…) ---------- */
@@ -8196,7 +8323,7 @@ const Account = (function(){
     return el;
   }
   const dropNotice = id => { const el=$(`#noticeStack [data-notice="${id}"]`); if(el) el.remove(); };
-  function toastMsg(text){ notice({id:'toast', html:esc(text), timeout:5000}); }
+  function toastMsg(text){ notice({id:'toast', html:esc(text), timeout:3000}); }
 
   /* ---------- hộp thư: lời mời đấu, lời mời kết bạn, nhịp online ---------- */
   function startInbox(){
@@ -8276,7 +8403,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : '<p class="hint-text">Chưa có bạn nào. Gõ tên đăng nhập của bạn mình vào ô tìm ở trên, hoặc vào <b>Phòng đấu → Tạo phòng</b> rồi gửi mã phòng cho bạn.</p>';
+      : (r.incoming.length || r.outgoing.length ? '' : '<p class="hint-text">Chưa có bạn. Tìm theo tên đăng nhập ở trên.</p>');
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -8333,7 +8460,7 @@ const Account = (function(){
     try{
       const r=await call('POST','/api/friends',{username});
       friendSent.add(username);
-      toastMsg(r.relation==='friend' ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời kết bạn.');
+      toastMsg(r.relation==='friend' ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời.');
       await loadFriends();
     }catch(e){ toastMsg(e.message); }
     document.dispatchEvent(new CustomEvent('friendschange'));
@@ -8407,7 +8534,7 @@ const lastZone=safeLS_get('xq_zone');
 initZones();
 initOnline();
 initAccount();
-showTab(TAB_KEYS.includes(safeLS_get('xq_last_tab')) ? safeLS_get('xq_last_tab') : 'hoc');
+showZone('kyvien');
 if(Online.wantsZone() || lastZone==='satruong') showZone('satruong');
 else if(lastZone==='toi') showZone('toi');
 

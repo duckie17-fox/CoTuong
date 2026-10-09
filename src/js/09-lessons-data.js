@@ -149,7 +149,7 @@ const LESSONS = [
   {
     key:'giatri', level:1, type:'R', title:'Giá trị các quân', han:'子力',
     text:[
-      'Muốn biết một cuộc đổi quân có lợi hay không, người chơi dùng bảng điểm ước lượng dưới đây. Đây chỉ là con số tham khảo; giá trị thật còn tuỳ vị trí.',
+      'Điểm ước lượng của mỗi quân (chỉ để tham khảo, giá trị thật còn tuỳ vị trí).',
       '<b>Pháo mạnh ở đầu ván</b> vì bàn còn nhiều quân làm ngòi. <b>Mã mạnh hơn ở cuối ván</b> khi bàn thưa, ít bị cản chân. <b>Tốt qua sông</b> được đi ngang nên giá trị tăng gấp đôi; Tốt đã tới hàng cuối thì yếu đi.',
       'Hai quy tắc hay dùng: đổi một Xe lấy Mã + Pháo thường là có lợi cho bên lấy hai quân. Mất Sĩ Tượng thì Tướng dễ bị chiếu bí, dù điểm số không cao.'
     ],

@@ -90,10 +90,12 @@ function aiRender(){
     active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
   if(g.result){
     const human = g.result.winner===H, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
+    const selfResign = g.result.reason==='resign' && g.result.winner===M;
+    statusBanner(el, draw?'draw':(human?'over':'fail'), selfResign ? '<b>Bạn đã đầu hàng.</b>' : `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
   } else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===H ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
   else if(aiGame.hint && aiGame.hintText) statusBanner(el,'think', aiGame.hintText);
-  else el.innerHTML = turn===H && !aiGame.thinking ? `<span class="hint-text small">Đến lượt bạn — chạm quân rồi chạm ô sáng để đi.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
+  // dòng nhắc cách đi chỉ ở vài nước đầu (thanh người chơi đã báo "tới lượt")
+  else el.innerHTML = turn===H && !aiGame.thinking && g.moves.filter(m=>m.color===H).length<2 ? `<span class="hint-text small">Chạm quân, rồi chạm ô sáng.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
   renderMoveLog($('#aiLog'), g.moves);
   const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
   $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
@@ -101,7 +103,7 @@ function aiRender(){
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
   $('#aiActions').hidden = over;
-  $('#aiAfter').hidden = !over;
+  $('#aiAfter').hidden = !over; $('#aiMore').hidden = !over;
   $('#aiLevelTag').textContent = '';
 }
 function aiPersist(){
@@ -161,7 +163,7 @@ function aiBeginGame(cfg){
   aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
-  revealBoard($('#aiBoardCard'));
+  revealBoard($('#aiBoardCard'), true);
 }
 function showAICard(which){
   $('#aiSetupCard').hidden = which!=='setup';
@@ -169,18 +171,36 @@ function showAICard(which){
   $('#aiReviewCard').hidden = which!=='review';
   if(which==='setup') renderHistoryList();
 }
+// Nhóm độ khó cho thang chọn cấp
+const LEVEL_GROUPS=[{to:3,label:'Dễ',key:'easy'},{to:6,label:'Vừa sức',key:'mid'},{to:8,label:'Khó',key:'hard'},{to:10,label:'Cao thủ',key:'pro'}];
+const levelGroup=id=>LEVEL_GROUPS.find(g=>id<=g.to);
+// Chọn cấp máy gọn trong một thẻ: ‹ [tên · cấp · nhóm · bậc tương đương / mô tả] ›, dưới là vạch 10 nấc bấm được.
+// Vẫn dùng radio name="aiLevel" để các phần khác đọc cấp đang chọn như cũ.
 function renderLevelPicker(){
   const saved=savedAiLevel();
   const pick=$('#aiLevelPicker');
-  pick.innerHTML = AI_LEVELS.map(l=>`<label class="level-chip"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}><span>${l.id}. ${esc(l.name)}</span></label>`).join('')
-    + '<p class="level-note" id="aiLevelNote"></p>';
-  const note=()=>{
-    const r=$('input[name="aiLevel"]:checked',pick); if(!r) return;
-    const l=AI_LEVELS.find(x=>x.id===+r.value);
-    $('#aiLevelNote').innerHTML = `${esc(l.desc)} <span class="lv-tier">Ngang bậc ${esc(Ranked.tierOf(l.elo).label)}</span>`;
+  const N=AI_LEVELS.length;
+  pick.innerHTML = `<div class="lvl-card">
+      <button type="button" class="lvl-step" data-step="-1" aria-label="Cấp dễ hơn">${icon('left')}</button>
+      <div class="lvl-main" aria-live="polite"></div>
+      <button type="button" class="lvl-step" data-step="1" aria-label="Cấp khó hơn">${icon('right')}</button>
+      <div class="lvl-track" role="radiogroup" aria-label="Cấp độ máy">${AI_LEVELS.map(l=>`<label class="lvl-seg lvl-${levelGroup(l.id).key}" title="Cấp ${l.id}: ${esc(l.name)} (${levelGroup(l.id).label})">
+        <input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''} aria-label="Cấp ${l.id}: ${esc(l.name)}"></label>`).join('')}</div>
+    </div>`;
+  const cur=()=>{ const r=$('input[name="aiLevel"]:checked',pick); return r ? +r.value : saved; };
+  const show=()=>{
+    const id=cur(), l=AI_LEVELS.find(x=>x.id===id), g=levelGroup(id), t=Ranked.tierOf(l.elo);
+    $('.lvl-main',pick).innerHTML = `<div class="lvl-line"><b class="lvl-name">${esc(l.name)}</b><span class="lvl-g lvl-${g.key}">${g.label}</span></div>
+      <div class="lvl-desc">${esc(l.desc)}</div>`;
+    pick.title = `Cấp ${id}/${N} · ngang bậc ${t.label} ở Đấu xếp hạng`;
+    $$('.lvl-seg',pick).forEach(b=>{ const v=+$('input',b).value; b.classList.toggle('on', v<=id); });
+    $$('.lvl-step',pick).forEach(b=>b.disabled = (+b.dataset.step<0 ? id<=1 : id>=N));
   };
-  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',note));
-  note();
+  const set=id=>{ const r=$(`input[name="aiLevel"][value="${id}"]`,pick); if(r){ r.checked=true; show(); } };
+  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',show));
+  $$('.lvl-step',pick).forEach(b=>b.addEventListener('click',()=>set(Math.max(1,Math.min(N,cur()+(+b.dataset.step))))));
+  pick.addEventListener('levelset',e=>set(e.detail));
+  show();
 }
 function initAIGame(){
   renderLevelPicker();

@@ -31,13 +31,13 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     // An đăng nhập rồi tạo phòng giao hữu (tắt Tính Elo để còn xin đi lại), cầm Đỏ
     await registerUI(A, PAGE + q, 'an_room', 'An');
     await A.click('.zone-btn[data-zone="satruong"]');
-    assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'Sa trường không hiện thanh tab Kỳ viện');
+    assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'phần Chơi không hiện thanh tab của phần Học');
     await A.evaluate(() => { document.querySelector('#olRated').checked = false; });
     await A.click('#olCreate');
     await A.waitForSelector('#olInvite:not([hidden]) .ol-link', { state: 'attached' });   // ô link ẩn, chỉ hiện khi không sao chép được
     const link = await A.inputValue('#olInvite .ol-link');
     const code = link.match(/room=([A-Z0-9]+)/)[1];
-    assert.match(await text(A, '#olStatus'), /chờ đối thủ/);
+    assert.match(await text(A, '#olTop'), /Chờ đối thủ/);   // một dòng chờ ở thanh người chơi
 
     // Bình mở link mời khi chưa có tài khoản → bắt đăng nhập → tạo tài khoản xong vào thẳng phòng
     await registerUI(B, PAGE + `?room=${code}&server=ws://localhost:${srv.port}`, 'binh_room', 'Bình');

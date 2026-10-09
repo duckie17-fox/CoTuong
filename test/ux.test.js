@@ -31,7 +31,7 @@ test('đấu với máy: đi quân bằng bàn phím, máy đáp, đi lại', as
   const plies = () => document.querySelectorAll('#aiLog .log-cell[data-ply]').length;
   for (let i = 0; i < 100 && plies() < 2; i++) await new Promise(r => setTimeout(r, 50));
   assert.equal(plies(), 2, 'máy chưa đáp');
-  assert.match(document.querySelector('#aiStatus').textContent, /Đến lượt bạn/);
+  assert.match(document.querySelector('#aiStatus').textContent, /Chạm quân/);
   document.querySelector('#aiUndo').click();
   assert.equal(plies(), 0);
   const hist = JSON.parse(window.localStorage.getItem('xq_ai_history'));

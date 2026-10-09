@@ -84,7 +84,7 @@
 }
 
 *{box-sizing:border-box;}
-html{background:var(--paper);}
+html{background:var(--paper);scroll-padding-top:calc(var(--sticky-top, 0px) + 8px);}
 body{
   margin:0;
   font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -122,7 +122,7 @@ a{color:var(--accent);}
 .zone-btn:hover{background:var(--paper-2);color:var(--ink);}
 .zone-btn[aria-pressed="true"]{color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .zone-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.zone-badge{position:absolute;top:3px;right:5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:17px;text-align:center;}
+.zone-badge{position:absolute;top:3px;right:5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:12px;line-height:17px;text-align:center;}
 .sync-ic{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);width:36px;height:36px;border-radius:50%;cursor:pointer;flex:none;}
 
 .tabs{
@@ -190,7 +190,8 @@ select.field, input.field{
   padding:14px;box-shadow:0 4px 16px var(--shadow);
 }
 .board-shell{max-width:460px;margin:0 auto;}
-@media(min-width:900px){ .play-layout .board-shell{max-width:max(400px, min(780px, calc((100vh - 250px) * 0.95)));} }
+/* Máy tính bảng dọc (601–899px): bàn cờ rộng hết khung nội dung, chỉ giới hạn theo chiều cao màn */
+@media(min-width:601px) and (max-width:899px){ .board-shell{max-width:max(320px, min(760px, calc((100svh - 250px) / 1.1)));} }
 .xq-board-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
 .xq-piece{cursor:pointer;}
 .xq-piece-outer{stroke:var(--b-line);stroke-width:2;}
@@ -270,6 +271,7 @@ select.field, input.field{
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
 .lesson-foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap;}
+.lesson-top .lesson-foot{margin-top:0;gap:6px;}
 
 /* ---------- Puzzle list ---------- */
 .puzzle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px;}
@@ -349,7 +351,7 @@ select.field, input.field{
 .log-list li:last-child{border-bottom:0;}
 .log-n{color:var(--ink-soft);font-size:12.5px;text-align:right;padding-right:4px;}
 .log-cell{appearance:none;border:0;background:transparent;text-align:left;font:600 14px 'Be Vietnam Pro',sans-serif;color:var(--ink);padding:6px 6px;border-radius:6px;cursor:pointer;min-height:34px;}
-.log-cell small{color:var(--accent);font-weight:800;margin-left:2px;}
+.log-cell small{color:var(--accent);font-weight:800;margin-left:2px;font-size:14px;}
 .log-cell:hover{background:var(--card);}
 .log-cell.active{background:var(--accent);color:var(--accent-ink);}
 .log-cell.active small{color:inherit;}
@@ -400,12 +402,10 @@ select.field, input.field{
 }
 
 /* ---------- Lộ trình bài học ---------- */
-.lesson-nav{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
-.lesson-level{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper-2);}
-.lesson-level-h{font-size:13.5px;color:var(--ink-soft);margin-bottom:8px;line-height:1.4;}
-.lesson-level-h b{color:var(--ink);font-size:14.5px;margin-right:4px;}
-.lesson-level-items{display:flex;gap:6px;flex-wrap:wrap;}
-.lesson-dot{min-height:38px;}
+.lesson-nav{display:flex;flex-direction:column;gap:8px;margin:0;}
+.lesson-level{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.lesson-level-h{font-size:13px;color:var(--ink-soft);min-width:84px;}
+.lesson-dot{min-height:34px;padding:5px 10px;}
 .lesson-level-tag{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;}
 .lesson-body.no-demo{grid-template-columns:1fr !important;}
 .lesson-text ol{font-family:'Noto Serif',Georgia,serif;font-size:15px;line-height:1.6;padding-left:22px;margin:0 0 12px;}
@@ -457,7 +457,6 @@ select.field, input.field{
 #puzzleMeta{display:flex;gap:6px;align-items:center;}
 @media (max-width:600px){
   .opening-cards,.topic-grid{grid-template-columns:1fr;}
-  .lesson-level{padding:8px 10px;}
   .trainer-cta .btn-row{width:100%;}
   #satcucList .topic-grid,#egTheory .topic-grid,#tacticGrid,#endgameGrid{grid-template-columns:1fr 1fr;gap:8px;}
   #satcucList .topic-card,#egTheory .topic-card,#tacticGrid .topic-card,#endgameGrid .topic-card{padding:10px 12px;}
@@ -571,7 +570,7 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 
 
 /* ---------- Cài đặt & tiến độ ---------- */
-.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line);}
 /* ---------- Tôi ---------- */
 .me-head{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
 .me-head h2{margin:0;}
@@ -715,7 +714,7 @@ body.dlg-open{overflow:hidden;}
 .switch input:focus-visible + .switch-ui{outline:2px solid var(--gold);outline-offset:2px;}
 .avatar{--av:20;display:inline-flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border-radius:50%;
   background:hsl(var(--av) 45% 42%);color:#fff;font:800 14px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;}
-.avatar-xs{width:24px;height:24px;font-size:10px;}
+.avatar-xs{width:24px;height:24px;font-size:11px;}
 .me-letter{background:hsl(var(--av,20) 45% 42%);color:#fff;font:800 22px 'Be Vietnam Pro',sans-serif;border:0;}
 .me-profile .me-head{flex-wrap:wrap;margin:0;}
 .me-id{flex:1;min-width:180px;}
@@ -726,7 +725,8 @@ body.dlg-open{overflow:hidden;}
 .me-elo small{color:var(--ink-soft);font-size:12.5px;}
 .me-actions{display:flex;flex-wrap:wrap;gap:8px;}
 #meSigned .card + .card{margin-top:14px;}
-#meSigned{margin-bottom:14px;}
+#meSigned{margin-bottom:0;}
+#progressCard{margin-top:14px;}
 .person{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;}
 .person:last-child{border-bottom:0;}
 .person-main{flex:1;min-width:150px;display:flex;flex-direction:column;gap:2px;}
@@ -735,7 +735,7 @@ body.dlg-open{overflow:hidden;}
 .friends-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;}
 .friend-chip{appearance:none;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:92px;padding:8px 4px;border:1px solid var(--line);border-radius:12px;background:var(--paper-2);color:var(--ink);cursor:pointer;font:600 13px 'Be Vietnam Pro',sans-serif;}
 .friend-chip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.friend-chip small{color:var(--jade);font-weight:700;font-size:11.5px;}
+.friend-chip small{color:var(--jade);font-weight:700;font-size:12px;}
 .friend-chip:hover{border-color:var(--gold);}
 .rank-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px dashed var(--line);}
 .rank-row .rank-n{width:30px;flex:none;}
@@ -802,8 +802,9 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
 .pb-main{display:flex;flex-direction:column;min-width:0;line-height:1.2;}
 .pb-main .ol-pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pb-sub{color:var(--ink-soft);font-size:12px;font-weight:600;}
-.pb-caps{display:flex;flex-wrap:wrap;gap:1px;flex:1;min-width:0;justify-content:flex-end;}
-.cap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:12px;line-height:1;}
+.pb-caps{display:flex;flex-wrap:wrap;gap:2px 0;flex:1;min-width:0;justify-content:flex-end;}
+.pb-caps .cap + .cap{margin-left:-5px;}
+.cap{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--b-disc);border:1px solid var(--b-line);font-family:var(--han-font);font-size:16px;line-height:1;}
 .cap-red{color:var(--b-red-deep);} .cap-black{color:var(--b-black-deep);}
 .ol-player .ol-turn{flex:none;}
 .ol-player .ol-dot{flex:none;}
@@ -814,12 +815,12 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
   .game-head .btn-label{display:none;}
   .game-head .btn{padding:8px 10px;min-height:40px;}
   .ol-player{padding:3px 8px;min-height:36px;}
-  .cap{width:18px;height:18px;font-size:11px;}
+  .cap{width:23px;height:23px;font-size:15px;}
 }
 .level-opt .lv-tier{color:var(--jade);font-weight:600;}
 
 /* ---------- Đấu xếp hạng: bậc hạng, thẻ tìm trận ---------- */
-.tier{display:inline-flex;align-items:center;gap:4px;font:800 11.5px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
+.tier{display:inline-flex;align-items:center;gap:4px;font:800 12px 'Be Vietnam Pro',sans-serif;letter-spacing:.02em;padding:2px 8px;border-radius:999px;color:#fff;background:var(--tier,#888);white-space:nowrap;vertical-align:1px;}
 .tier-dong{--tier:#9a6236;} .tier-bac{--tier:#7d8895;} .tier-vang{--tier:#b8871f;} .tier-bachkim{--tier:#2f948f;}
 .tier-kimcuong{--tier:#3e6fc4;} .tier-tinhanh{--tier:#7b4fc4;} .tier-caothu{--tier:#c23e50;} .tier-daicaothu{--tier:#8f1d2c;}
 .tier-thachdau{--tier:linear-gradient(120deg,#b8871f,#c23e50,#7b4fc4);background:var(--tier);}
@@ -863,7 +864,8 @@ body.gated{overflow:hidden;}
   .zone-btn[aria-pressed="true"] #meIcon .zone-ic{background:none;padding:0;}
   .zone-badge{top:2px;right:calc(50% - 30px);}
   body{padding-bottom:calc(84px + env(safe-area-inset-bottom));}
-  .notice-stack{bottom:calc(78px + env(safe-area-inset-bottom));}
+  /* thông báo nổi ở trên đầu màn: không che thanh nút dưới bàn cờ và thanh điều hướng */
+  .notice-stack{bottom:auto;top:calc(8px + env(safe-area-inset-top, 0px));}
   .sync-ic{width:34px;height:34px;}
 }
 
@@ -887,22 +889,23 @@ body.gated{overflow:hidden;}
   .play-layout > .side-panel{grid-column:2;}
   .play-layout > .play-board > .board-toolbar{margin-top:0;justify-content:flex-start;}
   .play-layout > .play-board > .board-caption{margin-top:0;text-align:left;}
-  .play-layout{--bw:max(420px, min(780px, calc((100vh - 220px) * 0.9)));grid-template-columns:minmax(0,var(--bw)) 320px;justify-content:center;column-gap:24px;}
+  /* cỡ bàn theo chiều cao màn: bàn (tỉ lệ ~1:1.1) vừa khít dưới thanh trên đang dính */
+  .play-layout{--bw:max(420px, min(880px, calc((100vh - var(--sticky-top, 100px) - 30px) / 1.1)));grid-template-columns:minmax(0,var(--bw)) 320px;justify-content:center;column-gap:24px;}
   .play-layout .board-shell{max-width:var(--bw);}
 }
 
 /* ---------- Nền: điểm nhấn nhẹ kiểu cờ thủ — dấu vị trí quân như trên bàn cờ, mây cát tường ở hai góc ---------- */
 body::before,body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;}
-body::before{background:var(--ink);opacity:.07;
+body::before{background:var(--ink);opacity:.04;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Cpath d=%22M38 44H44V38M58 44H52V38M38 52H44V58M58 52H52V58%22/%3E%3C/svg%3E") 0 0/96px 96px repeat;}
-body::after{background:var(--gold);opacity:.2;
+body::after{background:var(--gold);opacity:.11;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%28244 0%29 scale%28-1 1%29%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/g%3E%3C/svg%3E") right -36px top 110px/300px auto no-repeat,url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 244 130%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M24 96C24 62 70 54 82 78C90 96 66 104 59 90C54 80 67 75 72 84%22/%3E%3Cpath d=%22M82 78C86 40 138 34 148 64C155 86 126 94 120 78C115 66 132 61 135 71%22/%3E%3Cpath d=%22M148 64C160 50 190 56 190 78C190 92 172 95 169 85%22/%3E%3Cpath d=%22M8 110C70 110 150 110 236 110%22/%3E%3Cpath d=%22M40 122H196%22/%3E%3C/svg%3E") left -44px bottom 40px/340px auto no-repeat;}
-:root[data-theme="dark"] body::before{opacity:.05;}
-:root[data-theme="dark"] body::after{opacity:.13;}
+:root[data-theme="dark"] body::before{opacity:.025;}
+:root[data-theme="dark"] body::after{opacity:.06;}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) body::before{opacity:.05;}
-  :root:not([data-theme="light"]) body::after{opacity:.13;}
+  :root:not([data-theme="light"]) body::before{opacity:.025;}
+  :root:not([data-theme="light"]) body::after{opacity:.06;}
 }
 @media (max-width:767px){
   body::after{-webkit-mask-size:200px auto,230px auto;mask-size:200px auto,230px auto;
@@ -925,7 +928,6 @@ body::after{background:var(--gold);opacity:.2;
 .more-box > summary:hover{color:var(--ink);}
 .more-box > summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
 .more-box > :last-child{margin-bottom:4px;}
-#lessonToc .lesson-nav{margin-top:8px;}
 #pzFilterBox{border-top:0;margin-top:0;padding-top:0;}
 #pzFilterBox .chip-row{margin-top:8px;}
 @media (max-width:420px){ .tab-btn{padding:11px 6px;font-size:13px;} .tabs{padding-inline:4px;} }
@@ -937,10 +939,14 @@ body::after{background:var(--gold);opacity:.2;
 .ol-invite-row .btn-row{margin:0;}
 /* Máy tính: thông báo nổi ở góc phải dưới, không đè lên bàn cờ */
 @media (min-width:900px){ .notice-stack{left:auto;right:20px;transform:none;width:min(400px, calc(100vw - 40px));} }
-/* Điện thoại: hàng Bài trước / Bài tiếp luôn dính ngay trên thanh dưới */
+/* Điện thoại: hàng Bài trước / Bài n/19 / Bài tiếp luôn dính ngay trên thanh dưới */
 @media (max-width:767px){
-  .lesson-foot{position:sticky;bottom:calc(65px + env(safe-area-inset-bottom));z-index:5;background:var(--card);
-    margin:12px -12px -4px;padding:8px 12px;border-top:1px solid var(--line);}
+  .lesson-foot{position:fixed;left:0;right:0;bottom:calc(65px + env(safe-area-inset-bottom));z-index:35;background:var(--card);
+    margin:0;padding:6px max(10px, env(safe-area-inset-left));border-top:1px solid var(--line);flex-wrap:nowrap;
+    box-shadow:0 -3px 10px color-mix(in srgb, var(--shadow) 25%, transparent);}
+  .lesson-foot .btn-label{display:none;}
+  .lesson-foot #lessonTocBtn{flex:1;}
+  section[data-panel="hoc"]{padding-bottom:56px;}
 }
 
 /* ---------- Giao diện tối: tăng tương phản (chấm quân Đen, nhãn độ khó, hộp thoại, ô số liệu) ---------- */
@@ -993,12 +999,13 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
 .lesson-text .lesson-head{margin-bottom:10px;}
 @media(min-width:768px){ .lesson-demos .board-shell{max-width:none;width:100%;margin:0;} }
-/* "Chọn bài khác" nằm cùng hàng với tiêu đề bài (góc phải), mở ra thì danh sách hiện ngay dưới */
-.lesson-card{position:relative;}
-.lesson-card > h2{padding-right:150px;}
-.lesson-card > #lessonToc{border-top:0;margin-top:0;padding-top:0;}
-.lesson-card > #lessonToc > summary{position:absolute;top:20px;right:20px;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);}
-@media (max-width:600px){ .lesson-card > h2{padding-right:0;padding-top:36px;} .lesson-card > #lessonToc > summary{top:12px;right:12px;} }
+/* Bài học: tiêu đề + hàng ‹ Bài n/19 ▾ Bài tiếp › cùng một hàng; bấm "Bài n/19" mở danh sách bài */
+.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;}
+.lesson-top h2{margin:0;flex:1 1 220px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.lesson-top .lesson-level-tag{font-family:'Be Vietnam Pro',sans-serif;}
+.lesson-foot .btn{min-height:40px;padding:7px 12px;font-size:13.5px;}
+#lessonTocBtn .ic{width:15px;height:15px;}
+#lessonToc{margin-top:10px;}
 /* Máy tính bảng: thanh dưới gọn, không trải nút quá rộng */
 @media (min-width:768px) and (max-width:899px){
   .zone-switch{padding-inline:calc(50vw - 260px);}
@@ -1008,3 +1015,81 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .notation-help ul{margin:6px 0 4px;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
 .notation-help p{font-size:13.5px;margin:6px 0 0;}
 .notation-help b{color:var(--ink);}
+
+/* ---------- Chọn cấp máy: một thẻ gọn ‹ thông tin › + vạch 10 nấc ---------- */
+.level-grid:has(.lvl-card){display:block;}
+.lvl-card{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:6px 8px;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:10px;}
+.lvl-step{appearance:none;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.lvl-step:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.lvl-step:disabled{opacity:.35;cursor:default;}
+.lvl-step .ic{width:18px;height:18px;}
+.lvl-main{min-width:0;text-align:center;}
+.lvl-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 8px;}
+.lvl-name{font:800 17px 'Be Vietnam Pro',sans-serif;color:var(--ink);}
+.lvl-meta{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+.lvl-g{font:800 12px 'Be Vietnam Pro',sans-serif;color:#fff;background:var(--lg);padding:2px 8px;border-radius:999px;align-self:center;}
+.lvl-desc{font-size:13px;color:var(--ink-soft);line-height:1.45;margin-top:2px;}
+.lvl-easy{--lg:#3f8a5e;} .lvl-mid{--lg:#b8871f;} .lvl-hard{--lg:#c2603a;} .lvl-pro{--lg:#a3283a;}
+.lvl-track{grid-column:1 / -1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;margin:2px 4px 0;}
+.lvl-seg{position:relative;display:block;height:16px;cursor:pointer;}
+.lvl-seg::before{content:'';position:absolute;left:0;right:0;top:5px;height:6px;border-radius:3px;background:color-mix(in srgb, var(--lg) 22%, var(--card));transition:background .15s ease;}
+.lvl-seg.on::before{background:var(--lg);}
+.lvl-seg:has(input:checked)::after{content:'';position:absolute;right:-1px;top:1px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--lg);box-sizing:border-box;}
+.lvl-seg input{position:absolute;opacity:0;width:0;height:0;}
+.lvl-seg:has(input:focus-visible)::before{outline:2px solid var(--gold);outline-offset:2px;}
+@media (min-width:900px){ #aiSetupCard .lvl-card{max-width:620px;} }
+@media (min-width:900px){ #aiSetupCard .setup-field, #aiSetupCard #aiStartBtn{max-width:620px;} #aiSetupCard .seg-radio{display:flex;} #aiSetupCard .seg-radio label{flex:1;text-align:center;} }
+/* Màn lớn: nới khung để bàn cờ to theo chiều cao màn, bảng phụ rộng hơn */
+@media(min-width:1500px){
+  .app-main,.topbar,.tabs{max-width:1440px;}
+  .play-layout{grid-template-columns:minmax(0,var(--bw)) 380px;column-gap:32px;}
+}
+/* Nút phụ (Sao chép thế cờ, Đấu với máy từ thế này) gom vào "Thêm" */
+.tool-more{border-top:0;margin-top:6px;padding-top:0;}
+.tool-more > summary{min-height:32px;font-size:13px;}
+.tool-more .btn-row{margin-top:4px;}
+@media(max-width:899px){ .tool-more > summary{justify-content:center;} }
+/* Thẻ chiến thuật: tên + gợi ý thường 2 dòng (thay dòng chữ Hán) */
+.topic-card .puzzle-top h4{margin:0;flex:1;min-width:0;}
+.tc-count{font-size:12.5px;font-weight:700;color:var(--ink-soft);flex:none;}
+.tc-hint{font-size:13px;color:var(--ink-soft);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+/* Tàn cuộc: mỗi thế một hàng gọn, nhãn Thắng/Hoà bên phải */
+.topic-grid:has(.topic-row){grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;}
+.topic-card.topic-row{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;min-height:44px;}
+.topic-card.topic-row h4{margin:0;font-size:14.5px;}
+.tr-end{display:flex;align-items:center;gap:6px;flex:none;}
+@media (max-width:600px){
+  #satcucList .topic-grid,#tacticGrid{grid-template-columns:1fr 1fr;}
+  #egTheory .topic-grid,#endgameGrid{grid-template-columns:1fr !important;gap:6px;}
+  #egTheory .topic-card.topic-row,#endgameGrid .topic-card.topic-row{padding:8px 12px;}
+  #egTheory .topic-card.topic-row h4,#endgameGrid .topic-card.topic-row h4{margin:0;font-size:14px;}
+}
+.lesson-head h3{margin:0;}
+/* Học luật: phần tra nhanh bàn cờ + 7 loại quân thu gọn một dòng */
+.card.basics-box{border-top:1px solid var(--line);margin-top:14px;padding-block:8px;}
+.basics-box > summary{font-size:14px;}
+.basics-box[open]{padding-bottom:14px;}
+/* Khai cuộc: thẻ một dòng (tên + số nhánh + mức); nhánh cuộn ngang một hàng */
+.opening-card.op-row{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;min-height:44px;}
+.opening-card.op-row h4{margin:0;font-size:14.5px;min-width:0;}
+.opening-cards:has(.op-row){grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px;}
+@media (max-width:600px){ .opening-cards:has(.op-row){grid-template-columns:1fr;gap:6px;} }
+.group-desc{margin:0;font-size:13.5px;}
+.opening-group{margin-top:14px;}
+.line-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px 0;padding-bottom:2px;}
+.line-chips::-webkit-scrollbar{display:none;}
+.line-chips .chip{flex:none;}
+.explain-box .ex-line{margin:0 0 6px;}
+.explain-box .more-box{margin-top:6px;}
+/* Phân tích ván: tóm tắt một dòng trên cùng; biểu đồ là dải mỏng cạnh nút */
+.rv-sum{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;background:var(--paper-2);border-radius:12px;padding:8px 12px;}
+.rv-sum .acc-num{font-size:24px;line-height:1;}
+.rv-sum .cls-chip{background:var(--card);}
+#reviewChart .eval-svg,#masterChart .eval-svg{max-height:84px;}
+#reviewChart:empty{display:none;}
+/* Phòng chờ: nút mời nằm trên hàng tiêu đề, không còn khung mã phòng riêng */
+.ol-room-head .ol-invite{background:none;border:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;flex:none;max-width:100%;}
+.ol-room-head{flex-wrap:wrap;}
+.ol-invite .ol-link{flex-basis:100%;width:100%;}
+.btn-label-s{display:none;}
+@media (max-width:600px){ .ol-room-head .btn-label-s{display:inline;} }

@@ -178,3 +178,34 @@
 - **2026-10-09 — nhạc "Kỳ đình"** (người dùng chọn: hợp đánh cờ, đủ 5 nhạc cụ đàn tranh/sáo trúc/đàn nhị/tỳ bà/cổ cầm, du dương, không u ám, tĩnh tâm). Điệu Cung trên Rê, 66 nhịp/phút; 4 đoạn mỗi đoạn một nhạc cụ dẫn (sáo → nhị → tỳ bà gảy vê → sáo), đàn tranh lướt dây mở đoạn + rải hợp âm, cổ cầm đệm trầm. Nhị = sawtooth + lowpass + peaking 1.1kHz + luyến 0.2s + rung 5.8Hz, kéo thấp 1 quãng tám; tỳ bà = triangle+square tắt nhanh, nốt ≥1.4 phách thì vê 75ms. Đã cân độ to giữa các đoạn (nhị 0.078, tỳ bà 0.09). Link YouTube người dùng gửi chỉ làm tham khảo phong cách — không dùng nhạc gốc.
 - **2026-10-09: PR #6 merge + deploy xanh** (không có migration mới).
 - **2026-10-09 — 2 phần để ngỏ đã làm**: thanh dưới (bottom nav) mở rộng tới ≤899px (máy tính bảng dọc), `isPhone()` giờ là ≤899px (thanh trên tự ẩn khi cuộn); 768–899 thu hẹp hàng nút dưới (`padding-inline: 50vw-260px`). `addNotationHelp()` (07-ui-common) gắn `NOTATION_HELP` (details "Cách đọc ký hiệu nước đi") sau mọi `.movelog` trừ `.demo-log` của bài học, và thay `#openingNotationHelp` ở tab Khai cuộc.
+- **2026-10-09: PR #7 merge + deploy xanh** (không có migration mới).
+- **2026-10-09 — chọn cấp máy** (người dùng: danh sách cấp "hơi thô"): thay 10 chip bằng thẻ lớn (nhóm, "Cấp n/10", tên, mô tả, "Ngang bậc" + nút ‹ ›) và thang 10 cột cao dần, tô màu theo nhóm `LEVEL_GROUPS` (1–3 Dễ, 4–6 Vừa sức, 7–8 Khó, 9–10 Cao thủ; class `lvl-easy/mid/hard/pro` — tránh `lvl-top` vì trùng hàng tiêu đề). Vẫn giữ radio `name="aiLevel"`; đặt cấp từ ngoài bằng sự kiện `levelset` trên `#aiLevelPicker`.
+- Người dùng chê thang 10 cột "tốn diện tích minh hoạ mà không có ý nghĩa" → thu về một thẻ gọn (~120px): ‹ tên · Cấp n/10 · nhóm · ngang bậc / mô tả › + vạch mảnh 10 nấc bấm được (`.lvl-seg`). Bài học: tránh trang trí lớn không mang thông tin.
+- Dòng thông tin cấp máy (người dùng: "dài dòng") → chỉ còn tên + nhãn nhóm màu + mô tả; "Cấp n/10 · ngang bậc…" chuyển vào tooltip (title) của khối chọn cấp.
+
+## 2026-10-09 — Đợt rà UI/UX có hệ thống (người dùng: "lên plan review lại toàn bộ UI/UX")
+- Người dùng chọn: báo cáo trước, duyệt từng mục rồi mới sửa; ưu tiên gọn > dễ cho người mới > bàn cờ to > nhất quán.
+- Script chụp: scratchpad/review2.js (7 cỡ, ~40 màn/cỡ, đo pageH, bàn cờ vừa màn, chữ <12px, nút <40px). Chạy 1 tiến trình/cỡ song song cho nhanh (mỗi cỡ ~6–7 phút vì chờ ghép trận).
+- Thông báo nổi tự tắt sau 5s — trợ lý xem ảnh tưởng nó "đứng lì" do chụp liên tiếp nhanh; chỉ giữ ý "che nút trong vài giây".
+- Đã loại khỏi báo cáo/đánh dấu riêng các đề xuất đụng quyết định cũ: nhãn "Máy" cho đối thủ bot (người dùng từ chối), đổi tên cấp võ tướng, bỏ chữ Elo; "Kỳ viện/Sa trường" để mục C9 cho người dùng tự quyết.
+- Trang báo cáo: Artifact riêng có `db` + `user`; collection `approvals`.
+
+## 2026-10-09 — Sửa cả 37 mục báo cáo rà UI/UX (người dùng: "Xử lý hết")
+- **C9 đã đổi theo yêu cầu**: nhãn "Kỳ viện"→"Học", "Sa trường"→"Chơi"; thẻ "Đấu máy" chuyển sang hàng thẻ của Chơi (cạnh "Đấu người" = Phòng đấu cũ).
+  Mã nội bộ GIỮ NGUYÊN `kyvien`/`satruong` (localStorage xq_zone, test, e2e dùng). `PLAY_TABS=['may']` trong 24-tabs.js:
+  panel `may` vẫn là section[data-panel] nhưng thuộc zone satruong; showTab('may') ẩn section[data-zone-panel=satruong];
+  nhớ thẻ con của Chơi ở `xq_last_stab` (có thể là 'may'), thẻ của Học ở `xq_last_tab` (không bao giờ 'may').
+  Gotcha: từ Phân tích ván online bấm Quay lại phải `showStab('phong')`, không `showZone('satruong')` (sẽ về Đấu máy).
+- Cỡ bàn: desktop `--bw` theo `(100vh - --sticky-top - 30px)/1.1` (≈578px ở 1366×768); tablet 601–899 bàn rộng hết khung;
+  ≥1500px khung 1440. Mở trang chi tiết (khai cuộc, danh thủ, bài tập, phân tích) gọi thêm `revealBoard()` để bàn vào tầm nhìn.
+- `revealBoard(el, snap)`: snap=true (vào ván đấu máy/online) → điện thoại luôn cuộn sát + ẩn thanh trên. Tạo phòng chờ bạn thì KHÔNG snap
+  (để thấy nút mời ở hàng tiêu đề).
+- `confirmTap` giờ hiện thêm nút "Huỷ" (.btn-cancel) cạnh "Chắc chắn?", tự trở lại sau 4s.
+- `wireDemoTabs(host, slots, labels)` (07-ui-common) dùng chung cho bài học và sát cục (một bàn, chuyển Ví dụ/Bài n).
+- Bài học: tiêu đề + hàng ‹ [Bài n/19 ▾] Bài tiếp › cùng hàng; nút giữa mở danh sách bài (#lessonToc là div hidden, không còn details).
+  Điện thoại: .lesson-foot position:fixed trên thanh dưới.
+- Tiến độ (#progressDash) chuyển từ Học luật sang Tôi; `wdlText(w,d,l)` → "1 thắng · 1 thua". Đã bỏ #meStats.
+- Phân tích ván: nhãn chỉ dùng chữ (clsTag bỏ ký hiệu !! ?! ??), tóm tắt 1 dòng (#reviewSummary .rv-sum), "Nhận xét cả ván" ở #reviewMore dưới bàn,
+  biểu đồ #reviewChart nằm trong play-board (cột phải desktop), ẩn khi không có lỗi; bỏ nút #rvStart (dùng nút thanh công cụ).
+- Nút phụ "Sao chép thế cờ / Đấu với máy từ thế này" gom vào `<details class="more-box tool-more">Thêm`.
+- Thông báo nổi ≤899px hiện ở đầu màn; toast 3s.
