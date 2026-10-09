@@ -266,8 +266,10 @@ select.field, input.field{
 .lesson-body{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;}
 /* Bài học: chữ bên trái, bàn cờ bên phải luôn đứng yên khi cuộn đọc (≥768px); điện thoại: bàn cờ lên trước */
 @media(min-width:768px){
-  .lesson-body{--lbw:max(300px, min(560px, 48vw, calc((100vh - 300px) * 0.88)));
-    grid-template-columns:minmax(0,1fr) var(--lbw);align-items:start;gap:24px;}
+  .lesson-body{--lbw:max(320px, min(700px, 56vw, calc((100vh - 270px) / 1.12)));
+    grid-template-columns:minmax(0,1fr) var(--lbw);align-items:start;gap:22px;}
+  .lesson-body .lesson-text p,.lesson-body .lesson-text ul,.lesson-body .lesson-text ol{font-size:14.5px;line-height:1.6;}
+  .lesson-body .lesson-text .lesson-head h3{font-size:18px;}
   .lesson-body .lesson-demos{min-width:0;}
   .lesson-body .lesson-demos{position:sticky;top:calc(var(--sticky-top, 100px) + 12px);}
 }
@@ -989,13 +991,23 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 
 .demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
 .lesson-demo-slot[hidden]{display:none;}
-/* Ô ví dụ: câu hướng dẫn + nút Làm lại cùng một hàng, bàn cờ ngay dưới */
+/* Ô ví dụ: bàn cờ trên cùng (to nhất có thể); câu hướng dẫn + nút Làm lại cùng một hàng ngay dưới bàn */
 .lesson-demo-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;}
 .lesson-demo-slot > *{grid-column:1 / -1;}
-.lesson-demo-slot > .demo-cap{grid-column:1;text-align:left;margin:0 0 6px;}
-.lesson-demo-slot > .board-toolbar{grid-column:2;margin:0 0 6px;justify-content:flex-end;}
+.lesson-demo-slot > .board-shell{grid-row:1;}
+.lesson-demo-slot > .demo-cap{grid-row:2;grid-column:1;text-align:left;margin:8px 0 0;}
+.lesson-demo-slot > .board-toolbar{grid-row:2;grid-column:2;margin:8px 0 0;justify-content:flex-end;}
+.lesson-demo-slot > .demo-msg{grid-row:3;}
+.lesson-demo-slot > .demo-log{grid-row:4;}
 .lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
 .lesson-text .lesson-head{margin-bottom:10px;}
+@media(min-width:768px){ .lesson-demos .board-shell{max-width:none;width:100%;margin:0;} }
+/* "Chọn bài khác" nằm cùng hàng với tiêu đề bài (góc phải), mở ra thì danh sách hiện ngay dưới */
+.lesson-card{position:relative;}
+.lesson-card > h2{padding-right:150px;}
+.lesson-card > #lessonToc{border-top:0;margin-top:0;padding-top:0;}
+.lesson-card > #lessonToc > summary{position:absolute;top:20px;right:20px;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);}
+@media (max-width:600px){ .lesson-card > h2{padding-right:0;padding-top:36px;} .lesson-card > #lessonToc > summary{top:12px;right:12px;} }
 </style>
 </head>
 <body>
@@ -1028,7 +1040,7 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
-  <div class="card">
+  <div class="card lesson-card">
     <h2 id="lessonsHeading">Các bài học</h2>
     <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
       <div class="lesson-nav" id="lessonNav"></div>

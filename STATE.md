@@ -7,7 +7,8 @@ Nhánh `claude/improvement-plan-xdtg8b` (chưa PR, đã đẩy): dọn giao di�
 Test 80/80 + e2e 5/5 xanh. Artifact đã cập nhật.
 
 ## Next step
-1. Người dùng nghe nhạc "Xuân phong" + thử bố cục bài học mới.
+1. Chờ người dùng chọn cách lấy nhạc (link YouTube: gửi file nhạc có giấy phép / nhúng YouTube / soạn lại theo mô tả).
+   Bố cục bài học đã phóng to bàn cờ (bàn ~56% bề ngang, chữ nhỏ lại).
 2. Còn để ngỏ (chưa làm, chờ người dùng): khoảng 768–899px chưa có thanh dưới; giải thích ký hiệu nước đi (B7.1, P2-5);
    khai cuộc trên máy tính 1366 bàn hơi sát mép dưới.
 3. Khi người dùng bảo: tạo PR + merge → deploy.
