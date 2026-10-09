@@ -18,7 +18,7 @@ for (const vp of [{ name: 'máy tính', width: 1200, height: 900 }, { name: 'đi
       page.on('pageerror', e => errors.push(e.message));
       page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
       await registerUI(page, PAGE + `?server=ws://localhost:${srv.port}`, 'may_' + vp.width);
-      await page.click('.zone-btn[data-zone="satruong"]');   // Đấu máy nằm ở phần Chơi
+      await page.click('.zone-btn[data-zone="satruong"]');   // Đấu máy nằm ở Sa trường
       await page.click('.tab-btn[data-tab="may"]');
       await page.click('#aiStartBtn');
       await page.waitForTimeout(800);

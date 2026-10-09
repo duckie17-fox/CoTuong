@@ -1,10 +1,10 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-Đã sửa xong cả 37 mục báo cáo rà UI/UX (kể cả C9 đổi tên Học/Chơi). Test 80/80, e2e 5/5 xanh. Đã commit + push nhánh, cập nhật Artifact app.
+PR #8 (37 mục rà UI/UX) đã merge + deploy xanh. Vừa đổi tên hai khu về "Kỳ viện" / "Sa trường" theo người dùng (Đấu máy vẫn ở Sa trường).
 
 ## Next step
-- Chờ người dùng xem lại; tạo PR/merge khi người dùng bảo.
+- Tạo PR/merge thay đổi tên khi người dùng bảo.
 
 ## Blocker
 - Không.
