@@ -169,18 +169,38 @@ function showAICard(which){
   $('#aiReviewCard').hidden = which!=='review';
   if(which==='setup') renderHistoryList();
 }
+// Nhóm độ khó cho thang chọn cấp
+const LEVEL_GROUPS=[{to:3,label:'Dễ',key:'easy'},{to:6,label:'Vừa sức',key:'mid'},{to:8,label:'Khó',key:'hard'},{to:10,label:'Cao thủ',key:'pro'}];
+const levelGroup=id=>LEVEL_GROUPS.find(g=>id<=g.to);
+// Chọn cấp máy: thẻ lớn hiện cấp đang chọn (‹ › để đổi) + thang 10 cột tăng dần, chia nhóm Dễ / Vừa sức / Khó / Cao thủ.
+// Vẫn dùng radio name="aiLevel" bên dưới để các phần khác đọc cấp đang chọn như cũ.
 function renderLevelPicker(){
   const saved=savedAiLevel();
   const pick=$('#aiLevelPicker');
-  pick.innerHTML = AI_LEVELS.map(l=>`<label class="level-chip"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}><span>${l.id}. ${esc(l.name)}</span></label>`).join('')
-    + '<p class="level-note" id="aiLevelNote"></p>';
-  const note=()=>{
-    const r=$('input[name="aiLevel"]:checked',pick); if(!r) return;
-    const l=AI_LEVELS.find(x=>x.id===+r.value);
-    $('#aiLevelNote').innerHTML = `${esc(l.desc)} <span class="lv-tier">Ngang bậc ${esc(Ranked.tierOf(l.elo).label)}</span>`;
+  const N=AI_LEVELS.length;
+  pick.innerHTML = `<div class="lvl-card">
+      <button type="button" class="lvl-step" data-step="-1" aria-label="Cấp dễ hơn">${icon('left')}</button>
+      <div class="lvl-main" aria-live="polite"></div>
+      <button type="button" class="lvl-step" data-step="1" aria-label="Cấp khó hơn">${icon('right')}</button>
+    </div>
+    <div class="lvl-scale" role="radiogroup" aria-label="Cấp độ máy">${AI_LEVELS.map(l=>`<label class="lvl-bar lvl-${levelGroup(l.id).key}" title="Cấp ${l.id}: ${esc(l.name)}">
+      <input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''} aria-label="Cấp ${l.id}: ${esc(l.name)}">
+      <span class="lvl-col" style="--h:${Math.round(22+78*(l.id-1)/(N-1))}%"></span><span class="lvl-n">${l.id}</span></label>`).join('')}</div>
+    <div class="lvl-groups">${LEVEL_GROUPS.map((g,i)=>`<span style="--span:${g.to-(i?LEVEL_GROUPS[i-1].to:0)}">${g.label}</span>`).join('')}</div>`;
+  const cur=()=>{ const r=$('input[name="aiLevel"]:checked',pick); return r ? +r.value : saved; };
+  const show=()=>{
+    const id=cur(), l=AI_LEVELS.find(x=>x.id===id), g=levelGroup(id), t=Ranked.tierOf(l.elo);
+    $('.lvl-main',pick).innerHTML = `<div class="lvl-top"><span class="lvl-badge lvl-${g.key}">${g.label}</span><span class="hint-text small">Cấp ${id}/${N}</span></div>
+      <div class="lvl-name">${esc(l.name)}</div><div class="lvl-desc">${esc(l.desc)}</div>
+      <div class="lvl-tier">Ngang bậc <span class="tier tier-${t.key}">${esc(t.label)}</span></div>`;
+    $$('.lvl-bar',pick).forEach(b=>b.classList.toggle('on', +$('input',b).value<=id));
+    $$('.lvl-step',pick).forEach(b=>b.disabled = (+b.dataset.step<0 ? id<=1 : id>=N));
   };
-  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',note));
-  note();
+  const set=id=>{ const r=$(`input[name="aiLevel"][value="${id}"]`,pick); if(r){ r.checked=true; show(); } };
+  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',show));
+  $$('.lvl-step',pick).forEach(b=>b.addEventListener('click',()=>set(Math.max(1,Math.min(N,cur()+(+b.dataset.step))))));
+  pick.addEventListener('levelset',e=>set(e.detail));
+  show();
 }
 function initAIGame(){
   renderLevelPicker();

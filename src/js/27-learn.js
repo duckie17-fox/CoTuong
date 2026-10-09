@@ -201,7 +201,7 @@ function renderAiSuggestion(){
   if(!s){ el.innerHTML=''; return; }
   const name=levelInfo(s.level).name;
   el.innerHTML=`<div class="suggest-box">${esc(s.why)} <button type="button" class="btn btn-outline btn-sm" id="aiSuggestBtn">Chọn cấp ${s.level}: ${esc(name)}</button></div>`;
-  $('#aiSuggestBtn',el).addEventListener('click',()=>{ const r=$(`input[name="aiLevel"][value="${s.level}"]`); if(r){ r.checked=true; } el.innerHTML=''; });
+  $('#aiSuggestBtn',el).addEventListener('click',()=>{ $('#aiLevelPicker').dispatchEvent(new CustomEvent('levelset',{detail:s.level})); el.innerHTML=''; });
 }
 function initLearn(){
   // Bài tập: chơi tiếp & FEN

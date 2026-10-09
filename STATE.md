@@ -1,11 +1,11 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-**PR #7 đã merge + deploy xanh** (2026-10-09): thanh điều hướng dưới cho máy tính bảng dọc (≤899px),
-khối "Cách đọc ký hiệu nước đi". Không còn việc để ngỏ. Nhánh làm việc đã dựng lại từ main.
+Nhánh `claude/improvement-plan-xdtg8b` (chưa PR, đã đẩy, Artifact đã cập nhật): thiết kế lại phần chọn cấp máy
+(thẻ cấp đang chọn + nút ‹ ›, thang 10 cột tăng dần chia nhóm Dễ / Vừa sức / Khó / Cao thủ). Test 80/80 + e2e 5/5 xanh.
 
 ## Next step
-1. Người dùng dùng thử bản thật https://duckie17-fox.github.io/CoTuong/ và góp ý tiếp.
+1. Khi người dùng bảo: tạo PR + merge → deploy.
 2. Sau một thời gian có ván thật: hiệu chỉnh Elo các cấp máy xếp hạng (bảng bot_games).
 
 ## Blocker

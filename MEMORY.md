@@ -179,3 +179,4 @@
 - **2026-10-09: PR #6 merge + deploy xanh** (không có migration mới).
 - **2026-10-09 — 2 phần để ngỏ đã làm**: thanh dưới (bottom nav) mở rộng tới ≤899px (máy tính bảng dọc), `isPhone()` giờ là ≤899px (thanh trên tự ẩn khi cuộn); 768–899 thu hẹp hàng nút dưới (`padding-inline: 50vw-260px`). `addNotationHelp()` (07-ui-common) gắn `NOTATION_HELP` (details "Cách đọc ký hiệu nước đi") sau mọi `.movelog` trừ `.demo-log` của bài học, và thay `#openingNotationHelp` ở tab Khai cuộc.
 - **2026-10-09: PR #7 merge + deploy xanh** (không có migration mới).
+- **2026-10-09 — chọn cấp máy** (người dùng: danh sách cấp "hơi thô"): thay 10 chip bằng thẻ lớn (nhóm, "Cấp n/10", tên, mô tả, "Ngang bậc" + nút ‹ ›) và thang 10 cột cao dần, tô màu theo nhóm `LEVEL_GROUPS` (1–3 Dễ, 4–6 Vừa sức, 7–8 Khó, 9–10 Cao thủ; class `lvl-easy/mid/hard/pro` — tránh `lvl-top` vì trùng hàng tiêu đề). Vẫn giữ radio `name="aiLevel"`; đặt cấp từ ngoài bằng sự kiện `levelset` trên `#aiLevelPicker`.
