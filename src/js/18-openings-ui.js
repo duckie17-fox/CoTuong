@@ -10,15 +10,13 @@ function renderOpeningList(){
   const grid = $('#openingGrid');
   grid.innerHTML = OPENING_GROUPS.map(g=>`
     <div class="opening-group">
-      <h3 class="group-h">${esc(g.name)}</h3><p class="hint-text">${esc(g.desc)}</p>
+      <h3 class="group-h">${esc(g.name)}</h3><p class="hint-text group-desc">${esc(g.desc)}</p>
       <div class="opening-cards">${OPENINGS.filter(o=>o.group===g.id).map(o=>{
         const b=[best[o.id+':red'],best[o.id+':black']].filter(x=>x!=null);
         const star = b.length ? `<span class="solved-check" title="Điểm cao nhất khi tự đi lại">${Math.max(...b)}%</span>` : '';
-        return `<button class="opening-card" data-id="${o.id}">
-          <div class="puzzle-top">${o.isTrap?'<span class="badge badge-hard">Bẫy</span>':`<span class="badge ${['','badge-easy','badge-mid','badge-hard'][o.level]}">${['','Cơ bản','Phổ biến','Nâng cao'][o.level]}</span>`}${o.lines.length>1?`<span class="hint-text small">${o.lines.length-1} nhánh</span>`:''}${star}</div>
-          <h4>${esc(o.name)} <span class="han-sm">${esc(o.han)}</span></h4>
-          <p>${esc(o.summary)}</p>
-          <div class="op-first">${esc(o.moves.slice(0,4).map((m,i)=>(i%2===0?(i/2+1)+'. ':'')+m.text).join(' '))} …</div>
+        return `<button class="opening-card op-row" data-id="${o.id}">
+          <h4>${esc(o.name)}</h4>
+          <span class="tr-end">${star}${o.lines.length>1?`<span class="hint-text small">${o.lines.length-1} nhánh</span>`:''}${o.isTrap?'<span class="badge badge-hard">Bẫy</span>':`<span class="badge ${['','badge-easy','badge-mid','badge-hard'][o.level]}">${['','Cơ bản','Phổ biến','Nâng cao'][o.level]}</span>`}</span>
         </button>`;}).join('')}</div>
     </div>`).join('');
   $$('.opening-card',grid).forEach(btn=> btn.addEventListener('click', ()=> openOpening(btn.dataset.id)));
@@ -34,7 +32,7 @@ function openOpening(id, lineId){
   openingView.active=o; openingView.idx=0;
   openingView.line = o.lines.find(l=>l.id===lineId) || o.lines[0];
   showOpeningCard('detail');
-  $('#openingTitle').innerHTML = `${esc(o.name)} <span class="han-sm">${esc(o.han)}</span>`;
+  $('#openingTitle').textContent = o.name;
   $('#openingSummary').textContent = o.summary;
   $('#openingIdeasH').textContent = o.isTrap ? 'Bài học' : 'Ý chính';
   $('#openingTrapsH').textContent = o.isTrap ? 'Chỗ mắc bẫy' : 'Bẫy thường gặp';
@@ -46,14 +44,16 @@ function openOpening(id, lineId){
   if(!openingView.widget) openingView.widget = createBoardWidget($('#openingBoard'), {label:'Bàn cờ khai cuộc'});
   openingView.widget.setFlipped(false);
   openingRender();
-  $('#openingDetailCard').scrollIntoView({block:'start'});
+  $('#openingDetailCard').scrollIntoView({block:'start'}); revealBoard($('#openingBoard'));
 }
 function renderOpeningLines(){
   const o=openingView.active, cur=openingView.line, el=$('#openingLines');
   const src=(arr)=>arr&&arr.length?`<p class="sources">Nguồn: ${arr.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t||'nguồn')}</a>`).join(' · ')}</p>`:'';
-  if(o.lines.length<2){ el.innerHTML = o.isTrap ? src(o.sources) : ''; return; }
-  el.innerHTML = `<div class="chip-row" role="group" aria-label="Chọn nhánh">${o.lines.map(l=>`<button class="chip ${l===cur?'on':''}" data-line="${esc(l.id)}" aria-pressed="${l===cur}">${l.id==='main'?'Diễn biến chính':esc(l.name.replace(/^.*?—\s*/,''))}</button>`).join('')}</div>
-    ${cur.id!=='main'?`<div class="explain-box"><b>${esc(cur.name)}</b> <span class="han-sm">${esc(cur.han||'')}</span><br>${esc(cur.idea||'')}${src(cur.sources)}</div>`:''}`;
+  const info=$('#openingLineInfo');
+  if(o.lines.length<2){ el.innerHTML=''; info.innerHTML = o.isTrap ? src(o.sources) : ''; return; }
+  // các nhánh: một hàng cuộn ngang; giải thích nhánh nằm dưới bàn cờ (không đẩy bàn xuống)
+  el.innerHTML = `<div class="chip-row line-chips" role="group" aria-label="Chọn nhánh">${o.lines.map(l=>`<button class="chip ${l===cur?'on':''}" data-line="${esc(l.id)}" aria-pressed="${l===cur}">${l.id==='main'?'Diễn biến chính':esc(l.name.replace(/^.*?—\s*/,''))}</button>`).join('')}</div>`;
+  info.innerHTML = cur.id!=='main'?`<div class="explain-box"><b>${esc(cur.name)}</b><br>${esc(cur.idea||'')}${src(cur.sources)}</div>`:'';
   $$('[data-line]',el).forEach(b=>b.addEventListener('click',()=>{ openingView.line=o.lines.find(l=>l.id===b.dataset.line); openingView.idx=0; renderOpeningLines(); openingRender(); }));
 }
 function openingGame(moves, upto){
@@ -89,8 +89,8 @@ function startTrainer(o, color, multi){
   trainer.mistakes=0; trainer.wrongHere=0; trainer.hint=false; trainer.busy=false; trainer.feedback=null; trainer.mine=0;
   trainer.game=Game.create();
   showOpeningCard('trainer');
-  $('#trainerTitle').textContent = `Trainer: ${o.name}`;
-  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}. Hãy đi đúng các nước lý thuyết của bên ${COLOR_VN[color]}; máy đi bên kia${multi?' và chọn ngẫu nhiên một trong '+lines.length+' nhánh ở mỗi chỗ rẽ':''}.`;
+  $('#trainerTitle').textContent = `Tự đi lại: ${o.name}`;
+  $('#trainerSide').textContent = `Bạn cầm ${COLOR_VN[color]}, máy đi bên kia${multi?' (chọn ngẫu nhiên nhánh)':''}.`;
   if(!trainer.widget){
     trainer.widget = createBoardWidget($('#trainerBoard'), {onSquareClick:(r,c)=>trainer.ctl.click(r,c), label:'Bàn cờ Trainer khai cuộc'});
     trainer.ctl = makeClickController({
@@ -104,7 +104,7 @@ function startTrainer(o, color, multi){
   }
   trainer.widget.setFlipped(color===BLACK);
   trainer.ctl.clear();
-  $('#trainerCard').scrollIntoView({block:'start'});
+  $('#trainerCard').scrollIntoView({block:'start'}); revealBoard($('#trainerBoard'));
   trainerAdvance();
 }
 const sameMv=(a,b)=>a.from[0]===b.from[0]&&a.from[1]===b.from[1]&&a.to[0]===b.to[0]&&a.to[1]===b.to[1];

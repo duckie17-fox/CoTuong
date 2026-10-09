@@ -8,13 +8,13 @@ const CLASS_INFO = {
   brilliant:{label:'Tuyệt hay',  icon:'!!', cls:'brilliant', desc:'Giống “Hay”, nhưng nước đó còn <b>thí quân</b> (để đối phương ăn quân của mình) để đổi lấy cái lợi lớn hơn. Hiếm nhất, khó tìm nhất.'},
   great:  {label:'Hay',          icon:'!',  cls:'great',   desc:'Đúng nước máy chọn <b>và là nước duy nhất</b>: mọi nước khác đều làm thế cờ kém hẳn. Khen vì bạn tìm ra lối thoát duy nhất.'},
   best:   {label:'Tốt nhất',     icon:'',   cls:'best',    desc:'Đúng (hoặc ngang) nước máy chọn, nhưng còn những nước khác cũng ổn — nên không có gì phải khen riêng.'},
-  good:   {label:'Tốt',          icon:'',   cls:'good',    desc:'Kém nước máy chọn một chút, thế cờ không bị ảnh hưởng. Bấm vào để xem nước tối ưu hơn.'},
+  good:   {label:'Tốt',          icon:'',   cls:'good',    desc:'Kém nước máy chọn một chút, thế cờ không bị ảnh hưởng. Bấm vào để xem nước hay hơn.'},
   book:   {label:'Theo sách',    icon:'',   cls:'book',    desc:'Nước khai cuộc đúng lý thuyết.'},
   inacc:  {label:'Đáng ngờ',     icon:'?!', cls:'inacc',   desc:'Thiệt nhẹ (cỡ 2 Tốt trở lên), hoặc bỏ lỡ đòn thắng trong khi vẫn đang hơn.'},
   mistake:{label:'Sai lầm',      icon:'?',  cls:'mistake', desc:'Thiệt đáng kể (cỡ một Sĩ/Tượng trở lên), thế cờ xấu đi rõ.'},
   blunder:{label:'Sai lầm nặng', icon:'??', cls:'blunder', desc:'Đổi kết quả ván: mất quân lớn, để bị chiếu bí, hoặc đánh mất thế thắng.'},
 };
-const clsTag = info => (info.icon ? `<b>${info.icon}</b> ` : '') + info.label;
+const clsTag = info => info.label;   // chỉ dùng chữ, không dùng ký hiệu ?! ??
 // Bỏ lỡ đòn thắng nhưng vẫn đang hơn rõ
 const missedWin = p => (p.bestScore>MATE_T || winChance(p.bestScore)>=0.6) && winChance(p.played)>=0.2;
 // "Cơ hội thắng" trong khoảng [-1, 1] theo điểm của máy (thang: Tốt≈30, Mã/Pháo≈280, Xe≈600).
@@ -163,15 +163,15 @@ function explainPly(g, p){
   if(p.cls==='best'||p.cls==='good'){
     const res={ic:'check', q:'Kết quả', cls:'ts-good', html:(p.cls==='best'
       ? (same?'Đây chính là nước tốt nhất máy tìm được.':'Ngang bằng nước tốt nhất máy tìm được.')
-      : `Nước tốt — chỉ kém nước tối ưu ${diffWords(p.loss)}, thế cờ không bị ảnh hưởng.`)+purposeHTML(before,m,same?p.bestPv:null)};
+      : `Nước tốt — chỉ kém nước hay nhất ${diffWords(p.loss)}, thế cờ không bị ảnh hưởng.`)+purposeHTML(before,m,same?p.bestPv:null)};
     if(same || !bestTxt) return thinkStepsHTML([step1, step2, res]);
-    // Nước đã tốt nhưng vẫn có nước tối ưu hơn (hoặc một lựa chọn ngang bằng) → chỉ ra để học thêm
+    // Nước đã tốt nhưng vẫn có nước hay hơn (hoặc một lựa chọn ngang bằng) → chỉ ra để học thêm
     const bi=Coach.intent(before,p.bestMove)[0], mi=Coach.intent(before,m)[0];
     const cmp = bi && mi && bi.key!==mi.key ? `Nước của bạn nhằm ${esc(mi.goal)} — chưa sai, nhưng lúc này có việc đáng làm hơn:`
       : bi && !mi ? 'Nước của bạn chưa có mục tiêu cụ thể, còn nước này có:' : '';
     const best=lineText(before, p.bestPv, 4);
     return thinkStepsHTML([step1, step2, res,
-      {ic:p.cls==='best'?'repeat':'bulb', q:p.cls==='best'?'Lựa chọn khác ngang bằng':'Nước tối ưu hơn', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh)${p.cls==='good'?` — hơn nước của bạn ${diffWords(p.loss)}`:''}.${cmp?`<br>${cmp}`:''}${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
+      {ic:p.cls==='best'?'repeat':'bulb', q:p.cls==='best'?'Lựa chọn khác ngang bằng':'Nước hay hơn', cls:'ts-good', html:`<b>${esc(bestTxt.short)}</b> (${esc(bestTxt.long)}, mũi tên xanh)${p.cls==='good'?` — hơn nước của bạn ${diffWords(p.loss)}`:''}.${cmp?`<br>${cmp}`:''}${purposeHTML(before,p.bestMove,p.bestPv)}${best.n>1?`Diễn biến máy dự tính: ${best.html}${best.caps.length?` — ${best.caps.join(', ')}`:''}.`:''}`},
     ]);
   }
 
@@ -222,7 +222,7 @@ function lessonsFrom(rec, g, an){
   const missMate=mine.filter(p=>p.bestScore>MATE_T && p.played<MATE_T).length;
   const allowMate=mine.filter(p=>p.played< -MATE_T && p.bestScore> -MATE_T).length;
   if(allowMate) L.push(`Có ${allowMate} lần bạn đi nước để đối phương có đường chiếu bí. Trước mỗi nước, hãy tự hỏi: "Sau nước này đối phương có chiếu được không, Tướng mình còn chỗ chạy không?"`);
-  if(hang) L.push(`Có ${hang} lần bạn để quân bị ăn không (treo quân). Thói quen tốt: trước khi đi, kiểm tra quân vừa đi và các quân khác xem có bị Xe, Mã, Pháo đối phương nhắm không.`);
+  if(hang) L.push(`Có ${hang} lần bạn để quân bị ăn không (quân không được bảo vệ). Thói quen tốt: trước khi đi, kiểm tra quân vừa đi và các quân khác xem có bị Xe, Mã, Pháo đối phương nhắm không.`);
   if(missMate) L.push(`Bạn bỏ lỡ ${missMate} cơ hội chiếu bí. Khi Tướng đối phương ít chỗ chạy, hãy thử tính các nước chiếu trước tiên. Luyện mục "Sát cục" trong tab Chiến thuật.`);
   if(missCap) L.push(`Bạn bỏ lỡ ${missCap} lần ăn quân miễn phí. Mỗi lượt, hãy nhìn một vòng xem quân nào của đối phương đang không được bảo vệ.`);
   // ra Xe chậm
@@ -238,7 +238,7 @@ function lessonsFrom(rec, g, an){
   const qCount={}; mine.forEach(p=>{ if(p.qKey && ERR_ALL.includes(p.cls)) qCount[p.qKey]=(qCount[p.qKey]||0)+1; });
   const topQ=Object.entries(qCount).sort((a,b)=>b[1]-a[1])[0];
   if(topQ && topQ[1]>=2) L.unshift(`Thói quen cần luyện nhất (${topQ[1]} lỗi): ${Coach.QUESTIONS[topQ[0]]}`);
-  if(an.accuracy>=85 && lost) L.push(`Độ chính xác ${an.accuracy}% nhưng vẫn thua: thường là do nhiều nước “tốt” nhưng chưa tối ưu dồn lại. Hãy xem mục “nước tốt nhưng vẫn có nước tối ưu hơn” ở phần tổng quan.`);
+  if(an.accuracy>=85 && lost) L.push(`Độ chính xác ${an.accuracy}% nhưng vẫn thua: thường là do nhiều nước “tốt” nhưng chưa hay nhất dồn lại. Hãy xem mục “nước tốt nhưng vẫn có nước hay hơn” ở phần tổng quan.`);
   if(!L.length) L.push('Ván cờ khá ổn. Hãy bấm vào các nước được đánh dấu màu để xem chỗ có thể cải thiện.');
   return L.slice(0,5);
 }
@@ -320,7 +320,7 @@ function styleHTML(sp, an){
   const advice=[];
   const hangs=an.plies.filter(p=>p.color===sp.color && p.hanging && ['mistake','blunder'].includes(p.cls)).length;
   if(sp.kind==='attack') advice.push(hangs>=2
-    ? 'Bạn có máu tấn công nhưng ván này để treo quân khá nhiều. Hãy giữ lối đánh chủ động, nhưng trước mỗi nước tấn công tự hỏi “quân vừa đi có bị ăn không?”. Thế trận dưới đây cho thế công rõ ràng mà vẫn có nền chắc.'
+    ? 'Bạn có máu tấn công nhưng ván này để mất quân không đáng khá nhiều. Hãy giữ lối đánh chủ động, nhưng trước mỗi nước tấn công tự hỏi “quân vừa đi có bị ăn không?”. Thế trận dưới đây cho thế công rõ ràng mà vẫn có nền chắc.'
     : 'Lối đánh chủ động hợp với các thế trận mở, giao chiến sớm. Hãy chọn thế khai cuộc có kế hoạch tấn công rõ ràng.');
   else if(sp.kind==='solid') advice.push('Lối đánh chắc chắn hợp với các thế trận kín, triển khai đủ quân rồi mới phản công. Điểm cần luyện: biết lúc nào nên chuyển sang tấn công — khi đã ra đủ Xe và Tướng an toàn, đừng ngại đưa Xe qua sông.');
   else advice.push('Lối đánh cân bằng hợp với các thế trận linh hoạt, để ngỏ nhiều kế hoạch. Hãy luyện thêm cả thế công lẫn thế thủ để chọn theo đối thủ.');
@@ -335,12 +335,11 @@ function styleHTML(sp, an){
     <ul class="lesson-list">${traits.map(t=>`<li>${t}</li>`).join('')}</ul>
     <h3 class="side-h mt10">Nên học tiếp</h3><ul class="lesson-list">${advice.map(t=>`<li>${t}</li>`).join('')}</ul>
     ${ops.length?`<div class="btn-row">${ops.map(o=>`<button type="button" class="btn btn-outline btn-sm" data-op="${o.id}"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-book"></use></svg>${esc(o.name)}</button>`).join('')}</div>`:''}
-    ${sp.games<3?'<p class="hint-text small">Mới có ít ván nên nhận xét chỉ là tạm thời; chơi thêm vài ván để thấy rõ phong cách.</p>':''}</div>`;
+    ${sp.games<3?'<p class="hint-text small">Nhận xét tạm (mới ít ván).</p>':''}</div>`;
 }
 function legendHTML(){
   const C=CLASS_INFO, rows=[C.brilliant, C.great, C.best, C.good, C.book, C.inacc, C.mistake, C.blunder];
-  return `<details class="cls-legend more-box"><summary>Ý nghĩa các nhãn</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}"><b>${i.icon||'—'}</b> ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
-    <p class="hint-text small">Dấu <b>!</b> là khen, dấu <b>?</b> là chê, càng nhiều dấu càng mạnh. Nước <b>không có dấu</b> (Tốt nhất, Tốt, Theo sách) là nước bình thường, không có gì sai. <b>Tốt nhất</b> khác <b>Hay</b> ở chỗ: Tốt nhất là nước đúng nhưng dễ tìm (còn nước khác cũng được), Hay là nước đúng mà gần như chỉ có một. Mức lỗi tính theo <b>cơ hội thắng</b> bị mất: cùng thiệt một Mã, khi thế cờ đang cân bằng là lỗi nặng, còn khi bạn đang thắng đậm thì nhẹ hơn.</p></details>`;
+  return `<details class="cls-legend more-box"><summary>Ý nghĩa các nhãn</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}">${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl></details>`;
 }
 
 function openReview(rec){
@@ -351,9 +350,9 @@ function openReview(rec){
   review.widget.setFlipped(rec.human===BLACK);
   const rs=resultForHuman(rec);
   $('#reviewHead').innerHTML=`<span class="badge ${rs.cls}">${rs.txt}</span> <b>${rec.online?`Đấu với ${esc(rec.oppName||'bạn')}`:esc(levelInfo(recLevel(rec)).name)}</b> · Bạn cầm ${COLOR_VN[rec.human]} · ${Math.ceil(rec.moves.length/2)} nước`;
-  $('#reviewSummary').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
+  $('#reviewSummary').innerHTML=''; $('#reviewMore').innerHTML=''; $('#reviewChart').innerHTML=''; $('#reviewDetail').innerHTML='';
   reviewRender();
-  $('#aiReviewCard').scrollIntoView({block:'start'});
+  $('#aiReviewCard').scrollIntoView({block:'start'}); revealBoard($('#reviewBoard'));
   if(rec.analysis && (rec.analysis.version===2 || rec.analysis.version===3)) { applyStoredAnalysis(rec); return; }
   runAnalysis();
 }
@@ -404,12 +403,13 @@ function reviewShowAnalysis(){
   const mine=an.plies.filter(p=>p.color===rec.human).length;
   review.short = mine<SHORT_GAME;   // ván quá ngắn: không chấm % chính xác, không đoán phong cách, không vẽ biểu đồ
   $('#reviewSummary').innerHTML = review.short
-    ? `<div class="acc-side"><p><b>Ván quá ngắn để chấm điểm</b> — bạn mới đi ${mine} nước. Chơi dài hơn (từ ${SHORT_GAME} nước) thì máy sẽ chấm độ chính xác và nhận xét lối chơi.</p>
-       ${cnt?`<div class="cls-chips">${cnt}</div>${legendHTML()}`:''}</div>`
-    : `<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
-    <div class="acc-side"><div class="cls-chips">${cnt}</div>${legendHTML()}<h3 class="side-h mt10">Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>
-    ${styleHTML(styleProfile(rec,g,an), an)}`;
-  $$('[data-op]',$('#reviewSummary')).forEach(b=>b.addEventListener('click',()=>{ showTab('khaicuoc'); openOpening(b.dataset.op); }));
+    ? `<div class="rv-sum"><span>Ván ngắn (${mine} nước), chưa chấm điểm</span>${cnt}</div>`
+    : `<div class="rv-sum"><span class="acc-num">${an.accuracy}%</span><span class="hint-text small">chính xác</span>${cnt}</div>`;
+  $('#reviewMore').innerHTML = `<details class="more-box"><summary>Nhận xét cả ván</summary>
+    ${review.short?`<p class="hint-text">Chơi từ ${SHORT_GAME} nước trở lên thì máy chấm độ chính xác và nhận xét lối chơi.</p>`
+      :`<h3 class="side-h">Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul>${styleHTML(styleProfile(rec,g,an), an)}`}
+    ${cnt?legendHTML():''}</details>`;
+  $$('[data-op]',$('#reviewMore')).forEach(b=>b.addEventListener('click',()=>{ showTab('khaicuoc'); openOpening(b.dataset.op); }));
   review.overview=true; review.idx=-1;
   renderEvalChart();
   reviewRender();
@@ -417,19 +417,18 @@ function reviewShowAnalysis(){
 function overviewHTML(){
   const g=review.game, errs=reviewErrors(), tp=turningPoint(), an=review.an;
   const nInacc=an.plies.filter(p=>p.color===review.rec.human && p.cls==='inacc').length;
-  const filter=`<label class="toggle small"><input type="checkbox" id="rvOnlyBig" ${review.onlyBig?'checked':''}> Chỉ xem sai lầm lớn (bỏ qua ${nInacc} nước đáng ngờ ?!)</label>`;
+  const filter=`<label class="toggle small"><input type="checkbox" id="rvOnlyBig" ${review.onlyBig?'checked':''}> Chỉ xem lỗi lớn</label>`;
   const better=an.plies.filter(q=>q.color===review.rec.human && q.cls==='good' && q.bestMove);
-  const betterHTML = better.length ? `<details class="better-list mt10"><summary>${better.length} nước tốt nhưng vẫn có nước tối ưu hơn</summary><div class="timeline">${better.map(q=>`<button type="button" class="tl-item" data-k="${q.k}"><span class="tl-n"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span><span class="tl-body"><b>Nước ${moveNum(q.k)}: ${esc(g.moves[q.k].text.short)}</b> → tối ưu hơn: <b>${esc(Notation.describe(q.k===0?g.start:g.boards[q.k-1], q.bestMove).short)}</b><small>chênh ${diffWords(q.loss)}</small></span></button>`).join('')}</div></details>` : '';
+  const betterHTML = better.length ? `<details class="better-list mt10"><summary>${better.length} nước ổn, còn cách hay hơn</summary><div class="timeline">${better.map(q=>`<button type="button" class="tl-item" data-k="${q.k}"><span class="tl-n"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span><span class="tl-body"><b>Nước ${moveNum(q.k)}: ${esc(g.moves[q.k].text.short)}</b> → tối ưu hơn: <b>${esc(Notation.describe(q.k===0?g.start:g.boards[q.k-1], q.bestMove).short)}</b><small>chênh ${diffWords(q.loss)}</small></span></button>`).join('')}</div></details>` : '';
   if(!errs.length) return `<p><b>Không có lỗi đáng kể${review.onlyBig?' (sai lầm lớn)':''}.</b> Bạn có thể bấm từng nước trong biên bản để xem máy nhận xét.</p>${filter}${betterHTML}`;
   const groups={};
   errs.forEach((p,i)=>{ const ph=phaseOf(g,p.k); (groups[ph]=groups[ph]||[]).push({p,i}); });
   const items=Object.entries(groups).map(([ph,list])=>`<div class="tl-phase"><div class="tl-phase-h">${ph}</div>${list.map(({p,i})=>{
       const info=CLASS_INFO[p.cls], m=g.moves[p.k];
       return `<button type="button" class="tl-item" data-k="${p.k}"><span class="tl-n">${i+1}</span><span class="tl-body"><b>Nước ${moveNum(p.k)}: ${esc(m.text.short)}</b> <span class="cls-chip cls-${info.cls}">${clsTag(info)}</span>${p===tp?' <span class="tl-star"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-star"></use></svg>bước ngoặt</span>':''}<small>${esc(p.short||lossWords(p.loss))}</small></span></button>`; }).join('')}</div>`).join('');
-  const tpLine = tp ? `<p class="hint-text"><b>Bước ngoặt</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
-  return `<p><b>Ván này có ${errs.length} chỗ bạn có thể đi tốt hơn.</b> Hãy xem lần lượt từ đầu đến cuối: mỗi chỗ có tình huống, vì sao chưa tốt, máy đáp thế nào và nên đi gì.</p>
-    ${tpLine}${filter}<div class="timeline">${items}</div>${betterHTML}
-    <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="rvStart"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Bắt đầu từ lỗi 1</button></div>`;
+  const tpLine = tp ? `<p class="hint-text"><b>Lỗi đắt nhất</b> là nước ${moveNum(tp.k)} (${esc(review.game.moves[tp.k].text.short)}): thế cờ từ “${evalWords(evalAt(tp.k),'bạn','máy')}” thành “${evalWords(evalAt(tp.k+1),'bạn','máy')}”.</p>` : '';
+  return `<p><b>${errs.length} chỗ có thể đi tốt hơn.</b> Bấm <b>Bắt đầu</b> để xem từng chỗ.</p>
+    ${tpLine}${filter}<div class="timeline">${items}</div>${betterHTML}`;
 }
 function endHTML(){
   const rec=review.rec, errs=reviewErrors(), res=review.game.result;
@@ -465,9 +464,9 @@ function reviewPrevErr(){
 }
 const SHORT_GAME=6;
 function renderEvalChart(){
-  if(review.short){ $('#reviewChart').innerHTML=''; return; }
+  if(review.short || !reviewErrors().length){ $('#reviewChart').innerHTML=''; return; }
   const an=review.an, rec=review.rec, n=an.plies.length;
-  const W=600, H=130, pad=6, sign = rec.human===RED?1:-1;
+  const W=600, H=64, pad=5, sign = rec.human===RED?1:-1;
   const vals=an.plies.map(p=>sign*p.evalRed).concat([sign*an.finalRed]);
   const x=i=>pad+(W-2*pad)*i/Math.max(1,vals.length-1), y=v=>H/2 - (H/2-pad)*Math.max(-1,Math.min(1,v/800));
   const path=vals.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
@@ -477,7 +476,7 @@ function renderEvalChart(){
   $('#reviewChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="eval-svg" role="img" aria-label="Biểu đồ lợi thế theo từng nước (phía trên là bạn đang hơn)">
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${area}" class="area"/><path d="${path}" class="line"/>${dots}
     ${review.idx>=0?`<line class="cursor" x1="${x(review.idx+1)}" x2="${x(review.idx+1)}" y1="0" y2="${H}"/>`:''}</svg>
-    <div class="chart-legend"><span>Phía trên: bạn hơn</span><span>Phía dưới: máy hơn</span></div>`;
+    <div class="chart-legend"><span>Trên: bạn hơn</span><span>Dưới: đối thủ hơn</span></div>`;
   $$('.dot',$('#reviewChart')).forEach(d=>d.addEventListener('click',()=>reviewGo(+d.dataset.k)));
   $('#reviewChart svg').addEventListener('click',(e)=>{
     if(e.target.classList.contains('dot')) return;
@@ -497,7 +496,7 @@ function reviewRender(){
   if(p && p.bestMove && !(p.bestMove.from+''===m.from+''&&p.bestMove.to+''===m.to+'') && !['book','best'].includes(p.cls)) arrows.push({from:p.bestMove.from,to:p.bestMove.to});
   review.widget.setBoard(ov ? g.start : idx<0 && g.moves.length ? g.board() : board, {arrows, lastMove: !ov && idx<0 ? g.lastMove() : null});
   const marks={}, badges={};
-  if(an) an.plies.forEach(q=>{ if(q.color===rec.human){ marks[q.k]=CLASS_INFO[q.cls].cls; if(CLASS_INFO[q.cls].icon) badges[q.k]=`<small class="mk">${CLASS_INFO[q.cls].icon}</small>`; } });
+  if(an) an.plies.forEach(q=>{ if(q.color===rec.human) marks[q.k]=CLASS_INFO[q.cls].cls; });
   renderMoveLog($('#reviewLog'), g.moves, {active:ov?null:idx, marks, badges, onPick:(k)=>reviewGo(k)});
   // Thanh tiến trình: đang ở đâu trong luồng xem lại
   const errs=reviewErrors(), ei = idx>=0 ? errs.findIndex(q=>q.k===idx) : -1, tp=turningPoint();
@@ -505,7 +504,7 @@ function reviewRender(){
   if(!an) stepEl.innerHTML='';
   else if(ov) stepEl.innerHTML=`<b>Tổng quan</b> · ${errs.length} lỗi cần xem, theo thứ tự ván`;
   else if(idx<0) stepEl.innerHTML=`<b>Tổng kết</b> · đã xem ${errs.length}/${errs.length} lỗi`;
-  else if(ei>=0) stepEl.innerHTML=`<b>Lỗi ${ei+1}/${errs.length}</b> · Nước ${moveNum(idx)} · ${phaseOf(g,idx)}${errs[ei]===tp?' · bước ngoặt':''}
+  else if(ei>=0) stepEl.innerHTML=`<b>Lỗi ${ei+1}/${errs.length}</b> · Nước ${moveNum(idx)} · ${phaseOf(g,idx)}${errs[ei]===tp?' · lỗi đắt nhất':''}
     <div class="step-dots">${errs.map((q,j)=>`<span class="sd ${j<ei?'done':j===ei?'cur':''}"></span>`).join('')}</div>`;
   else stepEl.innerHTML=`Nước ${moveNum(idx)} · ${phaseOf(g,idx)} <span class="hint-text small">(không nằm trong danh sách lỗi)</span>`;
   const det=$('#reviewDetail');
@@ -535,7 +534,6 @@ function reviewRender(){
   }
   // nút trong khung chi tiết
   $$('.tl-item',det).forEach(b=>b.addEventListener('click',()=>reviewGo(+b.dataset.k)));
-  const st=$('#rvStart',det); if(st) st.addEventListener('click',reviewNextErr);
   const rs=$('#rvRestart',det); if(rs) rs.addEventListener('click',()=>{ review.overview=true; review.idx=-1; reviewRender(); });
   const nx=det.querySelector('[data-rv="next"]'); if(nx) nx.addEventListener('click',reviewNextErr);
   const ob=$('#rvOnlyBig',det); if(ob) ob.addEventListener('change',()=>{ review.onlyBig=ob.checked; safeLS_set('xq_review_big',ob.checked?'1':'0'); reviewRender(); });
@@ -550,7 +548,7 @@ function reviewRender(){
   $('#reviewNext').disabled = !ov && idx===-1;
 }
 function initReview(){
-  $('#reviewBack').addEventListener('click',()=>{ review.token++; if(review.rec && review.rec.online){ showZone('satruong'); return; } showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
+  $('#reviewBack').addEventListener('click',()=>{ review.token++; if(review.rec && review.rec.online){ showStab('phong'); return; } showAICard(aiGame.game && review.rec && review.rec.id===aiGame.recId && !aiGame.game.result ? 'game':'setup'); });
   // ◀ ▶: từng nửa nước. Tổng quan ↔ nước đầu ↔ … ↔ nước cuối (tổng kết)
   $('#reviewPrev').addEventListener('click',()=>{ const n=review.game.moves.length;
     if(review.overview) return;

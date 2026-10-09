@@ -12,9 +12,9 @@
    được chọn để minh hoạ nguyên tắc khai cuộc cho người mới — không phải bảng biến đầy đủ.
    ========================================================================= */
 const OPENING_GROUPS = [
-  {id:'phaodau', name:'Đỏ đi Pháo đầu', desc:'Nước mở màn phổ biến nhất: Pháo vào cột giữa nhắm Tốt đầu. Các thế dưới đây là những cách Đen đáp lại.'},
-  {id:'mem', name:'Khai cuộc mềm', desc:'Đỏ không vào Pháo đầu ngay mà chuẩn bị kín đáo hơn, giữ thế linh hoạt.'},
-  {id:'bay', name:'Bẫy khai cuộc', desc:'Những cái bẫy có thật trong sách và thực chiến, mỗi bẫy đều có nguồn. Xem bên mắc bẫy sai ở đâu và vì sao — để mình không mắc, và biết cách trừng phạt khi đối phương mắc.'},
+  {id:'phaodau', name:'Đỏ đi Pháo đầu', desc:'Pháo vào giữa nhắm Tốt đầu. Các cách Đen đáp lại:'},
+  {id:'mem', name:'Khai cuộc mềm', desc:'Đỏ chưa vào Pháo đầu, chuẩn bị kín đáo hơn.'},
+  {id:'bay', name:'Bẫy khai cuộc', desc:'Bẫy có thật trong sách và thực chiến: sai ở đâu, trừng phạt thế nào.'},
 ];
 
 const OPENINGS_RAW = [

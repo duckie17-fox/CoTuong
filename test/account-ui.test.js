@@ -139,7 +139,7 @@ test('đồng bộ: thay đổi trên máy được ghi thời điểm và gửi
   // đăng xuất, giữ tiến độ
   doc.querySelector('.zone-btn[data-zone="toi"]').click();
   doc.getElementById('meLogout').click();
-  doc.getElementById('loKeep').click();
+  doc.getElementById('loGo').click();
   await until(() => !win.localStorage.getItem('xq_auth'));
   assert.equal(doc.getElementById('meIntro').hidden, false);
   assert.deepEqual(JSON.parse(win.localStorage.getItem('xq_puzzles_solved')), ['p7']);
@@ -166,7 +166,7 @@ test('bạn bè: tìm, kết bạn, lời mời kết bạn hiện huy hiệu; m
   doc.querySelector('.zone-btn[data-zone="satruong"]').click();
   doc.querySelector('.st-btn[data-stab="banbe"]').click();
   assert.equal(doc.querySelector('[data-stpanel="banbe"] [data-need-login]').hidden, true);
-  await until(() => /Chưa có bạn nào/.test(doc.getElementById('friendList').textContent));
+  await until(() => /Chưa có bạn/.test(doc.getElementById('friendList').textContent));
   const box = doc.getElementById('friendSearch');
   box.value = 'dao'; box.dispatchEvent(new win.Event('input'));
   await until(() => doc.querySelector('#friendResults [data-add]'));
@@ -242,7 +242,7 @@ test('bắt buộc đăng nhập: chưa đăng nhập thì che app; đăng nhậ
   await until(() => doc.getElementById('authGate').hidden);
   assert.ok(!doc.body.classList.contains('gated'));
   doc.querySelector('.zone-btn[data-zone="toi"]').click();
-  doc.getElementById('meLogout').click(); doc.getElementById('loKeep').click();
+  doc.getElementById('meLogout').click(); doc.getElementById('loGo').click();
   await until(() => !doc.getElementById('authGate').hidden);
   const art = load({ fresh: true, setup(w) { w.claude = { use: () => Promise.resolve(null) }; } });
   OPEN.push(art.window);

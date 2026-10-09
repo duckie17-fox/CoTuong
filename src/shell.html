@@ -17,21 +17,21 @@
     <span class="seal" aria-hidden="true">象</span>
     <h1 class="app-name">Cờ Tướng</h1>
     <nav class="zone-switch" aria-label="Chọn phần">
-      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Kỳ viện</span></button>
-      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Sa trường</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
+      <button type="button" class="zone-btn" data-zone="kyvien" aria-pressed="true"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-academy"></use></svg><span class="zone-l">Học</span></button>
+      <button type="button" class="zone-btn" data-zone="satruong" aria-pressed="false"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg><span class="zone-l">Chơi</span><span class="zone-badge" id="zoneBadge" hidden></span></button>
       <button type="button" class="zone-btn" data-zone="toi" aria-pressed="false"><span id="meIcon"><svg class="ic zone-ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><span class="zone-l" id="meLabel">Đăng nhập</span></button>
     </nav>
     <button type="button" class="music-btn" id="musicBtn" aria-pressed="false" aria-label="Bật nhạc nền" title="Bật nhạc nền"></button>
   </div>
-  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Kỳ viện">
+  <nav class="tabs" data-zone-tabs="kyvien" role="tablist" aria-label="Học">
     <button class="tab-btn" data-tab="hoc" role="tab">Học luật</button>
     <button class="tab-btn" data-tab="khaicuoc" role="tab">Khai cuộc</button>
     <button class="tab-btn" data-tab="chienthuat" role="tab">Chiến thuật</button>
     <button class="tab-btn" data-tab="baitap" role="tab">Bài tập</button>
-    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
   </nav>
-  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Sa trường" hidden>
-    <button class="tab-btn st-btn" data-stab="phong" role="tab">Phòng đấu</button>
+  <nav class="tabs" data-zone-tabs="satruong" role="tablist" aria-label="Chơi" hidden>
+    <button class="tab-btn st-btn" data-stab="phong" role="tab">Đấu người</button>
+    <button class="tab-btn" data-tab="may" role="tab">Đấu máy</button>
     <button class="tab-btn st-btn" data-stab="banbe" role="tab">Bạn bè</button>
     <button class="tab-btn st-btn" data-stab="xephang" role="tab">Xếp hạng</button>
   </nav>
@@ -41,31 +41,21 @@
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
   <div class="card lesson-card">
-    <h2 id="lessonsHeading">Các bài học</h2>
-    <details class="more-box" id="lessonToc"><summary>Chọn bài khác</summary>
-      <div class="lesson-nav" id="lessonNav"></div>
-    </details>
-    <div id="lessonContent"></div>
-    <div class="lesson-foot">
-      <button class="btn btn-outline" id="lessonPrev"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg>Bài trước</button>
-      <span id="lessonProgress" class="hint-text"></span>
-      <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+    <div class="lesson-top">
+      <h2 id="lessonsHeading">Các bài học</h2>
+      <div class="lesson-foot">
+        <button class="btn btn-outline" id="lessonPrev" aria-label="Bài trước" title="Bài trước"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-left"></use></svg><span class="btn-label">Bài trước</span></button>
+        <button type="button" class="btn btn-outline" id="lessonTocBtn" aria-expanded="false" aria-controls="lessonToc"><span id="lessonProgress"></span><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chevDown"></use></svg></button>
+        <button class="btn btn-jade" id="lessonNext">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+      </div>
     </div>
+    <div id="lessonToc" hidden><div class="lesson-nav" id="lessonNav"></div></div>
+    <div id="lessonContent"></div>
   </div>
-  <div class="card">
-    <h2>Bàn cờ và những điều cơ bản</h2>
-    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ, không đứng trong ô như cờ vua. Đỏ đi trước, hai bên thay phiên nhau. Ai bắt được Tướng đối phương thì thắng.</p>
-    <details class="more-box"><summary>Vài từ hay gặp</summary>
-      <p class="serif"><b>Sông</b>: khoảng trống giữa bàn, chia hai bên Đỏ và Đen. <b>Cung</b>: ô vuông nhỏ có hình chữ X ở giữa hàng cuối — Tướng và Sĩ không được ra khỏi đó. <b>Chiếu bí</b>: Tướng bị tấn công và không còn cách nào thoát, bên đó thua.</p>
-    </details>
-    <h3 class="mt16">7 loại quân cờ</h3>
+  <details class="card more-box basics-box"><summary>Tra nhanh: bàn cờ và 7 loại quân</summary>
+    <p class="serif">Quân cờ đứng <b>trên giao điểm</b> các đường kẻ. Đỏ đi trước, hai bên thay phiên. Bắt được Tướng đối phương (chiếu bí) là thắng. <b>Sông</b> chia đôi bàn; <b>Cung</b> là ô có hình chữ X — Tướng và Sĩ không ra khỏi đó.</p>
     <div class="legend-grid" id="legendGrid"></div>
-  </div>
-
-  <div class="card" id="progressCard">
-    <h2>Tiến độ của bạn</h2>
-    <div id="progressDash"></div>
-  </div>
+  </details>
 </section>
 
 <!-- ===================== TAB: KHAI CUOC ===================== -->
@@ -77,15 +67,12 @@
     </div>
     <div data-opanel="master" hidden>
       <h2>Ván danh thủ có chú giải</h2>
-      <p class="serif">Xem lại các ván cờ nổi tiếng từng nước một, kèm lời giải thích vì sao đi như vậy.</p>
-      <details class="more-box"><summary>Về nhãn “1 nguồn” và “2 nguồn”</summary>
-        <p class="hint-text">Biên bản mỗi ván đều ghi rõ nguồn (bấm vào ván để xem). “2 nguồn” là đã đối chiếu khớp từng nước ở hai nơi khác nhau, “1 nguồn” là mới có một nơi. Mọi nước đều được máy kiểm tra hợp lệ.</p>
-      </details>
+      <p class="serif">Ván nổi tiếng, có giải thích từng nước.</p>
       <div class="topic-grid" id="masterGrid"></div>
     </div>
     <div data-opanel="open">
     <h2>Các thế trận khai cuộc</h2>
-    <p class="serif">Khai cuộc là 10–15 nước đầu ván. Chọn một thế trận để xem từng nước kèm giải thích, rồi bấm <b>Tự đi lại</b> để tự đi — sai là được nhắc ngay.</p>
+    <p class="serif">Chọn thế trận để xem từng nước, rồi bấm <b>Tự đi lại</b> để luyện.</p>
     <div id="openingNotationHelp"></div>
     <div class="btn-row"><button class="btn btn-jade" id="trainRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện một thế ngẫu nhiên</button></div>
     <div id="openingGrid"></div>
@@ -97,9 +84,6 @@
     <button class="btn btn-outline" id="masterBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách ván</button>
     <h2 id="masterTitle" class="mt10"></h2>
     <div id="masterHead" class="hint-text"></div>
-    <div class="btn-row mt10"><label class="toggle"><input type="checkbox" id="masterGuess"> Tự đoán nước tiếp theo trước khi xem</label>
-      <select id="masterSide" aria-label="Đoán nước của bên"><option value="both">Đoán cả hai bên</option><option value="red">Chỉ đoán nước Đỏ</option><option value="black">Chỉ đoán nước Đen</option></select></div>
-    <div id="masterChart" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div class="board-shell board-card"><div id="masterBoard"></div></div>
@@ -110,10 +94,13 @@
           <button class="btn btn-outline" id="masterKey"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-star"></use></svg>Nước quan trọng</button>
           <button class="btn btn-outline" id="masterFlip" aria-label="Xoay bàn cờ" title="Xoay bàn cờ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-flip"></use></svg></button>
         </div>
-        <div class="btn-row btn-row-center mt10">
+        <div class="btn-row master-opts"><label class="toggle"><input type="checkbox" id="masterGuess"> Tự đoán nước tiếp theo</label>
+          <select id="masterSide" aria-label="Đoán nước của bên" hidden><option value="both">Đoán cả hai bên</option><option value="red">Chỉ đoán nước Đỏ</option><option value="black">Chỉ đoán nước Đen</option></select></div>
+        <div id="masterChart"></div>
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="masterPlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="masterFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="explain">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
@@ -125,13 +112,13 @@
         </div>
       </div>
     </div>
+    <p class="hint-text mt10" id="masterFamous"></p>
     <p class="sources" id="masterSources"></p>
   </div>
 
   <div class="card" id="openingDetailCard" hidden>
     <button class="btn btn-outline" id="openingBackBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg>Danh sách khai cuộc</button>
     <h2 id="openingTitle" class="mt10"></h2>
-    <p id="openingSummary" class="hint-text"></p>
     <div id="openingLines"></div>
     <div class="play-layout">
       <div class="play-board">
@@ -151,6 +138,8 @@
         </div>
       </div>
     </div>
+    <div id="openingLineInfo" class="mt10"></div>
+    <p id="openingSummary" class="hint-text mt10"></p>
     <div class="info-grid mt16">
       <div class="info-box"><h3 id="openingIdeasH">Ý chính</h3><ul id="openingIdeas"></ul></div>
       <div class="info-box warn"><h3 id="openingTrapsH">Bẫy thường gặp</h3><ul id="openingTraps"></ul></div>
@@ -191,7 +180,6 @@
 <section data-panel="may" hidden>
   <div class="card" id="aiSetupCard">
     <h2>Đấu với máy</h2>
-    <p>Chọn cấp máy và màu quân của bạn, rồi bấm Bắt đầu.</p>
     <fieldset class="setup-field"><legend>Cấp độ</legend><div class="level-grid" id="aiLevelPicker"></div></fieldset>
     <fieldset class="setup-field"><legend>Bạn cầm quân</legend>
       <div class="seg-radio">
@@ -231,8 +219,10 @@
         <div class="btn-row btn-row-center mt10" id="aiAfter" hidden>
           <button class="btn btn-primary" id="aiAgainBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-repeat"></use></svg>Ván mới</button>
           <button class="btn btn-jade" id="aiReviewBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-chart"></use></svg>Phân tích ván</button>
-          <button type="button" class="btn btn-outline" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
         </div>
+        <details class="more-box tool-more" id="aiMore" hidden><summary>Thêm</summary><div class="btn-row">
+          <button type="button" class="btn btn-outline btn-sm" id="aiFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="log">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button><button type="button" class="side-tab" data-side-tab="think">Cách suy nghĩ</button></div>
@@ -251,8 +241,7 @@
     <h2 class="mt10">Phân tích ván cờ</h2>
     <div id="reviewHead" class="hint-text"></div>
     <div id="reviewProgress" class="mt10" hidden><div class="progress"><div class="progress-bar" id="reviewProgressBar"></div></div><div class="hint-text small mt10" id="reviewProgressTxt"></div></div>
-    <div id="reviewSummary" class="review-summary mt10"></div>
-    <div id="reviewChart" class="mt10"></div>
+    <div id="reviewSummary" class="mt10"></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div id="reviewStep" class="review-step" aria-live="polite"></div>
@@ -264,10 +253,11 @@
           <button class="btn btn-outline" id="reviewNext" aria-label="Nửa nước sau"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
           <span class="tb-extra" id="reviewTools"></span>
         </div>
-        <div class="btn-row btn-row-center mt10">
+        <div id="reviewChart"></div>
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="reviewPlayBtn" title="Chơi lại với máy từ thế ngay trước nước đang xem"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Chơi lại từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="reviewFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
       </div>
       <div class="play-side side-panel" data-side-default="explain">
         <div class="side-tabs" role="tablist"><button type="button" class="side-tab" data-side-tab="explain">Giải thích</button><button type="button" class="side-tab" data-side-tab="log">Các nước đã đi</button></div>
@@ -279,6 +269,7 @@
         </div>
       </div>
     </div>
+    <div id="reviewMore" class="mt10"></div>
   </div>
 </section>
 
@@ -286,14 +277,12 @@
 <section data-panel="chienthuat" hidden>
   <div class="card" id="tacticListCard">
     <h2>Chiến thuật & Tàn cuộc</h2>
-    <p class="serif">Ba nhóm: các thế chiếu bí hay gặp, các đòn ăn quân, và tàn cuộc (lúc còn ít quân).</p>
     <div class="chip-row subnav" role="tablist" aria-label="Chọn mảng">
       <button class="chip on" data-sub="satcuc" role="tab" aria-selected="true">Thế chiếu bí</button>
       <button class="chip" data-sub="don" role="tab" aria-selected="false">Đòn ăn quân</button>
       <button class="chip" data-sub="tancuoc" role="tab" aria-selected="false">Tàn cuộc</button>
     </div>
     <div data-subpanel="satcuc">
-      <p class="hint-text">Mỗi thế có cách nhận ra trong ván cờ và 3 bài để bạn tự chiếu bí.</p>
       <p class="hint-text" id="satcucProgress"></p>
       <div id="satcucList"></div>
     </div>
@@ -302,10 +291,10 @@
     </div>
     <div data-subpanel="tancuoc" hidden>
       <h3 class="group-h mt16">Tàn cuộc nhập môn</h3>
-      <p class="hint-text">Ở mỗi thế tàn cuộc, bạn cầm Đỏ, còn máy phòng thủ bằng những nước kéo dài nhất có thể.</p>
+      <p class="hint-text">Bạn cầm Đỏ, máy thủ hết sức.</p>
       <div class="topic-grid" id="endgameGrid"></div>
       <h3 class="group-h mt16">Tàn cuộc lý thuyết</h3>
-      <p class="hint-text">Thế nào thắng được, thế nào chỉ hoà. Nhãn “Máy kiểm chứng” là đã tính hết mọi khả năng; “Theo sách” là ghi theo sách tàn cuộc.</p>
+      <p class="hint-text">Thế nào thắng, thế nào chỉ hoà.</p>
       <div id="egTheory"></div>
     </div>
   </div>
@@ -319,11 +308,11 @@
 <section data-panel="baitap" hidden>
   <div class="card" id="puzzleListCard">
     <h2>Bài tập tình huống</h2>
-    <p>Chọn một thế cờ và tìm nước đi đúng. Bài có nhiều cách giải thì cách nào đúng cũng được tính.</p>
+    <p class="hint-text">Tìm nước đi đúng — cách nào đúng cũng được.</p>
     <div class="daily-card" id="dailyCard"></div>
     <p class="hint-text" id="puzzleProgressTxt"></p>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Luyện ngẫu nhiên</button><span class="hint-text">Lấy lần lượt các bài bạn chưa giải.</span></div>
+    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Làm bài chưa giải</button></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
     <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
@@ -340,15 +329,15 @@
         </div>
         <div class="board-toolbar">
           <button class="btn btn-outline" id="puzzleHintBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bulb"></use></svg>Gợi ý</button>
-          <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Thử lại</button>
-          <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem đáp án</button>
-          <button class="btn btn-outline" id="puzzleNextBtn">Bài tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
+          <button class="btn btn-outline" id="puzzleRetryBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-undo"></use></svg>Làm lại</button>
+          <button class="btn btn-outline" id="puzzleAnswerBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"></use></svg>Xem lời giải</button>
+          <button class="btn btn-outline" id="puzzleNextBtn">Tiếp<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-right"></use></svg></button>
         </div>
         <div id="puzzleStatus" class="board-caption" aria-live="polite"></div>
-        <div class="btn-row btn-row-center">
+        <details class="more-box tool-more"><summary>Thêm</summary><div class="btn-row">
           <button type="button" class="btn btn-outline btn-sm" id="puzzlePlayBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg>Đấu với máy từ thế này</button>
           <button type="button" class="btn btn-outline btn-sm" id="puzzleFenBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép thế cờ</button>
-        </div>
+        </div></details>
         <div id="puzzleExplain" class="explain-box" hidden></div>
       </div>
     </div>
@@ -371,7 +360,6 @@
     <div class="ol-grid">
       <div class="card ol-box">
         <h2>Tạo phòng</h2>
-        <p class="hint-text small" id="olAsUser" hidden></p>
         <label class="setup-field ol-name">Tên của bạn
           <input class="field" id="olName" maxlength="24" autocomplete="nickname" placeholder="Ví dụ: Minh">
         </label>
@@ -401,9 +389,9 @@
   <div class="card" id="olRoom" hidden>
     <div class="btn-row ol-room-head">
       <button type="button" class="btn btn-outline btn-sm" id="olLeave" aria-label="Rời phòng" title="Rời phòng"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"></use></svg><span class="btn-label">Rời phòng</span></button>
-      <div class="ol-room-title"><b>Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
+      <div class="ol-room-title"><b id="olTitle">Phòng <span id="olCode"></span></b> <span class="badge" id="olKind" hidden></span> <span class="ol-conn" id="olConn"></span></div>
+      <div id="olInvite" class="ol-invite" hidden></div>
     </div>
-    <div id="olInvite" class="ol-invite mt10" hidden></div>
     <div class="play-layout mt10">
       <div class="play-board">
         <div class="ol-player" id="olTop"></div>
@@ -448,17 +436,15 @@
     <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
   </div>
   <div data-when-login hidden>
-    <div class="card">
-      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
-      <div id="friendResults" class="mt10" aria-live="polite"></div>
-    </div>
     <div class="card" id="friendRequestsCard" hidden>
       <h2>Lời mời kết bạn</h2>
       <div id="friendRequests"></div>
     </div>
     <div class="card">
       <h2>Bạn bè</h2>
-      <div id="friendList"></div>
+      <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
+      <div id="friendResults" class="mt10" aria-live="polite"></div>
+      <div id="friendList" class="mt10"></div>
       <div id="friendOutgoing"></div>
     </div>
   </div>
@@ -487,7 +473,7 @@
     <div class="me-head"><span class="me-avatar"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-user"></use></svg></span><div><h2>Tài khoản</h2><div class="hint-text small">Bạn đang dùng không cần tài khoản — tiến độ lưu trong trình duyệt này.</div></div></div>
     <ul class="me-benefits">
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sync"></use></svg>Tiến độ học, bài tập, ván đã đấu đi theo bạn sang mọi máy</li>
-      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng ở Sa trường, kết bạn và mời đấu trực tiếp</li>
+      <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng khi đấu online, kết bạn và mời đấu trực tiếp</li>
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
     </ul>
     <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
@@ -505,7 +491,10 @@
         <div class="me-elo"><b id="meElo"></b><small id="meEloSub"></small></div>
       </div>
     </div>
-    <div class="card"><h2>Thống kê</h2><div class="dash-grid" id="meStats"></div></div>
+  </div>
+  <div class="card" id="progressCard">
+    <h2>Tiến độ</h2>
+    <div id="progressDash"></div>
   </div>
   <div class="me-grid">
     <div class="card" id="settingsPanel">
@@ -515,7 +504,7 @@
           <button type="button" data-sound="on">Bật</button><button type="button" data-sound="off">Tắt</button>
         </div>
       </div>
-      <div class="settings-row"><span>Nhạc nền <small class="hint-text">(không lời: đàn tranh, sáo trúc, đàn nhị, tỳ bà, cổ cầm)</small></span>
+      <div class="settings-row"><span>Nhạc nền</span>
         <div class="seg" id="musicToggle" role="group" aria-label="Nhạc nền">
           <button type="button" data-music="on">Bật</button><button type="button" data-music="off">Tắt</button>
         </div>
@@ -547,17 +536,17 @@
       <p class="hint-text small" id="progressMsg" aria-live="polite"></p>
       </details>
     </div>
-  </div>
-  <div class="card mt16" id="meAccount" hidden>
-    <h2>Tài khoản</h2>
-    <div class="me-actions">
-      <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
-      <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
-      <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
-      <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+    <div class="card" id="meAccount" hidden>
+      <h2>Tài khoản</h2>
+      <div class="me-actions">
+        <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
+        <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
+        <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
+        <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
+      </div>
+      <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
+      <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
     </div>
-    <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
-    <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
   </div>
 </section>
 

@@ -160,6 +160,8 @@ function playFromPosition(board, turn, source){
 function alertSoft(msg){ const el=document.querySelector('section:not([hidden]) [aria-live]'); if(el) statusBanner(el,'fail',esc(msg)); }
 
 /* ---------------- Bảng tiến độ ---------------- */
+// "2 thắng · 1 thua" (bỏ mục bằng 0); chưa có ván thì "Chưa có ván"
+function wdlText(w,d,l){ const p=[]; if(w) p.push(w+' thắng'); if(d) p.push(d+' hoà'); if(l) p.push(l+' thua'); return p.join(' · ')||'Chưa có ván'; }
 function renderProgressDashboard(){
   const el=$('#progressDash'); if(!el) return;
   const done=lessonsDone().filter(k=>LESSONS.some(l=>l.key===k)).length;
@@ -176,7 +178,7 @@ function renderProgressDashboard(){
       <div class="dash-tile"><b>${done}/${LESSONS.length}</b><span>bài học đã xem</span>${bar(done,LESSONS.length)}</div>
       <div class="dash-tile"><b>${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length}</b><span>bài tập đã giải</span>${bar(solved.length,PUZZLES.length)}</div>
       <div class="dash-tile"><b>${st||0} ngày</b><span>liên tiếp có làm bài</span></div>
-      <div class="dash-tile"><b>${w}–${d}–${l}</b><span>đấu máy: thắng–hoà–thua</span></div>
+      <div class="dash-tile"><b>${wdlText(w,d,l)}</b><span>đấu máy</span></div>
     </div>
     <details class="more-box dash-more"><summary>Chi tiết theo chủ đề bài tập${acc!=null?` · chính xác trung bình ${acc}%`:''}</summary>
       <ul class="dash-topics">${topics.map(t=>`<li><span>${esc(t.v)}</span>${bar(t.s,t.n)}<small>${t.s}/${t.n}</small></li>`).join('')}</ul>
@@ -190,8 +192,9 @@ function renderDailyCard(){
   const el=$('#dailyCard'); if(!el) return;
   const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
   const streak=Learn.streak();
-  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)} <span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic]||'')}</span>
-      <div class="hint-text small">${done?'Đã xong hôm nay. Mai có bài mới!':'Mỗi ngày một bài — giữ chuỗi ngày liên tiếp.'}${streak?` · Chuỗi ${streak} ngày liên tiếp`:''}</div></div>
+  const sub=[done?'Đã xong hôm nay. Mai có bài mới!':'', streak?`Chuỗi ${streak} ngày liên tiếp`:''].filter(Boolean).join(' · ');
+  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)}
+      ${sub?`<div class="hint-text small">${sub}</div>`:''}</div>
     <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
   $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
 }
@@ -229,8 +232,8 @@ function initLearn(){
     }catch(e){ out.textContent=e.message; }
   });
   renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
+  document.addEventListener('zoneshown',e=>{ if(e.detail==='toi') renderProgressDashboard(); });
   document.addEventListener('tabshown',e=>{
-    if(e.detail==='hoc') renderProgressDashboard();
     if(e.detail==='baitap') renderDailyCard();
     if(e.detail==='may') renderAiSuggestion();
   });

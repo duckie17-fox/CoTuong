@@ -190,7 +190,7 @@ const Online = (function(){
   // Thanh người chơi: tên, Elo, quân đã ăn; sáng lên khi tới lượt
   function renderPlayer(el, color){
     const r=st.room, s=r.seats[color], g=st.local||st.game, isTurn=!r.result && g.turn()===color;
-    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Đang chờ người vào ghế ${colorVN(color)}…</span>`; return; }
+    if(!s){ el.classList.remove('pb-active'); el.innerHTML=`<span class="turn-dot turn-${color}"></span><span class="ol-pname ol-empty">Chờ đối thủ…</span>`; return; }
     const sub=[s.elo!=null?`Elo ${s.elo}`:'', s.online?'':'mất kết nối'].filter(Boolean).join(' · ');
     setPlayerBar(el, {color, name:s.name, me:r.you===color, sub:esc(sub), captured:capturedBy(g.moves,color), active:isTurn && !!r.seats[other(color)],
       note: isTurn && r.seats[other(color)] ? (r.you===color?'tới lượt':'đang nghĩ…') : ''});
@@ -221,7 +221,7 @@ const Online = (function(){
       const head = r.you==='spectator' ? '' : `<b>${!res.winner?'Hoà.':res.winner===r.you?'Bạn thắng!':'Bạn thua.'}</b> `;
       statusBanner(el, kind, head+esc(txt)+elo); return;
     }
-    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ statusBanner(el,'think','Đang chờ đối thủ vào phòng…'); return; }
+    if(!r.seats[other(r.you==='spectator'?'red':r.you)] && r.you!=='spectator'){ el.innerHTML=''; return; }   // thanh người chơi đã ghi "Chờ đối thủ…"
     const turn=g.turn(), chk=Engine.isInCheck(g.board(),turn);
     if(st.local){ statusBanner(el,'think','Đang gửi nước đi…'); return; }
     if(r.you==='spectator'){ statusBanner(el,'think',`Bạn đang xem · lượt ${colorVN(turn)}${chk?' — đang bị chiếu!':''}`); return; }
@@ -257,9 +257,9 @@ const Online = (function(){
     if(!waiting){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
-    el.innerHTML=`<div class="ol-invite-row"><span>Mã phòng <b class="ol-bigcode">${st.code}</b><span class="hint-text small ol-invite-hint">Gửi cho bạn để vào chơi cùng</span></span>
-      <span class="btn-row"><button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép link mời</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</span></div>
-      <input class="field ol-link mt10" readonly value="${esc(link)}" aria-label="Link mời" hidden>`;
+    // gọn: chỉ nút mời nằm trên hàng tiêu đề (mã phòng đã có ở tiêu đề)
+    el.innerHTML=`<button type="button" class="btn btn-primary btn-sm" id="olCopy" title="Sao chép link mời"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg><span class="btn-label">Sao chép link mời</span><span class="btn-label-s">Mời</span></button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare" aria-label="Chia sẻ" title="Chia sẻ"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg></button>':''}
+      <input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời" hidden>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
       try{ await navigator.clipboard.writeText(link); flash('Đã sao chép link mời.'); }
       catch(e){ const inp=$('.ol-link',el); inp.hidden=false; inp.select(); flash('Hãy tự sao chép link trong ô (Ctrl/⌘+C).'); }
@@ -268,7 +268,8 @@ const Online = (function(){
   }
   function render(){
     const r=st.room;
-    $('#olCode').textContent=st.code||'';
+    // ván ghép xếp hạng: mã phòng không có ý nghĩa với người chơi
+    $('#olTitle').innerHTML = st.ranked ? 'Đấu xếp hạng' : `Phòng <span id="olCode">${esc(st.code||'')}</span>`;
     renderInvite();
     if(!r){ $('#olKind').hidden=true; st.widget.setBoard(Engine.initialBoard(),{}); $('#olTop').innerHTML=''; $('#olBottom').innerHTML=''; renderStatus(); renderChat(); $('#olOffer').innerHTML=''; return; }
     const me = r.you==='spectator' ? 'red' : r.you;
@@ -296,8 +297,8 @@ const Online = (function(){
     if(isArtifact() && (st.conn==='blocked' || !server()))
       return `Khung xem này không cho kết nối ra ngoài. Hãy mở ${web} để đấu với bạn bè.`;
     if(st.conn==='blocked')
-      return `Không kết nối được máy chủ Sa trường. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
-    if(!server()) return 'Sa trường tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
+      return `Không kết nối được máy chủ đấu online. Kiểm tra mạng, bấm “Rời phòng” rồi vào lại; nếu vẫn lỗi, thử bản web ${web}.`;
+    if(!server()) return 'Đấu online tạm thời chưa kết nối được máy chủ. Hãy thử lại sau.';
     return '';
   }
   function isArtifact(){ try{ return !!(window.claude && window.claude.use); }catch(e){ return false; } }
@@ -312,7 +313,7 @@ const Online = (function(){
     renderRanked();
     const u=Account.signedIn() ? Account.user() : null;
     $('.ol-name').hidden=!!u; $('#olRatedWrap').hidden=!u;
-    $('#olAsUser').hidden=!u; if(u) $('#olAsUser').innerHTML=`Bạn chơi với tên <b>${esc(u.displayName)}</b> · Elo ${u.elo}.`;
+
     const rc=recent();
     $('#olRecent').innerHTML = rc.length ? `<div class="ol-list">${rc.map(r=>`<button type="button" class="ol-item" data-code="${esc(r.code)}">
         <b>${esc(r.code)}</b> <span>${r.you==='spectator'?'xem: ':r.you?`cầm ${colorVN(r.you)}${r.opp?' · với ':''}`:''}${esc(r.opp||'')}</span>
@@ -352,10 +353,12 @@ const Online = (function(){
     disconnect();
     st.ranked=!!(create && create.match);
     st.code=code; st.everOpen=false; st.create=create||null; st.room=null; st.local=null; st.lastMoves=-1; st.chatSeen=0;
-    $('#olLobby').hidden=true; $('#olRoom').hidden=false;
+    $('#olLobby').hidden=true; $('#olRoom').hidden=false; $('#olToast').hidden=true;
     setRoomParam(code);
     render(); connect();
-    revealBoard($('#olBoardCard'));
+    // vừa tạo phòng (chờ bạn vào): giữ hàng tiêu đề có nút mời trong tầm nhìn
+    if(create && !create.match) $('#olRoom').scrollIntoView({block:'start'});
+    else revealBoard($('#olBoardCard'), true);
   }
   function review(id){
     const rec=history().find(r=>r.id===id); if(!rec) return;
@@ -379,8 +382,9 @@ const Online = (function(){
       body.innerHTML=`<div class="ranked-search"><span class="spinner" aria-hidden="true"></span><span>Đang tìm đối thủ… <b>0:${String(sec).padStart(2,'0')}</b></span><button type="button" class="btn btn-outline btn-sm" id="olSearchCancel">Huỷ</button></div>`;
       $('#olSearchCancel').addEventListener('click',cancelSearch); return;
     }
-    body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-outline btn-sm" data-resume="${g.id}">Vào tiếp</button></div>`).join('')
-      +`<button type="button" class="btn btn-primary ol-wide ranked-go" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button><p class="hint-text small ranked-note">${open.length ? 'Ván đang dở vẫn giữ nguyên, vào tiếp lúc nào cũng được.' : 'Thắng được cộng Elo, thua bị trừ. Không gợi ý, không xin đi lại.'}</p>`;
+    // có ván dở: "Vào tiếp" là nút chính, "Tìm trận mới" là nút phụ
+    body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-primary btn-sm" data-resume="${g.id}">${icon('play')}Vào tiếp</button></div>`).join('')
+      +`<button type="button" class="btn ${open.length?'btn-outline':'btn-primary ranked-go'} ol-wide" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button>${open.length?'':'<p class="hint-text small ranked-note">Thắng cộng Elo, thua trừ. Không gợi ý, không đi lại.</p>'}`;
     $$('[data-resume]',body).forEach(b=>b.addEventListener('click',()=>{ const g=savedBots().find(x=>String(x.id)===b.dataset.resume); if(g) startBotMatch(g, true); }));
     $('#olFindMatch').addEventListener('click',startSearch);
   }
@@ -439,7 +443,7 @@ const Online = (function(){
     botPush();
     if(st.bot.result && !st.bot.submitted) botSubmit();
     else botMaybeMove();
-    revealBoard($('#olBoardCard'));
+    revealBoard($('#olBoardCard'), true);
   }
   function botGame(){ return replay(st.bot.moves, null); }
   function botMaterial(board, color){
@@ -511,7 +515,7 @@ const Online = (function(){
   }
 
   function init(){
-    st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ Sa trường'});
+    st.widget=createBoardWidget($('#olBoard'), {onSquareClick:(r,c)=>st.ctl.click(r,c), label:'Bàn cờ đấu online'});
     st.ctl=makeClickController({ widget:st.widget, getBoard:board, turn:()=>(st.local||st.game||Game.create()).turn(), canMove, onMove, extraMeta:meta,
       legalMoves:()=>(st.game?st.game.legalMoves():[]) });
     st.game=Game.create();

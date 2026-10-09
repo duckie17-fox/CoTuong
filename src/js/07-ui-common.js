@@ -69,14 +69,20 @@ function statusBanner(el, kind, html){
 /* Cuộn để bàn cờ hiện đủ (dưới thanh tab và thanh nút đang dính ở trên) */
 // Nút cần bấm 2 lần mới chạy (vd. Đầu hàng): lần 1 đổi sang kiểu cảnh báo "Chắc chắn?", 3 giây không bấm thì trở lại.
 // Bỏ qua lần bấm thứ hai quá nhanh (chạm đúp vô tình). Không dùng confirm() vì có thể bị chặn trong khung nhúng.
+// Lần 1 hiện thêm nút "Huỷ" ngay cạnh để thoát rõ ràng (không phải chờ hết giờ).
 function confirmTap(btn, run, label){
   const html=btn.innerHTML;
-  const reset=()=>{ clearTimeout(btn._ctT); delete btn.dataset.confirm; btn.classList.remove('btn-confirm'); btn.innerHTML=html; };
+  let cancel=null;
+  const reset=()=>{ clearTimeout(btn._ctT); delete btn.dataset.confirm; btn.classList.remove('btn-confirm'); btn.innerHTML=html;
+    if(cancel){ cancel.remove(); cancel=null; } };
   btn.addEventListener('click',()=>{
     if(!btn.dataset.confirm){
       btn.dataset.confirm=String(Date.now()); btn.classList.add('btn-confirm');
       btn.innerHTML=`${icon('flag')}${label||'Chắc chắn?'}`;
-      btn._ctT=setTimeout(reset,3000); return;
+      cancel=document.createElement('button'); cancel.type='button'; cancel.className='btn btn-outline btn-cancel';
+      cancel.innerHTML=`${icon('x')}Huỷ`; cancel.addEventListener('click',reset);
+      btn.after(cancel);
+      btn._ctT=setTimeout(reset,4000); return;
     }
     if(Date.now()-(+btn.dataset.confirm)<400) return;
     reset(); run();
@@ -84,7 +90,8 @@ function confirmTap(btn, run, label){
   return reset;
 }
 function stickyTop(){ const v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-top'))||0; return v; }
-function revealBoard(el){
+// snap: khi vào ván (điện thoại) luôn cuộn bàn cờ sát mép trên và ẩn thanh trên, kể cả khi bàn đã thấy đủ
+function revealBoard(el, snap){
   if(!el) return;
   const shell = el.closest ? (el.closest('.board-shell')||el) : el;
   // thanh công cụ nằm ngay dưới bàn cờ: cố gắng hiện cả hai
@@ -96,14 +103,16 @@ function revealBoard(el){
   // điện thoại: cuộn xuống đủ xa thì ẩn thanh trên (xem initAutoHideHeader) → bàn cờ được sát mép trên.
   // Cuộn ít (< 60px) thì thanh trên vẫn hiện → phải chừa chỗ cho nó, kẻo che mất thanh người chơi.
   const hide = isPhone() && r.top>0 && (window.scrollY||0)+r.top-4>=60;
-  const top = (hide ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
+  // máy tính: thanh nút nằm ở cột phải, không cần chừa chỗ dưới bàn
+  const top = (hide ? 0 : stickyTop())+4, extra=tb&&isPhone()?tb.offsetHeight+6:0;
   // trừ thanh dưới (bottom nav trên điện thoại)
   const nav=document.querySelector('.zone-switch'), navH = nav && getComputedStyle(nav).position==='fixed' ? nav.offsetHeight : 0;
   const vh=(window.innerHeight||document.documentElement.clientHeight)-navH;
   // "đã thấy" tính theo thanh trên hiện tại (đang hiện thì nó che phần trên)
   const now = (isPhone() && document.body.classList.contains('hdr-hide') ? 0 : stickyTop())+4;
-  if(r.top>=now && r.bottom+extra<=vh) return;              // đã thấy đủ
-  if(r.top>=now && r.height+extra>vh-now && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
+  const snapNow = snap && hide;
+  if(!snapNow && r.top>=now && r.bottom+extra<=vh) return;              // đã thấy đủ
+  if(!snapNow && r.top>=now && r.height+extra>vh-now && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
   if(hide) document.body.classList.add('hdr-hide');
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
@@ -159,6 +168,7 @@ const ICON_PATHS = {
   flip:'<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
   flag:'<path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/>',
   left:'<path d="m15 18-6-6 6-6"/>',
+  chevDown:'<path d="m6 9 6 6 6-6"/>',
   right:'<path d="m9 18 6-6-6-6"/>',
   back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   prevErr:'<path d="M19 20 9 12l10-8z"/><path d="M5 19V5"/>',
@@ -221,9 +231,23 @@ function playerBarHTML(p){
 }
 function setPlayerBar(el, p){ el.innerHTML=playerBarHTML(p); el.classList.toggle('pb-active', !!p.active); }
 
+/* ---------- Nhiều bàn minh hoạ: chỉ hiện một bàn, chuyển bằng hàng nút (bài học, sát cục) ---------- */
+function wireDemoTabs(host, slots, labels){
+  if(slots.length<2) return;
+  host.insertAdjacentHTML('afterbegin', `<div class="demo-tabs" role="tablist" aria-label="Chọn ví dụ">${labels.map((t,i)=>
+    `<button type="button" class="chip${i?'':' on'}" role="tab" aria-selected="${!i}" data-demo="${i}">${esc(t)}</button>`).join('')}</div>`);
+  slots.forEach((d,i)=>{ d.hidden = i>0; });
+  $$('[data-demo]',host).forEach(b=>b.addEventListener('click',()=>{
+    const k=+b.dataset.demo;
+    slots.forEach((d,i)=>d.hidden = i!==k);
+    $$('[data-demo]',host).forEach(x=>{ const on=+x.dataset.demo===k; x.classList.toggle('on',on); x.setAttribute('aria-selected',on); });
+  }));
+}
+
 /* ---------- Cách đọc ký hiệu nước đi (gắn dưới mọi biên bản nước đi) ---------- */
 const NOTATION_HELP = `<details class="more-box notation-help"><summary>Cách đọc ký hiệu nước đi</summary>
   <p>Ví dụ <b>P2-5</b>: <b>P</b>háo đang ở <b>cột 2</b>, đi <b>ngang</b> sang <b>cột 5</b>.</p>
+  <p>Dấu <b>×</b> sau nước đi: ăn quân · <b>+</b>: chiếu Tướng.</p>
   <ul>
     <li><b>Chữ cái</b> là quân: Tg Tướng · S Sĩ · T Tượng · M Mã · X Xe · P Pháo · B Tốt (Binh).</li>
     <li><b>Số đầu</b> là cột quân đang đứng. Mỗi bên đếm cột 1→9 từ tay phải của mình — chính là các số in ở mép bàn cờ phía mình.</li>

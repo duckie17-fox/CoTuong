@@ -16,10 +16,8 @@ function masterKeyPlies(g){
 function renderMasterList(){
   const el=$('#masterGrid'); if(!el || typeof MASTER_GAMES==='undefined') return;
   el.innerHTML=MASTER_GAMES.map(g=>`<button class="opening-card topic-card" data-master="${g.id}">
-    <div class="puzzle-top"><span class="badge ${g.result==='1-0'?'badge-hard':g.result==='0-1'?'badge-mid':'badge-easy'}">${g.year}</span>
-      <span class="badge ${g.verified>=2?'badge-verified':'badge-source'}">${g.verified>=2?'2 nguồn':'1 nguồn'}</span></div>
-    <h4>${esc(g.red)} – ${esc(g.black)}</h4><span class="han-sm">${esc(g.redHan)} – ${esc(g.blackHan)}</span>
-    <p>${esc(g.resultText)} · ${Math.ceil(g.plies.length/2)} nước · ${esc(g.event)}</p></button>`).join('');
+    <div class="puzzle-top"><h4>${esc(g.red)} – ${esc(g.black)}</h4><span class="badge ${g.result==='1-0'?'badge-hard':g.result==='0-1'?'badge-mid':'badge-easy'}">${g.year}</span></div>
+    <span class="tc-hint">${esc(g.resultText)} · ${Math.ceil(g.plies.length/2)} nước · ${esc(g.event)}</span></button>`).join('');
   $$('[data-master]',el).forEach(b=>b.addEventListener('click',()=>openMaster(b.dataset.master)));
 }
 function showOpeningSub(id){
@@ -33,8 +31,9 @@ function openMaster(id){
   for(const p of g.plies) ms.game.play({from:[p.m[0],p.m[1]],to:[p.m[2],p.m[3]]});
   ms.pos=0; ms.right=0; ms.total=0; ms.feedback='';
   $('#openingListCard').hidden=true; $('#masterCard').hidden=false;
-  $('#masterTitle').innerHTML=`${esc(g.red)} <span class="han-sm">${esc(g.redHan)}</span> – ${esc(g.black)} <span class="han-sm">${esc(g.blackHan)}</span>`;
-  $('#masterHead').innerHTML=`<b>${g.year}</b> · ${esc(g.event)} · <b>${esc(g.resultText)}</b><br>${esc(g.famous)}`;
+  $('#masterTitle').textContent=`${g.red} – ${g.black}`;
+  $('#masterHead').innerHTML=`<b>${g.year}</b> · ${esc(g.event)} · <b>${esc(g.resultText)}</b>`;
+  $('#masterFamous').textContent=g.famous||'';
   $('#masterSources').innerHTML=`Nguồn biên bản (${g.verified>=2?'đã đối chiếu khớp từng nước ở hai nguồn':'một nguồn, đã kiểm mọi nước hợp lệ'}): ${g.sources.map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}. Đánh giá và chú giải tự động là của máy (tìm kiếm có giới hạn thời gian), có thể khác nhận định của danh thủ.`;
   if(!ms.widget){
     ms.widget=createBoardWidget($('#masterBoard'),{onSquareClick:(r,c)=>ms.ctl.click(r,c), label:'Bàn cờ ván danh thủ'});
@@ -49,7 +48,7 @@ function openMaster(id){
   }
   ms.widget.setFlipped(false);
   masterRender();
-  $('#masterCard').scrollIntoView({block:'start'});
+  $('#masterCard').scrollIntoView({block:'start'}); revealBoard($('#masterBoard'));
 }
 function masterBoard(){ return ms.pos===0 ? ms.game.start : ms.game.boards[ms.pos-1]; }
 function masterGuessing(){
@@ -103,7 +102,7 @@ function masterRender(){
   masterChart();
 }
 function masterChart(){
-  const g=ms.g, n=g.plies.length, W=600, H=110, pad=6;
+  const g=ms.g, n=g.plies.length, W=600, H=80, pad=6;
   const shown = ms.guess ? ms.pos : n;
   const vals=[0].concat(g.plies.map(p=>p.e)).slice(0,shown+1);
   const x=i=>pad+(W-2*pad)*i/Math.max(1,n), y=v=>H/2-(H/2-pad)*Math.max(-1,Math.min(1,v/800));
@@ -112,7 +111,7 @@ function masterChart(){
   $('#masterChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="eval-svg" role="img" aria-label="Biểu đồ đánh giá của máy theo từng nước (phía trên: Đỏ hơn)">
     <line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" class="mid"/><path d="${path}" class="line"/>${keys}
     <line class="cursor" x1="${x(ms.pos)}" x2="${x(ms.pos)}" y1="0" y2="${H}"/></svg>
-    <div class="chart-legend"><span>Phía trên: Đỏ hơn</span><span>Chấm vàng: nước quan trọng</span><span>Phía dưới: Đen hơn</span></div>`;
+    <div class="chart-legend"><span>Trên: Đỏ hơn</span><span>Chấm vàng: nước quan trọng</span><span>Dưới: Đen hơn</span></div>`;
   $$('.dot-key',$('#masterChart')).forEach(d=>d.addEventListener('click',()=>{ ms.pos=+d.dataset.k+1; ms.feedback=''; masterRender(); revealBoard($('#masterBoard')); }));
 }
 function masterGuessMove(mv){
@@ -146,7 +145,7 @@ function initMasters(){
   $('#masterNext').addEventListener('click',()=>{ ms.tk=null; if(ms.pos<ms.g.plies.length){ ms.pos++; ms.feedback=''; masterAutoAdvance(); } });
   $('#masterFlip').addEventListener('click',()=>ms.widget.setFlipped(!ms.widget.isFlipped()));
   $('#masterKey').addEventListener('click',()=>{ if(ms.guess) return; const keys=masterKeyPlies(ms.g); const nx=keys.find(k=>k+1>ms.pos) ; ms.pos = nx!=null ? nx+1 : (keys.length?keys[0]+1:ms.pos); ms.feedback=''; masterRender(); revealBoard($('#masterBoard')); });
-  $('#masterGuess').addEventListener('change',e=>{ ms.guess=e.target.checked; ms.feedback=''; if(ms.guess){ ms.right=0; ms.total=0; } masterAutoAdvance(); });
+  $('#masterGuess').addEventListener('change',e=>{ ms.guess=e.target.checked; $('#masterSide').hidden=!ms.guess; ms.feedback=''; if(ms.guess){ ms.right=0; ms.total=0; } masterAutoAdvance(); });
   $('#masterSide').addEventListener('change',e=>{ ms.side=e.target.value; ms.widget.setFlipped(ms.side==='black'); masterAutoAdvance(); });
 }
 

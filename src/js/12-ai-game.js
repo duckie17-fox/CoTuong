@@ -90,10 +90,12 @@ function aiRender(){
     active:!over && turn===H, note: !over && turn===H ? 'tới lượt' : ''});
   if(g.result){
     const human = g.result.winner===H, draw=!g.result.winner;
-    statusBanner(el, draw?'draw':(human?'over':'fail'), `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
+    const selfResign = g.result.reason==='resign' && g.result.winner===M;
+    statusBanner(el, draw?'draw':(human?'over':'fail'), selfResign ? '<b>Bạn đã đầu hàng.</b>' : `<b>${draw?'Hoà.':human?'Bạn thắng!':'Bạn thua.'}</b> ${esc(Game.resultText(g.result))}`);
   } else if(Engine.isInCheck(b,turn)) statusBanner(el,'check', turn===H ? 'Bạn đang bị chiếu tướng — phải giải chiếu!' : 'Máy đang bị chiếu tướng!');
   else if(aiGame.hint && aiGame.hintText) statusBanner(el,'think', aiGame.hintText);
-  else el.innerHTML = turn===H && !aiGame.thinking ? `<span class="hint-text small">Đến lượt bạn — chạm quân rồi chạm ô sáng để đi.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
+  // dòng nhắc cách đi chỉ ở vài nước đầu (thanh người chơi đã báo "tới lượt")
+  else el.innerHTML = turn===H && !aiGame.thinking && g.moves.filter(m=>m.color===H).length<2 ? `<span class="hint-text small">Chạm quân, rồi chạm ô sáng.</span>` : (aiGame.bookNote?`<span class="hint-text small">${esc(aiGame.bookNote)}</span>`:'');
   renderMoveLog($('#aiLog'), g.moves);
   const humanTurn = !g.result && !aiGame.thinking && turn===aiGame.humanColor;
   $('#aiUndo').disabled = aiGame.thinking || g.moves.filter(m=>m.color===aiGame.humanColor).length===0;
@@ -101,7 +103,7 @@ function aiRender(){
   $('#aiResign').disabled = !!g.result;
   $('#aiReviewBtn').disabled = g.moves.length<2;
   $('#aiActions').hidden = over;
-  $('#aiAfter').hidden = !over;
+  $('#aiAfter').hidden = !over; $('#aiMore').hidden = !over;
   $('#aiLevelTag').textContent = '';
 }
 function aiPersist(){
@@ -161,7 +163,7 @@ function aiBeginGame(cfg){
   aiGame.widget.setFlipped(aiGame.humanColor===BLACK);
   aiAfterMove();
   $('#aiGameCard').scrollIntoView({block:'start'});
-  revealBoard($('#aiBoardCard'));
+  revealBoard($('#aiBoardCard'), true);
 }
 function showAICard(which){
   $('#aiSetupCard').hidden = which!=='setup';

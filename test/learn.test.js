@@ -111,9 +111,9 @@ test('giao diện: bắt đầu ván từ FEN; FEN sai thì báo lỗi', () => {
   assert.equal(document.querySelectorAll('#aiBoard .xq-piece').length, 3);
 });
 
-test('bảng tiến độ hiển thị ở tab Học luật', () => {
+test('bảng tiến độ hiển thị ở mục Tôi', () => {
   const { document } = load({ fresh: true, storage: { xq_puzzles_solved: '["chariot-mate"]' } });
-  document.querySelector('.tab-btn[data-tab="hoc"]').click();
+  document.querySelector('.zone-btn[data-zone="toi"]').click();
   const txt = document.querySelector('#progressDash').textContent;
   assert.match(txt, /bài tập đã giải/);
   assert.match(txt, /1\/\d+/);

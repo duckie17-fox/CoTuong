@@ -200,7 +200,7 @@ const Account = (function(){
     openDialog(`${dlgHead('Tạo tài khoản')}
       <form novalidate>
         ${fieldHTML('rgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
-        <small class="hint-text small dlg-hint">3–20 ký tự: chữ không dấu, số, dấu _ và dấu chấm. Bạn bè tìm bạn bằng tên này.</small>
+        <small class="hint-text small dlg-hint">3–20 ký tự, không dấu. Bạn bè tìm bạn bằng tên này.</small>
         ${fieldHTML('rgName','Tên hiển thị','text','autocomplete="nickname" maxlength="24"')}
         ${fieldHTML('rgPass','Mật khẩu','password','autocomplete="new-password"')}
         ${fieldHTML('rgPass2','Nhập lại mật khẩu','password','autocomplete="new-password"')}
@@ -281,7 +281,7 @@ const Account = (function(){
   async function afterSignIn(r, fresh){
     saveSession(r.token, r.user);
     closeDialog();
-    if(fresh){ await sync({quiet:true}); toastMsg(`Chào ${r.user.displayName}! Tiến độ trên máy này đã được lưu vào tài khoản.`); return; }
+    if(fresh){ await sync({quiet:true}); toastMsg('Đã lưu tiến độ vào tài khoản.'); return; }
     let remote=null;
     try{ remote=await call('GET','/api/progress'); }catch(e){}
     const remoteHas = remote && Object.keys(remote.data||{}).some(k=>LEARN_KEYS.includes(k));
@@ -333,7 +333,6 @@ const Account = (function(){
         : m.last ? `Lần đồng bộ cuối: ${new Date(m.last).toLocaleString('vi-VN')}. Tiến độ tự đồng bộ vài giây sau mỗi thay đổi.` : 'Chưa đồng bộ lần nào.';
     }
   }
-  function statTile(big, small){ return `<div class="dash-tile"><b>${big}</b><span>${small}</span></div>`; }
   function renderMe(){
     const u=st.user;
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
@@ -344,15 +343,10 @@ const Account = (function(){
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;
-    $('#meSub').textContent=`@${u.username} · tham gia ${fmtDate(u.createdAt)}`;
     $('#meElo').textContent=u.elo;
     const t=Ranked.tierOf(u.elo);
     $('#meEloSub').innerHTML = `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
-    const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
-    const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
-    $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
-      + statTile(`${streak||0} ngày`,'liên tiếp có làm bài') + statTile(`${w}–${d}–${l}`,'đấu máy: thắng–hoà–thua')
-      + statTile(`${u.wins}–${u.draws}–${u.losses}`,'xếp hạng: thắng–hoà–thua');
+    $('#meSub').textContent=`@${u.username} · xếp hạng: ${wdlText(u.wins,u.draws,u.losses).toLowerCase()}`;
     renderSync();
   }
   // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
@@ -408,10 +402,10 @@ const Account = (function(){
       });
     });
     $('#meLogout').addEventListener('click',()=>{
-      openDialog(`${dlgHead('Đăng xuất')}<p>Giữ tiến độ học trên máy này sau khi đăng xuất?</p>
-        <div class="btn-row mt10"><button type="button" class="btn btn-primary" id="loKeep">Đăng xuất, giữ tiến độ</button><button type="button" class="btn btn-outline" id="loWipe">Đăng xuất và xoá tiến độ trên máy này</button></div>`, ()=>{
-        $('#loKeep').addEventListener('click',()=>logout(false));
-        $('#loWipe').addEventListener('click',()=>logout(true));
+      openDialog(`${dlgHead('Đăng xuất?')}<p class="hint-text">Tiến độ đã lưu trong tài khoản.</p>
+        <label class="check-line"><input type="checkbox" id="loWipe"> Xoá dữ liệu trên máy này</label>
+        <button type="button" class="btn btn-primary dlg-main" id="loGo">Đăng xuất</button>`, ()=>{
+        $('#loGo').addEventListener('click',()=>logout($('#loWipe').checked));
       });
     });
     $('#meLogoutAll').addEventListener('click',()=>confirmDialog('Đăng xuất mọi thiết bị','<p>Tất cả các máy đang đăng nhập tài khoản này (kể cả máy này) sẽ bị đăng xuất.</p>','Đăng xuất tất cả', async ()=>{
@@ -426,7 +420,7 @@ const Account = (function(){
           if(val('dlUser').trim().toLowerCase()!==u) return fieldErr('dlUser','Tên đăng nhập chưa khớp');
           try{ await call('DELETE','/api/me',{username:u, passHash:await passHash(u, val('dlPass'))}); }
           catch(e){ if(e.status===401) return fieldErr('dlPass','Mật khẩu chưa đúng'); throw e; }
-          closeDialog(); clearSession(); toastMsg('Đã xoá tài khoản. Tiến độ trên máy này vẫn giữ nguyên.');
+          closeDialog(); clearSession(); toastMsg('Đã xoá tài khoản.');
         });
       });
     });
@@ -450,7 +444,7 @@ const Account = (function(){
     const keys=syncedKeys();
     clearSession();
     if(wipe){ for(const k of keys) try{ localStorage.removeItem(k); }catch(e){} api.reload(); return; }
-    toastMsg('Đã đăng xuất. Tiến độ trên máy này vẫn giữ nguyên.');
+    toastMsg('Đã đăng xuất.');
   }
 
   /* ---------- thông báo nổi (lời mời đấu, phiên hết hạn…) ---------- */
@@ -467,7 +461,7 @@ const Account = (function(){
     return el;
   }
   const dropNotice = id => { const el=$(`#noticeStack [data-notice="${id}"]`); if(el) el.remove(); };
-  function toastMsg(text){ notice({id:'toast', html:esc(text), timeout:5000}); }
+  function toastMsg(text){ notice({id:'toast', html:esc(text), timeout:3000}); }
 
   /* ---------- hộp thư: lời mời đấu, lời mời kết bạn, nhịp online ---------- */
   function startInbox(){
@@ -547,7 +541,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : '<p class="hint-text">Chưa có bạn nào. Gõ tên đăng nhập của bạn mình vào ô tìm ở trên, hoặc vào <b>Phòng đấu → Tạo phòng</b> rồi gửi mã phòng cho bạn.</p>';
+      : (r.incoming.length || r.outgoing.length ? '' : '<p class="hint-text">Chưa có bạn. Tìm theo tên đăng nhập ở trên.</p>');
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -604,7 +598,7 @@ const Account = (function(){
     try{
       const r=await call('POST','/api/friends',{username});
       friendSent.add(username);
-      toastMsg(r.relation==='friend' ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời kết bạn.');
+      toastMsg(r.relation==='friend' ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời.');
       await loadFriends();
     }catch(e){ toastMsg(e.message); }
     document.dispatchEvent(new CustomEvent('friendschange'));
