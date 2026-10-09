@@ -255,8 +255,17 @@ select.field, input.field{
 }
 .lesson-vn{color:var(--ink-soft);font-size:14px;font-weight:600;}
 .lesson-body{display:grid;grid-template-columns:1fr;gap:16px;margin-top:6px;}
-@media(min-width:680px){
-  .lesson-body{grid-template-columns:1.1fr 1fr;align-items:start;}
+/* Bài học: chữ bên trái, bàn cờ bên phải luôn đứng yên khi cuộn đọc (≥768px); điện thoại: bàn cờ lên trước */
+@media(min-width:768px){
+  .lesson-body{--lbw:max(320px, min(700px, 56vw, calc((100vh - 270px) / 1.12)));
+    grid-template-columns:minmax(0,1fr) var(--lbw);align-items:start;gap:22px;}
+  .lesson-body .lesson-text p,.lesson-body .lesson-text ul,.lesson-body .lesson-text ol{font-size:14.5px;line-height:1.6;}
+  .lesson-body .lesson-text .lesson-head h3{font-size:18px;}
+  .lesson-body .lesson-demos{min-width:0;}
+  .lesson-body .lesson-demos{position:sticky;top:calc(var(--sticky-top, 100px) + 12px);}
+}
+@media(max-width:767px){
+  .lesson-body .lesson-demos{order:-1;}
 }
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
@@ -370,7 +379,7 @@ select.field, input.field{
   .topbar{padding:6px max(10px, env(safe-area-inset-left)) 4px;gap:8px;}
   .topbar .seal{width:34px;height:34px;font-size:19px;}
   .tabs{padding-inline:6px;}
-  .tab-btn{padding:11px 10px;font-size:14px;}
+  .tab-btn{padding:11px 8px;font-size:13.5px;}
   .app-main{padding:14px max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));}
   .seg button{padding:8px 9px;font-size:12.5px;}
   .card{padding:14px 12px;border-radius:14px;}
@@ -406,7 +415,7 @@ select.field, input.field{
 .demo-msg.bad{color:var(--accent);}
 .demo-msg.think{color:var(--ink-soft);font-weight:600;}
 .demo-log{max-height:130px;}
-.lesson-demo-slot + .lesson-demo-slot{margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);}
+
 .table-wrap{overflow-x:auto;margin:6px 0 12px;}
 .lesson-table{border-collapse:collapse;width:100%;font-size:14px;}
 .lesson-table th,.lesson-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top;}
@@ -467,7 +476,15 @@ select.field, input.field{
 /* ---------- Đấu với máy & review ---------- */
 fieldset.setup-field{border:0;padding:0;margin:14px 0 0;}
 fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);margin-bottom:8px;padding:0;}
-.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;}
+.level-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.level-chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;background:var(--card);
+  font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:38px;}
+.level-chip input{position:absolute;opacity:0;width:0;height:0;}
+.level-chip:hover{background:var(--paper-2);}
+.level-chip:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--card));color:var(--accent);}
+.level-chip:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px;}
+.level-note{flex-basis:100%;margin:6px 0 0;color:var(--ink-soft);font-size:13.5px;line-height:1.5;}
+.level-note .lv-tier{color:var(--jade);font-weight:700;white-space:nowrap;}
 .level-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card);min-height:52px;}
 .level-opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none;}
 .level-opt span{display:flex;flex-direction:column;gap:2px;}
@@ -535,7 +552,6 @@ fieldset.setup-field legend{font-weight:800;font-size:14px;color:var(--ink);marg
 @media (max-width:600px){
   .review-summary{grid-template-columns:1fr;}
   .acc-box{display:flex;align-items:baseline;gap:10px;justify-content:center;}
-  .level-grid{grid-template-columns:1fr;}
   .seg-radio{display:flex;} .seg-radio label{flex:1;text-align:center;}
 }
 
@@ -867,11 +883,12 @@ body.gated{overflow:hidden;}
   .play-layout{grid-auto-flow:row dense;grid-auto-rows:min-content;align-content:start;row-gap:10px;}
   .play-layout > .play-board{display:contents;}
   .play-layout > .play-board > *{grid-column:2;min-width:0;}
-  .play-layout > .play-board > .board-shell{grid-column:1;grid-row:1 / span 40;align-self:start;width:100%;margin:0 auto;}
+  .play-layout > .play-board > .board-shell{grid-column:1;grid-row:1 / span 40;align-self:start;width:100%;margin:0;}
   .play-layout > .side-panel{grid-column:2;}
   .play-layout > .play-board > .board-toolbar{margin-top:0;justify-content:flex-start;}
   .play-layout > .play-board > .board-caption{margin-top:0;text-align:left;}
-  .play-layout .board-shell{max-width:max(420px, min(780px, calc((100vh - 220px) * 0.9)));}
+  .play-layout{--bw:max(420px, min(780px, calc((100vh - 220px) * 0.9)));grid-template-columns:minmax(0,var(--bw)) 320px;justify-content:center;column-gap:24px;}
+  .play-layout .board-shell{max-width:var(--bw);}
 }
 
 /* ---------- Nền: điểm nhấn nhẹ kiểu cờ thủ — dấu vị trí quân như trên bàn cờ, mây cát tường ở hai góc ---------- */
@@ -898,3 +915,87 @@ body::after{background:var(--gold);opacity:.2;
 .music-btn:hover{background:var(--paper-2);color:var(--ink);}
 .music-btn[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb, var(--accent) 40%, transparent);background:color-mix(in srgb, var(--accent) 9%, transparent);}
 .music-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* ---------- Khối "xem thêm" thu gọn (giữ màn hình gọn cho người mới) ---------- */
+.more-box{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px;}
+.more-box > summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--ink-soft);min-height:34px;display:flex;align-items:center;gap:6px;list-style:none;}
+.more-box > summary::-webkit-details-marker{display:none;}
+.more-box > summary::before{content:'';width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s ease;flex:none;margin-left:2px;}
+.more-box[open] > summary::before{transform:rotate(45deg);}
+.more-box > summary:hover{color:var(--ink);}
+.more-box > summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
+.more-box > :last-child{margin-bottom:4px;}
+#lessonToc .lesson-nav{margin-top:8px;}
+#pzFilterBox{border-top:0;margin-top:0;padding-top:0;}
+#pzFilterBox .chip-row{margin-top:8px;}
+@media (max-width:420px){ .tab-btn{padding:11px 6px;font-size:13px;} .tabs{padding-inline:4px;} }
+/* Nút đang chờ bấm lần hai (Đầu hàng → Chắc chắn?) */
+.btn.btn-confirm{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+.btn.btn-confirm:hover{background:var(--accent-2);}
+.ol-invite-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.ol-invite-row > span:first-child{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.ol-invite-row .btn-row{margin:0;}
+/* Máy tính: thông báo nổi ở góc phải dưới, không đè lên bàn cờ */
+@media (min-width:900px){ .notice-stack{left:auto;right:20px;transform:none;width:min(400px, calc(100vw - 40px));} }
+/* Điện thoại: hàng Bài trước / Bài tiếp luôn dính ngay trên thanh dưới */
+@media (max-width:767px){
+  .lesson-foot{position:sticky;bottom:calc(65px + env(safe-area-inset-bottom));z-index:5;background:var(--card);
+    margin:12px -12px -4px;padding:8px 12px;border-top:1px solid var(--line);}
+}
+
+/* ---------- Giao diện tối: tăng tương phản (chấm quân Đen, nhãn độ khó, hộp thoại, ô số liệu) ---------- */
+:root[data-theme="dark"] .turn-dot.turn-black{border-color:var(--ink-soft);box-shadow:0 0 0 1px rgba(239,226,201,.35);}
+:root[data-theme="dark"] .badge-easy{background:color-mix(in srgb, var(--jade) 26%, transparent);color:color-mix(in srgb, var(--jade) 70%, #fff);}
+:root[data-theme="dark"] .badge-mid{background:color-mix(in srgb, var(--gold) 26%, transparent);color:color-mix(in srgb, var(--gold) 70%, #fff);}
+:root[data-theme="dark"] .badge-hard{background:color-mix(in srgb, var(--accent) 26%, transparent);color:color-mix(in srgb, var(--accent) 65%, #fff);}
+:root[data-theme="dark"] .dlg-backdrop{background:rgba(0,0,0,.7);}
+:root[data-theme="dark"] .dlg{background:#30251a;border-color:rgba(239,226,201,.22);}
+:root[data-theme="dark"] .dash-tile{background:color-mix(in srgb, var(--paper-2) 80%, var(--ink) 6%);border:1px solid var(--line);}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) .turn-dot.turn-black{border-color:var(--ink-soft);box-shadow:0 0 0 1px rgba(239,226,201,.35);}
+:root:not([data-theme="light"]) .badge-easy{background:color-mix(in srgb, var(--jade) 26%, transparent);color:color-mix(in srgb, var(--jade) 70%, #fff);}
+:root:not([data-theme="light"]) .badge-mid{background:color-mix(in srgb, var(--gold) 26%, transparent);color:color-mix(in srgb, var(--gold) 70%, #fff);}
+:root:not([data-theme="light"]) .badge-hard{background:color-mix(in srgb, var(--accent) 26%, transparent);color:color-mix(in srgb, var(--accent) 65%, #fff);}
+:root:not([data-theme="light"]) .dlg-backdrop{background:rgba(0,0,0,.7);}
+:root:not([data-theme="light"]) .dlg{background:#30251a;border-color:rgba(239,226,201,.22);}
+:root:not([data-theme="light"]) .dash-tile{background:color-mix(in srgb, var(--paper-2) 80%, var(--ink) 6%);border:1px solid var(--line);}
+}
+
+/* Xoá tài khoản: tách khỏi các nút thường, chỉ viền đỏ */
+.danger-zone{border-top:1px dashed var(--line);margin-top:14px;padding-top:12px;}
+.btn.btn-danger-outline{background:transparent;color:var(--danger);border:1px solid color-mix(in srgb, var(--danger) 55%, transparent);}
+.btn.btn-danger-outline:hover{background:color-mix(in srgb, var(--danger) 10%, transparent);}
+/* Ô nhập đang được chọn: viền màu chủ đạo (thay viền đen trông như báo lỗi) */
+select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);}
+/* 7 loại quân: 4 cột trên máy tính (4 + 3 thay vì 5 + 2) */
+@media (min-width:900px){ .legend-grid{grid-template-columns:repeat(4,minmax(0,1fr));} }
+/* Điện thoại: nút Bắt đầu ván mới trải rộng như Tìm trận / Tạo phòng */
+@media (max-width:767px){ #aiStartBtn{width:100%;justify-content:center;min-height:48px;} }
+@media(min-width:900px){ .play-layout > .play-board > .btn-row-center{justify-content:flex-start;} }
+/* Phân tích ván (máy tính): 4 nút điều hướng nằm gọn một hàng trong cột phải */
+@media (min-width:900px){
+  #reviewPrev,#reviewNext{padding-inline:10px;min-width:40px;}
+  #reviewPrevMistake,#reviewNextMistake{padding-inline:10px;}
+  .play-layout > .play-board > .board-toolbar:has(#reviewPrev){flex-wrap:nowrap;gap:6px;}
+}
+.settings-row > span small{display:block;font-weight:500;}
+
+.demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.lesson-demo-slot[hidden]{display:none;}
+/* Ô ví dụ: bàn cờ trên cùng (to nhất có thể); câu hướng dẫn + nút Làm lại cùng một hàng ngay dưới bàn */
+.lesson-demo-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;}
+.lesson-demo-slot > *{grid-column:1 / -1;}
+.lesson-demo-slot > .board-shell{grid-row:1;}
+.lesson-demo-slot > .demo-cap{grid-row:2;grid-column:1;text-align:left;margin:8px 0 0;}
+.lesson-demo-slot > .board-toolbar{grid-row:2;grid-column:2;margin:8px 0 0;justify-content:flex-end;}
+.lesson-demo-slot > .demo-msg{grid-row:3;}
+.lesson-demo-slot > .demo-log{grid-row:4;}
+.lesson-demo-slot > .board-toolbar .btn{min-height:36px;padding:6px 10px;}
+.lesson-text .lesson-head{margin-bottom:10px;}
+@media(min-width:768px){ .lesson-demos .board-shell{max-width:none;width:100%;margin:0;} }
+/* "Chọn bài khác" nằm cùng hàng với tiêu đề bài (góc phải), mở ra thì danh sách hiện ngay dưới */
+.lesson-card{position:relative;}
+.lesson-card > h2{padding-right:150px;}
+.lesson-card > #lessonToc{border-top:0;margin-top:0;padding-top:0;}
+.lesson-card > #lessonToc > summary{position:absolute;top:20px;right:20px;min-height:32px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);}
+@media (max-width:600px){ .lesson-card > h2{padding-right:0;padding-top:36px;} .lesson-card > #lessonToc > summary{top:12px;right:12px;} }

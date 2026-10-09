@@ -2,7 +2,7 @@
    UI BÀI TẬP — lọc theo chủ đề/độ khó, hỗ trợ chiếu bí 1–2 nước, bắt quân, bắt đôi
    ========================================================================= */
 const DIFF_LABEL = {1:['Dễ','badge-easy'],2:['Trung bình','badge-mid'],3:['Khó','badge-hard']};
-const pz = { widget:null, ctl:null, active:null, board:null, stage:0, locked:false, hint:false, arrows:null, last:null, filter:{topic:'all',diff:'all'} };
+const pz = { widget:null, ctl:null, active:null, board:null, stage:0, locked:false, hint:false, arrows:null, last:null, filter:{topic:'all',diff:'all'}, shown:null, shownKey:null };
 
 function getSolvedPuzzles(){ return safeJSON('xq_puzzles_solved',[]); }
 function markPuzzleSolved(id){
@@ -11,22 +11,28 @@ function markPuzzleSolved(id){
 }
 function puzzleList(){
   if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
-  return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff));
+  return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff))
+    .map((p,i)=>[p,i]).sort((a,b)=>a[0].difficulty-b[0].difficulty || a[1]-b[1]).map(x=>x[0]);   // dễ trước cho người mới
 }
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
   const due=Learn.due().length;
-  el.innerHTML = `<div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
-    <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div>`;
+  const on = pz.filter.topic!=='all' || pz.filter.diff!=='all';
+  el.innerHTML = `<details class="more-box" id="pzFilterBox" ${on?'open':''}><summary>Chọn loại bài${on?' (đang lọc)':''}</summary>
+    <div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+    <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div></details>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
+const PZ_PAGE=24;   // chỉ hiện một ít bài, bấm "Xem thêm" mới hiện tiếp (tránh đổ hàng trăm ô cùng lúc)
 function renderPuzzleGrid(){
   renderPuzzleFilters();
   const solved = getSolvedPuzzles();
   const list=puzzleList();
+  if(pz.shown==null || pz.shownKey!==JSON.stringify(pz.filter)){ pz.shown=PZ_PAGE; pz.shownKey=JSON.stringify(pz.filter); }
+  const shown=Math.min(pz.shown, list.length);
   $('#puzzleProgressTxt').textContent = `Đã giải ${solved.filter(id=>PUZZLES.some(p=>p.id===id)).length}/${PUZZLES.length} bài`;
-  $('#puzzleGrid').innerHTML = list.map(p=>{
+  $('#puzzleGrid').innerHTML = list.slice(0,shown).map(p=>{
     const [label,cls] = DIFF_LABEL[p.difficulty];
     return `<button class="puzzle-card ${solved.includes(p.id)?'solved':''}" data-id="${p.id}">
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
@@ -36,6 +42,14 @@ function renderPuzzleGrid(){
     </button>`;
   }).join('') || '<p class="hint-text">Không có bài nào khớp bộ lọc.</p>';
   $$('.puzzle-card',$('#puzzleGrid')).forEach(btn=> btn.addEventListener('click', ()=> openPuzzle(btn.dataset.id)));
+  const more=$('#puzzleMore');
+  if(more){
+    more.innerHTML = shown<list.length
+      ? `<button type="button" class="btn btn-outline" id="puzzleMoreBtn">Xem thêm bài (còn ${list.length-shown})</button>`
+      : (list.length>PZ_PAGE ? `<span class="hint-text">Đã hiện hết ${list.length} bài.</span>` : '');
+    const b=$('#puzzleMoreBtn',more);
+    if(b) b.addEventListener('click',()=>{ pz.shown=shown+PZ_PAGE; renderPuzzleGrid(); });
+  }
 }
 function openPuzzle(id){
   pz.active = PUZZLES.find(p=>p.id===id);
@@ -46,6 +60,7 @@ function openPuzzle(id){
   const [label,cls]=DIFF_LABEL[pz.active.difficulty];
   $('#puzzleMeta').innerHTML = `<span class="badge ${cls}">${label}</span> <span class="topic-tag">${esc(PUZZLE_TOPICS[pz.active.topic])}${pz.random?' · Luyện ngẫu nhiên':''}</span>`;
   $('#puzzlePrompt').textContent = pz.active.prompt;
+  setNextPrimary(false);
   if(!pz.widget){
     pz.widget = createBoardWidget($('#puzzleBoard'), {onSquareClick:(r,c)=>pz.ctl.click(r,c), label:'Bàn cờ bài tập'});
     pz.ctl = makeClickController({
@@ -123,8 +138,11 @@ function puzzleSuccess(){
   statusBanner($('#puzzleStatus'),'over','Chính xác! Giỏi lắm.'+(pz.random?` Chuỗi đúng liên tiếp: <b>${pz.streak}</b>.`:'')+(daily&&daily.done&&daily.lastDone===Learn.today()&&daily.id===pz.active.id?` Xong bài hôm nay — chuỗi <b>${daily.streak}</b> ngày!`:''));
   $('#puzzleExplain').hidden=false;
   $('#puzzleExplain').innerHTML = puzzleExplainHTML();
+  setNextPrimary(true);
   pz.ctl.render();
 }
+// "Bài tiếp" chỉ nổi bật khi đã giải xong (trước đó là nút phụ, tránh khuyến khích bỏ qua)
+function setNextPrimary(on){ const b=$('#puzzleNextBtn'); b.classList.toggle('btn-jade',on); b.classList.toggle('btn-outline',!on); }
 function puzzleFail(msg){
   pz.locked=true; if(pz.random) pz.streak=0;
   puzzleRecord('fail');

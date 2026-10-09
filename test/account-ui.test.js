@@ -206,7 +206,7 @@ test('xếp hạng hiện người đủ 5 ván; phiên hết hạn thì báo đ
   doc.querySelector('.zone-btn[data-zone="satruong"]').click();
   doc.querySelector('.st-btn[data-stab="xephang"]').click();
   await until(() => doc.querySelector('#rankList .rank-row'));
-  assert.match(doc.getElementById('rankList').textContent, /Chưa xếp hạng · còn 5 ván/);
+  assert.match(doc.getElementById('rankList').textContent, /Đánh thêm 5 ván xếp hạng để có hạng/);
   doc.querySelector('#rankScope [data-scope="all"]').click();
   await until(() => /Chưa có ai đủ 5 ván/.test(doc.getElementById('rankList').textContent));
   assert.ok(doc.querySelector('#rankList .rank-pin .rank-row.me'), 'dòng của mình được ghim');
@@ -266,4 +266,30 @@ test('kết bạn nhanh từ bảng xếp hạng: bấm + là gửi lời mời,
   assert.deepEqual(fr.incoming.map(u => u.username), ['hoc_tro']);
   assert.equal(doc.querySelector('#rankList [data-addfriend="hoc_tro"]'), null, 'không có nút kết bạn với chính mình');
   void win;
+});
+
+test('đồng bộ: máy chủ trả cùng dữ liệu khác thứ tự thì không báo "từ máy khác"; sửa trong lúc chờ máy chủ không bị ghi đè', async () => {
+  const be = backend();
+  const { document: doc, window: win } = device(be);
+  await registerViaUI(doc, 'dong_bo', 'Dong');
+  await until(() => !doc.getElementById('meSigned').hidden);
+  await until(() => win.eval('Account.state.sync') !== 'syncing');
+  const tok = win.localStorage.getItem('xq_auth');
+  // tài khoản có ["l2","l1"], máy có ["l1","l2"] → gộp ra thứ tự khác nhưng cùng nội dung
+  const mine = JSON.parse(win.localStorage.getItem('xq_lessons_done') || '[]');   // app tự đánh dấu bài đang mở
+  await be.call('PUT', '/api/progress', { data: { xq_lessons_done: JSON.stringify(['l2', 'l1', ...mine]) }, t: { xq_lessons_done: 1 } }, tok);
+  win.eval(`safeLS_set('xq_lessons_done', JSON.stringify(${JSON.stringify([...mine, 'l1', 'l2'])}))`);
+  doc.getElementById('noticeStack').innerHTML = '';
+  await win.eval('Account.sync()');
+  assert.equal(doc.querySelector('#noticeStack [data-notice="synced"]'), null, 'không báo nhầm');
+  // máy khác thêm bài mới → có báo
+  await be.call('PUT', '/api/progress', { data: { xq_lessons_done: '["l3"]' }, t: { xq_lessons_done: Date.now() + 1000 } }, tok);
+  await win.eval('Account.sync()');
+  assert.ok(doc.querySelector('#noticeStack [data-notice="synced"]'), 'có dữ liệu mới thật thì báo');
+  // đang chờ máy chủ mà trên máy học thêm bài → giữ bản trên máy
+  const p = win.eval('Account.sync()');
+  const now = [...mine, 'l1', 'l2', 'l3', 'l9'];
+  win.eval(`safeLS_set('xq_lessons_done', JSON.stringify(${JSON.stringify(now)}))`);
+  await p;
+  assert.deepEqual(JSON.parse(win.localStorage.getItem('xq_lessons_done')), now);
 });

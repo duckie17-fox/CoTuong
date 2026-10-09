@@ -148,3 +148,31 @@
 - **Ván xếp hạng với máy song song**: người dùng muốn tìm trận mới khi còn ván dở, các ván cùng tồn tại (đã thử "đóng ván cũ thành bỏ dở" — người dùng bác). `/api/match/bot` luôn tạo ván mới; client lưu `xq_ranked_bot` là MẢNG ván dở (đọc được dạng object cũ), mỗi ván một nút "Vào tiếp".
 - Nền: `body::before` (dấu vị trí quân kiểu bàn cờ, lặp 96px, màu --ink) + `body::after` (mây cát tường ở 2 góc, màu --gold), vẽ bằng CSS mask + SVG data URI để đổi màu theo theme. Phải để body nền trong suốt (chỉ html có nền), nếu không lớp z-index:-1 bị che.
 - Nhạc nền: module `Music` (26-ux.js) tự sinh bằng Web Audio — ngũ cung Rê, tiếng gảy kiểu đàn tranh (triangle + bồi âm, nhấn dây, rung cuối nốt), thỉnh thoảng lướt dây, nền ngân trầm, vang bằng Convolver. Không tệp ngoài. Mặc định tắt (`xq_music`), nút nốt nhạc ở thanh trên + mục Cài đặt; bật lại sau tải trang thì chờ lần chạm đầu (luật autoplay). Tạm dừng khi ẩn tab. Đo bản ghi 45s: trung bình ≈ -29 dB (nhỏ, làm nền).
+- **2026-10-08: PR #5 merge + deploy xanh** (không có migration mới).
+
+## 2026-10-08 — Dọn giao diện cho người mới (feedback "khó dùng với người nontech")
+- Người dùng chọn: **chỉ dọn gọn, giữ nguyên cấu trúc** tab và vị trí nội dung; nội dung nâng cao **giữ chỗ cũ**, chỉ gom nhóm. (Đã bác phương án thêm màn hình "Bắt đầu" và phương án tách mục "Nâng cao".)
+- Mẫu dùng lại: `<details class="more-box">` — khối "xem thêm" có mũi tên xoay, dùng cho mọi đoạn giải thích dài (từ ngữ, nguồn, bàn phím, chuyển tiến độ bằng tay, bộ lọc bài tập, mục lục bài học).
+- Chọn cấp máy: bỏ 10 thẻ radio 3 dòng → 10 chip 1 hàng (`.level-chip`), mô tả + "Ngang bậc X" chỉ hiện cho cấp đang chọn.
+- Bài tập: `PZ_PAGE=24`, nút "Xem thêm bài (còn N)"; `pz.shown/shownKey` reset khi đổi bộ lọc.
+- Tab điện thoại: đổi nhãn "Đấu với máy" → "Đấu máy" + giảm padding ≤420px → 5 tab vừa màn hình 390px, hết cuộn ngang.
+- Trang Học luật trên điện thoại rút từ ~4036px xuống ~2600px.
+- **Gotcha (2026-10-08)**: máy làm việc có thể bị khởi động lại giữa các lượt — commit đã push vẫn còn trên GitHub nhưng thư mục làm việc quay về bản cũ. Đầu mỗi lượt nên `git fetch` và so `git log origin/<nhánh>` với HEAD trước khi sửa/commit; lệch thì rebase lên remote rồi build lại.
+
+## 2026-10-08 — Nhạc nền mới + rà UI/UX toàn bộ
+- Người dùng muốn đổi nhạc → bài "Trúc lâm": tiêu (sine+triangle, vuốt nốt, rung cuối nốt, tiếng hơi qua bandpass Q=3) thổi các câu soạn sẵn
+  trên điệu Vũ (La Đô Rê Mi Sol), ~52 nhịp/phút; cổ cầm gảy trầm theo câu; thỉnh thoảng bồi âm như chuông; vang 4,5s. Tiếng hơi lúc đầu quá to (phổ nhiễu rộng) → đã giảm.
+- Cách rà UI: script playwright chụp ~20 màn × (390, 390 tối, 360, 768, 1366, 1366 tối, 1920) có đăng nhập qua online-dev-server; giao 3 trợ lý xem ảnh song song, tự kiểm lại lỗi họ báo trước khi sửa (vài lỗi họ báo sai, vd. thông báo nổi đè hộp thoại — thật ra z-index đã đúng).
+- **Lỗi thật đã sửa**: báo "Tiến độ vừa được cập nhật từ máy khác" khi chỉ dùng 1 máy — do máy chủ gộp xong trả cùng dữ liệu khác thứ tự (union) hoặc thêm trường mặc định (`best:0` ở xq_daily). Giờ chỉ báo khi có thông tin mới thật (`hasNew`). Đồng thời: khoá nào trên máy đổi trong lúc chờ máy chủ thì giữ bản trên máy (trước đây có thể bị ghi đè mất).
+- Chữ kết quả "Đen thắng — đối phương đầu hàng" gây hiểu nhầm khi chính mình đầu hàng → "Đen thắng — Đỏ đầu hàng".
+- Nút 2 bước dùng chung `confirmTap(btn, run)`: lần 1 đổi thành nút đỏ "Chắc chắn?", bỏ qua lần bấm thứ hai trong 400ms (chống chạm đúp), 3s tự trở lại. Test e2e phải chờ 450ms giữa 2 lần bấm.
+- `makeClickController.render()` tự bỏ quân đang chọn khi không còn được đi (hết ván/hết lượt).
+- `revealBoard` trên điện thoại: cuộn < 60px thì thanh trên không tự ẩn → phải chừa chỗ cho nó (trước đây che thanh đối thủ ở màn 360px).
+- Bài tập trên máy tính dùng chung bố cục 2 cột `.play-layout`; cột bàn + cột phải được canh giữa thành một cặp (`--bw`).
+- Phân tích ván < 6 nước của mình: không chấm %, không đoán phong cách, không vẽ biểu đồ.
+- Cấp máy mặc định cho người mới: 2 (trước là 5 — quá khó). Bài tập xếp dễ → khó. "Bài tiếp" chỉ nổi bật khi đã giải xong.
+- **2026-10-09**: người dùng chê nhạc "Trúc lâm" (điệu Vũ, thứ) **hơi buồn** → đổi sang "Xuân phong": điệu Cung (ngũ cung trưởng trên Rê), 72 nhịp/phút, câu nhạc đi lên kết về chủ âm, thêm đàn tranh rải hợp âm khe khẽ, vang ngắn hơn. Tránh điệu thứ/chậm nếu làm nhạc tiếp.
+- **Bố cục bài học** (người dùng: "phải cuộn xuống mới dùng được bàn cờ, không nắm được ngữ cảnh"): ≥768px chữ trái + bàn cờ phải `position:sticky`, cỡ bàn `--lbw` tính theo chiều cao màn (vừa một màn ở 1366×768); nhiều ví dụ → nút "Ví dụ 1/2" (một bàn mỗi lúc); câu hướng dẫn + "Làm lại" cùng hàng; tiêu đề bài nằm trong cột chữ; điện thoại: bàn cờ `order:-1` lên trước, tiêu đề thẻ "Bài n/19: Tên bài". Thẻ bài học đưa lên đầu tab, phần 7 loại quân và bảng tiến độ xuống dưới.
+- **2026-10-09 (tiếp)**: người dùng thấy bàn cờ bài học nhỏ, chữ quá to → bàn chiếm ~56% bề ngang (`--lbw` tối đa 700px, tính theo chiều cao `(100vh - 270px)/1.12`), chữ cột trái 14.5px; câu hướng dẫn + "Làm lại" xuống dưới bàn; "Chọn bài khác" thành nút nhỏ góc phải hàng tiêu đề. Lưu ý `.board-shell{max-width:460px}` chung — phải gỡ cho `.lesson-demos`. Kết quả: 1366×768 bàn ~445px, 1920×1080 bàn 700px, đều vừa một màn kèm câu hướng dẫn.
+- Người dùng gửi link YouTube muốn lấy nhạc: container không vào được YouTube; đã giải thích không tải nhạc YouTube vào app (điều khoản YouTube + bản quyền) và đưa 3 cách (nhạc có giấy phép do người dùng gửi file / nhúng trình phát YouTube / soạn lại theo mô tả) — đang chờ người dùng chọn.
+- **2026-10-09 — nhạc "Kỳ đình"** (người dùng chọn: hợp đánh cờ, đủ 5 nhạc cụ đàn tranh/sáo trúc/đàn nhị/tỳ bà/cổ cầm, du dương, không u ám, tĩnh tâm). Điệu Cung trên Rê, 66 nhịp/phút; 4 đoạn mỗi đoạn một nhạc cụ dẫn (sáo → nhị → tỳ bà gảy vê → sáo), đàn tranh lướt dây mở đoạn + rải hợp âm, cổ cầm đệm trầm. Nhị = sawtooth + lowpass + peaking 1.1kHz + luyến 0.2s + rung 5.8Hz, kéo thấp 1 quãng tám; tỳ bà = triangle+square tắt nhanh, nốt ≥1.4 phách thì vê 75ms. Đã cân độ to giữa các đoạn (nhị 0.078, tỳ bà 0.09). Link YouTube người dùng gửi chỉ làm tham khảo phong cách — không dùng nhạc gốc.

@@ -339,7 +339,7 @@ function styleHTML(sp, an){
 }
 function legendHTML(){
   const C=CLASS_INFO, rows=[C.brilliant, C.great, C.best, C.good, C.book, C.inacc, C.mistake, C.blunder];
-  return `<details class="cls-legend"><summary>Ý nghĩa ký hiệu</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}"><b>${i.icon||'—'}</b> ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
+  return `<details class="cls-legend more-box"><summary>Ý nghĩa các nhãn</summary><dl>${rows.map(i=>`<div><dt class="cls-${i.cls}"><b>${i.icon||'—'}</b> ${i.label}</dt><dd>${i.desc}</dd></div>`).join('')}</dl>
     <p class="hint-text small">Dấu <b>!</b> là khen, dấu <b>?</b> là chê, càng nhiều dấu càng mạnh. Nước <b>không có dấu</b> (Tốt nhất, Tốt, Theo sách) là nước bình thường, không có gì sai. <b>Tốt nhất</b> khác <b>Hay</b> ở chỗ: Tốt nhất là nước đúng nhưng dễ tìm (còn nước khác cũng được), Hay là nước đúng mà gần như chỉ có một. Mức lỗi tính theo <b>cơ hội thắng</b> bị mất: cùng thiệt một Mã, khi thế cờ đang cân bằng là lỗi nặng, còn khi bạn đang thắng đậm thì nhẹ hơn.</p></details>`;
 }
 
@@ -401,7 +401,12 @@ function reviewShowAnalysis(){
   review.lessons=lessonsFrom(rec,g,an);   // cũng tính sẵn lời giải thích ngắn cho từng lỗi
   const C=an.counts, chips=[[CLASS_INFO.brilliant,C.brilliant],[CLASS_INFO.great,C.great],[{label:'Tốt',icon:'',cls:'good'},C.best+C.good+C.book],[CLASS_INFO.inacc,C.inacc],[CLASS_INFO.mistake,C.mistake],[CLASS_INFO.blunder,C.blunder]];
   const cnt=chips.filter(([,n])=>n).map(([i,n])=>`<span class="cls-chip cls-${i.cls}">${clsTag(i)}: <b>${n}</b></span>`).join('');
-  $('#reviewSummary').innerHTML=`<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
+  const mine=an.plies.filter(p=>p.color===rec.human).length;
+  review.short = mine<SHORT_GAME;   // ván quá ngắn: không chấm % chính xác, không đoán phong cách, không vẽ biểu đồ
+  $('#reviewSummary').innerHTML = review.short
+    ? `<div class="acc-side"><p><b>Ván quá ngắn để chấm điểm</b> — bạn mới đi ${mine} nước. Chơi dài hơn (từ ${SHORT_GAME} nước) thì máy sẽ chấm độ chính xác và nhận xét lối chơi.</p>
+       ${cnt?`<div class="cls-chips">${cnt}</div>${legendHTML()}`:''}</div>`
+    : `<div class="acc-box"><div class="acc-num">${an.accuracy}%</div><div class="hint-text small">độ chính xác của bạn</div></div>
     <div class="acc-side"><div class="cls-chips">${cnt}</div>${legendHTML()}<h3 class="side-h mt10">Bài học rút ra</h3><ul class="lesson-list">${review.lessons.map(l=>`<li>${l}</li>`).join('')}</ul></div>
     ${styleHTML(styleProfile(rec,g,an), an)}`;
   $$('[data-op]',$('#reviewSummary')).forEach(b=>b.addEventListener('click',()=>{ showTab('khaicuoc'); openOpening(b.dataset.op); }));
@@ -458,7 +463,9 @@ function reviewPrevErr(){
   const pv=[...errs].reverse().find(p=>p.k<cur);
   if(pv) reviewGo(pv.k); else { review.overview=true; review.idx=-1; reviewRender(); }
 }
+const SHORT_GAME=6;
 function renderEvalChart(){
+  if(review.short){ $('#reviewChart').innerHTML=''; return; }
   const an=review.an, rec=review.rec, n=an.plies.length;
   const W=600, H=130, pad=6, sign = rec.human===RED?1:-1;
   const vals=an.plies.map(p=>sign*p.evalRed).concat([sign*an.finalRed]);

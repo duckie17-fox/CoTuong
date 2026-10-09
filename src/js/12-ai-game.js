@@ -31,7 +31,7 @@ function resultForHuman(rec){
 }
 function renderHistoryList(){
   const list=loadHistory(), el=$('#aiHistory');
-  if(!list.length){ el.innerHTML='<p class="hint-text">Chưa có ván nào. Các ván đấu với máy sẽ được lưu ở đây (trong trình duyệt này) để bạn xem lại và phân tích.</p>'; return; }
+  if(!list.length){ el.innerHTML='<p class="hint-text">Chưa có ván nào. Đánh xong một ván, ván đó sẽ hiện ở đây để bạn xem lại.</p>'; return; }
   el.innerHTML = list.map(r=>{
     const rs=resultForHuman(r), d=new Date(r.date);
     const acc = r.analysis ? ` · Chính xác ${r.analysis.accuracy}%` : '';
@@ -171,8 +171,16 @@ function showAICard(which){
 }
 function renderLevelPicker(){
   const saved=savedAiLevel();
-  $('#aiLevelPicker').innerHTML = AI_LEVELS.map(l=>`<label class="level-opt"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}>
-    <span><b>${l.id}. ${esc(l.name)}</b><small>${esc(l.desc)}</small><small class="lv-tier">Ngang bậc <b>${esc(Ranked.tierOf(l.elo).label)}</b></small></span></label>`).join('');
+  const pick=$('#aiLevelPicker');
+  pick.innerHTML = AI_LEVELS.map(l=>`<label class="level-chip"><input type="radio" name="aiLevel" value="${l.id}" ${l.id===saved?'checked':''}><span>${l.id}. ${esc(l.name)}</span></label>`).join('')
+    + '<p class="level-note" id="aiLevelNote"></p>';
+  const note=()=>{
+    const r=$('input[name="aiLevel"]:checked',pick); if(!r) return;
+    const l=AI_LEVELS.find(x=>x.id===+r.value);
+    $('#aiLevelNote').innerHTML = `${esc(l.desc)} <span class="lv-tier">Ngang bậc ${esc(Ranked.tierOf(l.elo).label)}</span>`;
+  };
+  $$('input[name="aiLevel"]',pick).forEach(r=>r.addEventListener('change',note));
+  note();
 }
 function initAIGame(){
   renderLevelPicker();
@@ -207,13 +215,8 @@ function initAIGame(){
       aiRender();
     }
   });
-  const RESIGN_HTML=$('#aiResign').innerHTML;
-  $('#aiResign').addEventListener('click', ()=>{
+  confirmTap($('#aiResign'), ()=>{
     const g=aiGame.game; if(g.result) return;
-    const btn=$('#aiResign');
-    // xác nhận 2 bước ngay trên nút (không dùng confirm() vì có thể bị chặn trong khung nhúng)
-    if(!btn.dataset.confirm){ btn.dataset.confirm='1'; btn.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML; },3000); return; }
-    delete btn.dataset.confirm; btn.innerHTML=RESIGN_HTML;
     aiGame.token++; aiGame.thinking=false;
     g.result={state:'over', winner:Engine.otherColor(aiGame.humanColor), reason:'resign'};
     aiPersist(); aiRender();

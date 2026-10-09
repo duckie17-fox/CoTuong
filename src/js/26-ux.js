@@ -47,82 +47,189 @@ const Sound = (function(){
   };
 })();
 
-/* ---------- Nhạc nền: không lời, kiểu đàn tranh ngũ cung — tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
+/* ---------- Nhạc nền "Kỳ đình": du dương, tĩnh tâm, hợp lúc đánh cờ. Điệu Cung (ngũ cung trưởng, sáng).
+   Năm nhạc cụ thay nhau: đàn tranh lướt dây mở đoạn + rải hợp âm, sáo trúc (đoạn 1, 4), đàn nhị (đoạn 2),
+   tỳ bà gảy vê (đoạn 3), cổ cầm đệm trầm. Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
 const Music = (function(){
-  let ctx=null, out=null, drone=null, timer=0, next=0, phrase=[], cur=7, playing=false, armed=false;
+  let ctx=null, out=null, noise=null, drone=null, timer=0, next=0, queue=[], prevF=0, playing=false, armed=false, round=0;
   let on = safeLS_get('xq_music')==='on';
-  // Ngũ cung (cung–thương–giốc–chuỷ–vũ) trên nền Rê, ba quãng tám
-  const scale=[];
-  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) scale.push(146.83*Math.pow(2,(st+12*o)/12));
+  const BEAT=60/66;                                   // vừa phải, thong thả: khoảng 66 nhịp/phút
+  // Điệu Cung (ngũ cung trưởng trên nền Rê): Rê Mi Fa# La Si, từ Rê4 lên
+  const SC=[];
+  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) SC.push(293.66*Math.pow(2,(st+12*o)/12));
   const rnd=a=>a[Math.floor(Math.random()*a.length)];
+  // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ. Đi lên nhiều, kết về chủ âm Rê
+  const P={
+    a:[[5,1],[6,1],[7,1],[8,1],[7,2],[6,1],[5,1]],
+    b:[[8,1],[9,1],[10,2],[9,1],[8,1],[7,2]],
+    c:[[7,1],[8,.5],[7,.5],[6,1],[5,1],[3,1],[4,1],[5,2]],
+    d:[[3,1],[4,1],[5,1],[7,1],[6,2],[5,1],[4,1]],
+    e:[[10,1.5],[9,.5],[8,1],[7,1],[8,1],[9,1],[10,2]],
+    f:[[7,1],[6,1],[5,3],[-1,1]],
+    g:[[5,.5],[6,.5],[7,1],[8,1],[7,.5],[6,.5],[5,1],[6,2],[-1,1]],
+  };
+  // Mỗi đoạn một nhạc cụ dẫn giai điệu
+  const FORM=[{lead:'flute', p:['a','b','c','f']},{lead:'erhu', p:['d','g','e','f']},{lead:'pipa', p:['a','e','c','f']},{lead:'flute', p:['d','b','g','f']}];
+  // Gốc hợp âm cho từng câu (Rê, La, Sol, Si thứ) — quãng trầm
+  const BASS={a:[146.83,110],b:[146.83,98],c:[110,146.83],d:[98,110],e:[146.83,123.47],f:[110,146.83],g:[146.83,98]};
   function ac(){
     if(ctx) return ctx;
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
     try{
       ctx=new AC();
       out=ctx.createGain(); out.gain.value=0;
-      // vang kiểu phòng rộng: xung nhiễu tắt dần
-      const len=Math.floor(ctx.sampleRate*3.2), ir=ctx.createBuffer(2,len,ctx.sampleRate);
-      for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3); }
+      // vang kiểu sảnh gỗ rộng: xung nhiễu tắt dần, dài
+      const len=Math.floor(ctx.sampleRate*4.5), ir=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(let ch=0;ch<2;ch++){ const d=ir.getChannelData(ch); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.5); }
       const rev=ctx.createConvolver(); rev.buffer=ir;
-      const wet=ctx.createGain(); wet.gain.value=0.45;
+      const wet=ctx.createGain(); wet.gain.value=0.42;
       out.connect(ctx.destination); out.connect(rev); rev.connect(wet); wet.connect(ctx.destination);
+      // nhiễu dùng chung cho tiếng hơi thổi
+      const n=ctx.sampleRate*2; noise=ctx.createBuffer(1,n,ctx.sampleRate);
+      const d=noise.getChannelData(0); for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
     }catch(e){ ctx=null; }
     return ctx;
   }
-  // Một tiếng gảy dây: nhấn nhẹ rồi nhả (cao độ trượt về), rung dây cuối nốt, tiếng tắt dần
-  function pluck(t, f, v, len){
+  // Tiếng tiêu: vào hơi chậm, vuốt từ nốt trước sang, rung hơi về cuối nốt, có tiếng gió nhẹ
+  function flute(t, f, dur, v){
     const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
     const lfo=ctx.createOscillator(), lg=ctx.createGain();
-    o.type='triangle'; o.frequency.setValueAtTime(f*1.015,t); o.frequency.exponentialRampToValueAtTime(f,t+0.09);
-    o2.type='sine'; o2.frequency.setValueAtTime(f*2,t); h.gain.value=0.2;
-    lfo.frequency.value=5.2; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(f*0.007,t+0.7);
+    o.type='sine'; o2.type='triangle'; h.gain.value=0.18;
+    if(prevF && Math.abs(prevF-f)>1){ o.frequency.setValueAtTime(prevF,t); o.frequency.exponentialRampToValueAtTime(f,t+0.14); }
+    else o.frequency.setValueAtTime(f,t);
+    o2.frequency.value=f*2;
+    lfo.frequency.value=5.4; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
     lfo.connect(lg); lg.connect(o.frequency);
-    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*7,6000),t); lp.frequency.exponentialRampToValueAtTime(f*1.4,t+len);
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+    lp.type='lowpass'; lp.frequency.value=Math.min(f*4,5000);
+    const end=t+dur;
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(v,t+0.2); g.gain.setValueAtTime(v,Math.max(t+0.2,end-0.15));
+    g.gain.exponentialRampToValueAtTime(0.0001,end+0.35);
     o.connect(lp); o2.connect(h); h.connect(lp); lp.connect(g); g.connect(out);
-    for(const x of [o,o2,lfo]){ x.start(t); x.stop(t+len+0.05); }
+    for(const x of [o,o2,lfo]){ x.start(t); x.stop(end+0.4); }
+    // hơi thổi
+    const ns=ctx.createBufferSource(), bp=ctx.createBiquadFilter(), ng=ctx.createGain();
+    ns.buffer=noise; ns.loop=true; bp.type='bandpass'; bp.frequency.value=f*1.6; bp.Q.value=3;
+    ng.gain.setValueAtTime(0.0001,t); ng.gain.linearRampToValueAtTime(v*0.16,t+0.08); ng.gain.exponentialRampToValueAtTime(v*0.03,t+0.4);
+    ng.gain.exponentialRampToValueAtTime(0.0001,end+0.3);
+    ns.connect(bp); bp.connect(ng); ng.connect(out); ns.start(t, Math.random()); ns.stop(end+0.35);
+    prevF=f;
   }
-  // Một câu nhạc: đôi khi lướt dây, các nốt đi gần nhau, kết về chủ âm, rồi nghỉ
-  function makePhrase(){
-    const p=[];
-    if(Math.random()<0.22){
-      const s=3+Math.floor(Math.random()*3);
-      for(let k=0;k<6;k++) p.push({i:s+k, v:0.035+k*0.008, len:2, d:0.075});
-      p[p.length-1].d=0.7; cur=s+5;
-    }
-    const n=4+Math.floor(Math.random()*4);
-    for(let k=0;k<n;k++){
-      cur=Math.max(4, Math.min(12, cur+rnd([-2,-1,-1,0,1,1,2])));
-      p.push({i:cur, v:0.09+Math.random()*0.04, len:2.8, d:rnd([0.6,0.85,0.85,1.2,1.7]), bass: k===0 ? rnd([0,3]) : null});
-    }
-    cur=rnd([5,5,8]); p.push({i:cur, v:0.1, len:4.5, d:2.4});
-    p.push({rest:true, d:1.8+Math.random()*2.6});
-    return p;
+  // Tiếng cổ cầm trầm: gảy mềm, ngân dài, đôi khi vuốt lên nốt
+  function qin(t, f, v){
+    const g=ctx.createGain(), lp=ctx.createBiquadFilter();
+    lp.type='lowpass'; lp.frequency.setValueAtTime(f*6,t); lp.frequency.exponentialRampToValueAtTime(f*1.5,t+3);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+5.5);
+    const slide=Math.random()<0.3;
+    [[1,1],[2,0.35],[3,0.12]].forEach(([m,a])=>{
+      const o=ctx.createOscillator(), og=ctx.createGain(); o.type='sine'; og.gain.value=a;
+      if(slide){ o.frequency.setValueAtTime(f*m*0.944,t); o.frequency.exponentialRampToValueAtTime(f*m,t+0.3); } else o.frequency.value=f*m;
+      o.connect(og); og.connect(lp); o.start(t); o.stop(t+5.6);
+    });
+    lp.connect(g); g.connect(out);
+  }
+  // Đàn tranh rải hợp âm: tiếng gảy sáng, tắt nhanh, rất nhỏ
+  function zheng(t, f, v){
+    const o=ctx.createOscillator(), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='triangle'; o.frequency.setValueAtTime(f*1.01,t); o.frequency.exponentialRampToValueAtTime(f,t+0.05);
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*6,7000),t); lp.frequency.exponentialRampToValueAtTime(f*1.5,t+1.2);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+    o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t+1.7);
+  }
+  function arp(t, root){ [2,3,4,3].forEach((m,i)=>zheng(t+i*BEAT*0.5, root*m, 0.03)); }
+  // Đàn nhị: tiếng kéo (sóng răng cưa qua bộ lọc giọng), vào hơi chậm, luyến từ nốt trước, rung ngân sớm
+  function erhu(t, f, dur, v){
+    const o=ctx.createOscillator(), lp=ctx.createBiquadFilter(), bp=ctx.createBiquadFilter(), bg=ctx.createGain(), g=ctx.createGain();
+    const lfo=ctx.createOscillator(), lg=ctx.createGain();
+    o.type='sawtooth';
+    if(prevF && Math.abs(prevF-f)>1){ o.frequency.setValueAtTime(prevF,t); o.frequency.exponentialRampToValueAtTime(f,t+0.2); }
+    else o.frequency.setValueAtTime(f,t);
+    lfo.frequency.value=5.8; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(f*0.009,t+Math.min(0.35,dur*0.5));
+    lfo.connect(lg); lg.connect(o.frequency);
+    lp.type='lowpass'; lp.frequency.value=Math.min(f*5,3800); lp.Q.value=0.7;
+    bp.type='peaking'; bp.frequency.value=1100; bp.Q.value=1.2; bp.gain.value=5;
+    const end=t+dur;
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(v,t+0.14); g.gain.setValueAtTime(v,Math.max(t+0.14,end-0.12));
+    g.gain.exponentialRampToValueAtTime(0.0001,end+0.3);
+    o.connect(lp); lp.connect(bp); bp.connect(g); g.connect(out);
+    o.start(t); lfo.start(t); o.stop(end+0.35); lfo.stop(end+0.35);
+    // tiếng vĩ cọ dây rất nhẹ
+    const ns=ctx.createBufferSource(), nf=ctx.createBiquadFilter();
+    ns.buffer=noise; ns.loop=true; nf.type='bandpass'; nf.frequency.value=f*3; nf.Q.value=4;
+    bg.gain.setValueAtTime(0.0001,t); bg.gain.linearRampToValueAtTime(v*0.06,t+0.1); bg.gain.exponentialRampToValueAtTime(0.0001,end+0.2);
+    ns.connect(nf); nf.connect(bg); bg.connect(out); ns.start(t, Math.random()); ns.stop(end+0.25);
+    prevF=f;
+  }
+  // Tỳ bà: tiếng gảy sáng, tắt nhanh; nốt dài thì gảy vê liên tục (tremolo) nhỏ dần rồi lớn lại
+  function pipaPluck(t, f, v){
+    const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
+    o.type='triangle'; o2.type='square'; h.gain.value=0.08;
+    o.frequency.value=f; o2.frequency.value=f;
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*8,8000),t); lp.frequency.exponentialRampToValueAtTime(f*2,t+0.5);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.004); g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+    o.connect(lp); o2.connect(h); h.connect(lp); lp.connect(g); g.connect(out);
+    o.start(t); o2.start(t); o.stop(t+0.95); o2.stop(t+0.95);
+  }
+  function pipa(t, f, dur, v){
+    if(dur<BEAT*1.4){ pipaPluck(t, f, v); return; }
+    const step=0.075, n=Math.floor((dur-0.05)/step);
+    for(let k=0;k<n;k++){ const sw=0.75+0.25*Math.cos(k/n*Math.PI*2); pipaPluck(t+k*step, f, v*sw*(k%2?0.8:1)); }
+  }
+  // Đàn tranh lướt dây: chuỗi nốt ngũ cung đi lên thật nhanh, mở đầu mỗi đoạn
+  function glide(t){
+    const from=rnd([0,2,3]);
+    for(let k=0;k<9;k++) zheng(t+k*0.05, SC[Math.min(SC.length-1, from+k)], 0.022+k*0.003);
+  }
+  // Bồi âm: tiếng trong, mỏng như chuông nhỏ
+  function bell(t, f, v){
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+3);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t+3.1);
+  }
+  // Xếp một vòng bài vào hàng đợi
+  function fill(){
+    const sec=FORM[round++ % FORM.length];
+    queue.push({glide:true});
+    sec.p.forEach(key=>{
+      const notes=P[key], total=notes.reduce((a,n)=>a+n[1],0), bass=BASS[key];
+      queue.push({bass:bass[0]}); if(Math.random()<0.25) queue.push({bell:SC[rnd([10,11,12,13])]});
+      let beats=0, half=false;
+      notes.forEach(([i,b])=>{
+        if(!half && beats>=total/2){ queue.push({bass:bass[1]}); half=true; }
+        queue.push(i<0 ? {rest:b} : {i, b, lead:sec.lead});
+        beats+=b;
+      });
+    });
+    queue.push({rest:1.5+Math.random()*1.5});
   }
   function schedule(){
     if(!playing) return;
-    while(next < ctx.currentTime+1.2){
-      if(!phrase.length) phrase=makePhrase();
-      const n=phrase.shift();
-      if(!n.rest){
-        pluck(next, scale[n.i], n.v, n.len);
-        if(n.bass!=null) pluck(next, scale[n.bass], 0.08, 5);
-      }
-      next+=n.d;
+    while(next < ctx.currentTime+1.5){
+      if(!queue.length) fill();
+      const n=queue.shift();
+      if(n.glide){ glide(next); next+=0.6; continue; }
+      if(n.bass){ qin(next+0.02, n.bass, 0.08); arp(next+0.02, n.bass); continue; }
+      if(n.bell){ bell(next+0.05, n.bell, 0.03); continue; }
+      if(n.rest){ prevF=0; next+=n.rest*BEAT; continue; }
+      const dur=n.b*BEAT*(0.96+Math.random()*0.06), f=SC[n.i];
+      if(n.lead==='erhu') erhu(next, f/2, dur, 0.078);          // nhị kéo thấp hơn một quãng tám, ấm hơn
+      else if(n.lead==='pipa') pipa(next, f, dur, 0.09);
+      else if(n.b>=2 && Math.random()<0.3 && n.i+1<SC.length){ flute(next, SC[n.i+1], 0.12, 0.07); flute(next+0.12, f, dur-0.12, 0.085); }
+      else flute(next, f, dur, 0.08+Math.random()*0.015);
+      next+=n.b*BEAT;
     }
   }
   function startDrone(){
     const t=ctx.currentTime, g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
-    g.gain.value=0.022; lfo.frequency.value=0.07; lg.gain.value=0.012; lfo.connect(lg); lg.connect(g.gain);
-    const os=[73.42, 110, 146.83].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
+    g.gain.value=0.016; lfo.frequency.value=0.05; lg.gain.value=0.008; lfo.connect(lg); lg.connect(g.gain);
+    const os=[73.42, 146.83, 220].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
     g.connect(out); lfo.start(t);
     drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
   }
   function start(){
     if(playing || !ac()) return;
     if(ctx.state==='suspended') ctx.resume();
-    playing=true; phrase=[]; next=ctx.currentTime+0.4;
+    playing=true; queue=[]; prevF=0; next=ctx.currentTime+0.5;
     out.gain.cancelScheduledValues(ctx.currentTime);
     out.gain.setValueAtTime(out.gain.value, ctx.currentTime); out.gain.linearRampToValueAtTime(1, ctx.currentTime+3);
     startDrone(); schedule(); timer=setInterval(schedule, 250);

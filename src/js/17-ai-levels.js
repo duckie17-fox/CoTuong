@@ -23,12 +23,12 @@ const LEVEL_MEASURED = {2:83, 3:84, 4:75, 5:84, 6:84, 7:96, 8:85, 9:85, 10:74};
 const LADDER_VERSION=2, OLD_LEVEL_MAP={1:1,2:4,3:6,4:8,5:9,6:10};
 function recLevel(rec){ return rec.ladder===LADDER_VERSION ? rec.level : (OLD_LEVEL_MAP[rec.level]||rec.level); }
 function savedAiLevel(){
-  let lv=parseInt(safeLS_get('xq_ai_level')||'5',10);
+  let lv=parseInt(safeLS_get('xq_ai_level')||'2',10);   // người mới: cấp 2
   if(safeLS_get('xq_ai_ladder')!==String(LADDER_VERSION)){
     if(safeLS_get('xq_ai_level')) lv=OLD_LEVEL_MAP[lv]||5;
     safeLS_set('xq_ai_ladder',String(LADDER_VERSION)); safeLS_set('xq_ai_level',String(lv));
   }
-  return AI_LEVELS.some(l=>l.id===lv) ? lv : 5;
+  return AI_LEVELS.some(l=>l.id===lv) ? lv : 2;
 }
 // Sách khai cuộc: lấy từ chính các thế ở tab Khai cuộc
 function buildOpeningBook(openings){

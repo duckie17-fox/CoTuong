@@ -83,17 +83,34 @@ const Account = (function(){
     const m=meta(); m.t[key]=Date.now(); saveMeta(m);
     if(signedIn()){ clearTimeout(st.syncTimer); st.syncTimer=setTimeout(()=>sync(), 5000); }
   }
-  // Ghi bản đã gộp từ máy chủ xuống máy; trả về các khoá học tập đã đổi
-  function applyRemote(r, replace){
+  // Bản từ máy chủ có thông tin mới thật không (bỏ qua thứ tự, bỏ qua trường mặc định rỗng/0 máy chủ tự thêm)
+  function hasNew(cur, v){
+    if(cur===v) return false;
+    let x, y; try{ x=JSON.parse(cur); y=JSON.parse(v); }catch(e){ return true; }
+    const empty=z=>z==null || z===0 || z===false || z==='' || (Array.isArray(z)&&!z.length) || (typeof z==='object'&&!Object.keys(z).length);
+    const walk=(a,b)=>{
+      if(Array.isArray(b)){ if(!Array.isArray(a)) return !empty(b); const seen=new Set(a.map(i=>JSON.stringify(i))); return b.some(i=>!seen.has(JSON.stringify(i))); }
+      if(b && typeof b==='object'){ if(!a || typeof a!=='object') return !empty(b); return Object.keys(b).some(k=>walk(a[k], b[k])); }
+      return a===undefined ? !empty(b) : a!==b;
+    };
+    return walk(x, y);
+  }
+  // Ghi bản đã gộp từ máy chủ xuống máy; trả về các khoá học tập thật sự có nội dung mới.
+  // `sent`: dữ liệu đã gửi lên — khoá nào trên máy đổi trong lúc chờ máy chủ thì giữ bản trên máy (lần đồng bộ sau gửi tiếp).
+  function applyRemote(r, replace, sent){
     st.applying=true;
-    const changed=[];
+    const changed=[], kept=[];
     try{
       if(replace) for(const k of syncedKeys()) if(!(k in r.data)){ try{ localStorage.removeItem(k); }catch(e){} changed.push(k); }
       for(const [k,v] of Object.entries(r.data||{})){
         if(NO_SYNC.has(k) || !k.startsWith('xq_')) continue;
-        if(safeLS_get(k)!==v){ safeLS_set(k, v); changed.push(k); }
+        const cur=safeLS_get(k);
+        if(sent && (k in sent) && cur!==sent[k]){ kept.push(k); continue; }
+        if(cur!==v){ safeLS_set(k, v); if(cur==null || hasNew(cur, v)) changed.push(k); }
       }
-      const m=meta(); m.t=Object.assign({}, r.t||{}); m.last=Date.now(); saveMeta(m);
+      const m=meta(), t=Object.assign({}, r.t||{}); for(const k of kept) if(m.t[k]) t[k]=m.t[k];
+      m.t=t; m.last=Date.now(); saveMeta(m);
+      if(kept.length && signedIn()){ clearTimeout(st.syncTimer); st.syncTimer=setTimeout(()=>sync(), 5000); }
     } finally { st.applying=false; }
     return changed;
   }
@@ -103,8 +120,9 @@ const Account = (function(){
     clearTimeout(st.syncTimer);
     st.sync='syncing'; renderSync();
     try{
-      const r=await call('PUT','/api/progress',{data:collect(), t:meta().t});
-      const changed=applyRemote(r);
+      const sent=collect();
+      const r=await call('PUT','/api/progress',{data:sent, t:meta().t});
+      const changed=applyRemote(r, false, sent);
       st.sync='ok'; st.lastSync=Date.now();
       renderSync();
       if(!opts.quiet && changed.some(k=>LEARN_KEYS.includes(k)))
@@ -213,7 +231,7 @@ const Account = (function(){
       <form novalidate>
         ${fieldHTML('fgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
         ${fieldHTML('fgCode','Mã khôi phục','text','autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"')}
-        ${fieldHTML('fgPass','Mật khẩu mới','password','autocomplete="new-password"')}
+        ${fieldHTML('fgPass','Mật khẩu mới (ít nhất 8 ký tự)','password','autocomplete="new-password"')}
         ${fieldHTML('fgPass2','Nhập lại mật khẩu mới','password','autocomplete="new-password"')}
         <p class="dlg-msg" role="alert"></p>
         <button type="submit" class="btn btn-primary dlg-main">Đặt mật khẩu mới</button>
@@ -333,8 +351,8 @@ const Account = (function(){
     const s=Progress.summary(), ai=loadHistory(), streak=Learn.streak();
     const w=ai.filter(r=>r.result&&r.result.winner===r.human).length, d=ai.filter(r=>r.result&&!r.result.winner).length, l=ai.filter(r=>r.result&&r.result.winner&&r.result.winner!==r.human).length;
     $('#meStats').innerHTML = statTile(`${s.lessons}/${LESSONS.length}`,'bài học đã xem') + statTile(`${s.puzzles}/${PUZZLES.length}`,'bài tập đã giải')
-      + statTile(streak||'—','ngày liên tiếp làm bài hôm nay') + statTile(`${w}-${d}-${l}`,'đấu với máy: thắng-hoà-thua')
-      + statTile(`${u.wins}-${u.draws}-${u.losses}`,'Sa trường (tính Elo): thắng-hoà-thua') + statTile(u.peakElo,'Elo cao nhất');
+      + statTile(`${streak||0} ngày`,'liên tiếp có làm bài') + statTile(`${w}–${d}–${l}`,'đấu máy: thắng–hoà–thua')
+      + statTile(`${u.wins}–${u.draws}–${u.losses}`,'xếp hạng: thắng–hoà–thua');
     renderSync();
   }
   // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
@@ -366,7 +384,7 @@ const Account = (function(){
     $('#meChangePass').addEventListener('click',()=>{
       openDialog(`${dlgHead('Đổi mật khẩu')}<form novalidate>
         ${fieldHTML('cpOld','Mật khẩu hiện tại','password','autocomplete="current-password"')}
-        ${fieldHTML('cpNew','Mật khẩu mới','password','autocomplete="new-password"')}
+        ${fieldHTML('cpNew','Mật khẩu mới (ít nhất 8 ký tự)','password','autocomplete="new-password"')}
         ${fieldHTML('cpNew2','Nhập lại mật khẩu mới','password','autocomplete="new-password"')}
         <p class="dlg-msg" role="alert"></p><button type="submit" class="btn btn-primary dlg-main">Đổi mật khẩu</button></form>`, body=>{
         wireForm(body, async ()=>{
@@ -529,7 +547,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : '<p class="hint-text">Chưa có bạn nào — tìm theo tên đăng nhập ở trên.</p>';
+      : '<p class="hint-text">Chưa có bạn nào. Gõ tên đăng nhập của bạn mình vào ô tìm ở trên, hoặc vào <b>Phòng đấu → Tạo phòng</b> rồi gửi mã phòng cho bạn.</p>';
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -603,9 +621,9 @@ const Account = (function(){
     $$('#rankScope button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.scope===st.rankScope?'true':'false'));
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
-      <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Chưa xếp hạng · còn ${Math.max(0,r.minGames-x.ratedGames)} ván`}</small></span>
-      ${x.me?'':friendButtonHTML(x.username, true)}<span class="rank-elo"><span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}</span></div>`;
-    el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Kết bạn ở thẻ Bạn bè.'}</p>`)
+      <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Đánh thêm ${Math.max(0,r.minGames-x.ratedGames)} ván xếp hạng để có hạng`}</small></span>
+      ${x.me?'':friendButtonHTML(x.username, true)}<span class="rank-elo">${x.rank!=null?`<span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>`:''}${x.elo}</span></div>`;
+    el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Bấm “Toàn bộ” để xem mọi người, hoặc kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
   }
 

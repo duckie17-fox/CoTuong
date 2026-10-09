@@ -132,8 +132,9 @@ const Game = (function(){
       const loser = res.winner==='red'?'Đen':'Đỏ';
       return `${who} thắng — ${loser} ${REASON_TEXT[res.reason]}.`;
     }
-    if(res.reason==='resign') return `${who} thắng — đối phương đầu hàng.`;
-    if(res.reason==='abandon') return `${who} thắng — đối phương rời ván quá 5 phút.`;
+    const loser = res.winner==='red'?'Đen':'Đỏ';
+    if(res.reason==='resign') return `${who} thắng — ${loser} đầu hàng.`;
+    if(res.reason==='abandon') return `${who} thắng — ${loser} rời ván.`;
     return `${who} thắng — ${REASON_TEXT[res.reason]}.`;
   }
   return {create, key, resultText, REASON_TEXT};

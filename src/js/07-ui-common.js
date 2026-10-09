@@ -38,6 +38,7 @@ function makeClickController(cfg){
   const st={selected:null, legalDest:[]};
   function render(){
     const b=cfg.getBoard();
+    if(st.selected && !cfg.canMove(cfg.turn())) clear();   // hết ván / hết lượt: bỏ quân đang chọn và các chấm gợi ý
     const meta=Object.assign({selected:st.selected, legalDest:st.legalDest}, cfg.extraMeta?cfg.extraMeta():{});
     cfg.widget.setBoard(b, meta);
   }
@@ -66,6 +67,22 @@ function statusBanner(el, kind, html){
 }
 
 /* Cuộn để bàn cờ hiện đủ (dưới thanh tab và thanh nút đang dính ở trên) */
+// Nút cần bấm 2 lần mới chạy (vd. Đầu hàng): lần 1 đổi sang kiểu cảnh báo "Chắc chắn?", 3 giây không bấm thì trở lại.
+// Bỏ qua lần bấm thứ hai quá nhanh (chạm đúp vô tình). Không dùng confirm() vì có thể bị chặn trong khung nhúng.
+function confirmTap(btn, run, label){
+  const html=btn.innerHTML;
+  const reset=()=>{ clearTimeout(btn._ctT); delete btn.dataset.confirm; btn.classList.remove('btn-confirm'); btn.innerHTML=html; };
+  btn.addEventListener('click',()=>{
+    if(!btn.dataset.confirm){
+      btn.dataset.confirm=String(Date.now()); btn.classList.add('btn-confirm');
+      btn.innerHTML=`${icon('flag')}${label||'Chắc chắn?'}`;
+      btn._ctT=setTimeout(reset,3000); return;
+    }
+    if(Date.now()-(+btn.dataset.confirm)<400) return;
+    reset(); run();
+  });
+  return reset;
+}
 function stickyTop(){ const v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-top'))||0; return v; }
 function revealBoard(el){
   if(!el) return;
@@ -76,13 +93,18 @@ function revealBoard(el){
   const above = shell.previousElementSibling && shell.previousElementSibling.classList.contains('ol-player') ? shell.previousElementSibling : null;
   const rs=shell.getBoundingClientRect(), ra=above ? above.getBoundingClientRect() : rs;
   const r={top:ra.top, bottom:rs.bottom, height:rs.bottom-ra.top};
-  // điện thoại: cuộn xuống thì thanh trên tự ẩn (xem initAutoHideHeader) → bàn cờ được sát mép trên
-  const top = (isPhone() && r.top>0 ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
+  // điện thoại: cuộn xuống đủ xa thì ẩn thanh trên (xem initAutoHideHeader) → bàn cờ được sát mép trên.
+  // Cuộn ít (< 60px) thì thanh trên vẫn hiện → phải chừa chỗ cho nó, kẻo che mất thanh người chơi.
+  const hide = isPhone() && r.top>0 && (window.scrollY||0)+r.top-4>=60;
+  const top = (hide ? 0 : stickyTop())+4, extra=tb?tb.offsetHeight+6:0;
   // trừ thanh dưới (bottom nav trên điện thoại)
   const nav=document.querySelector('.zone-switch'), navH = nav && getComputedStyle(nav).position==='fixed' ? nav.offsetHeight : 0;
   const vh=(window.innerHeight||document.documentElement.clientHeight)-navH;
-  if(r.top>=top && r.bottom+extra<=vh) return;              // đã thấy đủ
-  if(r.top>=top && r.height+extra>vh-top && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
+  // "đã thấy" tính theo thanh trên hiện tại (đang hiện thì nó che phần trên)
+  const now = (isPhone() && document.body.classList.contains('hdr-hide') ? 0 : stickyTop())+4;
+  if(r.top>=now && r.bottom+extra<=vh) return;              // đã thấy đủ
+  if(r.top>=now && r.height+extra>vh-now && r.top<vh*0.35) return; // bàn cao hơn màn hình nhưng đang ở vị trí tốt
+  if(hide) document.body.classList.add('hdr-hide');
   window.scrollBy({top:r.top-top, behavior:'smooth'});
 }
 function isPhone(){ try{ return !!(window.matchMedia && matchMedia('(max-width:767px)').matches); }catch(e){ return false; } }

@@ -257,12 +257,12 @@ const Online = (function(){
     if(!waiting){ el.hidden=true; return; }
     const link=inviteLink(st.code);
     el.hidden=false;
-    el.innerHTML=`<div>Gửi link hoặc mã phòng <b class="ol-bigcode">${st.code}</b> cho bạn</div>
-      <div class="btn-row mt10"><input class="field ol-link" readonly value="${esc(link)}" aria-label="Link mời">
-      <button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</div>`;
+    el.innerHTML=`<div class="ol-invite-row"><span>Mã phòng <b class="ol-bigcode">${st.code}</b><span class="hint-text small ol-invite-hint">Gửi cho bạn để vào chơi cùng</span></span>
+      <span class="btn-row"><button type="button" class="btn btn-primary btn-sm" id="olCopy"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-copy"></use></svg>Sao chép link mời</button>${navigator.share?'<button type="button" class="btn btn-outline btn-sm" id="olShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Chia sẻ</button>':''}</span></div>
+      <input class="field ol-link mt10" readonly value="${esc(link)}" aria-label="Link mời" hidden>`;
     $('#olCopy',el).addEventListener('click', async ()=>{
-      const inp=$('.ol-link',el); inp.select();
-      try{ await navigator.clipboard.writeText(link); flash('Đã sao chép link mời.'); }catch(e){ flash('Hãy tự sao chép link trong ô (Ctrl/⌘+C).'); }
+      try{ await navigator.clipboard.writeText(link); flash('Đã sao chép link mời.'); }
+      catch(e){ const inp=$('.ol-link',el); inp.hidden=false; inp.select(); flash('Hãy tự sao chép link trong ô (Ctrl/⌘+C).'); }
     });
     const sh=$('#olShare',el); if(sh) sh.addEventListener('click',()=>navigator.share({title:'Đánh cờ tướng với mình', text:`Vào phòng ${st.code} đánh cờ tướng với mình nhé!`, url:link}).catch(()=>{}));
   }
@@ -278,7 +278,7 @@ const Online = (function(){
     renderMoveLog($('#olLog'), (st.local||st.game).moves);
     renderStatus(); renderOffer(); renderChat();
     const seated = r.you!=='spectator', over=!!r.result, hasOpp=!!r.seats[other(me)], pending=!!r.offer;
-    $('#olActions').hidden = !seated || over;
+    $('#olActions').hidden = !seated || over || (!hasOpp && !r.moves.length);   // chưa có đối thủ thì chưa cần nút xin hoà/đầu hàng
     $('#olDraw').disabled = !hasOpp || pending || !r.moves.length;
     $('#olTakeback').disabled = !hasOpp || pending || !r.moves.some((m,i)=>(i%2===0?'red':'black')===r.you);
     $('#olTakeback').hidden = !!r.rated;
@@ -535,12 +535,7 @@ const Online = (function(){
     $('#olTakeback').addEventListener('click',()=>send({type:'offer', kind:'takeback'}));
     $('#olRematch').addEventListener('click',()=>send({type:'offer', kind:'rematch'}));
     // đầu hàng: xác nhận 2 bước ngay trên nút (confirm() có thể bị chặn trong khung nhúng)
-    const RESIGN_HTML=$('#olResign').innerHTML;
-    $('#olResign').addEventListener('click',()=>{
-      const b=$('#olResign');
-      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Bấm lần nữa để đầu hàng'; setTimeout(()=>{ delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; },3000); return; }
-      delete b.dataset.confirm; b.innerHTML=RESIGN_HTML; send({type:'resign'});
-    });
+    confirmTap($('#olResign'), ()=>send({type:'resign'}));
     $('#olReview').addEventListener('click',()=>{ const r=st.room; if(r) review(`ol-${r.code}-${r.game}`); });
     $('#olChips').innerHTML=ONLINE_QUICK.map(q=>`<button type="button" class="ol-chip">${esc(q)}</button>`).join('');
     $$('.ol-chip').forEach(b=>b.addEventListener('click',()=>send({type:'chat', text:b.textContent})));
