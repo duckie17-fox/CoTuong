@@ -1,7 +1,7 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-PR #8, #9, #10 đã merge. Chưa merge (đã push): sửa giật trang khi bấm "Nước tiếp" (biên bản kéo cả trang).
+PR #8–#11 đã merge. Chưa merge (đã push): Tự đi lại khai cuộc nhận nước đối xứng trái ↔ phải.
 
 ## Next step
 - Chờ góp ý tiếp.
