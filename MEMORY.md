@@ -246,3 +246,7 @@
 - Synth: BEAT 60/68, dịch giọng Rê→Fa (TR=2^(3/12) cho SC, BASS, drone), dẫn giai điệu chỉ sáo trúc + đàn tranh (zhengLead: gảy, vuốt từ dưới, vê nốt dài);
   BỎ hẳn đàn nhị và tỳ bà; tranh rải 8 tiếng/4 phách; cổ cầm thêm quãng tám dưới. Đo lại: 3,47 tiếng/giây, trầm 38% (khớp bài gốc).
 - Không chép giai điệu bài gốc, chỉ phong cách.
+
+## 2026-10-11 — Bỏ hẳn nhạc tự sinh 'Kỳ đình' (người dùng: không cần, chỉ dùng file đã gửi)
+- Music module giờ chỉ phát nhac-nen.mp3 (Audio, preload none, lặp, fade). Không tải được → tự tắt (nút về 'Tắt'), không có dự phòng.
+- Bỏ toàn bộ code Web Audio của nhạc (flute/zheng/qin/bell/arp…): app nhỏ đi ~12KB. Âm thanh nước đi (Sound) vẫn giữ.
