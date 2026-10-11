@@ -1,7 +1,7 @@
 # STATE — cập nhật lần cuối: 2026-10-09
 
 ## Đang làm
-PR #8–#12 đã merge (#12: Tự đi lại khai cuộc nhận nước đối xứng trái ↔ phải, 55c1423).
+PR #8–#12 đã merge. Chưa merge (đã push): nhạc nền dùng tệp nhac-nen.mp3 (Relax TMD, đã được phép), 1.8MB, chỉ tải khi bật nhạc.
 
 ## Next step
 - Chờ góp ý tiếp.

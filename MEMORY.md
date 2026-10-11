@@ -234,3 +234,9 @@
   khi người chơi đi đúng bản đối xứng (mọi nước đã đi khớp bản đó) thì hoán trainer.lines/other, máy đi theo hướng mới.
   Máy cũng tự chọn ngẫu nhiên hướng (50%) khi thế cờ còn đối xứng. mirrorCaption đổi ký hiệu (cột đầu 10-n; số cuối đổi khi '-' hoặc M/T/S),
   'cột N'/'Tốt N' → 10-N, '<quân|bên|cánh…> trái/phải' đổi chiều (không đổi chữ 'phải' nghĩa 'cần'). Test: test/trainer-mirror.test.js.
+
+## 2026-10-11 — Nhạc nền đổi sang tệp nhạc người dùng gửi (Relax TMD, người dùng xác nhận ĐÃ ĐƯỢC PHÉP dùng)
+- Nguồn: file 27MB/91 phút → cắt 6 phút (1.3s–361.3s), mono 32kHz, mp3 40kbps, loudnorm, fade vào 3s/ra 5s → src/assets/nhac-nen.mp3 (1.8MB).
+- tools/build.js chép src/assets/* cạnh trang (dist/, _site/). App KHÔNG nhúng nhạc: Audio preload='none', chỉ tải khi bật nhạc (người dùng dặn giữ app nhẹ).
+- Không tải được tệp (thiếu file, mất mạng) → tự dùng nhạc tự sinh 'Kỳ đình' cũ (giữ code làm dự phòng).
+- Artifact app: publish kèm files {'nhac-nen.mp3': 'dist/nhac-nen.mp3'}.

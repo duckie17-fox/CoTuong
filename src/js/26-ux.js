@@ -47,7 +47,7 @@ const Sound = (function(){
   };
 })();
 
-/* ---------- Nhạc nền "Kỳ đình": du dương, tĩnh tâm, hợp lúc đánh cờ. Điệu Cung (ngũ cung trưởng, sáng).
+/* ---------- Nhạc nền: phát tệp nhac-nen.mp3; dự phòng là bản tự sinh "Kỳ đình": du dương, tĩnh tâm, hợp lúc đánh cờ. Điệu Cung (ngũ cung trưởng, sáng).
    Năm nhạc cụ thay nhau: đàn tranh lướt dây mở đoạn + rải hợp âm, sáo trúc (đoạn 1, 4), đàn nhị (đoạn 2),
    tỳ bà gảy vê (đoạn 3), cổ cầm đệm trầm. Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
 const Music = (function(){
@@ -229,7 +229,30 @@ const Music = (function(){
     g.connect(out); lfo.start(t);
     drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
   }
+  /* Nhạc nền chính: tệp nhac-nen.mp3 (đàn tranh, sáo trúc — Relax TMD, đã được phép dùng) đặt cạnh trang.
+     Chỉ tải khi bật nhạc (preload none). Không tải được (mở trang từ tệp, mất mạng…) thì dùng nhạc tự sinh bên dưới. */
+  const FILE='nhac-nen.mp3', VOL=0.45;
+  let el=null, fileFailed=false, fadeT=0;
+  function fadeTo(v, ms, done){
+    clearInterval(fadeT); const step=(v-el.volume)/(ms/50);
+    fadeT=setInterval(()=>{ const nv=el.volume+step; if((step>=0&&nv>=v)||(step<0&&nv<=v)){ el.volume=Math.max(0,Math.min(1,v)); clearInterval(fadeT); if(done) done(); } else el.volume=Math.max(0,Math.min(1,nv)); },50);
+  }
+  function startFile(){
+    try{
+      if(!el){ el=new Audio(); el.preload='none'; el.loop=true; el.src=FILE;
+        el.addEventListener('error',()=>{ if(fileFailed) return; fileFailed=true; if(on && !document.hidden){ stopFile(); startSynth(); } }); }
+      el.volume=0; const p=el.play();
+      if(p && p.catch) p.catch(()=>{ if(!fileFailed && el.error){ fileFailed=true; startSynth(); } });
+      fadeTo(VOL, 2000);
+      return true;
+    }catch(e){ fileFailed=true; return false; }
+  }
+  function stopFile(){ if(el) fadeTo(0, 700, ()=>{ try{ el.pause(); }catch(e){} }); }
   function start(){
+    if(!fileFailed && typeof Audio!=='undefined' && startFile()) return;
+    startSynth();
+  }
+  function startSynth(){
     if(playing || !ac()) return;
     if(ctx.state==='suspended') ctx.resume();
     playing=true; queue=[]; prevF=0; next=ctx.currentTime+0.5;
@@ -237,7 +260,8 @@ const Music = (function(){
     out.gain.setValueAtTime(out.gain.value, ctx.currentTime); out.gain.linearRampToValueAtTime(1, ctx.currentTime+3);
     startDrone(); schedule(); timer=setInterval(schedule, 250);
   }
-  function stop(){
+  function stop(){ stopFile(); stopSynth(); }
+  function stopSynth(){
     if(!playing) return;
     playing=false; clearInterval(timer);
     const t=ctx.currentTime;
@@ -251,8 +275,9 @@ const Music = (function(){
     document.addEventListener('pointerdown',go,true); document.addEventListener('keydown',go,true);
   }
   document.addEventListener('visibilitychange',()=>{
+    if(el && !fileFailed){ if(document.hidden){ clearInterval(fadeT); try{ el.pause(); }catch(e){} } else if(on){ const p=el.play(); if(p&&p.catch) p.catch(()=>{}); el.volume=VOL; } }
     if(!ctx) return;
-    if(document.hidden) ctx.suspend().catch(()=>{}); else if(on) ctx.resume().catch(()=>{});
+    if(document.hidden) ctx.suspend().catch(()=>{}); else if(on && playing) ctx.resume().catch(()=>{});
   });
   function set(v){
     on=!!v; safeLS_set('xq_music', on?'on':'off');
@@ -260,7 +285,7 @@ const Music = (function(){
     document.dispatchEvent(new CustomEvent('musicchange'));
   }
   if(on) arm();
-  return {isOn:()=>on, set, toggle:()=>set(!on), available:()=>!!(window.AudioContext||window.webkitAudioContext)};
+  return {isOn:()=>on, set, toggle:()=>set(!on), available:()=>typeof Audio!=='undefined' || !!(window.AudioContext||window.webkitAudioContext)};
 })();
 
 const Progress = (function(){

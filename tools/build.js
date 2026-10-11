@@ -42,6 +42,9 @@ if (require.main === module) {
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const html = build();
   fs.writeFileSync(out, html);
+  // tệp đi kèm (nhạc nền…) đặt cạnh trang, chỉ tải khi cần
+  const assets = path.join(ROOT, 'src', 'assets');
+  if (fs.existsSync(assets)) for (const f of fs.readdirSync(assets)) fs.copyFileSync(path.join(assets, f), path.join(path.dirname(out), f));
   console.log(`Đã build ${path.relative(process.cwd(), out)} (${(html.length / 1024).toFixed(0)} KB)`);
 }
 module.exports = { build };
