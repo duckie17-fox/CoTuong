@@ -234,3 +234,19 @@
   khi người chơi đi đúng bản đối xứng (mọi nước đã đi khớp bản đó) thì hoán trainer.lines/other, máy đi theo hướng mới.
   Máy cũng tự chọn ngẫu nhiên hướng (50%) khi thế cờ còn đối xứng. mirrorCaption đổi ký hiệu (cột đầu 10-n; số cuối đổi khi '-' hoặc M/T/S),
   'cột N'/'Tốt N' → 10-N, '<quân|bên|cánh…> trái/phải' đổi chiều (không đổi chữ 'phải' nghĩa 'cần'). Test: test/trainer-mirror.test.js.
+
+## 2026-10-11 — Nhạc nền đổi sang tệp nhạc người dùng gửi (Relax TMD, người dùng xác nhận ĐÃ ĐƯỢC PHÉP dùng)
+- Nguồn: file 27MB/91 phút → cắt 6 phút (1.3s–361.3s), mono 32kHz, mp3 40kbps, loudnorm, fade vào 3s/ra 5s → src/assets/nhac-nen.mp3 (1.8MB).
+- tools/build.js chép src/assets/* cạnh trang (dist/, _site/). App KHÔNG nhúng nhạc: Audio preload='none', chỉ tải khi bật nhạc (người dùng dặn giữ app nhẹ).
+- Không tải được tệp (thiếu file, mất mạng) → tự dùng nhạc tự sinh 'Kỳ đình' cũ (giữ code làm dự phòng).
+- Artifact app: publish kèm files {'nhac-nen.mp3': 'dist/nhac-nen.mp3'}.
+
+## 2026-10-11 — Nhạc dự phòng 'Kỳ đình' chỉnh theo phong cách tệp nhạc chính (người dùng hỏi)
+- Phân tích bài gốc (numpy/scipy): ~68 bpm, 3,5 tiếng gảy/giây, giọng quanh Fa, trầm <250Hz ~38%, chủ yếu đàn tranh + sáo trúc.
+- Synth: BEAT 60/68, dịch giọng Rê→Fa (TR=2^(3/12) cho SC, BASS, drone), dẫn giai điệu chỉ sáo trúc + đàn tranh (zhengLead: gảy, vuốt từ dưới, vê nốt dài);
+  BỎ hẳn đàn nhị và tỳ bà; tranh rải 8 tiếng/4 phách; cổ cầm thêm quãng tám dưới. Đo lại: 3,47 tiếng/giây, trầm 38% (khớp bài gốc).
+- Không chép giai điệu bài gốc, chỉ phong cách.
+
+## 2026-10-11 — Bỏ hẳn nhạc tự sinh 'Kỳ đình' (người dùng: không cần, chỉ dùng file đã gửi)
+- Music module giờ chỉ phát nhac-nen.mp3 (Audio, preload none, lặp, fade). Không tải được → tự tắt (nút về 'Tắt'), không có dự phòng.
+- Bỏ toàn bộ code Web Audio của nhạc (flute/zheng/qin/bell/arp…): app nhỏ đi ~12KB. Âm thanh nước đi (Sound) vẫn giữ.
