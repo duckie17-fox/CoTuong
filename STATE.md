@@ -1,7 +1,7 @@
 # STATE — cập nhật lần cuối: 2026-10-11
 
 ## Đang làm
-PR #8–#12 đã merge. Chưa merge (đã push): nhạc nền dùng tệp nhac-nen.mp3 (Relax TMD, đã được phép, 1.8MB, chỉ tải khi bật); đã bỏ hẳn nhạc tự sinh Kỳ đình.
+PR #8–#13 đã merge (#13: nhạc nền dùng tệp nhac-nen.mp3, bỏ nhạc tự sinh, 255bbf8).
 
 ## Next step
 - Chờ góp ý tiếp.
