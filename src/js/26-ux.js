@@ -48,15 +48,17 @@ const Sound = (function(){
 })();
 
 /* ---------- Nhạc nền: phát tệp nhac-nen.mp3; dự phòng là bản tự sinh "Kỳ đình": du dương, tĩnh tâm, hợp lúc đánh cờ. Điệu Cung (ngũ cung trưởng, sáng).
-   Năm nhạc cụ thay nhau: đàn tranh lướt dây mở đoạn + rải hợp âm, sáo trúc (đoạn 1, 4), đàn nhị (đoạn 2),
-   tỳ bà gảy vê (đoạn 3), cổ cầm đệm trầm. Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
+   Theo phong cách tệp nhạc chính (đàn tranh + sáo trúc, ~68 nhịp/phút, giọng Fa, đệm tranh rải dày, trầm ấm):
+   sáo trúc và đàn tranh thay nhau dẫn giai điệu, đàn tranh rải hợp âm liên tục, cổ cầm đệm trầm.
+   Tự sinh bằng Web Audio, không cần tệp nhạc ---------- */
 const Music = (function(){
   let ctx=null, out=null, noise=null, drone=null, timer=0, next=0, queue=[], prevF=0, playing=false, armed=false, round=0;
   let on = safeLS_get('xq_music')==='on';
-  const BEAT=60/66;                                   // vừa phải, thong thả: khoảng 66 nhịp/phút
-  // Điệu Cung (ngũ cung trưởng trên nền Rê): Rê Mi Fa# La Si, từ Rê4 lên
+  const BEAT=60/68;                                   // thong thả như bài gốc: khoảng 68 nhịp/phút
+  const TR=Math.pow(2,3/12);                          // dịch cả bài từ Rê lên Fa (giọng của bài gốc)
+  // Điệu Cung (ngũ cung trưởng trên nền Fa): Fa Sol La Đô Rê, từ Fa4 lên
   const SC=[];
-  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) SC.push(293.66*Math.pow(2,(st+12*o)/12));
+  for(let o=0;o<3;o++) for(const st of [0,2,4,7,9]) SC.push(293.66*TR*Math.pow(2,(st+12*o)/12));
   const rnd=a=>a[Math.floor(Math.random()*a.length)];
   // Các câu nhạc soạn sẵn: [bậc trong SC, số phách]; -1 = nghỉ. Đi lên nhiều, kết về chủ âm Rê
   const P={
@@ -69,9 +71,9 @@ const Music = (function(){
     g:[[5,.5],[6,.5],[7,1],[8,1],[7,.5],[6,.5],[5,1],[6,2],[-1,1]],
   };
   // Mỗi đoạn một nhạc cụ dẫn giai điệu
-  const FORM=[{lead:'flute', p:['a','b','c','f']},{lead:'erhu', p:['d','g','e','f']},{lead:'pipa', p:['a','e','c','f']},{lead:'flute', p:['d','b','g','f']}];
+  const FORM=[{lead:'flute', p:['a','b','c','f']},{lead:'zheng', p:['d','g','e','f']},{lead:'flute', p:['a','e','c','f']},{lead:'zheng', p:['d','b','g','f']}];
   // Gốc hợp âm cho từng câu (Rê, La, Sol, Si thứ) — quãng trầm
-  const BASS={a:[146.83,110],b:[146.83,98],c:[110,146.83],d:[98,110],e:[146.83,123.47],f:[110,146.83],g:[146.83,98]};
+  const BASS=Object.fromEntries(Object.entries({a:[146.83,110],b:[146.83,98],c:[110,146.83],d:[98,110],e:[146.83,123.47],f:[110,146.83],g:[146.83,98]}).map(([k,v])=>[k,v.map(f=>f*TR)]));
   function ac(){
     if(ctx) return ctx;
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
@@ -94,13 +96,13 @@ const Music = (function(){
   function flute(t, f, dur, v){
     const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
     const lfo=ctx.createOscillator(), lg=ctx.createGain();
-    o.type='sine'; o2.type='triangle'; h.gain.value=0.18;
+    o.type='sine'; o2.type='triangle'; h.gain.value=0.26;
     if(prevF && Math.abs(prevF-f)>1){ o.frequency.setValueAtTime(prevF,t); o.frequency.exponentialRampToValueAtTime(f,t+0.14); }
     else o.frequency.setValueAtTime(f,t);
     o2.frequency.value=f*2;
     lfo.frequency.value=5.4; lg.gain.setValueAtTime(0,t); lg.gain.setValueAtTime(0,t+Math.min(0.5,dur*0.4)); lg.gain.linearRampToValueAtTime(f*0.008,t+dur);
     lfo.connect(lg); lg.connect(o.frequency);
-    lp.type='lowpass'; lp.frequency.value=Math.min(f*4,5000);
+    lp.type='lowpass'; lp.frequency.value=Math.min(f*6,7000);
     const end=t+dur;
     g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(v,t+0.2); g.gain.setValueAtTime(v,Math.max(t+0.2,end-0.15));
     g.gain.exponentialRampToValueAtTime(0.0001,end+0.35);
@@ -131,51 +133,29 @@ const Music = (function(){
   function zheng(t, f, v){
     const o=ctx.createOscillator(), g=ctx.createGain(), lp=ctx.createBiquadFilter();
     o.type='triangle'; o.frequency.setValueAtTime(f*1.01,t); o.frequency.exponentialRampToValueAtTime(f,t+0.05);
-    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*6,7000),t); lp.frequency.exponentialRampToValueAtTime(f*1.5,t+1.2);
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*10,9000),t); lp.frequency.exponentialRampToValueAtTime(f*2.5,t+1.2);
     g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
     o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t+1.7);
   }
-  function arp(t, root){ [2,3,4,3].forEach((m,i)=>zheng(t+i*BEAT*0.5, root*m, 0.03)); }
-  // Đàn nhị: tiếng kéo mềm (chủ yếu sóng tam giác, chỉ pha chút răng cưa, lọc tối) để không chói như kèn;
-  // vào chậm, luyến từ nốt trước, rung ngân sớm
-  function erhu(t, f, dur, v){
-    const o=ctx.createOscillator(), o2=ctx.createOscillator(), sg=ctx.createGain(), lp=ctx.createBiquadFilter(), bp=ctx.createBiquadFilter(), bg=ctx.createGain(), g=ctx.createGain();
-    const lfo=ctx.createOscillator(), lg=ctx.createGain();
-    o.type='triangle'; o2.type='sawtooth'; sg.gain.value=0.18;
-    for(const x of [o,o2]){
-      if(prevF && Math.abs(prevF-f)>1){ x.frequency.setValueAtTime(prevF,t); x.frequency.exponentialRampToValueAtTime(f,t+0.22); }
-      else x.frequency.setValueAtTime(f,t);
-    }
-    lfo.frequency.value=5.5; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(f*0.008,t+Math.min(0.4,dur*0.5));
-    lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
-    lp.type='lowpass'; lp.frequency.value=Math.min(f*3,1600); lp.Q.value=0.5;
-    bp.type='peaking'; bp.frequency.value=700; bp.Q.value=0.8; bp.gain.value=2;
-    const end=t+dur;
-    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(v,t+0.25); g.gain.setValueAtTime(v,Math.max(t+0.25,end-0.15));
-    g.gain.exponentialRampToValueAtTime(0.0001,end+0.35);
-    o.connect(lp); o2.connect(sg); sg.connect(lp); lp.connect(bp); bp.connect(g); g.connect(out);
-    for(const x of [o,o2,lfo]){ x.start(t); x.stop(end+0.4); }
-    // tiếng vĩ cọ dây rất nhẹ
-    const ns=ctx.createBufferSource(), nf=ctx.createBiquadFilter();
-    ns.buffer=noise; ns.loop=true; nf.type='bandpass'; nf.frequency.value=f*3; nf.Q.value=4;
-    bg.gain.setValueAtTime(0.0001,t); bg.gain.linearRampToValueAtTime(v*0.04,t+0.12); bg.gain.exponentialRampToValueAtTime(0.0001,end+0.2);
-    ns.connect(nf); nf.connect(bg); bg.connect(out); ns.start(t, Math.random()); ns.stop(end+0.25);
-    prevF=f;
-  }
-  // Tỳ bà: tiếng gảy sáng, tắt nhanh; nốt dài thì gảy vê liên tục (tremolo) nhỏ dần rồi lớn lại
-  function pipaPluck(t, f, v){
-    const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
-    o.type='triangle'; o2.type='square'; h.gain.value=0.08;
-    o.frequency.value=f; o2.frequency.value=f;
-    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*8,8000),t); lp.frequency.exponentialRampToValueAtTime(f*2,t+0.5);
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.004); g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+  // đàn tranh rải hợp âm liên tục (dày như bài gốc): 8 tiếng mỗi 4 phách, nhỏ để không lấn giai điệu
+  function arp(t, root){ [1,1.5,2,3,4,3,2,1.5].forEach((m,i)=>zheng(t+i*BEAT*0.5, root*m, i?0.022:0.03)); }
+  // Đàn tranh dẫn giai điệu: gảy rõ, ngân dài hơn tiếng rải; đôi khi vuốt từ dưới lên (nhấn nhá kiểu tranh);
+  // nốt dài thì vê (gảy nhanh liên tục) nhỏ dần rồi lớn lại
+  function zhengPluck(t, f, v, len, bend){
+    const o=ctx.createOscillator(), o2=ctx.createOscillator(), h=ctx.createGain(), g=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='triangle'; o2.type='sine'; h.gain.value=0.35;
+    if(bend){ o.frequency.setValueAtTime(f*0.89,t); o.frequency.exponentialRampToValueAtTime(f,t+0.09); } else o.frequency.setValueAtTime(f,t);
+    o2.frequency.value=f*2;
+    lp.type='lowpass'; lp.frequency.setValueAtTime(Math.min(f*10,9000),t); lp.frequency.exponentialRampToValueAtTime(f*2.5,t+len*0.7);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+len);
     o.connect(lp); o2.connect(h); h.connect(lp); lp.connect(g); g.connect(out);
-    o.start(t); o2.start(t); o.stop(t+0.95); o2.stop(t+0.95);
+    o.start(t); o2.start(t); o.stop(t+len+0.05); o2.stop(t+len+0.05);
   }
-  function pipa(t, f, dur, v){
-    if(dur<BEAT*1.4){ pipaPluck(t, f, v); return; }
-    const step=0.075, n=Math.floor((dur-0.05)/step);
-    for(let k=0;k<n;k++){ const sw=0.75+0.25*Math.cos(k/n*Math.PI*2); pipaPluck(t+k*step, f, v*sw*(k%2?0.8:1)); }
+  function zhengLead(t, f, dur, v){
+    if(dur<BEAT*1.6){ zhengPluck(t, f, v, 2.4, Math.random()<0.25); return; }
+    zhengPluck(t, f, v, 1.2, Math.random()<0.4);
+    const step=0.085, n=Math.floor((dur-0.3)/step);
+    for(let k=0;k<n;k++){ const sw=0.55+0.25*Math.cos(k/n*Math.PI*2); zhengPluck(t+0.25+k*step, f, v*sw*(k%2?0.75:0.9), 0.5); }
   }
   // Đàn tranh lướt dây: chuỗi nốt ngũ cung đi lên thật nhanh, mở đầu mỗi đoạn
   function glide(t){
@@ -211,12 +191,11 @@ const Music = (function(){
       if(!queue.length) fill();
       const n=queue.shift();
       if(n.glide){ glide(next); next+=0.6; continue; }
-      if(n.bass){ qin(next+0.02, n.bass, 0.08); arp(next+0.02, n.bass); continue; }
+      if(n.bass){ qin(next+0.02, n.bass, 0.1); qin(next+0.02, n.bass/2, 0.05); arp(next+0.02, n.bass); continue; }
       if(n.bell){ bell(next+0.05, n.bell, 0.03); continue; }
       if(n.rest){ prevF=0; next+=n.rest*BEAT; continue; }
       const dur=n.b*BEAT*(0.96+Math.random()*0.06), f=SC[n.i];
-      if(n.lead==='erhu') erhu(next, f/2, dur, 0.085);          // nhị kéo thấp hơn một quãng tám, ấm hơn
-      else if(n.lead==='pipa') pipa(next, f, dur, 0.09);
+      if(n.lead==='zheng') zhengLead(next, f, dur, 0.1);
       else if(n.b>=2 && Math.random()<0.3 && n.i+1<SC.length){ flute(next, SC[n.i+1], 0.12, 0.07); flute(next+0.12, f, dur-0.12, 0.085); }
       else flute(next, f, dur, 0.08+Math.random()*0.015);
       next+=n.b*BEAT;
@@ -225,7 +204,7 @@ const Music = (function(){
   function startDrone(){
     const t=ctx.currentTime, g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
     g.gain.value=0.016; lfo.frequency.value=0.05; lg.gain.value=0.008; lfo.connect(lg); lg.connect(g.gain);
-    const os=[73.42, 146.83, 220].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
+    const os=[73.42*TR, 146.83*TR, 220*TR].map(f=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.connect(g); o.start(t); return o; });
     g.connect(out); lfo.start(t);
     drone={stop(at){ for(const o of os.concat(lfo)) o.stop(at); }};
   }
