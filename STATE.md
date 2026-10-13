@@ -1,7 +1,7 @@
-# STATE — cập nhật lần cuối: 2026-10-11
+# STATE — cập nhật lần cuối: 2026-10-13
 
 ## Đang làm
-PR #8–#13 đã merge (#13: nhạc nền dùng tệp nhac-nen.mp3, bỏ nhạc tự sinh, 255bbf8).
+PR #8–#13 đã merge. Đang làm: nhạc nền đổi sang Vô Ưu Tịnh Độ (ZenMusics, đã được phép), test + e2e xanh; đã tạo PR và merge.
 
 ## Next step
 - Chờ góp ý tiếp.

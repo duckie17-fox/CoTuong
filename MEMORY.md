@@ -250,3 +250,6 @@
 ## 2026-10-11 — Bỏ hẳn nhạc tự sinh 'Kỳ đình' (người dùng: không cần, chỉ dùng file đã gửi)
 - Music module giờ chỉ phát nhac-nen.mp3 (Audio, preload none, lặp, fade). Không tải được → tự tắt (nút về 'Tắt'), không có dự phòng.
 - Bỏ toàn bộ code Web Audio của nhạc (flute/zheng/qin/bell/arp…): app nhỏ đi ~12KB. Âm thanh nước đi (Sound) vẫn giữ.
+
+## 2026-10-13 — Đổi nhạc nền sang 'Vô Ưu Tịnh Độ' (ZenMusics), người dùng xác nhận ĐÃ ĐƯỢC PHÉP
+- Cắt 6 phút từ giây thứ 2 (file gốc 86 phút), mono 32kHz 40kbps, loudnorm, fade vào 3s/ra 5s → src/assets/nhac-nen.mp3 (1.8MB), thay bài Relax TMD cũ. Giữ nguyên tên tệp/cách phát (preload none, lặp, thiếu tệp thì tự tắt).
