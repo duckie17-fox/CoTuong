@@ -1,10 +1,10 @@
-# STATE — cập nhật lần cuối: 2026-10-13
+# STATE — cập nhật lần cuối: 2026-10-19
 
 ## Đang làm
-PR #8–#14 đã merge (#14: nhạc nền Vô Ưu Tịnh Độ, 2392634); chờ deploy xanh.
+Thêm Playwright MCP vào `.mcp.json` (branch claude/playwright-mcp-x28ifa); PR #8–#14 đã merge trước đó.
 
 ## Next step
-- Chờ góp ý tiếp.
+- Restart Claude Code để load MCP server; chờ góp ý tiếp.
 
 ## Blocker
 - Không.

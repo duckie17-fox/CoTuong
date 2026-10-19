@@ -253,3 +253,6 @@
 
 ## 2026-10-13 — Đổi nhạc nền sang 'Vô Ưu Tịnh Độ' (ZenMusics), người dùng xác nhận ĐÃ ĐƯỢC PHÉP
 - Cắt 6 phút từ giây thứ 2 (file gốc 86 phút), mono 32kHz 40kbps, loudnorm, fade vào 3s/ra 5s → src/assets/nhac-nen.mp3 (1.8MB), thay bài Relax TMD cũ. Giữ nguyên tên tệp/cách phát (preload none, lặp, thiếu tệp thì tự tắt).
+
+## 2026-10-19 — Thêm Playwright MCP
+- Thêm `.mcp.json` với server `playwright` (`npx @playwright/mcp@latest`). Trong container cloud cần thêm `--headless --no-sandbox --executable-path /opt/pw-browsers/chromium` (không có Chrome thật, không chạy `playwright install`).
