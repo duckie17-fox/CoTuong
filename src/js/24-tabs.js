@@ -65,7 +65,8 @@ function initTabs(){
 }
 
 /* ---------- Thẻ con của Sa trường ---------- */
-let currentStab = safeLS_get('xq_last_stab') || 'phong';
+// lần đầu vào Sa trường: mở Đấu máy (hợp người mới hơn đấu xếp hạng)
+let currentStab = safeLS_get('xq_last_stab') || 'may';
 function showStab(key, focus){
   if(PLAY_TABS.includes(key)){ showTab(key, focus); return; }
   if(!ST_KEYS.includes(key)) key='phong';

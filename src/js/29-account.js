@@ -152,11 +152,12 @@ const Account = (function(){
     if(dlgPrevFocus && dlgPrevFocus.focus) try{ dlgPrevFocus.focus(); }catch(e){}
   }
   const dlgHead = (title, closable=true) => `<div class="dlg-head"><h2 id="dlgTitle">${title}</h2>${closable?`<button type="button" class="dlg-x" data-dlg-close aria-label="Đóng">${I('x')}</button>`:''}</div>`;
-  function fieldHTML(id, label, type, extra){
+  // hint: dòng gợi ý hiện sẵn dưới ô; khi có lỗi thì câu lỗi thay chỗ gợi ý (CSS .dlg-err:not(:empty) ~ .dlg-hint)
+  function fieldHTML(id, label, type, extra, hint){
     const pw=type==='password';
     return `<label class="dlg-field" for="${id}"><span>${label}</span>
       <span class="dlg-input">${`<input class="field" id="${id}" type="${type}" ${extra||''}>`}${pw?`<button type="button" class="pw-eye" data-eye="${id}" aria-label="Hiện mật khẩu" title="Hiện mật khẩu">${I('eye')}</button>`:''}</span>
-      <small class="dlg-err" id="${id}Err" aria-live="polite"></small></label>`;
+      <small class="dlg-err" id="${id}Err" aria-live="polite"></small>${hint?`<small class="dlg-hint">${hint}</small>`:''}</label>`;
   }
   function wireForm(body, onSubmit){
     $$('[data-eye]',body).forEach(b=>b.addEventListener('click',()=>{ const i=$('#'+b.dataset.eye); const show=i.type==='password'; i.type=show?'text':'password'; b.setAttribute('aria-label', show?'Ẩn mật khẩu':'Hiện mật khẩu'); }));
@@ -199,11 +200,11 @@ const Account = (function(){
     if(!available()) return noServerNotice();
     openDialog(`${dlgHead('Tạo tài khoản')}
       <form novalidate>
-        ${fieldHTML('rgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"')}
-        <small class="hint-text small dlg-hint">3–20 ký tự, không dấu. Bạn bè tìm bạn bằng tên này.</small>
-        ${fieldHTML('rgName','Tên hiển thị','text','autocomplete="nickname" maxlength="24"')}
-        ${fieldHTML('rgPass','Mật khẩu','password','autocomplete="new-password"')}
-        ${fieldHTML('rgPass2','Nhập lại mật khẩu','password','autocomplete="new-password"')}
+        ${fieldHTML('rgUser','Tên đăng nhập','text','autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"','3–20 ký tự không dấu. Bạn bè tìm bạn bằng tên này.')}
+        ${fieldHTML('rgPass','Mật khẩu','password','autocomplete="new-password"','Ít nhất 8 ký tự.')}
+        <details class="more-box dlg-more" id="rgNameBox"><summary>Tên hiển thị (không bắt buộc)</summary>
+          ${fieldHTML('rgName','Tên hiển thị','text','autocomplete="nickname" maxlength="24"','Tên người khác thấy khi đấu. Bỏ trống thì dùng tên đăng nhập, đổi lại được ở trang Tôi.')}
+        </details>
         <p class="dlg-msg" role="alert"></p>
         <button type="submit" class="btn btn-primary dlg-main">Tạo tài khoản</button>
       </form>
@@ -212,11 +213,12 @@ const Account = (function(){
       $('#rgUser').addEventListener('input',()=>{ if(!$('#rgName').dataset.touched) $('#rgName').placeholder=$('#rgUser').value.trim(); });
       $('#rgName').addEventListener('input',()=>{ $('#rgName').dataset.touched='1'; });
       wireForm(body, async ()=>{
-        const u=val('rgUser').trim().toLowerCase(), name=val('rgName').trim()||u, p=val('rgPass'), p2=val('rgPass2');
+        const u=val('rgUser').trim().toLowerCase(), name=val('rgName').trim()||u, p=val('rgPass');
         let ok=true;
-        if(!USER_RE.test(u)) ok=fieldErr('rgUser','Tên đăng nhập 3–20 ký tự, chỉ gồm chữ không dấu, số, _ và .');
-        if(p.length<8) ok=fieldErr('rgPass','Mật khẩu cần ít nhất 8 ký tự');
-        else if(p!==p2) ok=fieldErr('rgPass2','Hai mật khẩu chưa khớp');
+        if(!u) ok=fieldErr('rgUser','Nhập tên đăng nhập');
+        else if(!USER_RE.test(u)) ok=fieldErr('rgUser','Cần 3–20 ký tự, chỉ gồm chữ không dấu, số, dấu gạch dưới hoặc dấu chấm');
+        if(!p) ok=fieldErr('rgPass','Nhập mật khẩu');
+        else if(p.length<8) ok=fieldErr('rgPass','Mật khẩu cần ít nhất 8 ký tự');
         if(!ok) return;
         try{
           const r=await call('POST','/api/register',{username:u, displayName:name, passHash:await passHash(u,p)});
@@ -258,13 +260,19 @@ const Account = (function(){
     openDialog(`${dlgHead(title, false)}
       <p>${lead||'Đây là <b>mã khôi phục</b> của bạn:'}</p>
       <div class="recovery-code" id="rcCode">${esc(code)}</div>
-      <div class="btn-row"><button type="button" class="btn btn-outline btn-sm" id="rcCopy">${I('copy')}Sao chép</button><button type="button" class="btn btn-outline btn-sm" id="rcSave">${I('download')}Tải về</button></div>
+      <div class="btn-row"><button type="button" class="btn btn-outline btn-sm" id="rcCopy">${I('copy')}Sao chép</button><button type="button" class="btn btn-outline btn-sm" id="rcSave">${I('download')}Tải về</button>${canShare()?`<button type="button" class="btn btn-outline btn-sm" id="rcShare">${I('share')}Gửi vào ghi chú / Zalo</button>`:''}</div>
       <p class="hint-text small mt10">Không có email nên đây là cách duy nhất để lấy lại tài khoản khi quên mật khẩu. Mã chỉ hiện một lần — hãy chép ra giấy hoặc lưu vào nơi an toàn.</p>
       <label class="check-line"><input type="checkbox" id="rcOk"> Tôi đã lưu mã này</label>
       <p class="dlg-msg" role="alert"></p>
-      <button type="button" class="btn btn-primary dlg-main" id="rcNext" disabled>Tiếp tục</button>`, body=>{
+      <button type="button" class="btn btn-primary dlg-main" id="rcNext" disabled>Tiếp tục</button>
+      <p class="hint-text small rc-why" id="rcWhy">Tích “Tôi đã lưu mã này” để tiếp tục.</p>`, body=>{
       const msg=$('.dlg-msg',body);
-      $('#rcOk').addEventListener('change',()=>{ $('#rcNext').disabled=!$('#rcOk').checked; });
+      $('#rcOk').addEventListener('change',()=>{ $('#rcNext').disabled=!$('#rcOk').checked; $('#rcWhy').hidden=$('#rcOk').checked; });
+      const sh=$('#rcShare',body);
+      if(sh) sh.addEventListener('click', async ()=>{
+        try{ await navigator.share({title:'Mã khôi phục Cờ Tướng', text:`Mã khôi phục Cờ Tướng (${ONLINE_WEB_URL})\n${code}`}); msg.textContent='Đã gửi mã.'; }
+        catch(e){ if(e && e.name!=='AbortError') msg.textContent='Không gửi được — hãy sao chép mã.'; }
+      });
       $('#rcCopy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(code); msg.textContent='Đã sao chép mã.'; }catch(e){ msg.textContent='Hãy tự chép mã ở trên.'; } });
       $('#rcSave').addEventListener('click', async ()=>{
         const text=`Mã khôi phục Cờ Tướng (${ONLINE_WEB_URL})\n${code}\n`;
@@ -277,11 +285,12 @@ const Account = (function(){
       $('#rcNext').addEventListener('click',()=>{ closeDialog(); next && next(); });
     });
   }
+  const canShare = () => { try{ return typeof navigator.share==='function' && !isArtifact(); }catch(e){ return false; } };
   // Sau đăng nhập / đăng ký / khôi phục: lưu phiên, gộp tiến độ
   async function afterSignIn(r, fresh){
     saveSession(r.token, r.user);
     closeDialog();
-    if(fresh){ await sync({quiet:true}); toastMsg('Đã lưu tiến độ vào tài khoản.'); return; }
+    if(fresh){ const had=hasLocalProgress(); await sync({quiet:true}); toastMsg(had ? 'Đã lưu tiến độ trên máy này vào tài khoản.' : `Chào ${r.user.displayName}! Từ giờ tiến độ tự lưu vào tài khoản.`); return; }
     let remote=null;
     try{ remote=await call('GET','/api/progress'); }catch(e){}
     const remoteHas = remote && Object.keys(remote.data||{}).some(k=>LEARN_KEYS.includes(k));
@@ -333,6 +342,9 @@ const Account = (function(){
         : m.last ? `Lần đồng bộ cuối: ${new Date(m.last).toLocaleString('vi-VN')}. Tiến độ tự đồng bộ vài giây sau mỗi thay đổi.` : 'Chưa đồng bộ lần nào.';
     }
   }
+  // số ván xếp hạng còn thiếu để có hạng (0 = đã có hạng)
+  const RANKED_MIN=5;
+  const unrankedLeft = u => u && !u.ranked ? Math.max(1, RANKED_MIN-(u.ratedGames||0)) : 0;
   function renderMe(){
     const u=st.user;
     $('#meIntro').hidden=!!u; $('#meSigned').hidden=!u; $('#meAccount').hidden=!u;
@@ -343,20 +355,17 @@ const Account = (function(){
     if(!u) return;
     $('#meAvatar').outerHTML=`<span class="me-avatar me-letter" id="meAvatar" style="--av:${hue(u.username)}">${esc(initials(u.displayName))}</span>`;
     $('#meName').textContent=u.displayName;
-    $('#meElo').textContent=u.elo;
+    // chưa đủ ván xếp hạng: không khoe điểm khởi đầu 1200 / bậc như thể đã có hạng
+    const left=unrankedLeft(u);
+    $('#meElo').textContent = left ? 'Chưa xếp hạng' : u.elo;
+    $('#meElo').classList.toggle('me-elo-none', !!left);
     const t=Ranked.tierOf(u.elo);
-    $('#meEloSub').innerHTML = `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
+    $('#meEloSub').innerHTML = left ? `còn ${left} ván xếp hạng` : `<span class="tier tier-${t.key}">${esc(t.label)}</span> · cao nhất ${u.peakElo}`;
     $('#meSub').textContent=`@${u.username} · xếp hạng: ${wdlText(u.wins,u.draws,u.losses).toLowerCase()}`;
     renderSync();
   }
-  // Bắt buộc đăng nhập khi có máy chủ (bản Artifact không kết nối ra ngoài được thì bỏ qua)
-  function renderGate(){
-    const need = available() && !signedIn();
-    $('#authGate').hidden=!need;
-    document.body.classList.toggle('gated', need);
-  }
   function render(){
-    renderTop(); renderMe(); renderGate();
+    renderTop(); renderMe();
     const on=signedIn();
     $$('[data-need-login]').forEach(e=>{ e.hidden=on; });
     $$('[data-when-login]').forEach(e=>{ e.hidden=!on; });
@@ -541,7 +550,7 @@ const Account = (function(){
     $('#friendRequests').innerHTML=r.incoming.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-accept="${u.id}">Đồng ý</button><button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Từ chối" data-ask="Bấm lần nữa để từ chối">Từ chối</button>`)).join('');
     $('#friendList').innerHTML = r.friends.length ? r.friends.map(u=>personRow(u, `<button type="button" class="btn btn-primary btn-sm" data-invite="${u.id}">${I('swords')}Mời đấu</button>
         <button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ kết bạn" data-ask="Bấm lần nữa để huỷ">Huỷ kết bạn</button>`)).join('')
-      : (r.incoming.length || r.outgoing.length ? '' : '<p class="hint-text">Chưa có bạn. Tìm theo tên đăng nhập ở trên.</p>');
+      : (r.incoming.length || r.outgoing.length ? '' : '<p class="hint-text">Chưa có bạn. Tìm theo tên đăng nhập hoặc gửi link kết bạn ở trên.</p>');
     $('#friendOutgoing').innerHTML = r.outgoing.length ? `<h3 class="group-h mt16">Đang chờ đồng ý</h3>${r.outgoing.map(u=>personRow(u, `<button type="button" class="btn btn-outline btn-sm" data-remove="${u.id}" data-label="Huỷ lời mời" data-ask="Bấm lần nữa để huỷ">Huỷ lời mời</button>`)).join('')}` : '';
     wireFriendBtns($('[data-stpanel="banbe"]'));
     renderFriendsOnline();
@@ -608,6 +617,31 @@ const Account = (function(){
     b.disabled=true; addFriend(b.dataset.addfriend);
   });
 
+  /* ---------- link kết bạn (?ketban=tên_đăng_nhập) ---------- */
+  async function shareFriendLink(){
+    if(!signedIn()) return;
+    const link=Online.appLink('ketban='+encodeURIComponent(st.user.username));
+    const text=`Kết bạn với mình (${st.user.displayName}) trên Cờ Tướng để đấu cờ nhé:`;
+    if(canShare()){ try{ await navigator.share({title:'Kết bạn trên Cờ Tướng', text, url:link}); return; }catch(e){ if(e && e.name==='AbortError') return; } }
+    try{ await navigator.clipboard.writeText(`${text} ${link}`); toastMsg('Đã sao chép link kết bạn — dán gửi cho bạn bè.'); }
+    catch(e){ notice({id:'friendlink', html:`Gửi link này cho bạn bè:<br><b class="sel-all">${esc(link)}</b>`, timeout:15000}); }
+  }
+  function friendParam(){ const v=(Online.params().get('ketban')||'').trim().toLowerCase(); return USER_RE.test(v) ? v : ''; }
+  function dropFriendParam(){
+    try{ if(!/^https?:$/.test(location.protocol)) return; const u=new URL(location.href); u.searchParams.delete('ketban'); window.history.replaceState(null,'',u.toString()); }catch(e){}
+  }
+  // Mở link kết bạn: đã đăng nhập thì hỏi kết bạn; chưa thì mời tạo tài khoản (xong sẽ hỏi lại)
+  function handleFriendLink(){
+    const who=friendParam(); if(!who || !available()) return;
+    if(signedIn()){
+      dropFriendParam();
+      if(who===st.user.username) return;
+      notice({id:'ketban', html:`<b>@${esc(who)}</b> mời bạn kết bạn trên Cờ Tướng.`, actions:[{label:'Kết bạn', primary:true, run:()=>addFriend(who)}, {label:'Để sau', run:()=>{}}]});
+    } else {
+      notice({id:'ketban', html:`<b>@${esc(who)}</b> mời bạn kết bạn. Cần tài khoản để kết bạn và đấu với nhau.`, actions:[{label:'Tạo tài khoản', primary:true, run:()=>openRegister()}, {label:'Đăng nhập', run:()=>openLogin()}]});
+    }
+  }
+
   /* ---------- xếp hạng ---------- */
   async function loadRank(){
     if(!signedIn()) return;
@@ -616,7 +650,7 @@ const Account = (function(){
     let r; try{ r=await call('GET','/api/leaderboard?scope='+st.rankScope); }catch(e){ el.innerHTML=`<p class="hint-text">${esc(e.message)}</p>`; return; }
     const row = x => `<div class="rank-row${x.me?' me':''}"><span class="rank-n">${x.rank!=null?x.rank:'—'}</span>${avatar(x)}
       <span class="rank-name"><span><b>${esc(x.displayName)}</b>${x.me?' <small>(bạn)</small>':''}</span><small class="hint-text">${x.rank!=null?`${x.ratedGames} ván`:`Đánh thêm ${Math.max(0,r.minGames-x.ratedGames)} ván xếp hạng để có hạng`}</small></span>
-      ${x.me?'':friendButtonHTML(x.username, true)}<span class="rank-elo">${x.rank!=null?`<span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>`:''}${x.elo}</span></div>`;
+      ${x.me?'':friendButtonHTML(x.username, true)}<span class="rank-elo">${x.rank!=null?`<span class="tier tier-${Ranked.tierOf(x.elo).key}">${esc(Ranked.tierOf(x.elo).label)}</span>${x.elo}`:'<small class="hint-text">chưa xếp hạng</small>'}</span></div>`;
     el.innerHTML = (r.list.length ? r.list.map(row).join('') : `<p class="hint-text">${r.scope==='all'?'Chưa có ai đủ 5 ván tính Elo.':'Chưa có bạn bè. Bấm “Toàn bộ” để xem mọi người, hoặc kết bạn ở thẻ Bạn bè.'}</p>`)
       + (r.me ? `<div class="rank-pin">${row(r.me)}</div>` : '');
   }
@@ -626,6 +660,8 @@ const Account = (function(){
     try{ const u=JSON.parse(safeLS_get('xq_user')||'null'); if(u && token()) st.user=u; }catch(e){}
     initMe();
     $('#friendSearch').addEventListener('input',()=>{ clearTimeout(st.searchTimer); st.searchTimer=setTimeout(search, 300); });
+    $('#friendShare').addEventListener('click', shareFriendLink);
+    document.addEventListener('accountchange',()=>{ if(signedIn() && friendParam()) handleFriendLink(); });
     $$('#rankScope button').forEach(b=>b.addEventListener('click',()=>{ st.rankScope=b.dataset.scope; loadRank(); }));
     document.addEventListener('friendschange',()=>{ if(!$('[data-stpanel="xephang"]').hidden) loadRank(); });
     document.addEventListener('zoneshown',e=>{
@@ -636,7 +672,8 @@ const Account = (function(){
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden && signedIn()){ pollInbox(); } });
     render();
     if(token() && available()){ refreshMe().then(()=>{ if(signedIn()){ sync(); startInbox(); } }); }
+    else handleFriendLink();
   }
-  return {init, sync, signedIn, friendButtonHTML, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
+  return {init, sync, signedIn, unrankedLeft, openDialog, hasLocalProgress, friendButtonHTML, user:()=>st.user, setUser, token, api, openLogin, openRegister, call, passHash, state:st, available, applyRemote, collect, meta, notice, closeDialog};
 })();
 function initAccount(){ Account.init(); }

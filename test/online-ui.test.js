@@ -9,6 +9,10 @@ test('hai khu Kỳ viện / Sa trường: chuyển qua lại, nhớ khu đang m�
   const sa = () => document.querySelector('section[data-zone-panel="satruong"]');
   assert.equal(sa().hidden, true);
   document.querySelector('.zone-btn[data-zone="satruong"]').click();
+  // lần đầu vào Sa trường: mở Đấu máy (hợp người mới), chưa phải sảnh đấu người
+  assert.equal(document.querySelector('section[data-panel="may"]').hidden, false);
+  assert.equal(sa().hidden, true);
+  document.querySelector('.st-btn[data-stab="phong"]').click();
   assert.equal(sa().hidden, false);
   assert.equal(document.querySelector('.tabs').hidden, true);
   assert.ok([...document.querySelectorAll('section[data-panel]')].every(s => s.hidden), 'các phần Kỳ viện phải ẩn');
@@ -21,7 +25,7 @@ test('hai khu Kỳ viện / Sa trường: chuyển qua lại, nhớ khu đang m�
 });
 
 test('mở lại trang: vào thẳng Sa trường nếu lần trước đang ở đó', () => {
-  const { document } = load({ fresh: true, storage: { xq_zone: 'satruong' } });
+  const { document } = load({ fresh: true, storage: { xq_zone: 'satruong', xq_last_stab: 'phong' } });
   assert.equal(document.querySelector('section[data-zone-panel="satruong"]').hidden, false);
 });
 

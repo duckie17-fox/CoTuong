@@ -2,15 +2,15 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright-core');
-const { PAGE, chromiumPath } = require('./helpers');
+const { PAGE, chromiumPath, skipOnboarding } = require('./helpers');
 
 test('bấm Nước tiếp không làm trang giật', async () => {
   const browser = await chromium.launch({ executablePath: chromiumPath() });
   try {
     for (const [w, h] of [[390, 844], [820, 1180]]) {
       const p = await browser.newPage({ viewport: { width: w, height: h } });
+      await skipOnboarding(p);
       await p.goto(PAGE);
-      await p.evaluate(() => { document.body.classList.remove('gated'); document.querySelector('#authGate').hidden = true; });
       await p.evaluate(() => { showTab('khaicuoc'); openOpening(OPENINGS[0].id); });
       await p.waitForTimeout(500);
       // cho biên bản nằm trong tầm nhìn một phần như khi người dùng đang đọc

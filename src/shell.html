@@ -40,6 +40,7 @@
 
 <!-- ===================== TAB: HOC LUAT ===================== -->
 <section data-panel="hoc" hidden>
+  <div class="today-strip" id="todayStrip" hidden></div>
   <div class="card lesson-card">
     <div class="lesson-top">
       <h2 id="lessonsHeading">Các bài học</h2>
@@ -310,9 +311,8 @@
     <h2>Bài tập tình huống</h2>
     <p class="hint-text">Tìm nước đi đúng — cách nào đúng cũng được.</p>
     <div class="daily-card" id="dailyCard"></div>
-    <p class="hint-text" id="puzzleProgressTxt"></p>
+    <div class="pz-row"><p class="hint-text" id="puzzleProgressTxt"></p><button class="btn btn-outline btn-sm" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Làm bài chưa giải</button></div>
     <div id="puzzleFilters"></div>
-    <div class="btn-row mt10"><button class="btn btn-outline" id="puzzleRandomBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-shuffle"></use></svg>Làm bài chưa giải</button></div>
     <div class="puzzle-grid" id="puzzleGrid"></div>
     <div class="btn-row btn-row-center mt10" id="puzzleMore"></div>
   </div>
@@ -370,7 +370,7 @@
             <label><input type="radio" name="olColor" value="random"><span>Ngẫu nhiên</span></label>
           </div>
         </fieldset>
-        <label class="switch" id="olRatedWrap" hidden title="Chỉ tính khi đối thủ cũng đã đăng nhập. Không xin đi lại được."><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b></span></label>
+        <label class="switch" id="olRatedWrap" hidden title="Chỉ tính khi đối thủ cũng đã đăng nhập. Không xin đi lại được."><input type="checkbox" id="olRated" checked><span class="switch-ui" aria-hidden="true"></span><span><b>Tính Elo</b><small class="hint-text switch-sub">Thắng được cộng điểm trình độ, thua bị trừ</small></span></label>
         <button type="button" class="btn btn-primary ol-wide" id="olCreate">Tạo phòng</button>
       </div>
       <div class="card ol-box">
@@ -433,7 +433,7 @@
   <div class="card need-account" data-need-login>
     <h2>Bạn bè</h2>
     <p class="hint-text">Đăng nhập để kết bạn và mời đấu.</p>
-    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-register>Tạo tài khoản</button><button type="button" class="link-btn" data-open-login>Đã có tài khoản? Đăng nhập</button></div>
   </div>
   <div data-when-login hidden>
     <div class="card" id="friendRequestsCard" hidden>
@@ -443,6 +443,7 @@
     <div class="card">
       <h2>Bạn bè</h2>
       <input class="field ol-wide" id="friendSearch" type="search" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Tìm bạn theo tên đăng nhập" aria-label="Tìm bạn theo tên đăng nhập">
+      <div class="friend-share"><button type="button" class="btn btn-outline btn-sm" id="friendShare"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-share"></use></svg>Gửi link kết bạn</button><span class="hint-text small">Chưa biết tên đăng nhập của bạn bè? Gửi link qua Zalo/Messenger, bạn mở link là kết bạn được.</span></div>
       <div id="friendResults" class="mt10" aria-live="polite"></div>
       <div id="friendList" class="mt10"></div>
       <div id="friendOutgoing"></div>
@@ -453,7 +454,7 @@
   <div class="card need-account" data-need-login>
     <h2>Xếp hạng</h2>
     <p class="hint-text">Đăng nhập để có Elo và xếp hạng.</p>
-    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <div class="btn-row"><button type="button" class="btn btn-primary" data-open-register>Tạo tài khoản</button><button type="button" class="link-btn" data-open-login>Đã có tài khoản? Đăng nhập</button></div>
   </div>
   <div class="card" data-when-login hidden>
     <div class="btn-row" style="justify-content:space-between">
@@ -476,7 +477,7 @@
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-swords"></use></svg>Có tên riêng khi đấu online, kết bạn và mời đấu trực tiếp</li>
       <li><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-trophy"></use></svg>Xếp hạng Elo với bạn bè</li>
     </ul>
-    <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đăng nhập</button><button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button></div>
+    <div class="btn-row" id="meAuthBtns"><button type="button" class="btn btn-primary" data-open-register>Tạo tài khoản</button><button type="button" class="link-btn" data-open-login><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-login"></use></svg>Đã có tài khoản? Đăng nhập</button></div>
     <p class="hint-text small" id="meNoServer" hidden></p>
   </div>
   <div id="meSigned" hidden>
@@ -542,27 +543,15 @@
         <button type="button" class="btn btn-outline" id="meChangePass">Đổi mật khẩu</button>
         <button type="button" class="btn btn-outline" id="meNewCode">Tạo mã khôi phục mới</button>
         <button type="button" class="btn btn-outline" id="meLogout">Đăng xuất</button>
-        <button type="button" class="btn btn-outline" id="meLogoutAll">Đăng xuất mọi thiết bị</button>
       </div>
       <p class="hint-text small mt10">Mã khôi phục dùng để đặt lại mật khẩu khi bạn quên. Tạo mã mới thì mã cũ hết hiệu lực.</p>
+      <p class="mt10"><button type="button" class="link-btn" id="meLogoutAll">Đăng xuất khỏi mọi thiết bị (kể cả máy này)</button></p>
       <div class="danger-zone"><button type="button" class="btn btn-danger-outline btn-sm" id="meDelete">Xoá tài khoản</button></div>
     </div>
   </div>
 </section>
 
 </main>
-<div class="auth-gate" id="authGate" hidden>
-  <div class="gate-box">
-    <span class="seal gate-seal" aria-hidden="true">象</span>
-    <h1 class="gate-title">Cờ Tướng</h1>
-    <p class="gate-sub">Học cờ, đấu với máy và đấu xếp hạng với bạn bè.</p>
-    <div class="gate-btns">
-      <button type="button" class="btn btn-primary" data-open-login>Đăng nhập</button>
-      <button type="button" class="btn btn-outline" data-open-register>Tạo tài khoản</button>
-    </div>
-    <p class="hint-text small gate-note">Tiến độ của bạn được lưu theo tài khoản, dùng được trên mọi máy.</p>
-  </div>
-</div>
 <div class="dlg-backdrop" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" tabindex="-1"><div id="dlgBody"></div></div></div>
 <div class="notice-stack" id="noticeStack" aria-live="polite"></div>
 

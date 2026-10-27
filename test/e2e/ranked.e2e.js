@@ -27,11 +27,12 @@ test('đấu xếp hạng: ghép hai người; một mình thì ghép máy, đ�
       p.on('pageerror', e => errors.push(e.message));
       await registerUI(p, url, name);
       await p.click('.zone-btn[data-zone="satruong"]');
+      await p.click('.st-btn[data-stab="phong"]');   // lần đầu vào Sa trường mở Đấu máy
       await p.waitForSelector('#olFindMatch');
       return p;
     }
     const A = await user('xh_an'), B = await user('xh_binh');
-    assert.match(await text(A, '#olRankedMe'), /Vàng II\s*1200/);
+    assert.match(await text(A, '#olRankedMe'), /Chưa xếp hạng · còn 5 ván/);
     // hai người cùng tìm → cùng một phòng Tính Elo, khác màu
     await A.click('#olFindMatch'); await B.click('#olFindMatch');
     await A.waitForFunction(() => Online.state.room && Online.state.room.seats.red && Online.state.room.seats.black, null, { timeout: 15000 });
@@ -74,7 +75,7 @@ test('đấu xếp hạng: ghép hai người; một mình thì ghép máy, đ�
     await C.waitForFunction(() => /Elo của bạn: \d+ \(-\d+\)/.test(document.querySelector('#olStatus').textContent), null, { timeout: 10000 });
     assert.equal(await C.evaluate(() => JSON.parse(localStorage.getItem('xq_ranked_bot')).length), 1, 'còn lại đúng ván mới');
     await C.click('#olLeave');
-    await C.waitForFunction(() => /Vàng/.test(document.querySelector('#olRankedMe').textContent) && +document.querySelector('.ranked-elo').textContent < 1200);
+    await C.waitForFunction(() => /còn 4 ván/.test(document.querySelector('#olRankedMe').textContent) && Account.user().elo < 1200);
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

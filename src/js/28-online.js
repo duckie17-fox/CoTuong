@@ -45,12 +45,14 @@ const Online = (function(){
     if(q) return q;
     return normServer(safeLS_get('xq_online_server')) || normServer(ONLINE_DEFAULT_SERVER);
   }
-  function inviteLink(code){
+  // link tới app kèm tham số (vd. room=…, ketban=…); giữ server riêng nếu đang dùng
+  function appLink(query){
     let base;
     try{ base = /^https?:$/.test(location.protocol) ? location.origin+location.pathname : ONLINE_WEB_URL; }catch(e){ base=ONLINE_WEB_URL; }
     const srv=server(), extra = srv && srv!==normServer(ONLINE_DEFAULT_SERVER) ? '&server='+encodeURIComponent(srv) : '';
-    return `${base}?room=${code}${extra}`;
+    return `${base}?${query}${extra}`;
   }
+  const inviteLink = code => appLink('room='+code);
   const colorVN = c => c==='red' ? 'Đỏ' : 'Đen';
   const other = c => c==='red' ? 'black' : 'red';
 
@@ -368,14 +370,17 @@ const Online = (function(){
 
   /* ---------- Đấu xếp hạng (spec v4): ghép người 8 giây, không có thì ghép máy ---------- */
   const search = {active:false, t0:0, timer:0, tick:0};
+  const ELO_HINT='Elo là điểm trình độ: thắng được cộng, thua bị trừ.';
   function tierBadge(elo){ const t=Ranked.tierOf(elo); return `<span class="tier tier-${t.key}">${esc(t.label)}</span>`; }
   function renderRanked(){
     const card=$('#olRanked'); if(!card) return;
     const signed = typeof Account!=='undefined' && Account.signedIn(), u = signed ? Account.user() : null;
     card.hidden = !server();
-    $('#olRankedMe').innerHTML = u ? `${tierBadge(u.elo)}<b class="ranked-elo">${u.elo}</b>` : '';
+    const left=u ? Account.unrankedLeft(u) : 0;
+    $('#olRankedMe').innerHTML = !u ? '' : left ? `<span class="hint-text small">Chưa xếp hạng · còn ${left} ván</span>` : `${tierBadge(u.elo)}<b class="ranked-elo">${u.elo}</b>`;
     const body=$('#olRankedBody'), open=savedBots();
-    if(!u){ body.innerHTML=`<div class="btn-row"><button type="button" class="btn btn-primary" data-open-login-r>Đăng nhập để đấu xếp hạng</button></div>`;
+    if(!u){ body.innerHTML=`<p class="hint-text small ranked-note">${ELO_HINT} Cần tài khoản để giữ điểm.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-open-register-r>Tạo tài khoản để đấu xếp hạng</button><button type="button" class="link-btn" data-open-login-r>Đã có tài khoản? Đăng nhập</button></div>`;
+      $('[data-open-register-r]',body).addEventListener('click',()=>Account.openRegister());
       $('[data-open-login-r]',body).addEventListener('click',()=>Account.openLogin()); return; }
     if(search.active){
       const sec=Math.floor((Date.now()-search.t0)/1000);
@@ -384,7 +389,7 @@ const Online = (function(){
     }
     // có ván dở: "Vào tiếp" là nút chính, "Tìm trận mới" là nút phụ
     body.innerHTML=open.map(g=>`<div class="ranked-resume"><span>Ván đang dở với <b>${esc(g.botName)}</b> · ${g.moves.length} nước</span><button type="button" class="btn btn-primary btn-sm" data-resume="${g.id}">${icon('play')}Vào tiếp</button></div>`).join('')
-      +`<button type="button" class="btn ${open.length?'btn-outline':'btn-primary ranked-go'} ol-wide" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button>${open.length?'':'<p class="hint-text small ranked-note">Thắng cộng Elo, thua trừ. Không gợi ý, không đi lại.</p>'}`;
+      +`<button type="button" class="btn ${open.length?'btn-outline':'btn-primary ranked-go'} ol-wide" id="olFindMatch">${icon('swords')}${open.length ? 'Tìm trận mới' : 'Tìm trận'}</button>${open.length?'':`<p class="hint-text small ranked-note">${ELO_HINT} Không gợi ý, không đi lại.</p>`}`;
     $$('[data-resume]',body).forEach(b=>b.addEventListener('click',()=>{ const g=savedBots().find(x=>String(x.id)===b.dataset.resume); if(g) startBotMatch(g, true); }));
     $('#olFindMatch').addEventListener('click',startSearch);
   }
@@ -553,7 +558,7 @@ const Online = (function(){
       if(st.code) return;
       // mở link mời khi chưa đăng nhập: đăng nhập xong thì vào phòng luôn
       const rc=parseCode(params().get('room')||'');
-      if(rc && Account.signedIn()){ showZone('satruong'); enterRoom(rc); return; }
+      if(rc && Account.signedIn()){ showStab('phong'); enterRoom(rc); return; }
       renderLobby();
     });
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && st.room) keepAwake(!st.room.result && st.room.you!=='spectator'); });
@@ -561,6 +566,6 @@ const Online = (function(){
     if(code && myName()) enterRoom(code);
     else { showLobby(); if(code){ $('#olJoinCode').value=code; $('#olJoinMsg').textContent=`Bạn được mời vào phòng ${code}. Nhập tên rồi bấm “Vào phòng”.`; $('#olName').focus(); } }
   }
-  return {init, startSearch, renderRanked, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, server, enterRoom};
+  return {init, startSearch, renderRanked, wantsZone:()=>!!parseCode(params().get('room')||''), history, saveRecord, state:st, parseCode, normServer, inviteLink, appLink, params, server, enterRoom};
 })();
 function initOnline(){ Online.init(); }

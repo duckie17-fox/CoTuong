@@ -45,3 +45,26 @@ test('bảng cài đặt: bật/tắt âm thanh được lưu', () => {
   assert.equal(window.localStorage.getItem('xq_sound'), 'off');
   assert.equal(document.querySelector('#soundToggle [data-sound="off"]').getAttribute('aria-pressed'), 'true');
 });
+
+test('lần đầu mở app: hỏi bắt đầu từ đâu, chọn "đánh thử" thì vào Đấu máy cấp 1; mở lại không hỏi nữa', () => {
+  const { document: doc, window: win } = load({ fresh: true, storage: { xq_onboarded: '' } });
+  assert.equal(doc.getElementById('dlg').hidden, false);
+  assert.equal(doc.querySelectorAll('[data-onb]').length, 3);
+  doc.querySelector('[data-onb="may"]').click();
+  assert.equal(doc.getElementById('dlg').hidden, true);
+  assert.equal(doc.querySelector('section[data-panel="may"]').hidden, false);
+  assert.equal(doc.querySelector('input[name="aiLevel"]:checked').value, '1');
+  assert.equal(win.localStorage.getItem('xq_onboarded'), '1');
+  const again = load({ fresh: true, storage: { xq_onboarded: '' , xq_lessons_done: '["tuong","si"]' } });
+  assert.equal(again.document.getElementById('dlg').hidden, true, 'đã có tiến độ thì không hỏi');
+});
+
+test('bài tập trùng tên được đánh số; bài học có câu chốt trên bàn cờ', () => {
+  const { document: doc, window: win } = load({ fresh: true });
+  win.eval('showTab("baitap")');
+  const names = [...doc.querySelectorAll('#puzzleGrid .puzzle-card h4')].map(h => h.textContent.trim());
+  assert.equal(new Set(names).size, names.length, 'không còn hai thẻ cùng tên');
+  assert.match(doc.querySelector('#dailyCard').textContent, /chuỗi ngày/i, 'người mới cũng thấy có chuỗi ngày');
+  win.eval('showTab("hoc")');
+  assert.match(doc.querySelector('.lesson-lead').textContent, /Tướng đi 1 bước/);
+});

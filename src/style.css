@@ -267,7 +267,9 @@ select.field, input.field{
 }
 @media(max-width:767px){
   .lesson-body .lesson-demos{order:-1;}
+  .lesson-body .lesson-lead{order:-2;margin:0 0 -6px;font-weight:600;font-size:15px;line-height:1.5;padding:8px 12px;border-left:3px solid var(--accent);background:var(--paper);border-radius:0 8px 8px 0;}
 }
+@media(min-width:768px){ .lesson-lead{display:none;} }
 .lesson-text p{font-family:'Noto Serif',Georgia,serif;font-size:15px;}
 .lesson-text ul{font-family:'Noto Serif',Georgia,serif;font-size:15px;margin:0 0 10px;padding-left:20px;line-height:1.6;}
 .lesson-foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap;}
@@ -838,16 +840,6 @@ body.hdr-hide .app-header{top:calc(-1 * var(--hdr-h, 110px));}
 #meEloSub{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
 
 /* ---------- Bắt buộc đăng nhập ---------- */
-.auth-gate{position:fixed;inset:0;z-index:80;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;}
-body.gated{overflow:hidden;}
-.gate-box{width:100%;max-width:400px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.gate-seal{width:72px !important;height:72px !important;font-size:40px !important;border-radius:18px !important;display:inline-flex;align-items:center;justify-content:center;
-  background:linear-gradient(155deg,var(--b-red),var(--b-red-deep));color:#fff6ec;font-family:var(--han-font);box-shadow:0 4px 14px var(--shadow);}
-.gate-title{font-size:32px;margin:6px 0 0;}
-.gate-sub{color:var(--ink-soft);margin:0 0 10px;}
-.gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
-.gate-btns .btn{width:100%;min-height:50px;font-size:16px;}
-.gate-note{margin-top:6px;}
 
 /* ---------- Điện thoại / máy tính bảng dọc (≤899px): 3 mục chính nằm ở thanh dưới (bottom nav) ---------- */
 @media (max-width:899px){
@@ -1093,3 +1085,49 @@ select.field:focus, input.field:focus, textarea:focus{outline:none;border-color:
 .ol-invite .ol-link{flex-basis:100%;width:100%;}
 .btn-label-s{display:none;}
 @media (max-width:600px){ .ol-room-head .btn-label-s{display:inline;} }
+
+/* Form tài khoản: gợi ý hiện sẵn, lỗi thay chỗ gợi ý */
+.dlg-field .dlg-hint{display:block;color:var(--ink-soft);font-size:13px;font-weight:400;margin-top:4px;line-height:1.4;}
+.dlg-err:not(:empty) ~ .dlg-hint{display:none;}
+.dlg-more{margin:4px 0 8px;}
+.dlg-more .dlg-field{margin-top:8px;}
+.rc-why{text-align:center;margin:6px 0 0;}
+.switch-sub{display:block;font-weight:400;font-size:12.5px;}
+.me-elo-none{font-size:16px !important;color:var(--ink-soft) !important;}
+
+/* Hộp hỏi trình độ lần đầu */
+.onb-list{display:flex;flex-direction:column;gap:10px;margin:6px 0 12px;}
+.onb-opt{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);cursor:pointer;font:inherit;min-height:64px;}
+.onb-opt:hover,.onb-opt:focus-visible{border-color:var(--accent);}
+.onb-opt .ic{flex:none;width:22px;height:22px;margin-top:2px;color:var(--accent);}
+.onb-opt b{display:block;font-size:16px;}
+.onb-opt small{display:block;color:var(--ink-soft);font-size:13.5px;margin-top:2px;line-height:1.4;}
+
+/* Danh sách bài học: đầu bảng có tiến độ + nút đóng; điện thoại là bảng nổi ngay trên hàng Bài trước/Bài tiếp */
+.toc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.toc-head .dlg-x{display:none;}
+@media (max-width:767px){
+  #lessonToc:not([hidden]){position:fixed;left:0;right:0;bottom:calc(65px + 40px + env(safe-area-inset-bottom));z-index:34;margin:0;
+    max-height:min(60vh, 460px);overflow:auto;background:var(--card);border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+    padding:12px max(14px, env(safe-area-inset-left)) 30px;box-shadow:0 -8px 24px color-mix(in srgb, var(--shadow) 45%, transparent);}
+  .toc-head{position:sticky;top:-12px;background:var(--card);padding:4px 0 6px;z-index:1;}
+  .toc-head .dlg-x{display:inline-flex;}
+  .lesson-dot{min-height:40px;}
+}
+
+/* Bài tập: số thứ tự bài trùng tên, hàng tiến độ + "Làm bài chưa giải" */
+.pz-no{font-weight:600;color:var(--ink-soft);font-size:12.5px;white-space:nowrap;}
+.pz-row{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin:6px 0 4px;}
+.pz-row .hint-text{margin:0;}
+.daily-ic{width:16px;height:16px;color:var(--accent);vertical-align:-3px;margin-right:4px;}
+/* Dải "Bài hôm nay" ở đầu Học luật */
+.today-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border-radius:12px;
+  background:color-mix(in srgb, var(--gold) 14%, transparent);font-size:14px;}
+
+.friend-share{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin-top:10px;}
+.friend-share .hint-text{flex:1;min-width:200px;}
+.sel-all{user-select:all;word-break:break-all;}
+
+/* Nút nhạc nền có chữ để biết là nút gì (trước chỉ có hình nốt nhạc) */
+.music-btn{width:auto !important;padding:0 12px 0 10px;gap:6px;}
+.music-l{font-size:13px;font-weight:600;white-space:nowrap;}

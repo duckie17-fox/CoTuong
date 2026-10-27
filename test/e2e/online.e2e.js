@@ -31,6 +31,7 @@ test('hai người đấu với nhau trong Sa trường', async () => {
     // An đăng nhập rồi tạo phòng giao hữu (tắt Tính Elo để còn xin đi lại), cầm Đỏ
     await registerUI(A, PAGE + q, 'an_room', 'An');
     await A.click('.zone-btn[data-zone="satruong"]');
+    await A.click('.st-btn[data-stab="phong"]');   // lần đầu vào Sa trường mở Đấu máy
     assert.equal(await A.evaluate(() => document.querySelector('.tabs').hidden), true, 'Sa trường không hiện thanh tab Kỳ viện');
     await A.evaluate(() => { document.querySelector('#olRated').checked = false; });
     await A.click('#olCreate');
@@ -167,7 +168,9 @@ test('tài khoản trên trình duyệt thật: đăng ký, kết bạn, mời �
     await B.waitForFunction(() => /Elo của bạn: 1180 \(-20\)/.test(document.querySelector('#olStatus').textContent));
     // trang Tôi cập nhật Elo
     await A.click('.zone-btn[data-zone="toi"]');
-    await A.waitForFunction(() => document.querySelector('#meElo').textContent === '1220');
+    // mới 1 ván xếp hạng: chưa hiện Elo, chỉ báo còn thiếu bao nhiêu ván
+    await A.waitForFunction(() => document.querySelector('#meElo').textContent === 'Chưa xếp hạng' && /còn 4 ván/.test(document.querySelector('#meEloSub').textContent));
+    assert.equal(await A.evaluate(() => Account.user().elo), 1220);
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

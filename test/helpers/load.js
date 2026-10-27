@@ -28,7 +28,8 @@ function load({ fresh = false, storage, dist, setup, url = 'https://example.test
       win.scrollTo = () => {};
       win.matchMedia = q => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
       win.Worker = undefined; // chạy AI trên luồng chính trong test
-      if (storage) for (const [k, v] of Object.entries(storage)) win.localStorage.setItem(k, v);
+      // mặc định đã qua hộp hỏi trình độ lần đầu (test riêng truyền xq_onboarded: '' để thấy hộp)
+      for (const [k, v] of Object.entries(Object.assign({ xq_onboarded: '1' }, storage || {}))) win.localStorage.setItem(k, v);
       if (setup) setup(win);
     },
   });

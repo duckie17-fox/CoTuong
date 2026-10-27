@@ -9,6 +9,17 @@ function markPuzzleSolved(id){
   const done=getSolvedPuzzles();
   if(!done.includes(id)){ done.push(id); safeLS_set('xq_puzzles_solved', JSON.stringify(done)); }
 }
+// Bài trùng tên (vd. nhiều bài "Ăn Xe bị bỏ ngỏ") được đánh số theo thứ tự trong bộ bài để phân biệt
+let PZ_NO=null;
+function puzzleNo(p){
+  if(!PZ_NO){
+    PZ_NO={}; const seen={}, count={};
+    PUZZLES.forEach(x=>{ count[x.title]=(count[x.title]||0)+1; });
+    PUZZLES.forEach(x=>{ if(count[x.title]>1){ seen[x.title]=(seen[x.title]||0)+1; PZ_NO[x.id]=seen[x.title]; } });
+  }
+  return PZ_NO[p.id]||0;
+}
+const puzzleName = p => puzzleNo(p) ? `${p.title} · số ${puzzleNo(p)}` : p.title;
 function puzzleList(){
   if(pz.filter.topic==='review'){ const ids=Learn.due(); return ids.map(id=>PUZZLES.find(p=>p.id===id)).filter(p=>p && (pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff)); }
   return PUZZLES.filter(p=>(pz.filter.topic==='all'||p.topic===pz.filter.topic)&&(pz.filter.diff==='all'||String(p.difficulty)===pz.filter.diff))
@@ -17,10 +28,11 @@ function puzzleList(){
 function renderPuzzleFilters(){
   const el=$('#puzzleFilters');
   const chip=(group,val,label,count)=>`<button type="button" class="chip ${pz.filter[group]===val?'on':''}" data-g="${group}" data-v="${val}" aria-pressed="${pz.filter[group]===val}">${esc(label)}${count!=null?` <small>${count}</small>`:''}</button>`;
-  const due=Learn.due().length;
+  const due=Learn.due().length, solved=getSolvedPuzzles();
+  const prog = k => { const ps=PUZZLES.filter(p=>p.topic===k); return `${ps.filter(p=>solved.includes(p.id)).length}/${ps.length}`; };
   const on = pz.filter.topic!=='all' || pz.filter.diff!=='all';
   el.innerHTML = `<details class="more-box" id="pzFilterBox" ${on?'open':''}><summary>Chọn loại bài${on?' (đang lọc)':''}</summary>
-    <div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,PUZZLES.filter(p=>p.topic===k).length)).join('')}</div>
+    <div class="chip-row">${chip('topic','all','Tất cả',PUZZLES.length)}${due||pz.filter.topic==='review'?chip('topic','review','Cần ôn lại',due):''}${Object.entries(PUZZLE_TOPICS).map(([k,v])=>chip('topic',k,v,prog(k))).join('')}</div>
     <div class="chip-row">${chip('diff','all','Mọi độ khó')}${[1,2,3].map(d=>chip('diff',String(d),DIFF_LABEL[d][0])).join('')}</div></details>`;
   $$('.chip',el).forEach(b=>b.addEventListener('click',()=>{ pz.filter[b.dataset.g]=b.dataset.v; renderPuzzleGrid(); }));
 }
@@ -37,7 +49,7 @@ function renderPuzzleGrid(){
     return `<button class="puzzle-card ${solved.includes(p.id)?'solved':''}" data-id="${p.id}">
       <div class="puzzle-top"><span class="badge ${cls}">${label}</span><span class="topic-tag">${esc(PUZZLE_TOPICS[p.topic])}${p.turn===BLACK?' · Đen đi':''}</span>
         ${solved.includes(p.id) ? '<span class="solved-check" title="Đã giải"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"></use></svg></span>' : ''}</div>
-      <h4>${esc(p.title)}</h4>
+      <h4>${esc(p.title)}${puzzleNo(p)?` <small class="pz-no">số ${puzzleNo(p)}</small>`:''}</h4>
     </button>`;
   }).join('') || '<p class="hint-text">Không có bài nào khớp bộ lọc.</p>';
   $$('.puzzle-card',$('#puzzleGrid')).forEach(btn=> btn.addEventListener('click', ()=> openPuzzle(btn.dataset.id)));
@@ -55,7 +67,7 @@ function openPuzzle(id){
   pz.recorded=false; pz.usedHint=false;   // kết quả lần mở bài này (để ôn bài sai)
   $('#puzzleListCard').hidden = true;
   $('#puzzleDetailCard').hidden = false;
-  $('#puzzleTitle').textContent = pz.active.title;
+  $('#puzzleTitle').textContent = puzzleName(pz.active);
   const [label,cls]=DIFF_LABEL[pz.active.difficulty];
   $('#puzzleMeta').innerHTML = `<span class="badge ${cls}">${label}</span> <span class="topic-tag">${esc(PUZZLE_TOPICS[pz.active.topic])}${pz.random?' · Luyện ngẫu nhiên':''}</span>`;
   $('#puzzlePrompt').textContent = pz.active.prompt;

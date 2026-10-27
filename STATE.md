@@ -1,11 +1,10 @@
-# STATE — cập nhật lần cuối: 2026-10-24
+# STATE — cập nhật lần cuối: 2026-10-27
 
 ## Đang làm
-Đã review UX bản deploy (agent ux-reviewer) → `docs/ux-review-2026-10-24.md` (nhánh claude/cotuong-ux-review-p2h9mh).
+Đã sửa cả 14 mục review UX (docs/ux-review-2026-10-24.md) trên nhánh claude/cotuong-ux-review-p2h9mh; unit 84/84 + e2e 6/6 xanh, đã push.
 
 ## Next step
-- Chờ chủ dự án quyết: bỏ/hoãn cổng đăng nhập bắt buộc? giữ Elo 1200 hiển thị khi chưa có ván?
-- Việc nhỏ làm được ngay: đổi nút chính ở cổng thành "Tạo tài khoản", bỏ toast "Đã lưu tiến độ" lần đầu.
+- Chờ người dùng xem; muốn lên bản web thì tạo PR → merge.
 
 ## Blocker
 - Không.

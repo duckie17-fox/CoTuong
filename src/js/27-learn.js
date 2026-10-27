@@ -192,11 +192,22 @@ function renderDailyCard(){
   const el=$('#dailyCard'); if(!el) return;
   const p=Learn.dailyPuzzle(), st=Learn.dailyState(), done=st.done && st.id===p.id && st.date===Learn.today();
   const streak=Learn.streak();
-  const sub=[done?'Đã xong hôm nay. Mai có bài mới!':'', streak?`Chuỗi ${streak} ngày liên tiếp`:''].filter(Boolean).join(' · ');
-  el.innerHTML=`<div class="daily-inner"><div><b>Bài hôm nay:</b> ${esc(p.title)}
-      ${sub?`<div class="hint-text small">${sub}</div>`:''}</div>
+  // chuỗi ngày luôn hiện (cả khi = 0) để người mới biết có nó; giọng nhẹ, không doạ mất chuỗi
+  const sub=[done?'Đã xong hôm nay. Mai có bài mới!':'', streak?`Chuỗi ${streak} ngày liên tiếp`:'Làm mỗi ngày một bài để giữ chuỗi ngày'].filter(Boolean).join(' · ');
+  el.innerHTML=`<div class="daily-inner"><div><b>${icon('flame','daily-ic')}Bài hôm nay:</b> ${esc(p.title)}
+      <div class="hint-text small">${sub}</div></div>
     <button type="button" class="btn ${done?'btn-outline':'btn-primary'} btn-sm" id="dailyOpen">${done?'Xem lại':'Làm ngay'}</button></div>`;
   $('#dailyOpen',el).addEventListener('click',()=>{ pz.random=false; openPuzzle(p.id); });
+  renderTodayStrip(p, done, streak);
+}
+// Dải nhắc gọn ở đầu Học luật: chỉ khi bài hôm nay chưa làm và người dùng đã qua vài bài đầu
+// (màn đầu tiên của người mới giữ tập trung vào bài học)
+function renderTodayStrip(p, done, streak){
+  const el=$('#todayStrip'); if(!el) return;
+  const show = !done && (streak>0 || lessonsDone().length>=3);
+  el.hidden=!show; if(!show){ el.innerHTML=''; return; }
+  el.innerHTML=`<span>${icon('flame','daily-ic')}<b>Bài hôm nay</b> chưa làm${streak?` · chuỗi ${streak} ngày`:''}</span><button type="button" class="btn btn-outline btn-sm" id="todayGo">Làm ngay</button>`;
+  $('#todayGo',el).addEventListener('click',()=>{ showTab('baitap'); pz.random=false; openPuzzle(p.id); });
 }
 function renderAiSuggestion(){
   const el=$('#aiSuggest'); if(!el) return;
@@ -234,7 +245,7 @@ function initLearn(){
   renderDailyCard(); renderAiSuggestion(); renderProgressDashboard();
   document.addEventListener('zoneshown',e=>{ if(e.detail==='toi') renderProgressDashboard(); });
   document.addEventListener('tabshown',e=>{
-    if(e.detail==='baitap') renderDailyCard();
+    if(e.detail==='baitap' || e.detail==='hoc') renderDailyCard();
     if(e.detail==='may') renderAiSuggestion();
   });
 }
