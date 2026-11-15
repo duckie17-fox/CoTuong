@@ -1,10 +1,10 @@
-# STATE — cập nhật lần cuối: 2026-10-27
+# STATE — cập nhật lần cuối: 2026-11-15
 
 ## Đang làm
-Đã sửa cả 14 mục review UX (docs/ux-review-2026-10-24.md) trên nhánh claude/cotuong-ux-review-p2h9mh; unit 84/84 + e2e 6/6 xanh, đã push.
+PR #16 (sửa 14 mục review UX) đã merge vào main (de49253); CI test + e2e xanh. Chờ workflow Deploy đưa lên github.io.
 
 ## Next step
-- Chờ người dùng xem; muốn lên bản web thì tạo PR → merge.
+- Chờ góp ý tiếp sau khi bản web cập nhật.
 
 ## Blocker
 - Không.

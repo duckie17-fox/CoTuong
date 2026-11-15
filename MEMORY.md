@@ -269,3 +269,4 @@
 - Bài học điện thoại: `LESSON_LEADS` (câu chốt) trên bàn cờ; mục lục là bảng nổi dưới thanh Bài trước/Bài tiếp (z-index 34 < 35 để nằm dưới thanh).
 - Link kết bạn `?ketban=<tên>`: `Online.appLink`, đã đăng nhập thì thông báo "Kết bạn", chưa thì mời tạo tài khoản rồi hỏi lại.
 - Nút nhạc trên đầu có chữ "Nhạc bật/tắt". "Đăng xuất mọi thiết bị" thành link phụ (kể cả máy này).
+- **2026-11-15: PR #16 (14 mục review UX) merge** vào main (de49253), CI xanh; không có migration mới.
