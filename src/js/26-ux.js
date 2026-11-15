@@ -133,7 +133,7 @@ function initUxSettings(){
   const musBtns=$$('#musicToggle button'), musTop=$('#musicBtn');
   const syncMusic=()=>{
     musBtns.forEach(b=>b.setAttribute('aria-pressed', (b.dataset.music==='on')===Music.isOn()?'true':'false'));
-    if(musTop){ musTop.setAttribute('aria-pressed', Music.isOn()?'true':'false'); musTop.innerHTML=icon(Music.isOn()?'music':'musicOff');
+    if(musTop){ musTop.setAttribute('aria-pressed', Music.isOn()?'true':'false'); musTop.innerHTML=icon(Music.isOn()?'music':'musicOff')+`<span class="music-l">Nhạc ${Music.isOn()?'bật':'tắt'}</span>`;
       const t=Music.isOn()?'Tắt nhạc nền':'Bật nhạc nền'; musTop.title=t; musTop.setAttribute('aria-label',t); }
   };
   musBtns.forEach(b=>b.addEventListener('click',()=>Music.set(b.dataset.music==='on')));

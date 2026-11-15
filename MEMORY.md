@@ -253,3 +253,19 @@
 
 ## 2026-10-13 — Đổi nhạc nền sang 'Vô Ưu Tịnh Độ' (ZenMusics), người dùng xác nhận ĐÃ ĐƯỢC PHÉP
 - Cắt 6 phút từ giây thứ 2 (file gốc 86 phút), mono 32kHz 40kbps, loudnorm, fade vào 3s/ra 5s → src/assets/nhac-nen.mp3 (1.8MB), thay bài Relax TMD cũ. Giữ nguyên tên tệp/cách phát (preload none, lặp, thiếu tệp thì tự tắt).
+
+## 2026-10-27 — Sửa 14 mục review UX (docs/ux-review-2026-10-24.md, người dùng: "Fix tất cả")
+- **Bỏ cổng bắt buộc đăng nhập** (người dùng chốt, thay quyết định "Bắt buộc đăng nhập" ngày 2026-10-08): học + đấu máy dùng không cần tài khoản,
+  tiến độ lưu trên máy; chỉ Đấu người / Bạn bè / Xếp hạng cần đăng nhập. Đăng nhập sau thì dùng cơ chế gộp tiến độ sẵn có.
+- **Hộp hỏi trình độ 1 lần** (người dùng chọn, KHÔNG phải màn "Bắt đầu" đã bị bác): hộp thoại 3 lựa chọn lúc mới vào, không thêm tab/màn.
+- Đã làm cả 14 mục: gỡ `#authGate` (+ CSS, test); nút chính mọi chỗ mời tài khoản = "Tạo tài khoản", "Đã có tài khoản? Đăng nhập" là link phụ.
+  Form đăng ký: bỏ "Nhập lại mật khẩu", "Tên hiển thị" gập trong `<details id="rgNameBox">`; `fieldHTML(...,hint)` — lỗi thay chỗ gợi ý bằng CSS.
+  Mã khôi phục: dòng `#rcWhy` dưới nút mờ, nút Chia sẻ (navigator.share, không có ở Artifact). Lời chào sau đăng ký chỉ nói "đã lưu tiến độ" khi máy có tiến độ.
+- Hộp hỏi trình độ: `initOnboarding(hadProgress)` ở 25-boot, cờ `xq_onboarded`. PHẢI đo `hadProgress` trước `renderLesson()` vì mở bài 1 là ghi `xq_lessons_done`.
+  Test jsdom: `load()` mặc định đặt `xq_onboarded='1'`; e2e dùng `skipOnboarding(page)` (addInitScript) trước `goto`.
+- Sa trường lần đầu mở Đấu máy (`currentStab` mặc định 'may'); link `?room=` gọi `showStab('phong')`, KHÔNG `showZone('satruong')` (sẽ rơi vào Đấu máy).
+- Elo: chưa đủ 5 ván xếp hạng (`user.ranked` false) → Tôi/thẻ xếp hạng/bảng xếp hạng hiện "Chưa xếp hạng · còn N ván" (`Account.unrankedLeft`).
+- Bài tập trùng tên đánh "số n" (`puzzleNo`); chip chủ đề hiện đã giải/tổng; chuỗi ngày luôn hiện ở thẻ Bài hôm nay; `#todayStrip` đầu Học luật chỉ hiện khi chưa làm bài hôm nay VÀ (chuỗi>0 hoặc đã xem ≥3 bài).
+- Bài học điện thoại: `LESSON_LEADS` (câu chốt) trên bàn cờ; mục lục là bảng nổi dưới thanh Bài trước/Bài tiếp (z-index 34 < 35 để nằm dưới thanh).
+- Link kết bạn `?ketban=<tên>`: `Online.appLink`, đã đăng nhập thì thông báo "Kết bạn", chưa thì mời tạo tài khoản rồi hỏi lại.
+- Nút nhạc trên đầu có chữ "Nhạc bật/tắt". "Đăng xuất mọi thiết bị" thành link phụ (kể cả máy này).

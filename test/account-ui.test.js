@@ -44,7 +44,7 @@ const ph = (u, p) => nodeCrypto.pbkdf2Sync(p, 'cotuong:' + u, 1000, 32, 'sha256'
 async function registerViaUI(doc, username, name, pw = 'matkhau123') {
   doc.querySelector('[data-open-register]').click();
   assert.equal(doc.getElementById('dlg').hidden, false);
-  fill(doc, 'rgUser', username); fill(doc, 'rgName', name); fill(doc, 'rgPass', pw); fill(doc, 'rgPass2', pw);
+  fill(doc, 'rgUser', username); fill(doc, 'rgName', name); fill(doc, 'rgPass', pw);
   submit(doc);
   await until(() => doc.getElementById('rcCode'));
   const code = doc.getElementById('rcCode').textContent;
@@ -62,15 +62,13 @@ test('đăng ký trên giao diện: kiểm tra ô nhập, hiện mã khôi phụ
   assert.equal(doc.getElementById('meIntro').hidden, false);
   // lỗi nhập
   doc.querySelector('[data-open-register]').click();
-  fill(doc, 'rgUser', 'A'); fill(doc, 'rgPass', '123'); fill(doc, 'rgPass2', '123');
+  assert.equal(doc.getElementById('rgPass2'), null, 'không còn ô nhập lại mật khẩu (đã có nút hiện mật khẩu)');
+  assert.match(doc.querySelector('#rgPass').closest('.dlg-field').querySelector('.dlg-hint').textContent, /8 ký tự/, 'yêu cầu mật khẩu hiện sẵn');
+  fill(doc, 'rgUser', 'A'); fill(doc, 'rgPass', '123');
   submit(doc);
   await until(() => doc.getElementById('rgUserErr').textContent);
   assert.match(doc.getElementById('rgUserErr').textContent, /3–20 ký tự/);
   assert.match(doc.getElementById('rgPassErr').textContent, /ít nhất 8 ký tự/);
-  fill(doc, 'rgPass', 'matkhau123'); fill(doc, 'rgPass2', 'matkhau124'); fill(doc, 'rgUser', 'an_ui');
-  submit(doc);
-  await until(() => doc.getElementById('rgPass2Err').textContent);
-  assert.match(doc.getElementById('rgPass2Err').textContent, /chưa khớp/);
   win.eval('Account.closeDialog()');
   // đăng ký thật
   const code = await registerViaUI(doc, 'An_UI', 'An');
@@ -87,7 +85,7 @@ test('đăng ký trên giao diện: kiểm tra ô nhập, hiện mã khôi phụ
   // tên trùng
   const { document: d2, window: w2 } = device(be);
   d2.querySelector('[data-open-register]').click();
-  fill(d2, 'rgUser', 'an_ui'); fill(d2, 'rgPass', 'matkhau123'); fill(d2, 'rgPass2', 'matkhau123');
+  fill(d2, 'rgUser', 'an_ui'); fill(d2, 'rgPass', 'matkhau123');
   submit(d2);
   await until(() => d2.getElementById('rgUserErr').textContent);
   assert.equal(d2.getElementById('rgUserErr').textContent, 'Tên đăng nhập đã có người dùng');
@@ -229,24 +227,29 @@ test('không có máy chủ (vd. bản Artifact): nút đăng nhập tắt, có 
   assert.equal(doc.getElementById('meLabel').textContent, 'Tôi');
 });
 
-test('bắt buộc đăng nhập: chưa đăng nhập thì che app; đăng nhập xong mở; đăng xuất che lại; Artifact không che', async () => {
+test('không bắt đăng nhập: học được ngay; Bạn bè / Xếp hạng mời tạo tài khoản; đăng ký không tên hiển thị thì dùng tên đăng nhập', async () => {
   const be = backend();
-  const { document: doc, window: win } = device(be);
-  assert.equal(doc.getElementById('authGate').hidden, false);
-  assert.ok(doc.body.classList.contains('gated'));
-  doc.querySelector('#authGate [data-open-register]').click();
-  fill(doc, 'rgUser', 'gate_ui'); fill(doc, 'rgPass', 'matkhau123'); fill(doc, 'rgPass2', 'matkhau123');
+  const { document: doc } = device(be);
+  assert.equal(doc.getElementById('authGate'), null, 'không còn màn che toàn app');
+  assert.ok(!doc.body.classList.contains('gated'));
+  doc.querySelector('.zone-btn[data-zone="satruong"]').click();
+  doc.querySelector('.st-btn[data-stab="banbe"]').click();
+  const need = doc.querySelector('[data-stpanel="banbe"] [data-need-login]');
+  assert.equal(need.hidden, false);
+  assert.ok(need.querySelector('.btn-primary[data-open-register]'), 'nút chính là Tạo tài khoản');
+  need.querySelector('[data-open-register]').click();
+  fill(doc, 'rgUser', 'khach_ui'); fill(doc, 'rgPass', 'matkhau123');
   submit(doc);
   await until(() => doc.getElementById('rcCode'));
-  doc.getElementById('rcOk').click(); doc.getElementById('rcNext').click();
-  await until(() => doc.getElementById('authGate').hidden);
-  assert.ok(!doc.body.classList.contains('gated'));
+  assert.ok(doc.getElementById('rcWhy') && !doc.getElementById('rcWhy').hidden, 'giải thích vì sao Tiếp tục đang mờ');
+  doc.getElementById('rcOk').click();
+  assert.equal(doc.getElementById('rcWhy').hidden, true);
+  doc.getElementById('rcNext').click();
+  await until(() => need.hidden);
   doc.querySelector('.zone-btn[data-zone="toi"]').click();
-  doc.getElementById('meLogout').click(); doc.getElementById('loGo').click();
-  await until(() => !doc.getElementById('authGate').hidden);
-  const art = load({ fresh: true, setup(w) { w.claude = { use: () => Promise.resolve(null) }; } });
-  OPEN.push(art.window);
-  assert.equal(art.document.getElementById('authGate').hidden, true, 'Artifact không kết nối được máy chủ: không bắt đăng nhập');
+  assert.equal(doc.getElementById('meName').textContent, 'khach_ui');
+  assert.equal(doc.getElementById('meElo').textContent, 'Chưa xếp hạng', 'chưa đủ 5 ván thì không hiện Elo 1200');
+  assert.match(doc.getElementById('meEloSub').textContent, /còn 5 ván/);
 });
 
 test('kết bạn nhanh từ bảng xếp hạng: bấm + là gửi lời mời, nút đổi thành đã mời', async () => {
@@ -255,7 +258,7 @@ test('kết bạn nhanh từ bảng xếp hạng: bấm + là gửi lời mời,
   await be.env.DB.prepare('UPDATE users SET rated_games=6, elo=1500 WHERE username=?').bind('cao_thu').run();
   const { document: doc, window: win } = device(be);
   await registerViaUI(doc, 'hoc_tro', 'Học Trò');
-  await until(() => doc.getElementById('authGate').hidden);
+  await until(() => doc.querySelector('[data-stpanel="xephang"] [data-need-login]').hidden);
   doc.querySelector('.zone-btn[data-zone="satruong"]').click();
   doc.querySelector('.st-btn[data-stab="xephang"]').click();
   doc.querySelector('#rankScope [data-scope="all"]').click();

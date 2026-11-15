@@ -164,23 +164,47 @@ function lessonsDone(){ return safeJSON('xq_lessons_done',[]); }
 function renderLessonNav(){
   const nav=$('#lessonNav');
   const done = lessonsDone();
-  nav.innerHTML = LESSON_LEVELS.map(lv=>{
+  const seen = LESSONS.filter(l=>done.includes(l.key)).length;
+  nav.innerHTML = `<div class="toc-head"><b>Đã xem ${seen}/${LESSONS.length} bài</b><button type="button" class="dlg-x" id="lessonTocClose" aria-label="Đóng danh sách bài">${icon('x')}</button></div>`
+    + LESSON_LEVELS.map(lv=>{
     const items=LESSONS.map((l,i)=>({l,i})).filter(x=>x.l.level===lv.id);
     return `<div class="lesson-level"><b class="lesson-level-h">${esc(lv.name)}</b>${items.map(({l,i})=>
         `<button class="lesson-dot ${i===currentLessonIdx?'active':''} ${done.includes(l.key)?'done':''}" data-idx="${i}" ${i===currentLessonIdx?'aria-current="true"':''}>${i+1}. ${esc(l.title)}</button>`).join('')}</div>`;
   }).join('');
+  $('#lessonTocClose').addEventListener('click',()=>setLessonToc(false));
   $$('.lesson-dot',nav).forEach(btn=>{
     btn.addEventListener('click',()=>{ currentLessonIdx=parseInt(btn.dataset.idx,10); setLessonToc(false); renderLesson(true); });
   });
 }
 function setLessonToc(open){
   $('#lessonToc').hidden=!open; $('#lessonTocBtn').setAttribute('aria-expanded', open?'true':'false');
-  if(open) $('#lessonToc').scrollIntoView({block:'nearest'});
+  // điện thoại: danh sách là bảng nổi trên thanh dưới, không đẩy bàn cờ xuống
+  if(open && !(window.matchMedia && matchMedia('(max-width:767px)').matches)) $('#lessonToc').scrollIntoView({block:'nearest'});
 }
 function markLessonDone(key){
   const done = lessonsDone();
   if(!done.includes(key)){ done.push(key); safeLS_set('xq_lessons_done', JSON.stringify(done)); }
 }
+// Câu chốt của mỗi bài: điện thoại hiện ngay trên bàn cờ để biết đang xem gì trước khi cuộn đọc
+const LESSON_LEADS = {
+  tuong:'Tướng đi 1 bước ngang hoặc dọc, không ra khỏi cung.',
+  si:'Sĩ đi 1 bước chéo, chỉ trong cung.',
+  tuong2:'Tượng đi chéo 2 ô (chữ "điền"), không qua sông, bị cản khi có quân ở giữa.',
+  ma:'Mã đi chữ "nhật"; có quân sát chân thì không đi được hướng đó.',
+  xe:'Xe đi thẳng ngang/dọc bao xa cũng được, đến khi gặp quân cản.',
+  phao:'Pháo đi như Xe, nhưng muốn ăn phải nhảy qua đúng 1 quân.',
+  tot:'Tốt chỉ tiến 1 bước; qua sông thì được đi ngang, không bao giờ lùi.',
+  chieu:'Bị chiếu phải giải ngay; không giải được là chiếu bí, thua ván.',
+  kyhieu:'Nước đi ghi bằng: tên quân · cột đang đứng · hướng đi · số.',
+  luatcam:'Không được chiếu mãi hay đuổi mãi để ép lặp thế cờ.',
+  nguyentac:'Ra quân nhanh, ra Xe sớm, giữ cung Tướng an toàn.',
+  tuduy:'Mỗi lượt tự hỏi: đối phương doạ gì, quân mình có an toàn không.',
+  giaichieu:'Ba cách giải chiếu: chạy Tướng, cản, hoặc ăn quân đang chiếu.',
+  mahauphao:'Mã đứng trước làm ngòi, Pháo phía sau chiếu là bí.',
+  trungphao:'Hai Pháo chồng một cột: Pháo sau lấy Pháo trước làm ngòi chiếu.',
+  songxa:'Một Xe khoá hàng, Xe kia chiếu: hai Xe thay nhau dồn Tướng.',
+  bachdien:'Tướng mình khống chế cả cột, thêm một quân chiếu cột bên là bí.',
+};
 function renderLesson(scroll){
   const lesson = LESSONS[currentLessonIdx];
   markLessonDone(lesson.key);
@@ -192,6 +216,7 @@ function renderLesson(scroll){
   content.innerHTML = `
     <div class="lesson-body ${lesson.demos.length?'':'no-demo'}">
       <div class="lesson-text">${lesson.text.map(t=>t.startsWith('<ol')?t:`<p>${t}</p>`).join('')}${table}${sources}</div>
+      ${LESSON_LEADS[lesson.key] && lesson.demos.length ? `<p class="lesson-lead">${esc(LESSON_LEADS[lesson.key])}</p>` : ''}
       <div class="lesson-demos"></div>
     </div>`;
   // Bàn cờ minh hoạ: nhiều ví dụ thì chuyển bằng nút "Ví dụ 1 / 2…" (một bàn tại một lúc, luôn cạnh phần chữ)

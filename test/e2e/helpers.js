@@ -11,16 +11,20 @@ function chromiumPath() {
     for (const sub of ['chrome-linux/chrome', 'chrome-linux64/chrome']) { const p = path.join(base, d, sub); if (fs.existsSync(p)) return p; }
   return undefined;
 }
-// App bắt buộc đăng nhập: mở trang rồi tạo tài khoản qua màn chào (PBKDF2 hạ vòng lặp cho nhanh)
+// Bỏ qua hộp hỏi trình độ lần đầu (gọi trước page.goto)
+async function skipOnboarding(page) { await page.addInitScript(() => { try { if (!localStorage.getItem('xq_onboarded')) localStorage.setItem('xq_onboarded', '1'); } catch (e) {} }); }
+// Mở trang rồi tạo tài khoản từ trang Tôi (PBKDF2 hạ vòng lặp cho nhanh)
 async function registerUI(page, url, username, displayName) {
+  await skipOnboarding(page);
   await page.goto(url);
   await page.evaluate(() => { Account.api.iterations = 1000; });
-  await page.click('#authGate [data-open-register]');
+  await page.click('.zone-btn[data-zone="toi"]');
+  await page.click('#meAuthBtns [data-open-register]');
   await page.fill('#rgUser', username);
-  if (displayName) await page.fill('#rgName', displayName);
-  await page.fill('#rgPass', 'matkhau123'); await page.fill('#rgPass2', 'matkhau123');
+  if (displayName) { await page.click('#rgNameBox summary'); await page.fill('#rgName', displayName); }
+  await page.fill('#rgPass', 'matkhau123');
   await page.click('#dlgBody button[type=submit]');
   await page.waitForSelector('#rcCode'); await page.check('#rcOk'); await page.click('#rcNext');
-  await page.waitForSelector('#authGate', { state: 'hidden' });
+  await page.waitForFunction(() => Account.signedIn());   // mở từ link mời thì vào thẳng phòng, không ở lại trang Tôi
 }
-module.exports = { PAGE, chromiumPath, registerUI };
+module.exports = { PAGE, chromiumPath, registerUI, skipOnboarding };
